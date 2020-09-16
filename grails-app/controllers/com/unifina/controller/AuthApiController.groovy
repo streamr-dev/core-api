@@ -1,14 +1,10 @@
 package com.unifina.controller
 
-import com.unifina.domain.RegistrationCode
-import com.unifina.domain.SignupInvite
-import com.unifina.domain.SignupMethod
-import com.unifina.domain.User
+import com.unifina.domain.*
 import com.unifina.security.PasswordEncoder
 import com.unifina.service.SignupCodeService
 import com.unifina.service.UserCreationFailedException
 import com.unifina.service.UserService
-import com.unifina.utils.EmailValidator
 import grails.converters.JSON
 
 class AuthApiController {

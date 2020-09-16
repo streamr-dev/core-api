@@ -1,9 +1,7 @@
 package com.unifina.domain
 
-import grails.compiler.GrailsCompileStatic
-import groovy.transform.EqualsAndHashCode
 import grails.persistence.Entity
-import com.unifina.utils.EthereumAddressValidator
+import groovy.transform.EqualsAndHashCode
 
 @Entity
 @EqualsAndHashCode(includes="streamId,storageNodeAddress")
