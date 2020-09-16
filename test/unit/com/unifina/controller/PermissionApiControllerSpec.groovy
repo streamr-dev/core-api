@@ -1,6 +1,5 @@
 package com.unifina.controller
 
-import com.unifina.ControllerSpecification
 import com.unifina.domain.*
 import com.unifina.domain.Permission.Operation
 import com.unifina.service.PermissionService

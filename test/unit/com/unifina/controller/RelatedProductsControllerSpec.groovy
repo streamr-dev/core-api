@@ -1,6 +1,5 @@
 package com.unifina.controller
 
-import com.unifina.ControllerSpecification
 import com.unifina.domain.*
 import com.unifina.service.ProductService
 import grails.test.mixin.Mock
