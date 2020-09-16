@@ -9,14 +9,14 @@ import spock.lang.Specification
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class DataUnionOperatorServiceSpec extends Specification {
+class DataUnionServiceSpec extends Specification {
 	private URI httpBinEndpoint = URI.create("http://127.0.0.1:0")
 	private final HttpBin httpBin = new HttpBin(httpBinEndpoint)
-	private DataUnionOperatorService service
+	private DataUnionService service
 
 	void setup() {
 		Logger.getRootLogger().setLevel(Level.OFF)
-		Logger.getLogger(DataUnionOperatorService.class).setLevel(Level.OFF)
+		Logger.getLogger(DataUnionService.class).setLevel(Level.OFF)
 		httpBin.start()
 		httpBinEndpoint = new URI(
 			httpBinEndpoint.getScheme(),
@@ -27,7 +27,7 @@ class DataUnionOperatorServiceSpec extends Specification {
 			httpBinEndpoint.getQuery(),
 			httpBinEndpoint.getFragment()
 		)
-		service = new DataUnionOperatorService()
+		service = new DataUnionService()
 		service.grailsApplication = getGrailsApplication()
 	}
 
@@ -42,7 +42,7 @@ class DataUnionOperatorServiceSpec extends Specification {
 		String url = httpBinEndpoint.toString() + "/stream/1"
 		String expected = """{"args":{},"headers":{"Accept":"application/json","Connection":"keep-alive","User-Agent"""
 		when:
-		DataUnionOperatorService.ProxyResponse result = service.proxy(url)
+		DataUnionService.ProxyResponse result = service.proxy(url)
 		then:
 		result.body.startsWith(expected)
 		result.statusCode == 200
@@ -53,7 +53,7 @@ class DataUnionOperatorServiceSpec extends Specification {
 		service.afterPropertiesSet()
 		String url = httpBinEndpoint.toString() + "/status/400"
 		when:
-		DataUnionOperatorService.ProxyResponse result = service.proxy(url)
+		DataUnionService.ProxyResponse result = service.proxy(url)
 		then:
 		result.body == ""
 		result.statusCode == 400
@@ -81,7 +81,7 @@ class DataUnionOperatorServiceSpec extends Specification {
 		service.afterPropertiesSet()
 		String url = httpBinEndpoint.toString() + "/status/404"
 		when:
-		DataUnionOperatorService.ProxyResponse result = service.proxy(url)
+		DataUnionService.ProxyResponse result = service.proxy(url)
 		then:
 		result.body == ""
 		result.statusCode == 404
@@ -92,18 +92,18 @@ class DataUnionOperatorServiceSpec extends Specification {
 		service.afterPropertiesSet()
 		String url = httpBinEndpoint.toString() + "/status/500"
 		when:
-		DataUnionOperatorService.ProxyResponse result = service.proxy(url)
+		DataUnionService.ProxyResponse result = service.proxy(url)
 		then:
 		result.body == ""
 		result.statusCode == 500
 	}
 
 	static class Runner implements Runnable {
-		DataUnionOperatorService service
+		DataUnionService service
 		String url
-		DataUnionOperatorService.ProxyResponse response
+		DataUnionService.ProxyResponse response
 
-		Runner(DataUnionOperatorService service, String url) {
+		Runner(DataUnionService service, String url) {
 			this.service = service
 			this.url = url
 		}

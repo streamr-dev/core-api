@@ -2,10 +2,10 @@ package com.unifina.controller
 
 import com.unifina.api.BadRequestException
 import com.unifina.domain.EthereumAddressValidator
-import com.unifina.service.DataUnionOperatorService
+import com.unifina.service.DataUnionService
 
 class DataUnionOperatorApiController {
-	DataUnionOperatorService dataUnionOperatorService
+	DataUnionService dataUnionService
 	static boolean isDataUnionAddress(String value) {
 		return EthereumAddressValidator.validate(value)
 	}
@@ -18,7 +18,7 @@ class DataUnionOperatorApiController {
 		if (!isDataUnionAddress(contractAddress)) {
 			throw new BadRequestException("Data Union address is not an Ethereum address")
 		}
-		DataUnionOperatorService.ProxyResponse result = dataUnionOperatorService.stats(contractAddress)
+		DataUnionService.ProxyResponse result = dataUnionService.stats(contractAddress)
 		response.status = result.statusCode
 		render(text: result.body, contentType: "application/json", encoding: "UTF-8")
 	}
@@ -28,7 +28,7 @@ class DataUnionOperatorApiController {
 		if (!isDataUnionAddress(contractAddress)) {
 			throw new BadRequestException("Data Union address is not an Ethereum address")
 		}
-		DataUnionOperatorService.ProxyResponse result = dataUnionOperatorService.members(contractAddress)
+		DataUnionService.ProxyResponse result = dataUnionService.members(contractAddress)
 		response.status = result.statusCode
 		render(text: result.body, contentType: "application/json", encoding: "UTF-8")
 	}
@@ -41,14 +41,14 @@ class DataUnionOperatorApiController {
 		if (!isMemberAddress(memberAddress)) {
 			throw new BadRequestException("Member address is not an Ethereum address")
 		}
-		DataUnionOperatorService.ProxyResponse result = dataUnionOperatorService.memberStats(contractAddress, memberAddress)
+		DataUnionService.ProxyResponse result = dataUnionService.memberStats(contractAddress, memberAddress)
 		response.status = result.statusCode
 		render(text: result.body, contentType: "application/json", encoding: "UTF-8")
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def summary() {
-		DataUnionOperatorService.ProxyResponse result = dataUnionOperatorService.summary()
+		DataUnionService.ProxyResponse result = dataUnionService.summary()
 		response.status = result.statusCode
 		render(text: result.body, contentType: "application/json", encoding: "UTF-8")
 	}

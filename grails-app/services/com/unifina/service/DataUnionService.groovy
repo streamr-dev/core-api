@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.unifina.utils.MapTraversal
 import org.apache.http.HttpEntity
 import org.apache.http.HttpHeaders
@@ -25,12 +24,12 @@ import java.nio.charset.StandardCharsets
  * GET /dataunions/{contractAddress}/members: returns list of members
  * GET /dataunions/{contractAddress}/members/{memberAddress}: returns individual member stats (such as balances and withdraw proofs)
  */
-public class DataUnionOperatorService implements InitializingBean {
+public class DataUnionService implements InitializingBean {
 
 	// This service just proxies requests to the DUS, so we don't want to start database transactions
 	static transactional = false
 
-	private static final Logger log = LogManager.getLogger(DataUnionOperatorService.class);
+	private static final Logger log = LogManager.getLogger(DataUnionService.class);
 	private String baseUrl;
 	private CloseableHttpClient client;
 	GrailsApplication grailsApplication
