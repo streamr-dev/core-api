@@ -1,6 +1,5 @@
 package com.unifina.domain
 
-import com.unifina.security.Userish
 import grails.persistence.Entity
 
 @Entity

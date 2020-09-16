@@ -4,7 +4,6 @@ import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.*
 import com.unifina.domain.Permission.Operation
-import com.unifina.security.Userish
 import grails.compiler.GrailsCompileStatic
 import grails.gsp.PageRenderer
 import grails.plugin.mail.MailService

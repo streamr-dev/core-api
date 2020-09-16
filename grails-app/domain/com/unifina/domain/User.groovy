@@ -1,6 +1,5 @@
 package com.unifina.domain
 
-import com.unifina.security.Userish
 import grails.persistence.Entity
 import groovy.transform.CompileStatic
 import org.apache.commons.codec.digest.DigestUtils
