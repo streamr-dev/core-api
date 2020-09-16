@@ -158,7 +158,7 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
+		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
 			state: "ACCEPTED",
 		)
 
@@ -196,7 +196,7 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
+		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
 			state: "REJECTED",
 		)
 

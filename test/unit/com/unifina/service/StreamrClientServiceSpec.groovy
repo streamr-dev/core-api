@@ -5,7 +5,6 @@ import com.streamr.client.authentication.EthereumAuthenticationMethod
 import com.streamr.client.authentication.InternalAuthenticationMethod
 import com.unifina.domain.IntegrationKey
 import com.unifina.domain.User
-import com.unifina.security.SessionToken
 import com.unifina.utils.testutils.FakeStreamrClient
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
