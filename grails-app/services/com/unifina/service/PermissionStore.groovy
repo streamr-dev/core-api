@@ -1,7 +1,7 @@
 package com.unifina.service
 
 import com.unifina.domain.Permission
-import com.unifina.security.Userish
+import com.unifina.domain.Userish
 
 class PermissionStore {
 	/** null is often a valid value (but not a valid user), and means "anonymous Permissions only" */
