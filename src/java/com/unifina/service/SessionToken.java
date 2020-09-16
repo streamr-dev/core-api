@@ -12,18 +12,12 @@ import java.util.Map;
 import java.util.TimeZone;
 
 public class SessionToken {
-	private String token;
-	private Userish user;
-	private Date expiration;
+	private final static String DATE_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+	private final static TimeZone UTC = TimeZone.getTimeZone("UTC");
 
-	private static DateFormat df;
-	private static DateFormat getDateFormat() {
-		if (df == null) {
-			df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-			df.setTimeZone(TimeZone.getTimeZone("UTC"));
-		}
-		return df;
-	}
+	private final String token;
+	private final Userish user;
+	private final Date expiration;
 
 	public SessionToken(int tokenLength, Userish user, int ttlHours) {
 		this.token = AlphanumericStringGenerator.getRandomAlphanumericString(tokenLength);
@@ -44,9 +38,12 @@ public class SessionToken {
 	}
 
 	public Map<String, Object> toMap() {
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT_PATTERN);
+		df.setTimeZone(UTC);
+
+		Map<String, Object> map = new HashMap<>();
 		map.put("token", token);
-		map.put("expires", getDateFormat().format(expiration));
+		map.put("expires", df.format(expiration));
 		return map;
 	}
 }
