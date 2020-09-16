@@ -62,7 +62,7 @@ class NodeApiController {
 
 		Map<String, Canvas> canvasById = (running + shouldBeRunning).collectEntries { Canvas c -> [(c.id): c] }
 
-		Collection<Canvas> areAndShouldBeRunning = (running*.id).intersect(shouldBeRunning*.id)
+		Collection<Canvas> areAndShouldBeRunning = (running*.id).intersect(shouldBeRunning*.id as Collection<String>)
 			.collect { canvasById.get(it) }
 		Collection<Canvas> areNotButShouldBeRunning = (shouldBeRunning*.id).minus(running*.id)
 			.collect { canvasById.get(it) }
