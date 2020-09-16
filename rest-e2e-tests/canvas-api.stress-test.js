@@ -32,9 +32,6 @@ async function CreateClientUser() {
     // Generate a new user to isolate the test and not require any pre-existing resources
     const freshUser = StreamrClient.generateEthereumAccount()
 
-    // Print private key to console in case you need to debug by logging in as this user (import to MetaMask, log in with Ethereum)
-    console.log(`User created: ${JSON.stringify(freshUser)}`)
-
     const client = new StreamrClient({
         url: WS_URL,
         restUrl: REST_URL,

@@ -5,7 +5,9 @@
   "main": "index.js",
   "repository": "https://github.com/streamr-dev/engine-and-editor",
   "scripts": {
-    "test": "mocha *.test.js --recursive --color false --exit --timeout 5000"
+	"test": "npm run test:e2e && npm run test:stress",
+    "test:e2e": "mocha *.test.js --exclude '*.stress-test.js' --recursive --color false --exit --timeout 5000",
+    "test:stress": "mocha *.stress-test.js --recursive --color false --exit"
   },
   "author": "Streamr developers",
   "license": "AGPL-3.0-only",
