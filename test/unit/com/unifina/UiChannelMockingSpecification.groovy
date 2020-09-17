@@ -1,14 +1,13 @@
 package com.unifina
 
 import com.streamr.client.StreamrClient
+import com.unifina.domain.Canvas
 import com.unifina.domain.Stream
 import com.unifina.domain.User
-import com.unifina.domain.Canvas
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import com.unifina.service.StreamrClientService
 import com.unifina.service.UserService
-import com.unifina.domain.security.SecUser
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
