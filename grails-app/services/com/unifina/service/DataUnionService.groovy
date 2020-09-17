@@ -98,7 +98,7 @@ public class DataUnionService implements InitializingBean {
 			}
 		}
 		long total = System.currentTimeMillis() - start;
-		log.info("DataUnionOperatorServiceImpl.proxy() execution took " + total + " ms");
+		log.info("DataUnionService.proxy() execution took " + total + " ms");
 		log.debug("exiting proxy");
 		return result;
 	}
