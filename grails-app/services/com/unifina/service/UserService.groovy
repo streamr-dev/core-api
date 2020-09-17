@@ -175,4 +175,12 @@ class UserService {
 		}
 		return key // is an anonymous key
 	}
+
+	User getUserById(Long id) {
+		if (id != null) {
+			return User.get(id)
+		} else {
+			return null
+		}
+	}
 }
