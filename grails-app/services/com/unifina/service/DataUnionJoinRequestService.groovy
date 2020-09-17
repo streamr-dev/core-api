@@ -15,11 +15,11 @@ class DataUnionJoinRequestService {
 	EthereumService ethereumService
 	PermissionService permissionService
 	StreamrClientService streamrClientService
-	DataUnionOperatorService dataUnionOperatorService
+	DataUnionService dataUnionService
 
 	private isMemberActive(String contractAddress, String memberAddress) {
 		try {
-			DataUnionOperatorService.ProxyResponse result = dataUnionOperatorService.memberStats(contractAddress, memberAddress)
+			DataUnionService.ProxyResponse result = dataUnionService.memberStats(contractAddress, memberAddress)
 			if (result.statusCode == 200 && result.body != null || result.body != "") {
 				Map<String, Object> json = new JsonSlurper().parseText(result.body)
 				if (json.active != null && json.active == true) {

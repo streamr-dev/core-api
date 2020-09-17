@@ -1,20 +1,19 @@
 package com.unifina.controller
 
 import com.unifina.api.BadRequestException
-import com.unifina.controller.RESTAPIFilters
-import com.unifina.service.DataUnionOperatorService
+import com.unifina.service.DataUnionService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
-@TestFor(DataUnionOperatorApiController)
+@TestFor(DataUnionApiController)
 @Mock([RESTAPIFilters])
-class DataUnionOperatorApiControllerSpec extends Specification {
+class DataUnionApiControllerSpec extends Specification {
 	final String contractAddress = "0x6c90aece04198da2d5ca9b956b8f95af8041de37"
 	final String memberAddress = "0x7d01bfdf15198da2d5ca9b956c8f95af0041de38"
 
     def setup() {
-		controller.dataUnionOperatorService = Mock(DataUnionOperatorService)
+		controller.dataUnionService = Mock(DataUnionService)
     }
 
     void "test stats"() {
@@ -25,7 +24,7 @@ class DataUnionOperatorApiControllerSpec extends Specification {
 			controller.stats()
 		}
 		then:
-		1 * controller.dataUnionOperatorService.stats(contractAddress) >> new DataUnionOperatorService.ProxyResponse(statusCode: 200, body: """{"stats":[]}""")
+		1 * controller.dataUnionService.stats(contractAddress) >> new DataUnionService.ProxyResponse(statusCode: 200, body: """{"stats":[]}""")
 		response.json == [stats: []]
 		response.status == 200
     }
@@ -38,7 +37,7 @@ class DataUnionOperatorApiControllerSpec extends Specification {
 			controller.stats()
 		}
 		then:
-		1 * controller.dataUnionOperatorService.stats(contractAddress) >> new DataUnionOperatorService.ProxyResponse(statusCode: 500)
+		1 * controller.dataUnionService.stats(contractAddress) >> new DataUnionService.ProxyResponse(statusCode: 500)
 		response.status == 500
 		response.text == ""
 	}
@@ -51,7 +50,7 @@ class DataUnionOperatorApiControllerSpec extends Specification {
 			controller.stats()
 		}
 		then:
-		0 * controller.dataUnionOperatorService._
+		0 * controller.dataUnionService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
@@ -65,7 +64,7 @@ class DataUnionOperatorApiControllerSpec extends Specification {
 			controller.members()
 		}
 		then:
-		1 * controller.dataUnionOperatorService.members(contractAddress) >> new DataUnionOperatorService.ProxyResponse(statusCode: 200, body: """{"members":[]}""")
+		1 * controller.dataUnionService.members(contractAddress) >> new DataUnionService.ProxyResponse(statusCode: 200, body: """{"members":[]}""")
 		response.json == [members: []]
 		response.status == 200
 	}
@@ -78,7 +77,7 @@ class DataUnionOperatorApiControllerSpec extends Specification {
 			controller.members()
 		}
 		then:
-		0 * controller.dataUnionOperatorService._
+		0 * controller.dataUnionService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
@@ -93,7 +92,7 @@ class DataUnionOperatorApiControllerSpec extends Specification {
 			controller.memberStats()
 		}
 		then:
-		1 * controller.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> new DataUnionOperatorService.ProxyResponse(statusCode: 200, body: """{"memberStats":[]}""")
+		1 * controller.dataUnionService.memberStats(contractAddress, memberAddress) >> new DataUnionService.ProxyResponse(statusCode: 200, body: """{"memberStats":[]}""")
 		response.json == [memberStats: []]
 		response.status == 200
 	}
@@ -106,7 +105,7 @@ class DataUnionOperatorApiControllerSpec extends Specification {
 			controller.memberStats()
 		}
 		then:
-		0 * controller.dataUnionOperatorService._
+		0 * controller.dataUnionService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
@@ -121,7 +120,7 @@ class DataUnionOperatorApiControllerSpec extends Specification {
 			controller.memberStats()
 		}
 		then:
-		0 * controller.dataUnionOperatorService._
+		0 * controller.dataUnionService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
