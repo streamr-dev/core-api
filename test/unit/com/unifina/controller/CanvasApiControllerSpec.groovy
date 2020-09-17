@@ -409,7 +409,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 		response.json?.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_STARTSTOP) >> canvas1
-		1 * canvasService.stop(canvas1, me)
+		1 * canvasService.stop(canvas1, me, _)
 	}
 
 	void "stop() must return 204 for adhoc canvases"() {
@@ -423,7 +423,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 204
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_STARTSTOP) >> canvas1
-		1 * canvasService.stop(canvas1, me)
+		1 * canvasService.stop(canvas1, me, _)
 	}
 
 	void "stop() must not stop the canvas if authorization fails"() {
@@ -451,7 +451,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		then:
 		thrown(CanvasUnreachableException)
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_STARTSTOP) >> canvas1
-		1 * canvasService.stop(canvas1, me) >> { throw new CanvasUnreachableException("Test message") }
+		1 * canvasService.stop(canvas1, me, _) >> { throw new CanvasUnreachableException("Test message") }
 
 	}
 
@@ -501,7 +501,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 200
 		response.json == runtimeResponse
-		1 * controller.signalPathService.buildRuntimeRequest([bar: 'foo'], "canvases/$canvas1.id", me)
+		1 * controller.signalPathService.buildRuntimeRequest([bar: 'foo'], "canvases/$canvas1.id", me, _)
 		1 * controller.signalPathService.runtimeRequest(_, false) >> runtimeResponse
 	}
 

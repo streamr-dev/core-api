@@ -16,7 +16,7 @@ public class TokenAuthenticator {
 		TOKEN,
 		BEARER
 	}
-	private static class AuthorizationHeader {
+	public static class AuthorizationHeader {
 
 		private HeaderType headerType;
 		private String headerValue;
@@ -33,11 +33,15 @@ public class TokenAuthenticator {
 		public String getHeaderValue() {
 			return headerValue;
 		}
+
+		public String toString() {
+			return headerType + " " + headerValue;
+		}
 	}
 	public AuthenticationResult authenticate(HttpServletRequest request) {
 		AuthorizationHeader header;
 		try {
-			header = parseAuthorizationHeader(request.getHeader("Authorization"));
+			header = getAuthorizationHeader(request);
 		} catch (AuthenticationMalformedException e) {
 			return new AuthenticationResult(false, true, true);
 		}
@@ -54,7 +58,11 @@ public class TokenAuthenticator {
 		return new AuthenticationResult(true, false, true);
 	}
 
-	public AuthorizationHeader parseAuthorizationHeader(String s) {
+	public static AuthorizationHeader getAuthorizationHeader(HttpServletRequest request) {
+		return parseAuthorizationHeader(request.getHeader("Authorization"));
+	}
+
+	public static AuthorizationHeader parseAuthorizationHeader(String s) {
 		s = s == null ? null : s.trim();
 		if (s != null && !s.isEmpty()) {
 			String[] parts = s.split("\\s+");

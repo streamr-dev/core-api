@@ -58,7 +58,7 @@ class DashboardApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def runtimeRequest(String path, Boolean local) {
 		def msg = request.JSON
-		Map response = signalPathService.runtimeRequest(dashboardService.buildRuntimeRequest(msg, "dashboards/$path", request.apiUser), local ?: false)
+		Map response = signalPathService.runtimeRequest(dashboardService.buildRuntimeRequest(msg, "dashboards/$path", request.apiUser, TokenAuthenticator.getAuthorizationHeader(request)), local ?: false)
 		log.info("request: responding with $response")
 		render response as JSON
 	}

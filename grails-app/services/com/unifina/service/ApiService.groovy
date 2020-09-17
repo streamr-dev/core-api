@@ -6,7 +6,7 @@ import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
-import com.unifina.domain.Key
+import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
 import com.unifina.domain.Permission
 import com.unifina.domain.User
 import com.unifina.domain.Userish
@@ -89,12 +89,11 @@ class ApiService {
 	}
 
 	@CompileStatic
-	Map post(String url, Map body, Key key) {
-		// TODO: Migrate to Streamr API Java client lib when such a thing is made
+	Map post(String url, Map body, AuthorizationHeader authorizationHeader) {
 		def req = Unirest.post(url)
 
-		if (key) {
-			req.header("Authorization", "token $key.id")
+		if (authorizationHeader) {
+			req.header("Authorization", authorizationHeader.toString())
 		}
 
 		req.header("Content-Type", "application/json")
