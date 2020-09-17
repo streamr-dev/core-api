@@ -83,24 +83,16 @@ grails.project.dependency.resolution = {
 			excludes('org.springframework:spring-context:*')
 			excludes('org.springframework:spring-orm:*')
 		}
-		compile('org.springframework.security:spring-security-core:3.2.9.RELEASE') { // Needed for bcrypt password encoder
-			excludes('aopalliance', 'aspectjrt', 'cglib-nodep', 'commons-collections', 'commons-logging',
-				'ehcache', 'fest-assert', 'hsqldb', 'jcl-over-slf4j', 'jsr250-api', 'junit',
-				'logback-classic', 'mockito-core', 'powermock-api-mockito', 'powermock-api-support',
-				'powermock-core', 'powermock-module-junit4', 'powermock-module-junit4-common',
-				'powermock-reflect', 'spring-aop', 'spring-beans', 'spring-context', 'spring-core',
-				'spring-expression', 'spring-jdbc', 'spring-test', 'spring-tx')
+		compile('org.springframework.security:spring-security-core:4.2.9.RELEASE') { // Needed for bcrypt and PBKDF2 password encoders
+			excludes('org.springframework:spring-aop:*')
+			excludes('org.springframework:spring-beans:*')
+			excludes('org.springframework:spring-context:*')
+			excludes('org.springframework:spring-core:*')
+			excludes('org.springframework:spring-expression:*')
 		}
-		compile('org.springframework.security:spring-security-web:3.2.9.RELEASE') { // Needed for CORS
-			excludes('aopalliance', 'commons-codec', 'commons-logging', 'fest-assert', 'groovy', 'hsqldb',
-				'jcl-over-slf4j', 'junit', 'logback-classic', 'mockito-core', 'powermock-api-mockito',
-				'powermock-api-support', 'powermock-core', 'powermock-module-junit4',
-				'powermock-module-junit4-common', 'powermock-reflect', 'spock-core', 'spring-beans',
-				'spring-context', 'spring-core', 'spring-expression', 'spring-jdbc',
-				'spring-security-core', 'spring-test', 'spring-tx', 'spring-web', 'spring-webmvc',
-				'tomcat-servlet-api')
+		compile('org.springframework.security:spring-security-web:4.2.9.RELEASE') { // Needed for CORS plugin
+			excludes('org.springframework:spring-web:*')
 		}
-
 		compile('org.web3j:core:5.0.0') {
 			excludes "org.java-websocket:Java-WebSocket:1.3.8" // Version conflict with com.streamr:client
 		}
