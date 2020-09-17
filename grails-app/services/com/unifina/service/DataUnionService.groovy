@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets
 /**
  * Engine and editor proxies the following endpoints to the Data Union server:
  * <p>
- * GET /dataunions/{contractAddress}/stats: returns Operator stats.
+ * GET /dataunions/{contractAddress}/stats: returns stats
  * GET /dataunions/{contractAddress}/members: returns list of members
  * GET /dataunions/{contractAddress}/members/{memberAddress}: returns individual member stats (such as balances and withdraw proofs)
  */
