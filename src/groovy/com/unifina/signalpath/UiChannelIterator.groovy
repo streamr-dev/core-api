@@ -1,6 +1,6 @@
 package com.unifina.signalpath
 
-import com.unifina.domain.signalpath.Module
+import com.unifina.domain.Module
 
 class UiChannelIterator implements Iterable<Element> {
 	private final Iterator moduleIter

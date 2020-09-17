@@ -5,15 +5,16 @@ import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.EmailMessage
 import com.unifina.domain.Resource
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.Permission.Operation
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.security.SignupInvite
-import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.Module
+import com.unifina.domain.Dashboard
+import com.unifina.domain.Stream
+import com.unifina.domain.Key
+import com.unifina.domain.Permission
+import com.unifina.domain.Permission.Operation
+import com.unifina.domain.SignupInvite
+import com.unifina.domain.User
+import com.unifina.domain.SignupMethod
+import com.unifina.domain.Canvas
+import com.unifina.domain.Module
 import grails.gsp.PageRenderer
 import grails.plugin.mail.MailService
 import grails.test.mixin.Mock
@@ -29,10 +30,10 @@ import java.security.AccessControlException
  */
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(PermissionService)
-@Mock([SecUser, Key, SignupInvite, Module, Permission, Dashboard, Canvas])
+@Mock([User, Key, SignupInvite, Module, Permission, Dashboard, Canvas])
 class PermissionServiceSpec extends BeanMockingSpecification {
 
-	SecUser me, anotherUser, stranger
+	User me, anotherUser, stranger
 	Key myKey, anotherUserKey, anonymousKey
 
 	Dashboard dashAllowed, dashRestricted, dashOwned, dashPublic
@@ -42,9 +43,9 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 
     def setup() {
 		// Users
-		me = new SecUser(username: "me", password: "foo").save(validate:false)
-		anotherUser = new SecUser(username: "him", password: "bar").save(validate:false)
-		stranger = new SecUser(username: "stranger", password: "x").save(validate:false)
+		me = new User(username: "me", password: "foo").save(validate:false)
+		anotherUser = new User(username: "him", password: "bar").save(validate:false)
+		stranger = new User(username: "stranger", password: "x").save(validate:false)
 
 		// Keys
 		myKey = new Key(name: "my key", user: me).save(failOnError: true)
@@ -75,7 +76,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 
 	void "test setup"() {
 		expect:
-		SecUser.count() == 3
+		User.count() == 3
 		Key.count() == 3
 		Dashboard.count() == 4
 		Canvas.count() == 1
@@ -192,12 +193,12 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 	}
 
 	void "systemRevoke() on a stream also revokes the parent permissions"() {
-		SecUser publisher = new SecUser()
+		User publisher = new User()
 		publisher.id = 7L
 		Stream pubInbox = new Stream(name: "publisher", inbox: true)
 		pubInbox.id = "publisher"
 		pubInbox.save(failOnError: true, validate: false)
-		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+		User subscriber = new User(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
 		Stream subInbox = new Stream(name: subscriber.username, inbox: true)
 		subInbox.id = subscriber.username
 		subInbox.save(failOnError: true, validate: false)
@@ -270,7 +271,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 	}
 
 	void "cleanUpExpiredPermissions() deletes permissions that already ended"() {
-		SecUser testUser = new SecUser(username: "testUser", password: "foo").save(validate:false)
+		User testUser = new User(username: "testUser", password: "foo").save(validate:false)
 		Stream testStream = new Stream(name: "testStream")
 		testStream.id = "testStream"
 		testStream.save(validate: false)
@@ -307,11 +308,11 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		setup:
 		service.mailService = Mock(MailService)
 		service.groovyPageRenderer = Mock(PageRenderer)
-		SecUser me = new SecUser(id: 1, username: "me@me.net").save(validate: false)
-		SecUser other = new SecUser(id: 2, username: "permission@recipient.net").save(validate: false)
+		User me = new User(id: 1, username: "me@me.net").save(validate: false)
+		User other = new User(id: 2, username: "permission@recipient.net").save(validate: false)
 		Canvas canvasOwned = newCanvas("own")
 		Resource res = new Resource(Canvas, canvasOwned.id)
-		SecUser apiUser = me
+		User apiUser = me
 		Key apiKey = null
 		Operation op = Operation.CANVAS_GET
 		String targetUsername = other.username
@@ -332,11 +333,11 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		setup:
 		service.mailService = Mock(MailService)
 		service.groovyPageRenderer = Mock(PageRenderer)
-		SecUser me = new SecUser(id: 1, username: "me@me.net").save(validate: false)
-		SecUser other = new SecUser(id: 2, username: "permission@recipient.net").save(validate: false)
+		User me = new User(id: 1, username: "me@me.net").save(validate: false)
+		User other = new User(id: 2, username: "permission@recipient.net").save(validate: false)
 		Canvas canvasOwned = newCanvas("own")
 		Resource res = new Resource(Canvas, canvasOwned.id)
-		SecUser apiUser = me
+		User apiUser = me
 		Key apiKey = null
 		Operation op = Operation.CANVAS_EDIT
 		String targetUsername = other.username
@@ -357,11 +358,11 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		setup:
 		service.mailService = Mock(MailService)
 		service.groovyPageRenderer = Mock(PageRenderer)
-		SecUser me = new SecUser(id: 1, username: "me@me.net").save(validate: false)
-		SecUser other = new SecUser(id: 2, username: "permission@recipient.net").save(validate: false)
+		User me = new User(id: 1, username: "me@me.net").save(validate: false)
+		User other = new User(id: 2, username: "permission@recipient.net").save(validate: false)
 		Canvas canvasOwned = newCanvas("own")
 		Resource res = new Resource(Canvas, canvasOwned.id)
-		SecUser apiUser = me
+		User apiUser = me
 		Key apiKey = null
 		Operation op = Operation.CANVAS_SHARE
 		String sharer = me.username
@@ -384,17 +385,17 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.groovyPageRenderer = Mock(PageRenderer)
 		EthereumIntegrationKeyService ethereumIntegrationKeyService = mockBean(EthereumIntegrationKeyService, Mock(EthereumIntegrationKeyService))
 		String ethUserUsername = "0xa50E97f6a98dD992D9eCb8207c2Aa58F54970729"
-		SecUser createdEthUser = new SecUser(username: ethUserUsername, password: "x", name: "Ethereum User")
+        User createdEthUser = new User(username: ethUserUsername, password: "x", name: "Ethereum User")
 		createdEthUser.save(validate: true, failOnError: true)
 		Canvas canvasOwned = newCanvas("own")
 		Resource res = new Resource(Canvas, canvasOwned.id)
-		SecUser apiUser = me
+		User apiUser = me
 		Operation op = Operation.CANVAS_GET
 		service.systemGrant(me, canvasOwned, Operation.CANVAS_SHARE)
 		when:
-		service.savePermissionForEthereumAccount(ethUserUsername, apiUser, op, res)
+		service.savePermissionForEthereumAccount(ethUserUsername, apiUser, op, res, SignupMethod.UNKNOWN)
 		then:
-		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(ethUserUsername) >> createdEthUser
+		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(ethUserUsername, SignupMethod.UNKNOWN) >> createdEthUser
 		0 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
 		0 * service.mailService.sendMail { _ }
 		service.check(createdEthUser, canvasOwned, op)
@@ -405,11 +406,11 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.mailService = Mock(MailService)
 		service.groovyPageRenderer = Mock(PageRenderer)
 		service.signupCodeService = Mock(SignupCodeService)
-		SecUser me = new SecUser(id: 1, username: "me@me.net").save(validate: false)
-		SecUser other = new SecUser(id: 2, username: "permission@recipient.net").save(validate: false)
+		User me = new User(id: 1, username: "me@me.net").save(validate: false)
+		User other = new User(id: 2, username: "permission@recipient.net").save(validate: false)
 		Canvas canvasOwned = newCanvas("own")
 		Resource res = new Resource(Canvas, canvasOwned.id)
-		SecUser apiUser = me
+		User apiUser = me
 		Operation op = Operation.CANVAS_GET
 		String targetUsername = other.username
 		String sharer = me.username
@@ -418,7 +419,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		EmailMessage msg = new EmailMessage(sharer, recipient, subjectTemplate, res)
 		SignupInvite invite = new SignupInvite(
 			code: "x",
-			username: recipient,
+			email: recipient,
 			used: false,
 			sent: false,
 		)
@@ -434,10 +435,10 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 
 	void "save anonymous permission"() {
 		setup:
-		SecUser me = new SecUser(id: 1, username: "me@me.net").save(validate: false)
+		User me = new User(id: 1, username: "me@me.net").save(validate: false)
 		Canvas canvasOwned = newCanvas("own")
 		Resource res = new Resource(Canvas, canvasOwned.id)
-		SecUser apiUser = me
+		User apiUser = me
 		Key apiKey = null
 		Operation op = Operation.CANVAS_GET
 		service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_SHARE)
@@ -452,7 +453,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Canvas canvas = new Canvas()
 		canvas.save()
 		Resource resource = new Resource(Canvas, canvas.id)
-		SecUser apiUser = me
+		User apiUser = me
 		Key apiKey = null
 		boolean subscriptions = false
 		when:
@@ -465,7 +466,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		setup:
 		Canvas canvasOwned = newCanvas("own")
 		Resource resource = new Resource(Canvas, canvasOwned.id)
-		SecUser apiUser = me
+		User apiUser = me
 		Key apiKey = null
 		service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_SHARE)
 		Permission p = service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_INTERACT)
@@ -480,7 +481,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		setup:
 		Canvas canvasOwned = newCanvas("own")
 		Resource resource = new Resource(Canvas, canvasOwned.id)
-		SecUser apiUser = me
+		User apiUser = me
 		Key apiKey = null
 		service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_SHARE)
 		Permission p = service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_INTERACT)
@@ -499,7 +500,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		stream.id = "stream-id"
 		stream.save()
 		Resource resource = new Resource(Stream, stream.id)
-		SecUser apiUser = me
+		User apiUser = me
 		Key apiKey = null
 		boolean subscriptions = false
 		when:

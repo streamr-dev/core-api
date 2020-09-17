@@ -3,28 +3,21 @@ package com.unifina.service
 import com.streamr.client.StreamrClient
 import com.streamr.client.options.StreamrClientOptions
 import com.unifina.api.NotFoundException
-import com.unifina.api.UpdateDataUnionJoinRequestCommand
-import com.unifina.domain.dataunion.DataUnionJoinRequest
-import com.unifina.domain.data.Stream
-import com.unifina.domain.marketplace.Category
-import com.unifina.domain.marketplace.Product
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.Module
-import com.unifina.domain.signalpath.ModuleCategory
+import com.unifina.domain.*
+import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 // This is an integration test because Grails doesn't support criteria queries in unit tests
 class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 	DataUnionJoinRequestService service = new DataUnionJoinRequestService()
-	SecUser me
+    User me
 	com.streamr.client.rest.Stream joinPartStream
 	Category category
 	final String contractAddress = "0x0000000000000000000000000000000000000000"
 	StreamrClient streamrClientMock
 
 	void setup() {
-		me = new SecUser(
+		me = new User(
 			name: "First Lastname",
 			username: "first@last.com",
 			password: "salasana",
@@ -50,7 +43,7 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 
 		service.ethereumService = Mock(EthereumService)
 		service.permissionService = Mock(PermissionService)
-		service.dataUnionOperatorService = Mock(DataUnionOperatorService)
+		service.dataUnionService = Mock(DataUnionService)
 	}
 
 	void "findAll"() {
@@ -165,18 +158,24 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
+		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
 			state: "ACCEPTED",
 		)
 
-		DataUnionOperatorService.ProxyResponse stats = new DataUnionOperatorService.ProxyResponse()
-		stats.statusCode = 404
+		DataUnionService.ProxyResponse notFoundStats = new DataUnionService.ProxyResponse()
+		notFoundStats.statusCode = 404
+		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
+		okStats.statusCode = 200
+		okStats.body =  new JsonBuilder([
+			active: true,
+		]).toString()
 
 		when:
 		def c = service.update(contractAddress, r.id, cmd)
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		1 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> stats
+		2 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> notFoundStats
+		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> okStats
 		1 * streamrClientMock.publish(_, [type: "join", addresses: [r.memberAddress]])
 		c.state == DataUnionJoinRequest.State.ACCEPTED
 		// no changes below
@@ -197,7 +196,7 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
+		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
 			state: "REJECTED",
 		)
 
@@ -251,9 +250,14 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
 		1 * streamrClientMock.publish(_, [type: "part", addresses: [r.memberAddress]])
 		1 * service.permissionService.systemRevoke(me, s1, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemRevoke(me, s1, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemRevoke(me, s2, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemRevoke(me, s2, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemRevoke(me, s3, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemRevoke(me, s3, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemRevoke(me, s4, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemRevoke(me, s4, Permission.Operation.STREAM_GET)
+		0 * service.permissionService._
 		DataUnionJoinRequest.findById(r.id) == null
 	}
 

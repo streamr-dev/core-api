@@ -1,8 +1,8 @@
 package com.unifina.signalpath.streams;
 
-import com.unifina.domain.data.Stream;
-import com.unifina.domain.security.Permission;
-import com.unifina.domain.security.SecUser;
+import com.unifina.domain.Stream;
+import com.unifina.domain.Permission;
+import com.unifina.domain.User;
 import com.unifina.service.PermissionService;
 import com.unifina.signalpath.*;
 import grails.orm.HibernateCriteriaBuilder;
@@ -29,7 +29,7 @@ public class SearchStream extends AbstractSignalPathModule {
 		}
 
 		List<Stream> streams = permissionService.get(Stream.class,
-			SecUser.loadViaJava(getGlobals().getUserId()),
+			User.loadViaJava(getGlobals().getUserId()),
 			Permission.Operation.STREAM_GET,
 			true,
 			new NameFilteringClosure(this, searchName.getValue()));

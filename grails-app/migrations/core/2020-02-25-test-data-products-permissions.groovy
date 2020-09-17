@@ -1,6 +1,6 @@
 package core
 
-import com.unifina.domain.security.Permission
+import com.unifina.domain.Permission
 
 databaseChangeLog = {
 	// See grails-app/migrations/core/2018-05-02-test-data-products-subscriptions.groovy

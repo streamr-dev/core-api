@@ -1,6 +1,7 @@
 package com.unifina.signalpath.time
 
-import com.unifina.domain.security.SecUser
+
+import com.unifina.domain.User
 import com.unifina.signalpath.Input
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
@@ -9,7 +10,7 @@ import spock.lang.Specification
 
 import java.text.SimpleDateFormat
 
-@Mock(SecUser)
+@Mock(User)
 class DateConversionSpec extends Specification {
 
 	def final static format = "yyyy-MM-dd HH:mm:ss"
@@ -17,10 +18,10 @@ class DateConversionSpec extends Specification {
 	DateConversion module
 
 	private void initContext(String username="username") {
-		initContextWithUser(new SecUser(username: username).save(failOnError: true, validate: false))
+		initContextWithUser(new User(username: username).save(failOnError: true, validate: false))
 	}
 
-	private void initContextWithUser(SecUser user) {
+	private void initContextWithUser(User user) {
 		module = new DateConversion()
 		module.globals = new Globals([:], user)
 		module.init()

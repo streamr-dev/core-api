@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.domain.security.SignupInvite
+import com.unifina.domain.SignupInvite
 import grails.compiler.GrailsCompileStatic
 
 @GrailsCompileStatic
@@ -11,9 +11,9 @@ class SignupCodeService {
 		return s
 	}
 
-	SignupInvite create(String username) {
+	SignupInvite create(String email) {
 		SignupInvite result = new SignupInvite(
-			username: username,
+			email: email,
 			code: generateSignupCode(),
 			sent: false,
 			used: false,

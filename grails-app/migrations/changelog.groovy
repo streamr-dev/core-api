@@ -149,4 +149,9 @@ databaseChangeLog = {
 	include file: 'core/2020-02-25-test-data-products-permissions.groovy'
 	include file: 'core/2020-03-05-new-product-fields-contact-terms-of-use.groovy'
 	include file: 'core/2020-04-01-rm-tour-user.groovy'
+	include file: 'core/2020-04-15-user-refactor-username-add-email.groovy'
+	include file: 'core/2020-08-07-mv-secuser-user.groovy'
+	include file: 'core/2020-08-24-add-user-signup-method.groovy'
+	include file: 'core/2020-09-11-add-stream-storage-node.groovy'
+	include file: 'core/2020-09-15-add-DU-version-field-to-product.groovy'
 }

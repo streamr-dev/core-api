@@ -1,7 +1,7 @@
 package com.unifina.service
 
 import com.unifina.api.ApiException
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.User
 import com.unifina.provider.FileUploadProvider
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.ImageResizer
@@ -16,7 +16,7 @@ class UserAvatarImageService {
 	IdGenerator idGenerator = new IdGenerator()
 	ImageResizer imageResizer = new ImageResizer()
 
-	def replaceImage(SecUser user, byte[] fileBytes, String filename) {
+	def replaceImage(User user, byte[] fileBytes, String filename) {
 		imageVerifier.verifyImage(fileBytes)
 		final byte[] small = imageResizer.resize(fileBytes, filename, ImageResizer.Size.AVATAR_SMALL)
 		final String smallImageUrl = fileUploadProvider.uploadFile(generateFilename(filename), small)

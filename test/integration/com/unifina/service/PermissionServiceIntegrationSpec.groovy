@@ -1,13 +1,13 @@
 package com.unifina.service
 
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.dashboard.DashboardItem
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.security.SignupInvite
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.Dashboard
+import com.unifina.domain.DashboardItem
+import com.unifina.domain.Stream
+import com.unifina.domain.Key
+import com.unifina.domain.Permission
+import com.unifina.domain.SignupInvite
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
 import com.unifina.utils.Webcomponent
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders
@@ -25,7 +25,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	PermissionService service
 
-	SecUser me, anotherUser, stranger, someone
+	User me, anotherUser, stranger, someone
 	Key myKey, anotherUserKey, anonymousKey
 
 	Dashboard dashAllowed, dashRestricted, dashOwned, dashPublic
@@ -50,33 +50,35 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	SignupInvite invite
 
+	Stream anonymousStream
+
 	void setup() {
 		service = Holders.getApplicationContext().getBean(PermissionService)
-		SecUser.findByUsername("me-permission-service-integration-spec@streamr.com")?.delete(flush: true)
-		SecUser.findByUsername("him-permission-service-integration-spec@streamr.com")?.delete(flush: true)
-		SecUser.findByUsername("stranger-permission-service-integration-spec@streamr.com")?.delete(flush: true)
-		SecUser.findByUsername("someone-service-integration-spec@streamr.com")?.delete(flush: true)
+		User.findByUsername("me-permission-service-integration-spec@streamr.com")?.delete(flush: true)
+		User.findByUsername("him-permission-service-integration-spec@streamr.com")?.delete(flush: true)
+		User.findByUsername("stranger-permission-service-integration-spec@streamr.com")?.delete(flush: true)
+		User.findByUsername("someone-service-integration-spec@streamr.com")?.delete(flush: true)
 
 		// Users
-		me = new SecUser(
+		me = new User(
 			username: "me-permission-service-integration-spec@streamr.com",
 			name: "me",
 			password: "foo",
 		).save(failOnError: true)
 
-		anotherUser = new SecUser(
+		anotherUser = new User(
 			username: "him-permission-service-integration-spec@streamr.com",
 			name: "him",
 			password: "bar",
 		).save(failOnError: true)
 
-		stranger = new SecUser(
+		stranger = new User(
 			username: "stranger-permission-service-integration-spec@streamr.com",
 			name: "stranger",
 			password: "x",
 		).save(failOnError: true)
 
-		someone = new SecUser(
+		someone = new User(
 			username: "someone-service-integration-spec@streamr.com",
 			name: "someone",
 			password: "x",
@@ -151,7 +153,11 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		secretItem.save(failOnError: true, validate: true, flush: true)
 
 		// Sign-up invitations can also receive Permissions; they will later be converted to User permissions
-		invite = new SignupInvite(username: "him-permission-service-integration-spec@streamr.com", code: "sikritCode", sent: true, used: false).save(validate: false, flush: true)
+		invite = new SignupInvite(email: "him-permission-service-integration-spec@streamr.com", code: "sikritCode", sent: true, used: false).save(validate: false, flush: true)
+
+		anonymousStream = new Stream(name: "anonymous stream")
+		anonymousStream.id = "stream-id-3"
+		anonymousStream.save(validate: true, failOnError: true)
 	}
 
 	void cleanup() {
@@ -168,6 +174,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		Permission.findAllByStream(uiChannelStream)*.delete(flush: true)
 		Permission.findAllByStream(uiChannelPublic)*.delete(flush: true)
 		Permission.findAllByStream(uiChannelStream)*.delete(flush: true)
+		Permission.findAllByStream(anonymousStream)*.delete(flush: true)
 
 		dashAllowed?.delete(flush: true)
 		dashRestricted?.delete(flush: true)
@@ -198,6 +205,8 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		vulCan?.delete(flush: true)
 
 		invite?.delete(flush: true)
+
+		anonymousStream?.delete(flush: true)
 	}
 
 	void "get closure filtering works as expected"() {
@@ -298,9 +307,9 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	void "getAll returns public resources on bad/null user"() {
 		expect:
-		service.get(Dashboard, new SecUser(), Permission.Operation.DASHBOARD_GET) == []
+		service.get(Dashboard, new User(), Permission.Operation.DASHBOARD_GET) == []
 		service.get(Dashboard, null, Permission.Operation.DASHBOARD_GET) == []
-		service.getAll(Dashboard, new SecUser(), Permission.Operation.DASHBOARD_GET) == [dashPublic]
+		service.getAll(Dashboard, new User(), Permission.Operation.DASHBOARD_GET) == [dashPublic]
 		service.getAll(Dashboard, null, Permission.Operation.DASHBOARD_GET) == [dashPublic]
 	}
 
@@ -482,5 +491,17 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		then:
 		def e = thrown(AccessControlException)
 		e.message == "Cannot revoke only SHARE permission of ${stream}"
+	}
+
+	void "check anonymous permission"() {
+		when:
+		service.systemGrantAnonymousAccess(anonymousStream, Permission.Operation.STREAM_GET)
+		then:
+		service.checkAnonymousAccess(anonymousStream, Permission.Operation.STREAM_GET) == true
+
+		when:
+		service.systemRevokeAnonymousAccess(anonymousStream, Permission.Operation.STREAM_GET)
+		then:
+		service.checkAnonymousAccess(anonymousStream, Permission.Operation.STREAM_GET) == false
 	}
 }

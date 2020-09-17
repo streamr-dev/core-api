@@ -2,21 +2,21 @@ package com.unifina.service
 
 import com.streamr.api.client.CanvasesPerNode
 import com.streamr.api.client.StreamrClient
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.Key
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(ClusterService)
-@Mock([Canvas, SecUser, Key])
+@Mock([Canvas, User, Key])
 class ClusterServiceSpec extends Specification {
-	SecUser me
+	User me
 	String apiKey = "token myApiKey"
 
 	def setup() {
-		me = new SecUser().save(failOnError: true, validate: false)
+		me = new User().save(failOnError: true, validate: false)
 		Key key = new Key(name: "key", user: me)
 		key.id = "myApiKey"
 		key.save(failOnError: true, validate: false)
@@ -204,7 +204,7 @@ class ClusterServiceSpec extends Specification {
 		service.canvasService = Mock(CanvasService)
 		CanvasesPerNode canvasesPerNode = new CanvasesPerNode()
 		canvasesPerNode.shouldBeRunning = new ArrayList<HashMap<String, Object>>()
-		SecUser u = new SecUser(username: "pena@host.com", password: "abcabcabcabc123", name: "Pena")
+		User u = new User(username: "pena@host.com", password: "abcabcabcabc123", name: "Pena")
 		u.id = 1
 		u.save(failOnError: true)
 		Canvas c = new Canvas(name: "Canvas 1", startedBy: u, json: "{}")

@@ -2,11 +2,11 @@ package com.unifina.service
 
 import com.unifina.api.InvalidStateTransitionException
 import com.unifina.api.ProductNotFreeException
-import com.unifina.domain.data.Stream
-import com.unifina.domain.marketplace.Category
-import com.unifina.domain.marketplace.Product
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.Stream
+import com.unifina.domain.Category
+import com.unifina.domain.Product
+import com.unifina.domain.Permission
+import com.unifina.domain.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -18,7 +18,7 @@ class FreeProductServiceSpec extends Specification {
 	Product freeProduct
 
 	void setup() {
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"

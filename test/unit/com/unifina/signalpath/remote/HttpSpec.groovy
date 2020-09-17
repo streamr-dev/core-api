@@ -2,7 +2,7 @@ package com.unifina.signalpath.remote
 
 import com.unifina.data.Event
 import com.unifina.datasource.DataSource
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.Canvas
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper

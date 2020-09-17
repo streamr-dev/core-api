@@ -2,8 +2,8 @@ package com.unifina.signalpath
 
 import com.unifina.BeanMockingSpecification
 import com.unifina.datasource.DataSource
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
 import com.unifina.service.SignalPathService
 import com.unifina.utils.Globals
 import spock.util.concurrent.PollingConditions
@@ -42,7 +42,7 @@ class SignalPathRunnerSpec extends BeanMockingSpecification {
 	}
 
 	void "when SignalPathRunner thread is killed, dont mark realtime canvas to stopped state"() {
-		Globals globals = new Globals([:], new SecUser(), Globals.Mode.REALTIME, dataSource)
+		Globals globals = new Globals([:], new User(), Globals.Mode.REALTIME, dataSource)
 		canvas.adhoc = false
 		runner = new SignalPathRunner(sp, globals)
 
@@ -66,7 +66,7 @@ class SignalPathRunnerSpec extends BeanMockingSpecification {
 	}
 
 	void "when SignalPathRunner thread is killed, mark historical canvas to stopped state"() {
-		Globals globals = new Globals([beginDate: new Date().getTime(), endDate: new Date().getTime()], new SecUser(),
+		Globals globals = new Globals([beginDate: new Date().getTime(), endDate: new Date().getTime()], new User(),
 			Globals.Mode.HISTORICAL, dataSource)
 		canvas.adhoc = true
 		runner = new SignalPathRunner(sp, globals)

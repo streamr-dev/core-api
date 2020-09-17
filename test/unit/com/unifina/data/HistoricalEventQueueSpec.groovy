@@ -3,7 +3,7 @@ package com.unifina.data
 
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.ITimeListener
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.User
 import com.unifina.utils.Globals
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
@@ -14,7 +14,7 @@ import java.util.function.Consumer
 class HistoricalEventQueueSpec extends Specification {
 
 	private HistoricalEventQueue createQueue(Date beginDate, Date endDate, int speed = 0, int capacity = 100, boolean addEndEvent = true) {
-		SecUser user = new SecUser()
+		User user = new User()
 
 		Globals globals = new Globals([
 			speed: speed,

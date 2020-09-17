@@ -1,7 +1,7 @@
 package com.unifina.signalpath.remote
 
 import com.unifina.ModuleTestingSpecification
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.User
 import com.unifina.signalpath.ModuleOption
 import com.unifina.signalpath.ModuleOptions
 import com.unifina.signalpath.ModuleWithSideEffects
@@ -34,7 +34,7 @@ class SqlSpec extends ModuleTestingSpecification {
 			]
 		])
 
-		globals = mockGlobals([:], new SecUser(), Globals.Mode.REALTIME)
+		globals = mockGlobals([:], new User(), Globals.Mode.REALTIME)
 	}
 
 	private def getMockCursor(List<Map> results) {
@@ -91,7 +91,7 @@ class SqlSpec extends ModuleTestingSpecification {
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 				.overrideGlobals {
-					return mockGlobals([:], new SecUser(), Globals.Mode.HISTORICAL)
+					return mockGlobals([:], new User(), Globals.Mode.HISTORICAL)
 				}.test()
 
 		0 * TestableSql.statement.execute(_)
@@ -118,7 +118,7 @@ class SqlSpec extends ModuleTestingSpecification {
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 				.overrideGlobals {
-					return mockGlobals([:], new SecUser(), Globals.Mode.HISTORICAL)
+					return mockGlobals([:], new User(), Globals.Mode.HISTORICAL)
 				}.test()
 	}
 }

@@ -3,8 +3,8 @@ package com.unifina.signalpath
 
 import com.unifina.ModuleTestingSpecification
 import com.unifina.data.Event
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.Permission
+import com.unifina.domain.User
 import com.unifina.service.PermissionService
 import com.unifina.utils.Globals
 import groovy.transform.CompileStatic
@@ -104,24 +104,13 @@ class AbstractSignalPathModuleSpec extends ModuleTestingSpecification {
 		module.setParentSignalPath(mockSignalPath)
 	}
 
-	private RuntimeResponse sendRuntimeRequest(LinkedHashMap<String, Object> msg, SecUser user) {
-		def request = new RuntimeRequest(msg, user, null, "request/1", "request/1", [] as Set)
+	private RuntimeResponse sendRuntimeRequest(LinkedHashMap<String, Object> msg, User user) {
+		def request = new RuntimeRequest(msg, user, null, null, "request/1", "request/1", [] as Set)
 		// Will insert an event to the event queue
 		def future = module.onRequest(request, request.getPathReader())
 		// Dispatch the event from the event queue, executing the future
 		mockedEventQueue.poll().dispatch()
 		return future.get(1, TimeUnit.SECONDS)
-	}
-
-	void "supports 'ping' runtime requests"() {
-		setUpModuleWithRuntimeRequestEnv()
-
-		when:
-		Map msg = [type: "ping"]
-		def response = sendRuntimeRequest(msg, null)
-
-		then:
-		response == new RuntimeResponse(true, [request: msg])
 	}
 
 	void "supports 'paramChange' runtime requests"() {
@@ -133,7 +122,7 @@ class AbstractSignalPathModuleSpec extends ModuleTestingSpecification {
 			param: "param",
 			value: -123
 		]
-		def response = sendRuntimeRequest(msg, new SecUser())
+		def response = sendRuntimeRequest(msg, new User())
 
 		then:
 		response == new RuntimeResponse(true, [request: msg])
@@ -164,7 +153,7 @@ class AbstractSignalPathModuleSpec extends ModuleTestingSpecification {
 
 		when:
 		Map msg = [type: "json"]
-		def response = sendRuntimeRequest([type: "json"], new SecUser())
+		def response = sendRuntimeRequest([type: "json"], new User())
 
 		then:
 		response == new RuntimeResponse(true, [request: msg, json: module.configuration])

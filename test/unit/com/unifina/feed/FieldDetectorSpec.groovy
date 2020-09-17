@@ -18,14 +18,14 @@ class FieldDetectorSpec extends Specification {
 	}
 
 	def "detects 0 fields given empty message"() {
-		msg.getContent() >> [:]
+		msg.getParsedContent() >> [:]
 
 		expect:
 		FieldDetector.detectFields(msg, false) == []
 	}
 
 	def "detects simple fields given flat message"() {
-		msg.getContent() >> [a: 666, b: 312.0, c: "sss", d: true]
+		msg.getParsedContent() >> [a: 666, b: 312.0, c: "sss", d: true]
 
 		expect:
 		FieldDetector.detectFields(msg, false)*.toMap() == [
@@ -37,7 +37,7 @@ class FieldDetectorSpec extends Specification {
 	}
 
 	def "detects maps and list fields given structured message"() {
-		msg.getContent() >> [a: [1,2,3], b: [hello: "world"]]
+		msg.getParsedContent() >> [a: [1,2,3], b: [hello: "world"]]
 
 		expect:
 		FieldDetector.detectFields(msg, false)*.toMap() == [
@@ -47,7 +47,7 @@ class FieldDetectorSpec extends Specification {
 	}
 
 	def "can flatten to simple fields given structured message"() {
-		msg.getContent() >> [a: [1,2,3], b: [hello: "world", "beast": 666], c: true]
+		msg.getParsedContent() >> [a: [1,2,3], b: [hello: "world", "beast": 666], c: true]
 
 		expect:
 		FieldDetector.detectFields(msg, true)*.toMap() == [

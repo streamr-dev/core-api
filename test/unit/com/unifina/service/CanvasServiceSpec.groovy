@@ -2,16 +2,7 @@ package com.unifina.service
 
 import com.unifina.BeanMockingSpecification
 import com.unifina.api.*
-import com.unifina.domain.ExampleType
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.dashboard.DashboardItem
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.Module
-import com.unifina.domain.signalpath.Serialization
-import com.unifina.exceptions.CanvasUnreachableException
+import com.unifina.domain.*
 import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.signalpath.charts.Heatmap
@@ -27,11 +18,11 @@ import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 @TestMixin(ControllerUnitTestMixin) // "as JSON" converter
 @TestFor(CanvasService)
-@Mock([SecUser, Canvas, Module, Permission, Serialization, Dashboard, DashboardItem])
+@Mock([User, Canvas, Module, Permission, Serialization, Dashboard, DashboardItem])
 class CanvasServiceSpec extends BeanMockingSpecification {
 
-	SecUser me
-	SecUser someoneElse
+	User me
+    User someoneElse
 	Canvas myFirstCanvas
 	List<Canvas> canvases = []
 	Module moduleWithUi
@@ -54,7 +45,9 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 
 		moduleWithUi = new Module(implementingClass: Heatmap.name).save(validate: false)
 
-		me = new SecUser(username: "me@me.com").save(validate: false)
+		me = new User(username: "me@me.com").save(validate: false)
+		def userService = mockBean(UserService, new UserService())
+		userService.getUserById(_) >> me
 
 		myFirstCanvas = new Canvas(
 			name: "my_canvas_1",
@@ -113,7 +106,7 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 			json: json,
 		).save(failOnError: true)
 
-		someoneElse = new SecUser(username: "someone@someone.com").save(validate: false)
+		someoneElse = new User(username: "someone@someone.com").save(validate: false)
 
 		canvases << new Canvas(
 			name: "someoneElses_canvas_1",
@@ -479,10 +472,10 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		myFirstCanvas.save(failOnError: true)
 
 		when:
-		service.stop(myFirstCanvas, me)
+		service.stop(myFirstCanvas, me, null)
 
 		then:
-		1 * signalPathService.stopRemote(myFirstCanvas, me) >> [:]
+		1 * signalPathService.stopRemote(myFirstCanvas, me, _) >> [:]
 		0 * signalPathService._
 
 	}
@@ -492,10 +485,10 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		service.signalPathService = signalPathService
 		myFirstCanvas.state = Canvas.State.RUNNING
 
-		signalPathService.stopRemote(myFirstCanvas, me) >> { throw new CanvasUnreachableException("") }
+		signalPathService.stopRemote(myFirstCanvas, me, _) >> { throw new CanvasUnreachableException("") }
 
 		when:
-		service.stop(myFirstCanvas, me)
+		service.stop(myFirstCanvas, me, null)
 
 		then:
 		thrown(CanvasUnreachableException)
@@ -506,10 +499,10 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		service.signalPathService = signalPathService
 		myFirstCanvas.state = Canvas.State.STOPPED
 
-		signalPathService.stopRemote(myFirstCanvas, me) >> { throw new CanvasUnreachableException("") }
+		signalPathService.stopRemote(myFirstCanvas, me, _) >> { throw new CanvasUnreachableException("") }
 
 		when:
-		service.stop(myFirstCanvas, me)
+		service.stop(myFirstCanvas, me, null)
 
 		then:
 		thrown(InvalidStateException)

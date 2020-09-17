@@ -1,9 +1,9 @@
 package com.unifina.signalpath.list
 
 import com.unifina.BeanMockingSpecification
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.Module
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
+import com.unifina.domain.Module
 import com.unifina.service.CanvasService
 import com.unifina.service.ModuleService
 import com.unifina.service.PermissionService
@@ -19,12 +19,12 @@ import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 
 @TestMixin(ControllerUnitTestMixin) // "as JSON" converter
-@Mock([Canvas, Module, SecUser])
+@Mock([Canvas, Module, User])
 class ForEachItemSpec extends BeanMockingSpecification {
 
 	Globals globals
 	ForEachItem module
-	SecUser user
+	User user
 	PermissionService permissionService
 	SignalPathService signalPathService
 	ModuleService moduleService
@@ -34,7 +34,7 @@ class ForEachItemSpec extends BeanMockingSpecification {
 
 	def setup() {
 		module = new ForEachItem()
-		user = new SecUser().save(failOnError: true, validate: false)
+		user = new User().save(failOnError: true, validate: false)
 		module.globals = globals = new Globals([:], user)
 		module.init()
 
@@ -115,7 +115,7 @@ class ForEachItemSpec extends BeanMockingSpecification {
 		]
 	}
 
-	Canvas createCanvas(String name, List modules, SecUser user) {
+	Canvas createCanvas(String name, List modules, User user) {
 		Canvas canvas = new Canvas()
 		canvas.name = name
 		canvas.json = [modules:modules] as JSON

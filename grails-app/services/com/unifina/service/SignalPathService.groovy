@@ -1,15 +1,10 @@
 package com.unifina.service
 
 import com.unifina.api.CanvasCommunicationException
+import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
 import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.Serialization
-import com.unifina.exceptions.CanvasUnreachableException
-import com.unifina.exceptions.UnauthorizedStreamException
+import com.unifina.domain.*
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.*
 import com.unifina.utils.Globals
@@ -84,13 +79,13 @@ class SignalPathService {
 	@Transactional
 	void deleteReferences(SignalPath signalPath, boolean delayed) {
 		CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService) // Cannot use dependency injection because of circular dependency! Do not turn into instance variable.
-		canvasService.deleteCanvas(signalPath.canvas, SecUser.load(signalPath.globals.userId), delayed)
+		canvasService.deleteCanvas(signalPath.canvas, User.load(signalPath.globals.userId), delayed)
 	}
 
 	/**
 	 * @throws SerializationException if de-serialization fails when resuming from existing state
      */
-	void startLocal(Canvas canvas, Map signalPathContext, SecUser asUser) throws SerializationException {
+	void startLocal(Canvas canvas, Map signalPathContext, User asUser) throws SerializationException {
 		Globals globals = new Globals(
 			signalPathContext,
 			asUser,
@@ -171,10 +166,10 @@ class SignalPathService {
 	 * @return canvasId => user
 	 */
 	@CompileStatic
-	Map<String, SecUser> getUsersOfRunningCanvases() {
-		Map<String, SecUser> canvasIdToUser = [:]
+	Map<String, User> getUsersOfRunningCanvases() {
+		Map<String, User> canvasIdToUser = [:]
 		runners().values().each { SignalPathRunner runner ->
-			SecUser user = SecUser.loadViaJava(runner.globals.userId)
+			User user = User.loadViaJava(runner.globals.userId)
 			canvasIdToUser[runner.signalPath.canvas.id] = user
 		}
 		return canvasIdToUser
@@ -223,25 +218,19 @@ class SignalPathService {
 
 	@NotTransactional
 	@CompileStatic
-	Map stopRemote(Canvas canvas, SecUser user) {
-		return runtimeRequest(buildRuntimeRequest([type:"stopRequest"], "canvases/$canvas.id", user))
-	}
-
-	@CompileStatic
-	boolean ping(Canvas canvas, SecUser user) {
-		runtimeRequest(buildRuntimeRequest([type:'ping'], "canvases/$canvas.id", user))
-		return true
+	Map stopRemote(Canvas canvas, User user, AuthorizationHeader authorizationHeader) {
+		return runtimeRequest(buildRuntimeRequest([type:"stopRequest"], "canvases/$canvas.id", user, authorizationHeader))
 	}
 
 	@CompileStatic
 	private Map sendRemoteRequest(RuntimeRequest req) {
 		// Require the request to be local to the receiving server to avoid redirect loops in case of invalid data
 		String url = req.getCanvas().getRequestUrl().replace("canvases/${req.getCanvas().id}", req.getOriginalPath() + "/request?local=true")
-		return apiService.post(url, req, req.getUser().keys.iterator().next())
+		return apiService.post(url, req, req.getAuthorizationHeader())
 	}
 
 	@CompileStatic
-	RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, SecUser user) {
+	RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, User user, AuthorizationHeader authorizationHeader) {
 		RuntimeRequest.PathReader pathReader = RuntimeRequest.getPathReader(path)
 
 		// All runtime requests require at least read permission
@@ -255,7 +244,7 @@ class SignalPathService {
 		Set<Permission.Operation> checkedOperations = new HashSet<>()
 		checkedOperations.add(Permission.Operation.CANVAS_GET)
 
-		return new RuntimeRequest(msg, user, canvas, path, originalPath, checkedOperations)
+		return new RuntimeRequest(msg, user, authorizationHeader, canvas, path, originalPath, checkedOperations)
 	}
 
 	@CompileStatic

@@ -1,18 +1,16 @@
 package com.unifina.service
 
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.SecUser
-import com.unifina.security.SessionToken
+import com.unifina.domain.Key
+import com.unifina.domain.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
-import org.hibernate.StaleObjectStateException
 import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin)
 @TestFor(SessionService)
-@Mock([SecUser])
+@Mock([User])
 class SessionServiceSpec extends Specification {
 	KeyValueStoreService keyValueStoreService
 
@@ -21,14 +19,14 @@ class SessionServiceSpec extends Specification {
 
 		// Must mock executeUpdate(String,List) because HQL is not supported in unit test GORM
 		// Used in SessionService#updateUsersLoginDate()
-		def secUserMock = mockFor(SecUser)
+		def secUserMock = mockFor(User)
 		secUserMock.demand.static.executeUpdate(1) {String s, List p->
-			SecUser.get(p[1]).lastLogin = p[0]
+			User.get(p[1]).lastLogin = p[0]
 		}
 	}
 
 	void "generateToken() should generate session token from user"() {
-		SecUser user = new SecUser(id: 123L).save(failOnError: true, validate: false)
+		User user = new User(id: 123L).save(failOnError: true, validate: false)
 		when:
 		SessionToken token = service.generateToken(user)
 		then:
@@ -46,7 +44,7 @@ class SessionServiceSpec extends Specification {
 	}
 
 	void "generateToken() should update SecUsers lastLogin"() {
-		SecUser user = new SecUser(id: 123L).save(failOnError: true, validate: false)
+		User user = new User(id: 123L).save(failOnError: true, validate: false)
 		when:
 		service.generateToken(user)
 		then:
@@ -54,12 +52,12 @@ class SessionServiceSpec extends Specification {
 	}
 
 	void "getUserishFromToken() should return user"() {
-		SecUser user = new SecUser(id: 123L).save(failOnError: true, validate: false)
+		User user = new User(id: 123L).save(failOnError: true, validate: false)
 		String token = "token"
 		when:
-		SecUser retrieved = (SecUser) service.getUserishFromToken(token)
+		User retrieved = (User) service.getUserishFromToken(token)
 		then:
-		1 * keyValueStoreService.get(token) >> "SecUser"+user.id.toString()
+		1 * keyValueStoreService.get(token) >> "User"+user.id.toString()
 		retrieved.id == user.id
 	}
 

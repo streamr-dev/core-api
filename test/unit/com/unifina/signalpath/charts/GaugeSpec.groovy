@@ -1,7 +1,7 @@
 package com.unifina.signalpath.charts
 
 import com.unifina.UiChannelMockingSpecification
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.User
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
@@ -9,14 +9,14 @@ import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
 @TestMixin(GrailsUnitTestMixin) // for grailsApplication
-@Mock([SecUser])
+@Mock([User])
 class GaugeSpec extends UiChannelMockingSpecification {
 
 	Gauge module
 
     def setup() {
 		mockServicesForUiChannels()
-		SecUser user = new SecUser(username: 'user').save(failOnError: true, validate: false)
+        User user = new User(username: 'user').save(failOnError: true, validate: false)
 		module = setupModule(new Gauge(), [
 			uiChannel: [id: "gauge"],
 			params: [

@@ -5,7 +5,7 @@ import com.streamr.client.exceptions.ResourceNotFoundException;
 import com.streamr.client.options.StreamrClientOptions;
 import com.streamr.client.rest.Stream;
 import com.streamr.client.rest.UserInfo;
-import com.streamr.client.utils.UnencryptedGroupKey;
+import com.streamr.client.utils.GroupKey;
 
 import java.io.IOException;
 import java.util.*;
@@ -25,7 +25,7 @@ public class FakeStreamrClient extends StreamrClient {
 	}
 
 	@Override
-	public void publish(Stream stream, Map<String, Object> payload, Date timestamp, String partitionKey, UnencryptedGroupKey groupKey) {
+	public void publish(Stream stream, Map<String, Object> payload, Date timestamp, String partitionKey, GroupKey groupKey) {
 		if (!sentMessagesByChannel.containsKey(stream.getId())) {
 			sentMessagesByChannel.put(stream.getId(), new ArrayList<>());
 		}

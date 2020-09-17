@@ -1,25 +1,25 @@
 package com.unifina.task
 
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.task.Task
+
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
+import com.unifina.domain.Task
 import com.unifina.service.CanvasService
 import grails.test.mixin.Mock
-import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
 
-@Mock([Canvas, SecUser, Task])
+@Mock([Canvas, User, Task])
 class CanvasStartTaskSpec extends Specification {
 
 	Canvas canvas
 	CanvasService canvasService
-	SecUser user
+	User user
 
     def setup() {
 		canvasService = Mock(CanvasService)
 		canvas = new Canvas(state: "stopped")
 		canvas.save(validate: false)
-		user = new SecUser(username: "user@streamr.com")
+		user = new User(username: "user@streamr.com")
 		user.save(validate: false, failOnError: true)
     }
 

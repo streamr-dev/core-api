@@ -1,17 +1,18 @@
 package com.unifina.signalpath.time
 
-import com.unifina.domain.security.SecUser
+
+import com.unifina.domain.User
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification
 
 class TimeBetweenEventsSpec extends Specification {
-	
+
 	Globals globals
 	TimeBetweenEvents module
-	
+
     def setup() {
-		globals = new Globals([:], new SecUser(timezone:"Europe/Helsinki", username: "username"))
+		globals = new Globals([:], new User(timezone:"Europe/Helsinki", username: "username"))
 		module = new TimeBetweenEvents()
 		module.globals = globals
 		module.init()
@@ -30,7 +31,7 @@ class TimeBetweenEventsSpec extends Specification {
 			.timeToFurtherPerIteration(100)
 			.test()
 	}
-	
+
 	void "must send no output before two subsequent events"() {
 		when: "first value is received"
 		globals.time = new Date(1436882043000)
@@ -38,14 +39,14 @@ class TimeBetweenEventsSpec extends Specification {
 		module.sendOutput()
 		then: "nothing is sent out"
 		module.getOutput("ms").getValue() == null
-		
+
 		when: "a second value is received"
 		globals.time = new Date(1436882044000)
 		module.getInput("in").receive(2)
 		module.sendOutput()
 		then: "the time is sent out"
 		module.getOutput("ms").getValue() == 1000
-		
+
 		when: "a third value is received"
 		globals.time = new Date(1436882054000)
 		module.getInput("in").receive(3)
@@ -53,5 +54,5 @@ class TimeBetweenEventsSpec extends Specification {
 		then: "the time is sent out"
 		module.getOutput("ms").getValue() == 10000
 	}
-	
+
 }

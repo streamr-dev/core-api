@@ -2,13 +2,6 @@ package com.unifina.domain
 
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.data.Stream
-import com.unifina.domain.marketplace.Product
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import grails.compiler.GrailsCompileStatic
@@ -51,7 +44,7 @@ class Resource {
 		return "Unknown"
 	}
 
-	Object load(SecUser apiUser, Key apiKey, boolean requireShareResourcePermission) {
+	Object load(User apiUser, Key apiKey, boolean requireShareResourcePermission) {
 		Object resource
 		if (Canvas.isAssignableFrom(clazz)) {
 			resource = Canvas.get(idToString())

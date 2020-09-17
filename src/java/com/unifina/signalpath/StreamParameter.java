@@ -1,7 +1,6 @@
 package com.unifina.signalpath;
 
-import com.unifina.domain.data.Stream;
-import com.unifina.exceptions.StreamNotFoundException;
+import com.unifina.domain.Stream;
 import com.unifina.service.StreamService;
 import grails.util.Holders;
 

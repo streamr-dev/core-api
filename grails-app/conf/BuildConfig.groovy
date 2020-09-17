@@ -101,7 +101,7 @@ grails.project.dependency.resolution = {
 				'tomcat-servlet-api')
 		}
 
-		compile('org.web3j:core:4.4.1') {
+		compile('org.web3j:core:5.0.0') {
 			excludes "org.java-websocket:Java-WebSocket:1.3.8" // Version conflict with com.streamr:client
 		}
 		compile('com.amazonaws:aws-java-sdk:1.11.294')
@@ -112,7 +112,7 @@ grails.project.dependency.resolution = {
 		compile('org.glassfish.jersey.media:jersey-media-json-jackson:2.27')
 		compile('com.fasterxml.jackson.core:jackson-databind:2.9.6')
 		compile('com.fasterxml.jackson.core:jackson-annotations:2.9.6')
-		compile('com.streamr:client:1.4.0')
+		compile('com.streamr:client:2.0.1')
 
 		compile('com.google.code.gson:gson:2.8.5')
 		runtime('mysql:mysql-connector-java:5.1.20')
@@ -137,7 +137,7 @@ grails.project.dependency.resolution = {
 
 		compile(":mail:1.0.8-SNAPSHOT")
 
-		runtime(':hibernate:3.6.10.19') // or :hibernate4:4.3.10
+		runtime(':hibernate4:4.3.10')
 		runtime(":cors:1.3.0") {
 			excludes('spring-security-core')
 			excludes('spring-security-web')

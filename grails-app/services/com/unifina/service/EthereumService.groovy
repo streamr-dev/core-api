@@ -1,7 +1,7 @@
 package com.unifina.service
 
-import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.User
 import com.unifina.signalpath.blockchain.Web3jHelper
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
@@ -37,7 +37,7 @@ class EthereumService {
 	}
 
 	/** Checks if given user has registered the given Ethereum address in their Streamr profile */
-	boolean hasEthereumAddress(SecUser user, String ethereumAddress) {
+	boolean hasEthereumAddress(User user, String ethereumAddress) {
 		IntegrationKey key = IntegrationKey.createCriteria().get {
 			eq("user", user)
 			eq("idInService", ethereumAddress, [ignoreCase: true])

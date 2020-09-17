@@ -2,12 +2,11 @@ package com.unifina.service
 
 import com.google.common.collect.Lists
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.streamr.client.protocol.message_layer.StreamMessageV31
-import com.unifina.api.*
-import com.unifina.domain.data.Stream
-import com.unifina.domain.marketplace.*
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.api.InvalidStateTransitionException
+import com.unifina.api.NotPermittedException
+import com.unifina.api.ValidationException
+import com.unifina.domain.*
+import com.unifina.utils.TestUtils
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -37,7 +36,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	private void setupProduct(Product.State state = Product.State.NOT_DEPLOYED) {
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
@@ -62,7 +61,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	private void setupFreeProduct(Product.State state = Product.State.NOT_DEPLOYED) {
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
@@ -105,29 +104,24 @@ class ProductServiceSpec extends Specification {
 		return new Date(System.currentTimeMillis() - minusMilliSeconds)
 	}
 
-	StreamMessage buildMsg(String streamId, int streamPartition, Date timestamp, Map content) {
-		return new StreamMessageV31(streamId, streamPartition, timestamp.getTime(), 0, "", "", null, null,
-			StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE, content, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
-	}
-
 	void "stale products"() {
 		setup:
 		// Fresh streams and products
 		Stream s1 = newStream("s1","Air Stream") // This stream has a message four hours ago
 		Product a = newProduct("a", "Air quality", s1)
-		StreamMessage m1 = buildMsg("s1", 1, newDate(4*60*60*1000), new HashMap())
+		StreamMessage m1 = TestUtils.buildMsg("s1", 1, newDate(4*60*60*1000), new HashMap())
 
 		Stream s2 = newStream("s2", "Wind Stream") // This stream has a message two minutes ago
 		Product b = newProduct("b", "Wind speed", s2)
-		StreamMessage m2 = buildMsg("s2", 1, newDate(2*60*1000), new HashMap())
+		StreamMessage m2 = TestUtils.buildMsg("s2", 1, newDate(2*60*1000), new HashMap())
 
 		Stream s4 = newStream("s4", "Hacked Stream") // This stream has a message one day ago
 		Product d = newProduct("d", "Hacked computers", s4)
-		StreamMessage m4 = buildMsg("s4", 1, newDate(24*60*60*1000), new HashMap())
+		StreamMessage m4 = TestUtils.buildMsg("s4", 1, newDate(24*60*60*1000), new HashMap())
 
 		Stream s5 = newStream("s5", "Time Stream") // This stream has a message two hours ago
 		Product e = newProduct("e", "Time machine", s5)
-		StreamMessage m5 = buildMsg("s5", 1, newDate(2*60*60*1000), new HashMap())
+		StreamMessage m5 = TestUtils.buildMsg("s5", 1, newDate(2*60*60*1000), new HashMap())
 		// Not stale product. inactivityThresholdHours 0.
 		Stream s12 = newStream("s12", "Never stale stream") // No messages
 		s12.inactivityThresholdHours = 0
@@ -137,7 +131,7 @@ class ProductServiceSpec extends Specification {
 		// Stale product 1
 		Stream s3 = newStream("s3", "Storm Stream") // This stream has a message three days ago
 		Product c = newProduct("c", "Storm warning", s3)
-		StreamMessage m3 = buildMsg("s3", 1, newDate(3*24*60*60*1000), new HashMap())
+		StreamMessage m3 = TestUtils.buildMsg("s3", 1, newDate(3*24*60*60*1000), new HashMap())
 		ProductService.StaleProduct sp1 = new ProductService.StaleProduct(c)
 		ProductService.StreamWithLatestMessage sm1 = new ProductService.StreamWithLatestMessage(s3, m3)
 		sp1.streams.add(sm1)
@@ -145,9 +139,9 @@ class ProductServiceSpec extends Specification {
 
 		// Stale product 2
 		Stream s6 = newStream("s6", "Mainframe Stream") // This stream has a message two weeks ago
-		StreamMessage m6 = buildMsg("s6", 1, newDate(14*24*60*60*1000), new HashMap())
+		StreamMessage m6 = TestUtils.buildMsg("s6", 1, newDate(14*24*60*60*1000), new HashMap())
 		Stream s6b = newStream("s6b", "Mainframe B Stream") // This stream has a message one week ago
-		StreamMessage m6b = buildMsg("s6b", 1, newDate(7*24*60*60*1000), new HashMap())
+		StreamMessage m6b = TestUtils.buildMsg("s6b", 1, newDate(7*24*60*60*1000), new HashMap())
 		Product f = newProduct("f", "Mainframe connector", s6, s6b)
 		ProductService.StaleProduct sp2 = new ProductService.StaleProduct(f)
 		ProductService.StreamWithLatestMessage sm2 = new ProductService.StreamWithLatestMessage(s6, m6)
@@ -167,8 +161,8 @@ class ProductServiceSpec extends Specification {
 		Stream s8 = newStream("s8", "Stream a") // This stream has message six days ago
 		Stream s9 = newStream("s9", "Stream b") // This stream has message over five days ago
 		Product h = newProduct("h", "Product with two streams", s8, s9)
-		StreamMessage m8 = buildMsg("s8", 1, newDate(6*24*60*60*1000), new HashMap())
-		StreamMessage m9 = buildMsg("s9", 1, newDate(5*25*60*60*1000), new HashMap())
+		StreamMessage m8 = TestUtils.buildMsg("s8", 1, newDate(6*24*60*60*1000), new HashMap())
+		StreamMessage m9 = TestUtils.buildMsg("s9", 1, newDate(5*25*60*60*1000), new HashMap())
 		ProductService.StaleProduct sp4 = new ProductService.StaleProduct(h)
 		ProductService.StreamWithLatestMessage sm4 = new ProductService.StreamWithLatestMessage(s8, m8)
 		sp4.streams.add(sm4)
@@ -179,8 +173,8 @@ class ProductServiceSpec extends Specification {
 		Stream s10 = newStream("s10", "Stream X") // This stream has message two minutes ago
 		Stream s11 = newStream("s11", "Stream Y") // This stream has message five days ago
 		Product i = newProduct("i", "Product with two streams. other expired", s10, s11)
-		StreamMessage m10 = buildMsg("s10", 1, newDate(2*60*60*1000), new HashMap())
-		StreamMessage m11 = buildMsg("s11", 1, newDate(5*24*60*60*1000), new HashMap())
+		StreamMessage m10 = TestUtils.buildMsg("s10", 1, newDate(2*60*60*1000), new HashMap())
+		StreamMessage m11 = TestUtils.buildMsg("s11", 1, newDate(5*24*60*60*1000), new HashMap())
 		ProductService.StaleProduct sp5 = new ProductService.StaleProduct(i)
 		ProductService.StreamWithLatestMessage sm6 = new ProductService.StreamWithLatestMessage(s10, m10)
 		sp5.streams.add(sm6)
@@ -214,7 +208,7 @@ class ProductServiceSpec extends Specification {
 
 	void "list() delegates to ApiService#list"() {
 		def apiService = service.apiService = Mock(ApiService)
-		def me = new SecUser(username: "me@streamr.com")
+		def me = new User(username: "me@streamr.com")
 
 		when:
 		service.list(new ProductListParams(max: 5), me)
@@ -228,7 +222,7 @@ class ProductServiceSpec extends Specification {
 
 	void "findById() delegates to ApiService#authorizedGetById"() {
 		def apiService = service.apiService = Mock(ApiService)
-		def me = new SecUser(username: "me@streamr.com")
+		def me = new User(username: "me@streamr.com")
 
 		when:
 		service.findById("product-id", me, Permission.Operation.PRODUCT_GET)
@@ -239,7 +233,7 @@ class ProductServiceSpec extends Specification {
 
 	void "create() throws ValidationException if command object does not pass validation"() {
 		when:
-		service.create(new CreateProductCommand(pricePerSecond: -1), new SecUser())
+		service.create(new CreateProductCommand(pricePerSecond: -1), new User())
 		then:
 		thrown(ValidationException)
 	}
@@ -265,7 +259,7 @@ class ProductServiceSpec extends Specification {
 			termsOfUse: termsOfUse,
 		)
 
-		def user = new SecUser()
+		def user = new User()
 		user.name = "Arnold Schwarzenegger"
 		when:
 		def product = service.create(validCommand, user)
@@ -315,7 +309,7 @@ class ProductServiceSpec extends Specification {
 			pricePerSecond: 10,
 			minimumSubscriptionInSeconds: 1
 		)
-		def me = new SecUser(username: "me@streamr.com")
+		def me = new User(username: "me@streamr.com")
 
 		when:
 		service.create(validCommand, me)
@@ -337,7 +331,7 @@ class ProductServiceSpec extends Specification {
 			pricePerSecond: 10,
 			minimumSubscriptionInSeconds: 1
 		)
-		def me = new SecUser(username: "me@streamr.com")
+		def me = new User(username: "me@streamr.com")
 
 		when:
 		service.create(validCommand, me)
@@ -361,7 +355,7 @@ class ProductServiceSpec extends Specification {
 			pricePerSecond: 0,
 			minimumSubscriptionInSeconds: 0,
 		)
-		def me = new SecUser(username: "me@streamr.com")
+		def me = new User(username: "me@streamr.com")
 
 		when:
 		service.create(validCommand, me)
@@ -388,7 +382,7 @@ class ProductServiceSpec extends Specification {
 			pricePerSecond: 10,
 			minimumSubscriptionInSeconds: 1
 		)
-		def me = new SecUser(username: "me@streamr.com")
+		def me = new User(username: "me@streamr.com")
 
 		when:
 		service.create(validCommand, me)
@@ -403,7 +397,7 @@ class ProductServiceSpec extends Specification {
 		service.permissionService = Stub(PermissionService)
 
 		def validCommand = new CreateProductCommand()
-		def user = new SecUser()
+		def user = new User()
 		user.name = "Arnold Schwarzenegger"
 
 		when:
@@ -457,7 +451,7 @@ class ProductServiceSpec extends Specification {
 		service.permissionService = Stub(PermissionService)
 
 		def validCommand = new CreateProductCommand(type: "DATAUNION")
-		def user = new SecUser()
+		def user = new User()
 		user.name = "Arnold Schwarzenegger"
 
 		when:
@@ -472,7 +466,7 @@ class ProductServiceSpec extends Specification {
 
 	void "update() throws ValidationException if command object does not pass validation"() {
 		when:
-		service.update("product-id", new UpdateProductCommand(), new SecUser())
+		service.update("product-id", new UpdateProductCommand(), new User())
 		then:
 		thrown(ValidationException)
 	}
@@ -498,7 +492,7 @@ class ProductServiceSpec extends Specification {
 				priceCurrency: Product.Currency.DATA,
 				minimumSubscriptionInSeconds: 1000
 		)
-		def user = new SecUser(username: "me@streamr.com")
+		def user = new User(username: "me@streamr.com")
 
 		when:
 		service.update("product-id", validCommand, user)
@@ -516,6 +510,9 @@ class ProductServiceSpec extends Specification {
 			authorizedGetById(Product, _, _, _) >> product
 		}
 		def permissionService = service.permissionService = Mock(PermissionService)
+		service.store = Stub(ProductStore) {
+			findProductsByStream(_) >> []
+		}
 
 		def validCommand = new UpdateProductCommand(
 			name: "updated name",
@@ -528,7 +525,7 @@ class ProductServiceSpec extends Specification {
 			priceCurrency: Product.Currency.DATA,
 			minimumSubscriptionInSeconds: 0
 		)
-		def user = new SecUser(username: "me@streamr.com")
+		def user = new User(username: "me@streamr.com")
 
 		when:
 		service.update("product-id", validCommand, user)
@@ -538,18 +535,101 @@ class ProductServiceSpec extends Specification {
 
 		// revoke streams old permissions
 		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_GET)
-		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.STREAM_GET)
 		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_GET)
 		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
-		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
 		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_SUBSCRIBE)
 
 		// grant permissions for new streams
-		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_GET)
+		1 * permissionService.checkAnonymousAccess(s4, Permission.Operation.STREAM_GET) >> false
+		1 * permissionService.checkAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE) >> false
 		1 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_GET)
-		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
 		1 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE)
 
+		0 * permissionService._
+	}
+
+	void "update() does not grant permission if it has already been granted"() {
+		setupStreams()
+		setupFreeProduct()
+
+		service.subscriptionService = Stub(SubscriptionService)
+		service.apiService = Stub(ApiService) {
+			authorizedGetById(Product, _, _, _) >> product
+		}
+		def permissionService = service.permissionService = Mock(PermissionService)
+		service.store = Stub(ProductStore) {
+			findProductsByStream(_) >> []
+		}
+
+		def validCommand = new UpdateProductCommand(
+			name: "updated name",
+			description: "updated description",
+			category: category,
+			streams: [s1, s2, s3, s4],
+			pricePerSecond: 0,
+			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			priceCurrency: Product.Currency.DATA,
+			minimumSubscriptionInSeconds: 0
+		)
+		def user = new User(username: "me@streamr.com")
+
+		when:
+		service.update("product-id", validCommand, user)
+		then:
+		1 * permissionService.verify(user, s1, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.verify(user, s2, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.verify(user, s3, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
+
+		// permission already granted
+		1 * permissionService.checkAnonymousAccess(s4, Permission.Operation.STREAM_GET) >> true
+		1 * permissionService.checkAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE) >> true
+		0 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_GET)
+		0 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE)
+
+		0 * permissionService._
+	}
+
+	void "update() does not revoke permission if the stream belongs to another free product"() {
+		setupStreams()
+		setupFreeProduct()
+
+		service.subscriptionService = Stub(SubscriptionService)
+		service.apiService = Stub(ApiService) {
+			authorizedGetById(Product, _, _, _) >> product
+		}
+		def permissionService = service.permissionService = Mock(PermissionService)
+		service.store = Stub(ProductStore) {
+			findProductsByStream(_) >> {Stream s ->
+				if (s == s2) {
+					return [product]
+				} else {
+					return [];
+				}
+			}
+		}
+
+		def validCommand = new UpdateProductCommand(
+			name: "updated name",
+			description: "updated description",
+			category: category,
+			streams: [s3],
+			pricePerSecond: 0,
+			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			priceCurrency: Product.Currency.DATA,
+			minimumSubscriptionInSeconds: 0
+		)
+		def user = new User(username: "me@streamr.com")
+
+		when:
+		service.update("product-id", validCommand, user)
+
+		then:
+		1 * permissionService.verify(user, s3, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
 		0 * permissionService._
 	}
 
@@ -566,7 +646,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		service.update("product-id", validCommand, new SecUser())
+		service.update("product-id", validCommand, new User())
 
 		then:
 		thrown(NotPermittedException)
@@ -590,7 +670,7 @@ class ProductServiceSpec extends Specification {
 				priceCurrency: Product.Currency.DATA,
 				minimumSubscriptionInSeconds: 1000
 		)
-		def user = new SecUser(username: "me@streamr.com")
+		def user = new User(username: "me@streamr.com")
 
 		when:
 		service.update("product-id", validCommand, user)
@@ -620,7 +700,7 @@ class ProductServiceSpec extends Specification {
 			priceCurrency: Product.Currency.DATA,
 			minimumSubscriptionInSeconds: 1000
 		)
-		def user = new SecUser(username: "me@streamr.com")
+		def user = new User(username: "me@streamr.com")
 
 		when:
 		service.update("product-id", validCommand, user)
@@ -673,7 +753,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		def updatedProduct = service.update("product-id", validCommand, new SecUser())
+		def updatedProduct = service.update("product-id", validCommand, new User())
 
 		then:
 		Product.findById("product-id").toMap() == updatedProduct.toMap()
@@ -719,16 +799,17 @@ class ProductServiceSpec extends Specification {
 		t.termsName == "legal terms for site.org"
 	}
 
-	void "addStreamToProduct() verifies Stream via PermissionService#verifyShare"() {
+	void "addStreamToProduct() verifies Stream via PermissionService#verify"() {
 		setupStreams()
 		setupProduct()
 		service.subscriptionService = Stub(SubscriptionService)
-		def permissionService = service.permissionService = Mock(PermissionService)
-		def user = new SecUser()
+		service.permissionService = Mock(PermissionService)
+		def user = new User()
 		when:
 		service.addStreamToProduct(product, s4, user)
 		then:
-		1 * permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
+		1 * service.permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
+		0 * service.permissionService._
 	}
 
 	void "addStreamToProduct() adds Stream to Product"() {
@@ -738,7 +819,7 @@ class ProductServiceSpec extends Specification {
 
 		service.subscriptionService = Stub(SubscriptionService)
 		service.permissionService = Stub(PermissionService)
-		def user = new SecUser()
+		def user = new User()
 
 		when:
 		service.addStreamToProduct(product, s4, user)
@@ -753,12 +834,15 @@ class ProductServiceSpec extends Specification {
 
 		service.subscriptionService = Stub(SubscriptionService)
 		service.permissionService = Mock(PermissionService)
-		def user = new SecUser()
+		def user = new User()
 
 		when:
 		service.addStreamToProduct(product, s4, user)
 		then:
+		1 * service.permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
 		1 * service.permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE)
+		0 * service.permissionService._
 	}
 
 	void "addStreamToProduct() invokes subscriptionService#afterProductUpdated"() {
@@ -766,7 +850,7 @@ class ProductServiceSpec extends Specification {
 		setupProduct()
 		def subscriptionService = service.subscriptionService = Mock(SubscriptionService)
 		service.permissionService = Stub(PermissionService)
-		def user = new SecUser()
+		def user = new User()
 
 		when:
 		service.addStreamToProduct(product, s4, user)
@@ -797,6 +881,8 @@ class ProductServiceSpec extends Specification {
 		service.removeStreamFromProduct(product, s1)
 		then:
 		1 * service.permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
+		0 * service.permissionService._
 	}
 
 	void "removeStreamFromProduct() invokes subscriptionService#afterProductUpdated"() {
@@ -865,7 +951,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductUndeployedCommand(blockNumber: 50000, blockIndex: 15)
 
 		when:
-		service.markAsUndeployed(product, command, Stub(SecUser) {
+		service.markAsUndeployed(product, command, Stub(User) {
 			isDevOps() >> false
 		})
 		then:
@@ -879,7 +965,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductUndeployedCommand(blockNumber: 30000, blockIndex: 15)
 
 		when:
-		boolean result = service.markAsUndeployed(product, command, Stub(SecUser) {
+		boolean result = service.markAsUndeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -894,7 +980,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductUndeployedCommand(blockNumber: 30000, blockIndex: 15)
 
 		when:
-		service.markAsUndeployed(product, command, Stub(SecUser) {
+		service.markAsUndeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -909,7 +995,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductUndeployedCommand(blockNumber: 30000, blockIndex: 15)
 
 		when:
-		service.markAsUndeployed(product, command, Stub(SecUser) {
+		service.markAsUndeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -924,7 +1010,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductUndeployedCommand(blockNumber: 50000, blockIndex: 15)
 
 		when:
-		boolean result = service.markAsUndeployed(product, command, Stub(SecUser) {
+		boolean result = service.markAsUndeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -940,7 +1026,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductUndeployedCommand(blockNumber: 50000, blockIndex: 15)
 
 		when:
-		service.markAsUndeployed(product, command, Stub(SecUser) {
+		service.markAsUndeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -958,7 +1044,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductUndeployedCommand(blockNumber: 50000, blockIndex: 15)
 
 		when:
-		service.markAsUndeployed(product, command, Stub(SecUser) {
+		service.markAsUndeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -969,7 +1055,7 @@ class ProductServiceSpec extends Specification {
 	void "markAsDeployed() throws ValidationException if command object does not pass validation"() {
 		setupProduct()
 		when:
-		service.markAsDeployed(product, new ProductDeployedCommand(), new SecUser())
+		service.markAsDeployed(product, new ProductDeployedCommand(), new User())
 		then:
 		thrown(ValidationException)
 	}
@@ -988,7 +1074,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		service.markAsDeployed(product, command, new SecUser())
+		service.markAsDeployed(product, command, new User())
 		then:
 		thrown(InvalidStateTransitionException)
 	}
@@ -1007,7 +1093,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		service.markAsDeployed(product, command, Stub(SecUser) {
+		service.markAsDeployed(product, command, Stub(User) {
 			isDevOps() >> false
 		})
 		then:
@@ -1029,7 +1115,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		boolean result = service.markAsDeployed(product, command, Stub(SecUser) {
+		boolean result = service.markAsDeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -1052,7 +1138,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		boolean result = service.markAsDeployed(product, command, Stub(SecUser) {
+		boolean result = service.markAsDeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -1075,7 +1161,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		service.markAsDeployed(product, command, Stub(SecUser) {
+		service.markAsDeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -1099,7 +1185,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		boolean result = service.markAsDeployed(product, command, Stub(SecUser) {
+		boolean result = service.markAsDeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -1122,7 +1208,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		service.markAsDeployed(product, command, Stub(SecUser) {
+		service.markAsDeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -1170,7 +1256,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		def product = service.markAsDeployed(product, command, Stub(SecUser) {
+		def product = service.markAsDeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -1193,7 +1279,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		service.updatePricing(product, command, Stub(SecUser) {
+		service.updatePricing(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -1221,7 +1307,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		service.updatePricing(product, command, Stub(SecUser) {
+		service.updatePricing(product, command, Stub(User) {
 			isDevOps() >> false
 		})
 		then:
@@ -1234,7 +1320,7 @@ class ProductServiceSpec extends Specification {
 		service.permissionService = Mock(PermissionService)
 		service.dataUnionJoinRequestService = Mock(DataUnionJoinRequestService)
 		setupStreams()
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
@@ -1272,7 +1358,7 @@ class ProductServiceSpec extends Specification {
 		service.permissionService = Mock(PermissionService)
 		service.dataUnionJoinRequestService = Mock(DataUnionJoinRequestService)
 		setupStreams()
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"

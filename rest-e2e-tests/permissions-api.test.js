@@ -11,9 +11,7 @@ const schemaValidator = new SchemaValidator()
 
 const API_KEY = 'tester1-api-key'
 
-describe('Permissions API', function() { // use "function" instead of arrow because of this.timeout(...)
-    this.timeout(120 * 1000)
-
+describe('Permissions API', () => {
     const me = StreamrClient.generateEthereumAccount()
     const nonExistingUser = StreamrClient.generateEthereumAccount()
     const existingUser = StreamrClient.generateEthereumAccount()
@@ -81,46 +79,66 @@ describe('Permissions API', function() { // use "function" instead of arrow beca
                 .call()
             assert.equal(response.status, 200)
         })
+    })
 
-        describe('race conditions', () => {
-            // The worst case is that there are parallel requests open for all the different operations
-            const operations = [
-                'stream_get',
-                'stream_edit',
-                'stream_subscribe',
-                'stream_publish',
-                'stream_delete',
-                'stream_share',
-            ]
+    describe('DELETE /api/v1/streams/{streamId}/permissions/{permissionId}', function() {
+        let stream
 
-            // Tests here are repeated 50 times, as they have some chance of an individual attempt
-            // succeeding even if the race condition is not handled properly
-            const ITERATIONS = 50
+        before(async function() {
+            stream = await Streamr.api.v1.streams
+                .create({
+                    name: `permissions-api.test.js-delete-${Date.now()}`
+                })
+                .withSessionToken(mySessionToken)
+                .execute()
+        })
 
-            it('survives a race condition when granting multiple permissions to a non-existing user using Ethereum address', async () => {
-                for (let i=0; i<ITERATIONS; i++) {
-                    const responses = await Promise.all(operations.map((operation) => {
-                        return Streamr.api.v1.streams
-                            .grant(stream.id, StreamrClient.generateEthereumAccount().address, operation)
-                            .withSessionToken(mySessionToken)
-                            .call()
-                    }))
-                    // All response statuses must be 200
-                    assert.deepEqual(responses.map((r) => r.status), operations.map((op) => 200), `Race condition test failed on iteration ${i}`)
-                }
-            })
+        it('delete a permission', async function() {
+            const permissionResponse = await Streamr.api.v1.streams
+                .grant(stream.id, StreamrClient.generateEthereumAccount().address, 'stream_get')
+                .withSessionToken(mySessionToken)
+                .call()
+            const permissionGet = await permissionResponse.json()
+            assert.equal(permissionResponse.status, 200)
 
-            it('survives a race condition when granting multiple permissions to a non-existing user using email address', async () => {
-                for (let i=0; i<ITERATIONS; i++) {
-                    const responses = await Promise.all(operations.map((operation) => {
-                        return Streamr.api.v1.streams
-                            .grant(stream.id, `race-condition-${i}@foobar.invalid`, 'stream_get')
-                            .withSessionToken(mySessionToken)
-                            .call()
-                    }))
-                    // All response statuses must be 200
-                    assert.deepEqual(responses.map((r) => r.status), operations.map((op) => 200), `Race condition test failed on iteration ${i}`)
-                }
+            const response = await Streamr.api.v1.streams
+                .delete(stream.id, permissionGet.id)
+                .withSessionToken(mySessionToken)
+                .call()
+            assert.equal(response.status, 204)
+        })
+
+        it('deleting last share permission is not allowed', async function() {
+            const ownPermissionsResponse = await Streamr.api.v1.streams
+                .getOwnPermissions(stream.id)
+                .withSessionToken(mySessionToken)
+                .call()
+            const ownPermissions = await ownPermissionsResponse.json()
+            assert.equal(ownPermissionsResponse.status, 200)
+            const sharePermission = ownPermissions.filter((permission) => permission.operation === 'stream_share')[0]
+
+            const response = await Streamr.api.v1.streams
+                .delete(stream.id, sharePermission.id)
+                .withSessionToken(mySessionToken)
+                .call()
+            assert.equal(response.status, 500)
+        })
+
+        it('deletes permissions', async function() {
+            const ownPermissionsResponse = await Streamr.api.v1.streams
+                .getOwnPermissions(stream.id)
+                .withSessionToken(mySessionToken)
+                .call()
+            const ownPermissions = await ownPermissionsResponse.json()
+            assert.equal(ownPermissionsResponse.status, 200)
+            const permissionsToDelete = ownPermissions.filter((permission) => permission.operation !== 'stream_share')
+
+            permissionsToDelete.forEach(async function(permission) {
+                const response = await Streamr.api.v1.streams
+                    .delete(stream.id, permission.id)
+                    .withSessionToken(mySessionToken)
+                    .call()
+                assert.equal(response.status, 204, `delete permission unexpected status ${response.status} for ${JSON.stringify(permission)}`)
             })
         })
     })

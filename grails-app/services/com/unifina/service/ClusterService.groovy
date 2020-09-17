@@ -2,8 +2,8 @@ package com.unifina.service
 
 import com.streamr.api.client.CanvasesPerNode
 import com.streamr.api.client.StreamrClient
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.Canvas
+import com.unifina.domain.User
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
@@ -48,7 +48,7 @@ class ClusterService {
 			Canvas c = Canvas.get(id)
 			c.state = Canvas.State.STOPPED
 			c.save()
-			SecUser u = SecUser.get(startedById)
+			User u = User.get(startedById)
 			boolean forceReset = true
 			boolean resetOnError = true
 			canvasService.startRemote(c, u, forceReset, resetOnError)

@@ -1,7 +1,7 @@
 package com.unifina.service
 
-import com.unifina.domain.config.HostConfig
-import com.unifina.domain.security.SecRole
+import com.unifina.domain.HostConfig
+import com.unifina.domain.Role
 import com.unifina.security.MyPolicy
 import com.unifina.security.MySecurityManager
 import grails.util.Environment
@@ -57,9 +57,9 @@ class BootService {
 
 
 		// Create user roles if not present
-		def userRole = SecRole.findByAuthority('ROLE_USER') ?: new SecRole(authority: 'ROLE_USER').save(failOnError: true)
-		def adminRole = SecRole.findByAuthority('ROLE_ADMIN') ?: new SecRole(authority: 'ROLE_ADMIN').save(failOnError: true)
-		def liveRole = SecRole.findByAuthority('ROLE_LIVE') ?: new SecRole(authority: 'ROLE_LIVE').save(failOnError: true)
+		def userRole = Role.findByAuthority('ROLE_USER') ?: new Role(authority: 'ROLE_USER').save(failOnError: true)
+		def adminRole = Role.findByAuthority('ROLE_ADMIN') ?: new Role(authority: 'ROLE_ADMIN').save(failOnError: true)
+		def liveRole = Role.findByAuthority('ROLE_LIVE') ?: new Role(authority: 'ROLE_LIVE').save(failOnError: true)
 
 
 		/**

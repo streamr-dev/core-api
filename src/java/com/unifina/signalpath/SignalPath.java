@@ -1,13 +1,12 @@
 package com.unifina.signalpath;
 
-import com.unifina.domain.data.Stream;
-import com.unifina.domain.signalpath.Canvas;
-import com.unifina.domain.signalpath.Module;
-import com.unifina.exceptions.CyclicCanvasModuleExceptionMessage;
-import com.unifina.exceptions.ModuleExceptionMessage;
+import com.unifina.domain.Canvas;
+import com.unifina.domain.Module;
+import com.unifina.domain.Stream;
 import com.unifina.service.CanvasService;
 import com.unifina.service.ModuleService;
 import com.unifina.service.SerializationService;
+import com.unifina.signalpath.custom.ModuleExceptionMessage;
 import com.unifina.signalpath.utils.ConfigurableStreamModule;
 import com.unifina.utils.Globals;
 import grails.converters.JSON;

@@ -1,14 +1,14 @@
 package com.unifina.service
 
-import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.User
 import spock.lang.Specification
 
 class EthereumIntegrationKeyServiceIntegrationSpec extends Specification {
 	void "getEthereumUser query works with lowercase or uppercase input"() {
 		setup:
 		String ethAddr = "0xF24197f71fC9b2F4F4c24ecE461fB0Ff7C91FD23"
-		SecUser me = new SecUser(
+		User me = new User(
 			username: "ethereum-ik-spec-1@streamr.com",
 			name: "me",
 			password: "foo",
@@ -21,7 +21,7 @@ class EthereumIntegrationKeyServiceIntegrationSpec extends Specification {
 			idInService: ethAddr,
 		).save(failOnError: true, validate: true)
 
-		SecUser other = new SecUser(
+		User other = new User(
 			username: "ethereum-ik-spec-2@streamr.com",
 			name: "other",
 			password: "bar",
@@ -36,7 +36,7 @@ class EthereumIntegrationKeyServiceIntegrationSpec extends Specification {
 
 		EthereumIntegrationKeyService service = new EthereumIntegrationKeyService()
 		when:
-		SecUser result = service.getEthereumUser(ethAddr.toLowerCase())
+		User result = service.getEthereumUser(ethAddr.toLowerCase())
 		then:
 		result == me
 	}

@@ -1,15 +1,15 @@
 package com.unifina.signalpath.streams
 
 import com.unifina.ModuleTestingSpecification
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.Stream
+import com.unifina.domain.User
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import com.unifina.signalpath.streams.GetOrCreateStream.NameFilteringClosure
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 
-@Mock(SecUser)
+@Mock(User)
 class GetOrCreateStreamSpec extends ModuleTestingSpecification {
 
 	GetOrCreateStream module

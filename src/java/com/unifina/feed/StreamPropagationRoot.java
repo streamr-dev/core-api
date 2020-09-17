@@ -2,14 +2,15 @@ package com.unifina.feed;
 
 import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.unifina.datasource.DataSource;
-import com.unifina.exceptions.StreamFieldChangedException;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Output;
 import com.unifina.signalpath.TimeSeriesOutput;
 import com.unifina.signalpath.utils.ConfigurableStreamModule;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class receives StreamMessages and maps their payloads to the outputs
@@ -33,12 +34,7 @@ public class StreamPropagationRoot extends AbstractPropagationRoot<ConfigurableS
 			initCacheMap();
 		}
 
-		Map msg;
-		try {
-			msg = streamMessage.getContent();
-		} catch (IOException e) {
-			msg = new HashMap();
-		}
+		Map msg = streamMessage.getParsedContent();
 
 		for (Map.Entry<String, List<Output>> entry : outputsByName.entrySet()) {
 			String fieldName = entry.getKey();

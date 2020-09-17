@@ -1,16 +1,16 @@
 package com.unifina.service
 
-import com.unifina.domain.marketplace.Category
-import com.unifina.domain.marketplace.Product
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.Category
+import com.unifina.domain.Product
+import com.unifina.domain.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(ProductService)
-@Mock([Product, SecUser, Category])
+@Mock([Product, User, Category])
 class ProductServiceRelatedProductsSpec extends Specification {
-	Product newProduct(String id, String name, String description, Category c, SecUser user) {
+	Product newProduct(String id, String name, String description, Category c, User user) {
 		Product p = new Product(
 			name: name,
 			description: description,
@@ -34,18 +34,18 @@ class ProductServiceRelatedProductsSpec extends Specification {
 	}
 
 	Product p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13
-	SecUser u1, u2, apiUser
+	User u1, u2, apiUser
 	Category cat1, cat2
 
 	void setup() {
-		apiUser = new SecUser(
+		apiUser = new User(
 			username: "username: api@user.com",
 			name: "Regular API user",
 			password: "xxx"
 		)
 
 		// u1 is the user who owns the product p1 used to search for related products
-		u1 = new SecUser(
+		u1 = new User(
 			username: "username: masa@hypätääneka.com",
 			name: "Matti Nykänen",
 			password: "xxx"
@@ -53,7 +53,7 @@ class ProductServiceRelatedProductsSpec extends Specification {
 		u1.id = 1
 		u1.save(validate: false, failOnError: true)
 
-		u2 = new SecUser(
+		u2 = new User(
 			username: "username: marilyn@monroe.com",
 			name: "Marilyn Monroe",
 			password: "xxx"

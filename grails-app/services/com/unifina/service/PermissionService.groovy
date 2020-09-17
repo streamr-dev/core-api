@@ -2,21 +2,8 @@ package com.unifina.service
 
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
-import com.unifina.domain.EmailMessage
-import com.unifina.domain.Resource
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.dashboard.DashboardItem
-import com.unifina.domain.data.Stream
-import com.unifina.domain.marketplace.Product
-import com.unifina.domain.marketplace.Subscription
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.Permission.Operation
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.security.SignupInvite
-import com.unifina.domain.signalpath.Canvas
-import com.unifina.security.Userish
-import com.unifina.utils.EmailValidator
+import com.unifina.domain.*
+import com.unifina.domain.Permission.Operation
 import grails.compiler.GrailsCompileStatic
 import grails.gsp.PageRenderer
 import grails.plugin.mail.MailService
@@ -27,6 +14,7 @@ import groovy.transform.TypeCheckingMode
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.security.AccessControlException
+
 /**
  * Check, get, grant, and revoke permissions. Maintains Access Control Lists (ACLs) to resources.
  *
@@ -69,6 +57,10 @@ class PermissionService {
 		return id != null && hasPermission(userish, resource, op)
 	}
 
+	boolean checkAnonymousAccess(Object resource, Operation op) {
+		return check(null, resource, op)
+	}
+
 	/**
 	 * Throws an exception if user is not allowed to perform specified operation on a resource.
 	 */
@@ -81,8 +73,8 @@ class PermissionService {
 			if (u instanceof Key) {
 				Key k = u as Key
 				name = k.user?.username
-			} else if (u instanceof SecUser) {
-				SecUser s = u as SecUser
+			} else if (u instanceof User) {
+				User s = u as User
 				name = s.username
 			}
 			throw new NotPermittedException(name, resource.class.simpleName, findID(resource)?.toString(), op.id)
@@ -151,11 +143,11 @@ class PermissionService {
 		if (resource instanceof Stream && resource.isUIChannel()) {
 			Set<Permission> syntheticPermissions = new HashSet<>()
 			Key key = null
-			SecUser user = null
+			User user = null
 			if (userish instanceof Key) {
 				key = userish as Key
-			} else if (userish instanceof SecUser) {
-				user = userish as SecUser
+			} else if (userish instanceof User) {
+				user = userish as User
 			}
 			if (userish != null && isPermissionToStreamViaDashboard(userish, resource)) {
 				syntheticPermissions.add(new Permission(
@@ -241,7 +233,7 @@ class PermissionService {
 	}
 
 	/**
-	 * As a SecUser, attempt to grant Permission to another Userish on resource
+	 * As a User, attempt to grant Permission to another Userish on resource
 	 *
 	 * @param grantor user attempting to grant Permission (needs SHARE permission)
 	 * @param resource to be given permission on
@@ -252,11 +244,11 @@ class PermissionService {
 	 * @throws AccessControlException if grantor doesn't have SHARE permission on resource
 	 * @throws IllegalArgumentException if given invalid resource or target
      */
-	Permission grant(SecUser grantor,
-					 Object resource,
-					 Userish target,
-					 Operation operation,
-					 boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
+	Permission grant(User grantor,
+                     Object resource,
+                     Userish target,
+                     Operation operation,
+                     boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
 		Operation shareOp = Permission.Operation.shareOperation(resource)
 		if (!check(grantor, resource, shareOp)) {
 			throwAccessControlException(grantor, resource, logIfDenied)
@@ -324,10 +316,10 @@ class PermissionService {
 	 * @throws AccessControlException if grantor doesn't have SHARE permission on resource
 	 * @throws IllegalArgumentException if given invalid resource
 	 */
-	Permission grantAnonymousAccess(SecUser grantor,
-									Object resource,
-									Operation operation,
-									boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
+	Permission grantAnonymousAccess(User grantor,
+                                    Object resource,
+                                    Operation operation,
+                                    boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
 		Operation shareOp = Permission.Operation.shareOperation(resource)
 		if (!check(grantor, resource, shareOp)) {
 			throwAccessControlException(grantor, resource, logIfDenied)
@@ -352,7 +344,7 @@ class PermissionService {
 	}
 
 	/**
-	 * As a SecUser, revoke a Permission from a Userish
+	 * As a User, revoke a Permission from a Userish
 	 *
 	 * @param revoker user attempting to revoke permission (needs *_share permission)
 	 * @param resource to be revoked from target
@@ -363,11 +355,11 @@ class PermissionService {
 	 *
 	 * @throws AccessControlException if revoker doesn't have *_share permission on resource
      */
-	List<Permission> revoke(SecUser revoker,
-							Object resource,
-							Userish target,
-							Operation operation,
-							boolean logIfDenied = true) throws AccessControlException {
+	List<Permission> revoke(User revoker,
+                            Object resource,
+                            Userish target,
+                            Operation operation,
+                            boolean logIfDenied = true) throws AccessControlException {
 		if (operation == null) {
 			throw new IllegalArgumentException("Operation can't be null")
 		}
@@ -412,7 +404,7 @@ class PermissionService {
 	}
 
 	/**
-	 * As a SecUser, revoke a Permission.
+	 * As a User, revoke a Permission.
 	 *
 	 * @param revoker user attempting to revoke permission (needs SHARE permission)
 	 * @param permission to be revoked
@@ -421,7 +413,7 @@ class PermissionService {
 	 *
 	 * @throws AccessControlException if revoker doesn't have SHARE permission on resource
 	 */
-	List<Permission> revoke(SecUser revoker, Permission permission, boolean logIfDenied=true)
+	List<Permission> revoke(User revoker, Permission permission, boolean logIfDenied=true)
 			throws AccessControlException {
 		Object resource = getResourceFromPermission(permission)
 		Permission.Operation shareOp = Operation.shareOperation(resource)
@@ -445,15 +437,15 @@ class PermissionService {
 	}
 
 	/**
-	 * Transfer all Permissions created for a SignupInvite to the corresponding SecUser (based on email)
+	 * Transfer all Permissions created for a SignupInvite to the corresponding User (based on email)
 	 *
 	 * @param user to transfer to
-     * @return List of Permissions transferred from SignupInvite to SecUser
+     * @return List of Permissions transferred from SignupInvite to User
      */
-	List<Permission> transferInvitePermissionsTo(SecUser user) {
+	List<Permission> transferInvitePermissionsTo(User user) {
 		// { invite { eq "username", user.username } } won't do: some invite are null => NullPointerException
-		return store.findPermissionsToTransfer().findAll {
-			it.invite.username == user.username
+		return store.findPermissionsToTransfer().findAll { Permission it ->
+			it.invite.email == user.username
 		}.collect { Permission p ->
 			p.invite = null
 			p.user = user
@@ -494,7 +486,8 @@ class PermissionService {
 		List<Permission> permissionList = store.findPermissionsToRevoke(resourceProp, resource, anonymous, target)
 
 		// Prevent revocation of only/last share permission to prevent inaccessible resources
-		if (hasOneOrLessSharePermissionsLeft(resource) && Operation.shareOperation(resource) in permissionList*.operation) {
+		Operation shareOperation = Operation.shareOperation(resource)
+		if (operation == shareOperation && hasOneOrLessSharePermissionsLeft(resource) && shareOperation in permissionList*.operation) {
 			throw new AccessControlException("Cannot revoke only SHARE permission of ${resource}")
 		}
 
@@ -534,7 +527,7 @@ class PermissionService {
 		return n <= 1
 	}
 
-	private void throwAccessControlException(SecUser violator, Object resource, boolean loggingEnabled) {
+	private void throwAccessControlException(User violator, Object resource, boolean loggingEnabled) {
 		if (loggingEnabled) {
 			log.warn("${violator?.username}(id ${violator?.id}) tried to modify sharing of $resource without SHARE Permission!")
 		}
@@ -569,7 +562,7 @@ class PermissionService {
 	 * Return property name for Userish
 	 */
 	static String getUserPropertyName(Userish userish) {
-		if (userish instanceof SecUser) {
+		if (userish instanceof User) {
 			return "user"
 		} else if (userish instanceof SignupInvite) {
 			return "invite"
@@ -580,20 +573,20 @@ class PermissionService {
 		}
 	}
 
-	Permission savePermissionAndSendShareResourceEmail(SecUser apiUser, Key apiKey, Operation op, String targetUsername, EmailMessage msg) {
-		SecUser userish = SecUser.findByUsername(targetUsername)
+	Permission savePermissionAndSendShareResourceEmail(User apiUser, Key apiKey, Operation op, String targetUsername, EmailMessage msg) {
+		User userish = User.findByUsername(targetUsername)
 		Permission permission = savePermission(msg.resource, apiUser, apiKey, userish, op)
 		sendEmailShareResource(op, msg)
 		return permission
 	}
 
-	Permission saveAnonymousPermission(SecUser apiUser, Key apiKey, Operation op, Resource resource) {
+	Permission saveAnonymousPermission(User apiUser, Key apiKey, Operation op, Resource resource) {
 		Object res = resource.load(apiUser, apiKey, true)
 		Permission permission = grantAnonymousAccess(apiUser, res, op)
 		return permission
 	}
 
-	private Permission savePermission(Resource resource, SecUser apiUser, Key apiKey, Userish targetUserish, Operation op) {
+	private Permission savePermission(Resource resource, User apiUser, Key apiKey, Userish targetUserish, Operation op) {
 		Object res = resource.load(apiUser, apiKey, true)
 		Permission permission = grant(apiUser, res, targetUserish, op)
 		return permission
@@ -626,24 +619,26 @@ class PermissionService {
 	}
 
 	@CompileStatic(value = TypeCheckingMode.SKIP)
-	Permission savePermissionAndSendEmailShareResourceInvite(SecUser apiUser, String username, Operation op, EmailMessage msg) {
-		SignupInvite invite = SignupInvite.findByUsername(username)
+	Permission savePermissionAndSendEmailShareResourceInvite(User apiUser, String username, Operation op, EmailMessage msg) {
+		SignupInvite invite = SignupInvite.findByEmail(username)
 		if (!invite) {
 			invite = signupCodeService.create(username)
-			String content = groovyPageRenderer.render([
-				template: "/emails/email_share_resource_invite",
-				model: [
-					sharer  : msg.sharer,
-					resource: msg.resourceType(),
-					name    : msg.resourceName(),
-					invite  : invite,
-				],
-			])
-			mailService.sendMail {
-				from grailsApplication.config.unifina.email.sender
-				to invite.username
-				subject msg.subject()
-				html content
+			if (op == Operation.STREAM_GET || op == Operation.CANVAS_GET || op == Operation.DASHBOARD_GET) {
+				String content = groovyPageRenderer.render([
+					template: "/emails/email_share_resource_invite",
+					model   : [
+						sharer  : msg.sharer,
+						resource: msg.resourceType(),
+						name    : msg.resourceName(),
+						invite  : invite,
+					],
+				])
+				mailService.sendMail {
+					from grailsApplication.config.unifina.email.sender
+					to invite.email
+					subject msg.subject()
+					html content
+				}
 			}
 			invite.sent = true
 			invite.save(failOnError: true, validate: true)
@@ -652,30 +647,30 @@ class PermissionService {
 		return newPermission
 	}
 
-	Permission savePermissionForEthereumAccount(String username, SecUser grantor, Operation operation, Resource res) {
+	Permission savePermissionForEthereumAccount(String username, User grantor, Operation operation, Resource res, SignupMethod signupMethod) {
 		EthereumIntegrationKeyService ethereumIntegrationKeyService = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService)
-		SecUser user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(username)
-		SecUser userish = SecUser.findByUsername(user.username)
+		User user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(username, signupMethod)
+		User userish = User.findByUsername(user.username)
 		Permission newPermission = savePermission(res, grantor, null, userish, operation)
 		return newPermission
 	}
 
 	@Transactional(readOnly = true)
-	List<Permission> getOwnPermissions(Resource resource, SecUser apiUser, Key apiKey) {
+	List<Permission> getOwnPermissions(Resource resource, User apiUser, Key apiKey) {
 		Object res = resource.load(apiUser, apiKey, false)
 		List<Permission> results = getPermissionsTo(res, apiUser ?: apiKey)
 		return results
 	}
 
 	@Transactional(readOnly = true)
-	List<Permission> findAllPermissions(Resource resource, SecUser apiUser, Key apiKey, boolean subscriptions) {
+	List<Permission> findAllPermissions(Resource resource, User apiUser, Key apiKey, boolean subscriptions) {
 		Object res = resource.load(apiUser, apiKey, true)
 		List<Permission> permissions = getPermissionsTo(res, subscriptions, null)
 		return permissions
 	}
 
 	@Transactional(readOnly = true)
-	Permission findPermission(Long permissionId, Resource resource, SecUser apiUser, Key apiKey) {
+	Permission findPermission(Long permissionId, Resource resource, User apiUser, Key apiKey) {
 		Object res = resource.load(apiUser, apiKey, true)
 		List<Permission> permissions = getPermissionsTo(res)
 		Permission p = permissions.find { it.id == permissionId }
@@ -685,7 +680,7 @@ class PermissionService {
 		return p
 	}
 
-	void deletePermission(Long permissionId, Resource resource, SecUser apiUser, Key apiKey) {
+	void deletePermission(Long permissionId, Resource resource, User apiUser, Key apiKey) {
 		Object res = resource.load(apiUser, apiKey, false)
 		List<Permission> permissions = getPermissionsTo(res)
 		Permission p = permissions.find { it.id == permissionId }

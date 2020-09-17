@@ -1,13 +1,11 @@
 package com.unifina.service
 
-import com.unifina.api.DashboardListParams
-import com.unifina.api.ListParams
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.Dashboard
+import com.unifina.domain.Permission
+import com.unifina.domain.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
@@ -25,7 +23,7 @@ class ApiServiceSpec extends Specification {
 	void "list() returns streams with share permission"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
 		ListParams listParams = new DashboardListParams(operation: Permission.Operation.DASHBOARD_SHARE, publicAccess: true)
-		SecUser me = new SecUser(username: "me@me.com")
+		User me = new User(username: "me@me.com")
 
 		when:
 		def list = service.list(Dashboard, listParams, me)
@@ -40,7 +38,7 @@ class ApiServiceSpec extends Specification {
 	void "list() delegates to permissionService#get"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
 
-		SecUser me = new SecUser(username: "me@me.com")
+		User me = new User(username: "me@me.com")
 		ListParams listParams = new DashboardListParams(publicAccess: true)
 
 		when:
@@ -56,7 +54,7 @@ class ApiServiceSpec extends Specification {
 	void "list() passes user as null to permissionService#get if grantedAccess=false"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
 
-		SecUser me = new SecUser(username: "me@me.com")
+		User me = new User(username: "me@me.com")
 		ListParams listParams = new DashboardListParams(publicAccess: true, grantedAccess: false)
 
 		when:
@@ -69,7 +67,7 @@ class ApiServiceSpec extends Specification {
 	void "list() invokes listParams#validate and listParams#createListCriteria and passes returned closure to permissionService#get"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
 
-		SecUser me = new SecUser(username: "me@me.com")
+		User me = new User(username: "me@me.com")
 		ListParams listParams = Mock(ListParams)
 
 		when:
@@ -82,7 +80,7 @@ class ApiServiceSpec extends Specification {
 	}
 
 	void "list() throws ValidationException if validation of listParams fails"() {
-		SecUser me = new SecUser(username: "me@me.com")
+		User me = new User(username: "me@me.com")
 		ListParams listParams = new DashboardListParams(order: null)
 
 		when:
@@ -134,7 +132,7 @@ class ApiServiceSpec extends Specification {
 	}
 
 	void "authorizedGetById() throws NotFoundException if domain object cannot be found"() {
-		SecUser me = new SecUser(username: "me@me.com")
+		User me = new User(username: "me@me.com")
 
 		when:
 		service.authorizedGetById(Dashboard, "dashboard-id", me, Permission.Operation.DASHBOARD_EDIT)
@@ -151,7 +149,7 @@ class ApiServiceSpec extends Specification {
 	}
 
 	void "authorizedGetById() throws NotPermittedException if user does not have required permission"() {
-		SecUser me = new SecUser(username: "me@me.com")
+		User me = new User(username: "me@me.com")
 		Dashboard dashboard = new Dashboard(name: "dashboard")
 		dashboard.id = "dashboard-id"
 		dashboard.save(failOnError: true)
@@ -167,7 +165,7 @@ class ApiServiceSpec extends Specification {
 	}
 
 	void "authorizedGetById() returns domain object if it exists and user has required permission"() {
-		SecUser me = new SecUser(username: "me@me.com")
+		User me = new User(username: "me@me.com")
 		Dashboard dashboard = new Dashboard(name: "dashboard")
 		dashboard.id = "dashboard-id"
 		dashboard.save(failOnError: true)

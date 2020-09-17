@@ -1,10 +1,11 @@
 package com.unifina.service
 
 import com.unifina.api.*
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.Permission
+import com.unifina.domain.SignupMethod
+import com.unifina.domain.Stream
+import com.unifina.domain.User
 import com.unifina.security.StringEncryptor
 import com.unifina.utils.AlphanumericStringGenerator
 import grails.compiler.GrailsCompileStatic
@@ -36,7 +37,7 @@ class EthereumIntegrationKeyService {
 		encryptor = new StringEncryptor(password)
 	}
 
-	IntegrationKey createEthereumAccount(SecUser user, String name, String privateKey) {
+	IntegrationKey createEthereumAccount(User user, String name, String privateKey) {
 		privateKey = trimPrivateKey(privateKey)
 		validatePrivateKey(privateKey)
 
@@ -66,7 +67,7 @@ class EthereumIntegrationKeyService {
 		}
 	}
 
-	IntegrationKey createEthereumID(SecUser user, String name, String challengeID, String challenge, String signature) {
+	IntegrationKey createEthereumID(User user, String name, String challengeID, String challenge, String signature) {
 		String address
 		try {
 			address = challengeService.verifyChallengeAndGetAddress(challengeID, challenge, signature)
@@ -95,7 +96,7 @@ class EthereumIntegrationKeyService {
 	}
 
 	@GrailsCompileStatic
-	void delete(String integrationKeyId, SecUser currentUser) {
+	void delete(String integrationKeyId, User currentUser) {
 		if (currentUser.isEthereumUser()) {
 			int nbKeys = IntegrationKey.countByUserAndService(currentUser, IntegrationKey.Service.ETHEREUM_ID)
 			if (nbKeys <= 1) {
@@ -116,14 +117,14 @@ class EthereumIntegrationKeyService {
 		return encryptor.decrypt((String) json.privateKey, key.user.id.byteValue())
 	}
 
-	List<IntegrationKey> getAllPrivateKeysForUser(SecUser user) {
+	List<IntegrationKey> getAllPrivateKeysForUser(User user) {
 		IntegrationKey.findAllByServiceAndUser(IntegrationKey.Service.ETHEREUM, user)
 	}
 
-	SecUser getEthereumUser(String address) {
+    User getEthereumUser(String address) {
 		IntegrationKey key = IntegrationKey.createCriteria().get {
 			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
-			ilike("idInService", address)
+			ilike("idInService", address) // ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
 		}
 		if (key == null) {
 			return null
@@ -131,22 +132,23 @@ class EthereumIntegrationKeyService {
 		return key.user
 	}
 
-	SecUser getOrCreateFromEthereumAddress(String address) {
-		SecUser user = getEthereumUser(address)
+	User getOrCreateFromEthereumAddress(String address, SignupMethod signupMethod) {
+		User user = getEthereumUser(address)
 		if (user == null) {
-			user = createEthereumUser(address)
+			user = createEthereumUser(address, signupMethod)
 		}
 		return user
 	}
 
-	SecUser createEthereumUser(String address) {
-		SecUser user = userService.createUser([
+	User createEthereumUser(String address, SignupMethod signupMethod) {
+		User user = userService.createUser([
 			username       : address,
 			password       : AlphanumericStringGenerator.getRandomAlphanumericString(32),
 			name           : "Anonymous User",
 			enabled        : true,
 			accountLocked  : false,
-			passwordExpired: false
+			passwordExpired: false,
+			signupMethod   : signupMethod
 		])
 		new IntegrationKey(
 			name: address,
@@ -161,7 +163,7 @@ class EthereumIntegrationKeyService {
 		return user
 	}
 
-	private void createUserInboxStream(SecUser user, String address) {
+	private void createUserInboxStream(User user, String address) {
 		Stream existing = Stream.get(address)
 		if (existing != null && existing.inbox) {
 			// The inbox stream already exists.
@@ -216,14 +218,14 @@ class EthereumIntegrationKeyService {
 	}
 
 	private void assertUnique(String address) {
-		SecUser existingUser = getEthereumUser(address)
+		User existingUser = getEthereumUser(address)
 		if (existingUser != null) {
 			log.error("The Ethereum address " + address + " is already associated with the Streamr user: " + existingUser.id)
 			throw new DuplicateNotAllowedException("The Ethereum address " + address + " is already associated with a Streamr user.")
 		}
 	}
 
-	void updateKey(SecUser user, String id, String name) {
+	void updateKey(User user, String id, String name) {
 		IntegrationKey key = IntegrationKey.findByIdAndUser(id, user)
 		if (key == null) {
 			throw new NotFoundException("integration key not found", "IntegrationKey", id)

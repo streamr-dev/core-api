@@ -1,8 +1,7 @@
 package com.unifina.signalpath.utils;
 
 import com.streamr.client.utils.StreamPartition;
-import com.unifina.domain.data.Stream;
-import com.unifina.exceptions.InvalidStreamConfigException;
+import com.unifina.domain.Stream;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
 import grails.converters.JSON;
@@ -12,7 +11,6 @@ import org.codehaus.groovy.grails.web.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 

@@ -5,15 +5,10 @@ import com.google.gson.GsonBuilder
 import com.streamr.client.protocol.message_layer.StreamMessage
 import com.unifina.api.ValidationException
 import com.unifina.data.StreamPartitioner
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.task.Task
+import com.unifina.domain.*
 import com.unifina.feed.DataRange
 import com.unifina.feed.FieldDetector
 import com.unifina.task.DelayedDeleteStreamTask
-import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
@@ -50,7 +45,7 @@ class StreamService {
 		return Stream.findByUiChannelPath(uiChannelPath)
 	}
 
-	Stream createStream(Map params, SecUser user, String id = IdGenerator.getShort()) {
+	Stream createStream(Map params, User user, String id = IdGenerator.getShort()) {
 		Stream stream = new Stream(params)
 		stream.id = id
 		stream.config = params.config
@@ -109,24 +104,6 @@ class StreamService {
 		cassandraService.save(msg)
 	}
 
-	// Ref to Cassandra will be abstracted out when Feed abstraction is reworked
-	@CompileStatic
-	void deleteDataRange(Stream stream, Date from, Date to) {
-		cassandraService.deleteRange(stream, from, to)
-	}
-
-	// Ref to Cassandra will be abstracted out when Feed abstraction is reworked
-	@CompileStatic
-	void deleteDataUpTo(Stream stream, Date to) {
-		cassandraService.deleteUpTo(stream, to)
-	}
-
-	// Ref to Cassandra will be abstracted out when Feed abstraction is reworked
-	@CompileStatic
-	void deleteAllData(Stream stream) {
-		cassandraService.deleteAll(stream)
-	}
-
 	@CompileStatic
 	DataRange getDataRange(Stream stream) {
 		return cassandraService.getDataRange(stream)
@@ -134,7 +111,7 @@ class StreamService {
 
 	Set<String> getStreamEthereumPublishers(Stream stream) {
 		// This approach might be slow if there are a lot of allowed writers to the Stream
-		List<SecUser> writers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_PUBLISH)*.user
+		List<User> writers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_PUBLISH)*.user
 
 		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
 			user {
@@ -148,7 +125,7 @@ class StreamService {
 
 	boolean isStreamEthereumPublisher(Stream stream, String ethereumAddress) {
 		IntegrationKey key = IntegrationKey.createCriteria().get {
-			ilike("idInService", ethereumAddress)
+			ilike("idInService", ethereumAddress) // ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
 		}
 		if (key == null || key.user == null) {
 			return false
@@ -158,7 +135,7 @@ class StreamService {
 
 	Set<String> getStreamEthereumSubscribers(Stream stream) {
 		// This approach might be slow if there are a lot of allowed readers to the Stream
-		List<SecUser> readers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_SUBSCRIBE)*.user
+		List<User> readers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_SUBSCRIBE)*.user
 
 		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
 			user {
@@ -180,7 +157,7 @@ class StreamService {
 		return permissionService.check(key.user, stream, Permission.Operation.STREAM_SUBSCRIBE)
 	}
 
-	List<Stream> getInboxStreams(List<SecUser> users) {
+	List<Stream> getInboxStreams(List<User> users) {
 		if (users.isEmpty()) return new ArrayList<Stream>()
 		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
 			user {
@@ -219,7 +196,7 @@ class StreamService {
 	}
 
 	@CompileStatic
-	def addExampleStreams(SecUser user, List<Stream> examples) {
+	def addExampleStreams(User user, List<Stream> examples) {
 		for (final Stream example : examples) {
 			// Grant read permission to example stream.
 			permissionService.systemGrant(user, example, Permission.Operation.STREAM_GET)

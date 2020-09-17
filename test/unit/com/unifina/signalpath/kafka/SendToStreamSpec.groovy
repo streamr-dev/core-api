@@ -2,9 +2,9 @@ package com.unifina.signalpath.kafka
 
 import com.streamr.client.options.StreamrClientOptions
 import com.unifina.BeanMockingSpecification
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.Stream
+import com.unifina.domain.Permission
+import com.unifina.domain.User
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import com.unifina.service.StreamrClientService
@@ -18,10 +18,10 @@ import grails.test.mixin.support.GrailsUnitTestMixin
 import java.security.AccessControlException
 
 @TestMixin(GrailsUnitTestMixin)
-@Mock([SecUser, Stream])
+@Mock([User, Stream])
 class SendToStreamSpec extends BeanMockingSpecification {
 
-	SecUser user
+	User user
 	Globals globals
 	SendToStream module
 	Stream stream
@@ -30,7 +30,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 	StreamService streamService
 
     def setup() {
-		def user = new SecUser(name: "test user", username: 'test user')
+		def user = new User(name: "test user", username: 'test user')
 		user.save(failOnError: true, validate: false)
 
 		StreamrClientService streamrClientService = mockBean(StreamrClientService, Mock(StreamrClientService))
