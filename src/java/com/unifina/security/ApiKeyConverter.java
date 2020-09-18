@@ -10,7 +10,6 @@ import java.security.GeneralSecurityException;
 
 public class ApiKeyConverter {
 
-	private static final String ETHEREUM_KEY_PREFIX = "0x";
 	private static final int HEX_DIGIT_BIT_COUNT = 4;
 	private static final byte[] SALT = new byte[] {0};
 	private static final int ETHEREUM_PRIVATE_KEY_LENGTH = 64;
@@ -21,8 +20,7 @@ public class ApiKeyConverter {
 			int keyLength = (ETHEREUM_PRIVATE_KEY_LENGTH - Hex.encode(SALT).length) * HEX_DIGIT_BIT_COUNT;
 			PBEKeySpec spec = new PBEKeySpec(apiKey.toCharArray(), SALT, ITERATION_COUNT, keyLength);
 			SecretKeyFactory skf = SecretKeyFactory.getInstance(Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA1.name());
-			String encoded = String.valueOf(Hex.encode(EncodingUtils.concatenate(new byte[][]{SALT, skf.generateSecret(spec).getEncoded()})));
-			return ETHEREUM_KEY_PREFIX + encoded;
+			return String.valueOf(Hex.encode(EncodingUtils.concatenate(new byte[][]{SALT, skf.generateSecret(spec).getEncoded()})));
 		} catch (GeneralSecurityException e) {
 			throw new IllegalStateException("Could not create hash", e);
 		}
