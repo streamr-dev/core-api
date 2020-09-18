@@ -197,11 +197,10 @@ class EthereumIntegrationKeyService {
 	}
 
 	@CompileStatic
-	private static String getAddress(String privateKey) {
+	public static String getAddress(String privateKey) {
 		BigInteger pk = new BigInteger(privateKey, 16)
 		ECKey key = ECKey.fromPrivate(pk)
 		String publicKey = Hex.encodeHexString(key.getAddress())
-
 		return publicKey
 	}
 
