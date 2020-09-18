@@ -1,4 +1,4 @@
-package com.unifina.api;
+package com.unifina.service;
 
 public class InvalidStateTransitionException extends ApiException {
 	public <T extends Enum> InvalidStateTransitionException(T fromState, T toState) {

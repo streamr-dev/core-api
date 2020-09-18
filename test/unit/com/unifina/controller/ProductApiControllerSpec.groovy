@@ -2,8 +2,6 @@ package com.unifina.controller
 
 import com.google.common.collect.Lists
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.unifina.api.ApiException
-import com.unifina.controller.RESTAPIFilters
 import com.unifina.domain.*
 import com.unifina.service.*
 import com.unifina.utils.TestUtils

@@ -1,4 +1,4 @@
-package com.unifina.api.node
+package com.unifina.controller
 
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse

@@ -3,7 +3,6 @@ package com.unifina.service
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.unifina.api.ValidationException
 import com.unifina.data.StreamPartitioner
 import com.unifina.domain.*
 import com.unifina.feed.DataRange

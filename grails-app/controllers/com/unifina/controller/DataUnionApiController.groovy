@@ -1,7 +1,7 @@
 package com.unifina.controller
 
-import com.unifina.api.BadRequestException
 import com.unifina.domain.EthereumAddressValidator
+import com.unifina.service.BadRequestException
 import com.unifina.service.DataUnionService
 
 class DataUnionApiController {

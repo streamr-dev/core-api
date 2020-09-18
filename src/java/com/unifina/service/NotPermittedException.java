@@ -1,4 +1,4 @@
-package com.unifina.api;
+package com.unifina.service;
 
 public class NotPermittedException extends ApiException {
 	/** User whose access was denied */

@@ -1,7 +1,6 @@
 package com.unifina.controller
 
-import com.unifina.api.*
-import com.unifina.service.CanvasUnreachableException
+import com.unifina.service.*
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 

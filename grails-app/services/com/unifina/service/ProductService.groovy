@@ -1,10 +1,6 @@
 package com.unifina.service
 
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.unifina.api.InvalidStateTransitionException
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.ValidationException
 import com.unifina.domain.Permission
 import com.unifina.domain.Product
 import com.unifina.domain.Stream
