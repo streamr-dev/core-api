@@ -72,6 +72,8 @@ databaseChangeLog = {
 
 	// For each API key that is attached to a user:
 	// - create a new IntegrationKey for the user
+	// - delete the permissions attached to the key
+	// - delete the key
 	changeSet(author: "teogeb", id: "convert-API-keys-to-Ethereum-IDs-1") {
 		grailsChange {
 			change {
@@ -82,14 +84,17 @@ databaseChangeLog = {
 					String accountAddress = getAccountAddress(apiKeyId)
 					String integrationKeyName = 'Converted from API key: ' + apiKeyName
 					createIntegrationKey(integrationKeyName, accountAddress, userId, sql)
+					sql.execute("DELETE FROM permission WHERE key_id = ?", [apiKeyId])
 				}
 			}
 		}
+		sql('DELETE FROM `key` where user_id is not null')
 	}
 
 	// For each anonymous API key:
 	// - create a new Ethereum user (and inbox stream for that user)
 	// - migrate the key’s permissions to that user
+	// - delete the key
 	changeSet(author: "teogeb", id: "convert-API-keys-to-Ethereum-IDs-2") {
 		grailsChange {
 			change {
@@ -97,15 +102,15 @@ databaseChangeLog = {
 					String apiKeyId = row['id']
 					String accountAddress = getAccountAddress(apiKeyId)
 					def insertResult = sql.executeInsert("INSERT INTO user (version, account_expired, account_locked, enabled, name, password, password_expired, username, signup_method) VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?)", [
-							0,
-							false,
-							false,
-							true,
-							"Anonymous User",
-							AlphanumericStringGenerator.getRandomAlphanumericString(32),
-							false,
-							accountAddress,
-							SignupMethod.UNKNOWN.name()  // TODO: what value we should use?
+						0,
+						false,
+						false,
+						true,
+						"Anonymous User",
+						AlphanumericStringGenerator.getRandomAlphanumericString(32),
+						false,
+						accountAddress,
+						SignupMethod.UNKNOWN.name()
 					]);
 					int userId = insertResult[0][0]
 					sql.execute("UPDATE permission SET user_id = ?, key_id = null WHERE key_id = ?", [ userId, apiKeyId])
@@ -114,19 +119,6 @@ databaseChangeLog = {
 				}
 			}
 		}
+		sql('DELETE FROM `key` where user_id is null')
 	}
-
-	/*
-	TODO removing the Key domain class and applying these changeSets should happen in the same commit
-	changeSet(author: "teogeb", id: "convert-API-keys-to-Ethereum-IDs-3") {
-		dropForeignKeyConstraint(baseTableName: "permission", constraintName: "FKE125C5CF8EE35041")
-	}
-
-	changeSet(author: "teogeb", id: "convert-API-keys-to-Ethereum-IDs-4") {
-		dropColumn(tableName: "permission", columnName: "key_id")
-	}
-
-	changeSet(author: "teogeb", id: "convert-API-keys-to-Ethereum-IDs-5") {
-		dropTable(tableName: "key")
-	}*/
 }
