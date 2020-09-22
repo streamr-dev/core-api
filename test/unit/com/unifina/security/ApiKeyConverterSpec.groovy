@@ -8,6 +8,6 @@ class ApiKeyConverterSpec extends Specification {
 		String converted = ApiKeyConverter.createEthereumPrivateKey("mock-api-key")
 		then:
 		true
-		converted == "003806b4ddedf17eddb217e191e02a98dd057d4f223c5e0302c5d00fb2b604c9"
+		converted == "372da4ca3dbb6829ddbaaf81478344e89c1544d8be98705c54477de238e448b7"
 	}
 }
