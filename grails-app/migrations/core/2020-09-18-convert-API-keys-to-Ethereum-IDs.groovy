@@ -2,6 +2,9 @@ package core
 
 import com.unifina.domain.IntegrationKey
 import com.unifina.domain.SignupMethod
+import com.unifina.domain.Stream
+import com.unifina.domain.ExampleType
+import com.unifina.domain.Permission
 import com.unifina.utils.IdGenerator
 import com.unifina.security.ApiKeyConverter
 import com.unifina.service.EthereumIntegrationKeyService
@@ -29,6 +32,42 @@ def createIntegrationKey(String integrationKeyName, String accountAddress, Integ
 	]);
 }
 
+def createInboxStream(long userId, String accountAddress, Sql sql) {
+	Date now = new Date();
+	sql.executeInsert('INSERT INTO stream (version, id, name, date_created, last_updated, partitions, require_signed_data, auto_configure, storage_days, inbox, inactivity_threshold_hours, example_type, require_encrypted_data) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+		0,
+		accountAddress,
+		accountAddress,
+		now,
+		now,
+		1,
+		false,
+		false,
+		Stream.DEFAULT_STORAGE_DAYS,
+		true,
+		Stream.DEFAULT_INACTIVITY_THRESHOLD_HOURS,
+		ExampleType.NOT_SET.value,
+		false
+	]);
+	List<Permission.Operation> permissionOperations = [
+		Permission.Operation.STREAM_GET,
+		Permission.Operation.STREAM_EDIT,
+		Permission.Operation.STREAM_DELETE,
+		Permission.Operation.STREAM_PUBLISH,
+		Permission.Operation.STREAM_SUBSCRIBE,
+		Permission.Operation.STREAM_SHARE,
+	];
+	permissionOperations.each { op ->
+		sql.executeInsert('INSERT INTO permission (version, operation, stream_id, anonymous, user_id) VALUES (?, ?, ?, ?, ?)', [
+			0,
+			op.id,
+			accountAddress,
+			false,
+			userId
+		]);
+	}
+}
+
 databaseChangeLog = {
 
 	// For each API key that is attached to a user:
@@ -49,7 +88,7 @@ databaseChangeLog = {
 	}
 
 	// For each anonymous API key:
-	// - create a new Ethereum user
+	// - create a new Ethereum user (and inbox stream for that user)
 	// - migrate the key’s permissions to that user
 	changeSet(author: "teogeb", id: "convert-API-keys-to-Ethereum-IDs-2") {
 		grailsChange {
@@ -66,14 +105,12 @@ databaseChangeLog = {
 							AlphanumericStringGenerator.getRandomAlphanumericString(32),
 							false,
 							accountAddress,
-							'UNKNOWN'  // TODO: what value we should use?
+							SignupMethod.UNKNOWN.name()  // TODO: what value we should use?
 					]);
 					int userId = insertResult[0][0]
 					sql.execute("UPDATE permission SET user_id = ?, key_id = null WHERE key_id = ?", [ userId, apiKeyId])
 					createIntegrationKey(accountAddress, accountAddress, userId, sql)
-					// TODO if the goal is to emulate createEthereumUser() method, should we also create
-					// an inbox stream? (as we do in that method)
-					// Or is that needed for anonymous users?
+					createInboxStream(userId, accountAddress, sql)
 				}
 			}
 		}
