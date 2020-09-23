@@ -72,7 +72,6 @@ databaseChangeLog = {
 
 	// For each API key that is attached to a user:
 	// - create a new IntegrationKey for the user
-	// - delete the permissions attached to the key
 	// - delete the key
 	changeSet(author: "teogeb", id: "convert-API-keys-to-Ethereum-IDs-1") {
 		grailsChange {
@@ -84,7 +83,6 @@ databaseChangeLog = {
 					String accountAddress = getAccountAddress(apiKeyId)
 					String integrationKeyName = 'Converted from API key: ' + apiKeyName
 					createIntegrationKey(integrationKeyName, accountAddress, userId, sql)
-					sql.execute("DELETE FROM permission WHERE key_id = ?", [apiKeyId])
 				}
 			}
 		}
