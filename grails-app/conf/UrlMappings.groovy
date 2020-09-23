@@ -34,8 +34,6 @@ class UrlMappings {
 		"/api/v1/streams/$id/subscribers"(controller: "streamApi", action: "subscribers")
 		"/api/v1/streams/$id/subscriber/$address"(controller: "streamApi", action: "subscriber")
 		"/api/v1/streams/$id/status"(controller: "streamApi", action: "status")
-		"/api/v1/streams/$resourceId/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
-		"/api/v1/streams/$streamId/keys/$keyId"(method: "PUT", controller: "keyApi", action: "updateStreamKey")
 
 		"/api/v1/storageNodes/$storageNodeAddress/streams"(method: "GET", controller: "storageNodeApi", action: "findStreamsByStorageNode")
 		"/api/v1/streams/$streamId/storageNodes"(method: "GET", controller: "storageNodeApi", action: "findStorageNodesByStream")
@@ -60,8 +58,6 @@ class UrlMappings {
 		"/api/v1/users/me"(method: "PUT", controller: "userApi", action: "update")
 		"/api/v1/users/me"(method: "DELETE", controller: "userApi", action: "delete")
 
-		"/api/v1/users/me/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = User }
-		"/api/v1/users/me/keys/$keyId"(method: "PUT", controller: "keyApi", action: "updateUserKey")
 		"/api/v1/users/me/products"(method: "GET", controller: "productApi", action: "index") { operation = Permission.Operation.PRODUCT_SHARE }
 		"/api/v1/users/me/changePassword"(method: "POST", controller: "userApi", action: "changePassword")
 		"/api/v1/users/me/image"(method: "POST", controller: "userApi", action: "uploadAvatarImage")
