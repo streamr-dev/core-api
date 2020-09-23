@@ -2,7 +2,6 @@ package com.unifina.controller
 
 import com.unifina.ControllerSpecification
 import com.unifina.api.*
-import com.unifina.domain.Key
 import com.unifina.domain.SignupMethod
 import com.unifina.domain.User
 import com.unifina.security.Challenge
@@ -21,8 +20,12 @@ import java.text.SimpleDateFormat
  * See the API for {@link grails.test.mixin.web.ControllerUnitTestMixin} for usage instructions
  */
 @TestFor(LoginApiController)
-@Mock([User, Key])
+@Mock([User])
 class LoginApiControllerSpec extends ControllerSpecification {
+
+	private static final String USER_API_KEY = "myApiKey"
+	private static final String USER_ACCOUNT_ADDRESS = "0xa0f7f3ff8a0965d0d46e5f1f963102fc6bed45ec"
+
 	ChallengeService challengeService
 	SessionService sessionService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
@@ -207,59 +210,32 @@ class LoginApiControllerSpec extends ControllerSpecification {
 			password: "password"
 		).save(failOnError: true, validate: false)
 
-		String apiKey = "apiKey"
-
 		SessionToken token = new SessionToken(64, user, 3)
 
 		when:
 		request.method = "POST"
 		request.JSON = [
-			apiKey: apiKey
+			apiKey: USER_API_KEY
 		]
 		authenticatedAs(me) { controller.apikey() }
 
 		then:
-		1 * userService.getUserishFromApiKey(apiKey) >> user
+		1 * ethereumIntegrationKeyService.getEthereumUser(USER_ACCOUNT_ADDRESS) >> user
 		1 * sessionService.generateToken(user) >> token
 		response.status == 200
 		response.json == token.toMap()
 	}
 
-	def "apikey-based login for anonymous key should pass"() {
-		Key key = new Key(
-			id: "apiKey",
-		).save(failOnError: true, validate: false)
-
-		String apiKey = "apiKey"
-
-		SessionToken token = new SessionToken(64, key, 3)
-
-		when:
-		request.method = "POST"
-		request.JSON = [
-			apiKey: apiKey
-		]
-		authenticatedAs(me) { controller.apikey() }
-
-		then:
-		1 * userService.getUserishFromApiKey(apiKey) >> key
-		1 * sessionService.generateToken(key) >> token
-		response.status == 200
-		response.json == token.toMap()
-	}
-
 	def "apikey-based login should fail"() {
-		String apiKey = "apiKey"
-
 		when:
 		request.method = "POST"
 		request.JSON = [
-			apiKey: apiKey
+			apiKey: "invalid-mock-key"
 		]
 		authenticatedAs(me) { controller.apikey() }
 
 		then:
-		1 * userService.getUserishFromApiKey(apiKey) >> { throw new InvalidAPIKeyException() }
+		1 * ethereumIntegrationKeyService.getEthereumUser(_) >> null
 		thrown InvalidAPIKeyException
 	}
 
@@ -268,17 +244,15 @@ class LoginApiControllerSpec extends ControllerSpecification {
 			enabled: false,
 		).save(failOnError: true, validate: false)
 
-		String apiKey = "apiKey"
-
 		when:
 		request.method = "POST"
 		request.JSON = [
-			apiKey: apiKey
+			apiKey: USER_API_KEY
 		]
 		authenticatedAs(me) { controller.apikey() }
 
 		then:
-		1 * userService.getUserishFromApiKey(apiKey) >> user
+		1 * ethereumIntegrationKeyService.getEthereumUser(USER_ACCOUNT_ADDRESS) >> user
 		thrown DisabledUserException
 	}
 
