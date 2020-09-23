@@ -108,7 +108,7 @@ databaseChangeLog = {
 						AlphanumericStringGenerator.getRandomAlphanumericString(32),
 						false,
 						accountAddress,
-						SignupMethod.UNKNOWN.name()
+						SignupMethod.MIGRATED.name()
 					]);
 					int userId = insertResult[0][0]
 					sql.execute("UPDATE permission SET user_id = ?, key_id = null WHERE key_id = ?", [ userId, apiKeyId])
