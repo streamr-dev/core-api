@@ -1,4 +1,4 @@
-package com.unifina.api;
+package com.unifina.service;
 
 public class NotFoundException extends TypedApiException {
 	public NotFoundException(String message, String type, String id) {

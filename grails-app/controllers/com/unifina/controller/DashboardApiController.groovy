@@ -1,6 +1,6 @@
 package com.unifina.controller
 
-import com.unifina.api.ValidationException
+
 import com.unifina.domain.Dashboard
 import com.unifina.domain.User
 import com.unifina.service.*

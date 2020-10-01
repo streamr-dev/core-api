@@ -1,4 +1,4 @@
-package com.unifina.api;
+package com.unifina.controller;
 
 public class DisabledUserException extends RuntimeException {
 	public DisabledUserException(String message) {

@@ -1,4 +1,4 @@
-package com.unifina.api;
+package com.unifina.service;
 
 /**
  * Exceptions thrown by ApiControllers

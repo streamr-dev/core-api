@@ -1,13 +1,7 @@
 package com.unifina.service
 
-import com.unifina.api.CannotRemoveEthereumKeyException
-import com.unifina.api.DuplicateNotAllowedException
-import com.unifina.domain.Stream
-import com.unifina.domain.Permission
-import com.unifina.domain.SignupMethod
+import com.unifina.domain.*
 import com.unifina.security.Challenge
-import com.unifina.domain.IntegrationKey
-import com.unifina.domain.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin

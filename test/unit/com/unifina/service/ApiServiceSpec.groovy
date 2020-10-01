@@ -1,8 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.ValidationException
+
 import com.unifina.domain.Dashboard
 import com.unifina.domain.Permission
 import com.unifina.domain.User

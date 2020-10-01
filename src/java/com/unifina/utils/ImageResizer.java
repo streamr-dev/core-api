@@ -1,6 +1,6 @@
 package com.unifina.utils;
 
-import com.unifina.api.ApiException;
+import com.unifina.service.ApiException;
 import org.imgscalr.Scalr;
 
 import javax.imageio.ImageIO;

@@ -1,8 +1,7 @@
 package com.unifina.service
 
-import com.unifina.api.FieldCannotBeUpdatedException
+
 import com.unifina.domain.*
-import com.unifina.service.PermissionService
 import grails.compiler.GrailsCompileStatic
 import grails.validation.Validateable
 import groovy.json.JsonBuilder

@@ -1,4 +1,4 @@
-package com.unifina.api;
+package com.unifina.service;
 
 public class TypedApiException extends ApiException {
 	/** Type of the missing resource */
