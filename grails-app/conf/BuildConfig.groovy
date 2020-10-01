@@ -107,7 +107,7 @@ grails.project.dependency.resolution = {
 		compile('com.streamr:client:2.0.1')
 
 		compile('com.google.code.gson:gson:2.8.5')
-		runtime('mysql:mysql-connector-java:5.1.20')
+		runtime('mysql:mysql-connector-java:5.1.49')
 		runtime('commons-net:commons-net:3.3')
 		runtime('org.apache.commons:commons-math3:3.2')
 		runtime('commons-codec:commons-codec:1.6')
