@@ -183,8 +183,4 @@ class UserService {
 			return null
 		}
 	}
-
-	User getUserByUsername(String username) {
-		return User.findByUsername(username);
-	}
 }
