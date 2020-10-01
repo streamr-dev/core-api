@@ -1,10 +1,8 @@
 package com.unifina.controller
 
-import com.unifina.ControllerSpecification
 import com.unifina.domain.Key
 import com.unifina.domain.SignupMethod
 import com.unifina.domain.User
-import com.unifina.security.Challenge
 import com.unifina.service.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor

@@ -1,10 +1,9 @@
 package com.unifina.controller
 
-import com.unifina.ControllerSpecification
 import com.unifina.domain.IntegrationKey
 import com.unifina.domain.Key
 import com.unifina.domain.User
-import com.unifina.security.Challenge
+import com.unifina.service.Challenge
 import com.unifina.service.EthereumIntegrationKeyService
 import grails.converters.JSON
 import grails.test.mixin.Mock
