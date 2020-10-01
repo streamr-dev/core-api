@@ -185,73 +185,13 @@ databaseChangeLog = {
 		}
 	}
 
-	// create inbox streams for the integration keys
-	changeSet(author: "teogeb", id: "convert-API-keys-to-Ethereum-IDs-5") {
-		grailsChange {
-			change {
-				sql.execute("""
-					INSERT INTO stream (version, id, name, date_created, last_updated, partitions, require_signed_data, auto_configure, storage_days, inbox, inactivity_threshold_hours, example_type, require_encrypted_data)
-					SELECT
-						0,
-						account_address,
-						account_address,
-						CURRENT_TIMESTAMP(),
-						CURRENT_TIMESTAMP(),
-						1,
-						false,
-						false,
-						?,
-						true,
-						?,
-						?,
-						false
-					FROM tmp_apikey_lookup
-				""", [Stream.DEFAULT_STORAGE_DAYS, Stream.DEFAULT_INACTIVITY_THRESHOLD_HOURS, ExampleType.NOT_SET.value])
-			}
-		}
-	}
-
-	// create permissions for the inbox streams
-	changeSet(author: "teogeb", id: "convert-API-keys-to-Ethereum-IDs-6") {
-		grailsChange {
-			change {
-				List<Permission.Operation> permissionOperations = [
-					Permission.Operation.STREAM_GET,
-					Permission.Operation.STREAM_EDIT,
-					Permission.Operation.STREAM_DELETE,
-					Permission.Operation.STREAM_PUBLISH,
-					Permission.Operation.STREAM_SUBSCRIBE,
-					Permission.Operation.STREAM_SHARE,
-				];
-				sql.execute("""
-					INSERT INTO permission (version, operation, stream_id, anonymous, user_id)
-					SELECT
-						0,
-						permission_id,
-						account_address,
-						false,
-						user_id
-					FROM tmp_apikey_lookup
-					JOIN (
-						(SELECT ? as permission_id FROM DUAL) UNION ALL
-						(SELECT ? as permission_id FROM DUAL) UNION ALL
-						(SELECT ? as permission_id FROM DUAL) UNION ALL
-						(SELECT ? as permission_id FROM DUAL) UNION ALL
-						(SELECT ? as permission_id FROM DUAL) UNION ALL
-						(SELECT ? as permission_id FROM DUAL)
-					) as permission_ids
-				""", permissionOperations.collect { it.id })
-			}
-		}
-	}
-
 	// delete keys
-	changeSet(author: "teogeb", id: "convert-API-keys-to-Ethereum-IDs-7") {
+	changeSet(author: "teogeb", id: "convert-API-keys-to-Ethereum-IDs-5") {
 		sql('DELETE FROM `key`')
 	}
 
 	// drop lookup table
-	changeSet(author: "teogeb", id: "convert-API-keys-to-Ethereum-IDs-8") {
+	changeSet(author: "teogeb", id: "convert-API-keys-to-Ethereum-IDs-6") {
 		dropTable(tableName: "tmp_apikey_lookup")
 	}
 }
