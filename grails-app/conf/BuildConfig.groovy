@@ -137,6 +137,5 @@ grails.project.dependency.resolution = {
 		runtime(':database-migration:1.4.2-SNAPSHOT')
 
 		test(":plastic-criteria:1.6.7")
-		test(":rest-client-builder:2.1.1")
 	}
 }
