@@ -31,12 +31,6 @@ class StreamService {
 		.create()
 
 	Stream getStream(String id) {
-		if (EthereumAddressValidator.validate(id)) {
-			Stream inboxStream = Stream.get(id.toLowerCase())
-			if (inboxStream.inbox) {
-				return inboxStream
-			}
-		}
 		return Stream.get(id)
 	}
 
@@ -154,17 +148,6 @@ class StreamService {
 			return false
 		}
 		return permissionService.check(key.user, stream, Permission.Operation.STREAM_SUBSCRIBE)
-	}
-
-	List<Stream> getInboxStreams(List<User> users) {
-		if (users.isEmpty()) return new ArrayList<Stream>()
-		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
-			user {
-				'in'("id", users*.id)
-			}
-			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
-		}
-		return Stream.findAllByIdInListAndInbox(keys*.idInService, true)
 	}
 
 	static class StreamStatus {

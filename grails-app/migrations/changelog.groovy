@@ -154,4 +154,5 @@ databaseChangeLog = {
 	include file: 'core/2020-08-24-add-user-signup-method.groovy'
 	include file: 'core/2020-09-11-add-stream-storage-node.groovy'
 	include file: 'core/2020-09-15-add-DU-version-field-to-product.groovy'
+	include file: 'core/2020-10-01-remove-inbox-stream.groovy'
 }

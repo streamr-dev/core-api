@@ -53,8 +53,6 @@ class EthereumIntegrationKeyService {
 				] as JSON).toString()
 			).save(flush: false, failOnError: true)
 
-			createUserInboxStream(user, address)
-
 			subscriptionService.afterIntegrationKeyCreated(key)
 			return key
 		} catch (NumberFormatException e) {
@@ -84,8 +82,6 @@ class EthereumIntegrationKeyService {
 			] as JSON).toString()
 		).save(flush: false)
 
-		createUserInboxStream(user, address)
-
 		subscriptionService.afterIntegrationKeyCreated(integrationKey)
 		return integrationKey
 	}
@@ -102,7 +98,6 @@ class EthereumIntegrationKeyService {
 		IntegrationKey account = IntegrationKey.findByIdAndUser(integrationKeyId, currentUser)
 		if (account) {
 			subscriptionService.beforeIntegrationKeyRemoved(account)
-			deleteInboxStream(account.idInService)
 			account.delete(flush: true)
 		}
 	}
@@ -154,32 +149,7 @@ class EthereumIntegrationKeyService {
 				address: address
 			] as JSON).toString()
 		).save(failOnError: true, flush: false)
-		createUserInboxStream(user, address)
 		return user
-	}
-
-	private void createUserInboxStream(User user, String address) {
-		Stream existing = Stream.get(address)
-		if (existing != null && existing.inbox) {
-			// The inbox stream already exists.
-			return
-		}
-		Stream inboxStream = new Stream()
-		inboxStream.id = address.toLowerCase()
-		inboxStream.name = address.toLowerCase()
-		inboxStream.inbox = true
-		inboxStream.autoConfigure = false
-
-		inboxStream.save(failOnError: true, flush: false)
-		permissionService.systemGrantAll(user, inboxStream)
-	}
-
-	private void deleteInboxStream(String address) {
-		Stream stream = Stream.get(address)
-		if (stream && stream.inbox) {
-			Permission.findAllByStream(Stream.get(address))*.delete(flush: true)
-			stream.delete(flush: true)
-		}
 	}
 
 	@CompileStatic
