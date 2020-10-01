@@ -110,7 +110,7 @@ grails.project.dependency.resolution = {
 		runtime('mysql:mysql-connector-java:5.1.20')
 		runtime('commons-net:commons-net:3.3')
 		runtime('org.apache.commons:commons-math3:3.2')
-		runtime('commons-codec:commons-codec:1.6')
+		runtime('commons-codec:commons-codec:1.15')
 		runtime('com.opencsv:opencsv:3.3')
 		runtime('de.ruedigermoeller:fst:2.56')
 		runtime('joda-time:joda-time:2.10.6')
