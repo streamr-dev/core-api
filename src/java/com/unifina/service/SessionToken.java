@@ -2,27 +2,22 @@ package com.unifina.service;
 
 import com.unifina.domain.Userish;
 import com.unifina.utils.AlphanumericStringGenerator;
-import org.joda.time.DateTime;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimeZone;
 
 public class SessionToken {
-	private final static String DATE_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-	private final static TimeZone UTC = TimeZone.getTimeZone("UTC");
-
 	private final String token;
 	private final Userish user;
-	private final Date expiration;
+	private final ZonedDateTime expiration;
 
 	public SessionToken(int tokenLength, Userish user, int ttlHours) {
 		this.token = AlphanumericStringGenerator.getRandomAlphanumericString(tokenLength);
 		this.user = user;
-		this.expiration = new DateTime().plusHours(ttlHours).toDate();
+		this.expiration = ZonedDateTime.now().plusHours(ttlHours);
 	}
 
 	public String getToken() {
@@ -34,16 +29,13 @@ public class SessionToken {
 	}
 
 	public Date getExpiration() {
-		return expiration;
+		return Date.from(expiration.toInstant());
 	}
 
 	public Map<String, Object> toMap() {
-		SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT_PATTERN);
-		df.setTimeZone(UTC);
-
 		Map<String, Object> map = new HashMap<>();
 		map.put("token", token);
-		map.put("expires", df.format(expiration));
+		map.put("expires", expiration.format(DateTimeFormatter.ISO_INSTANT));
 		return map;
 	}
 }
