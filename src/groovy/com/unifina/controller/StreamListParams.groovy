@@ -47,10 +47,10 @@ class StreamListParams extends ListParams {
 
 	@CompileStatic
 	Map toMap() {
-		super.toMap() + [
-			name: name,
+		return super.toMap() + ([
+			name     : name,
 			uiChannel: uiChannel,
-			inbox: inbox
-		]
+			inbox    : inbox
+		] as Map<String, Object>)
 	}
 }
