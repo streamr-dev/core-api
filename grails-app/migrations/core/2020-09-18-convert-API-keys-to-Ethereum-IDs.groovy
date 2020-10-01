@@ -31,27 +31,6 @@ class GetAccountAddressTask implements Callable<String> {
 	}
 }
 
-def convertUserKeysToIntegrationKeys(Sql sql) {
-	String statement = """
-		INSERT INTO
-			integration_key (id, version, name, json, user_id, service, id_in_service, date_created, last_updated)
-		SELECT
-			generated_integration_key_id,
-			0,
-			CONCAT('Converted from API key: ',key_id),
-			CONCAT(CONCAT('{\"address\":\"',account_address),'\"}'),
-			user_id,
-			?,
-			account_address,
-			CURRENT_TIMESTAMP(),
-			CURRENT_TIMESTAMP()
-		FROM `key`
-		LEFT JOIN tmp_apikey_lookup ON tmp_apikey_lookup.key_id = `key`.id
-		WHERE `key`.user_id is not null
-	"""
-	sql.execute(statement, [IntegrationKey.Service.ETHEREUM_ID.name()])
-}
-
 databaseChangeLog = {
 
 	// fill a lookup table
