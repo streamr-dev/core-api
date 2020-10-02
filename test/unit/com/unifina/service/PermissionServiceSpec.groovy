@@ -183,27 +183,27 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 	void "systemRevoke() on a stream also revokes the parent permissions"() {
 		User publisher = new User()
 		publisher.id = 7L
-		Stream pubInbox = new Stream(name: "publisher", inbox: true)
-		pubInbox.id = "publisher"
-		pubInbox.save(failOnError: true, validate: false)
+		Stream pub = new Stream(name: "publisher")
+		pub.id = "publisher"
+		pub.save(failOnError: true, validate: false)
 		User subscriber = new User(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
-		Stream subInbox = new Stream(name: subscriber.username, inbox: true)
-		subInbox.id = subscriber.username
-		subInbox.save(failOnError: true, validate: false)
+		Stream sub = new Stream(name: subscriber.username)
+		sub.id = subscriber.username
+		sub.save(failOnError: true, validate: false)
 		Stream stream = new Stream()
 		stream.id = "stream"
 		setup:
 		new Permission(user: publisher, stream: stream, operation: Operation.STREAM_PUBLISH).save(failOnError: true, validate: false)
 
 		Permission parent = new Permission(user: subscriber, stream: stream, operation: Operation.STREAM_SUBSCRIBE).save(failOnError: true, validate: false)
-		new Permission(user: subscriber, stream: pubInbox, operation: Operation.STREAM_PUBLISH, parent: parent).save(failOnError: true, validate: false)
-		new Permission(user: publisher, stream: subInbox, operation: Operation.STREAM_PUBLISH, parent: parent).save(failOnError: true, validate: false)
+		new Permission(user: subscriber, stream: pub, operation: Operation.STREAM_PUBLISH, parent: parent).save(failOnError: true, validate: false)
+		new Permission(user: publisher, stream: sub, operation: Operation.STREAM_PUBLISH, parent: parent).save(failOnError: true, validate: false)
 		when:
 		service.systemRevoke(subscriber, stream, Operation.STREAM_SUBSCRIBE)
 		then:
 		!service.check(subscriber, stream, Permission.Operation.STREAM_SUBSCRIBE)
-		!service.check(subscriber, pubInbox, Permission.Operation.STREAM_PUBLISH)
-		!service.check(publisher, subInbox, Permission.Operation.STREAM_PUBLISH)
+		!service.check(subscriber, pub, Permission.Operation.STREAM_PUBLISH)
+		!service.check(publisher, sub, Permission.Operation.STREAM_PUBLISH)
 	}
 
 	void "stranger can read public resources with anonymous read access"() {
