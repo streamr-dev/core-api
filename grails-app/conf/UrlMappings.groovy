@@ -1,9 +1,4 @@
-import com.unifina.domain.Dashboard
-import com.unifina.domain.Stream
-import com.unifina.domain.Product
-import com.unifina.domain.Permission
-import com.unifina.domain.User
-import com.unifina.domain.Canvas
+import com.unifina.domain.*
 
 class UrlMappings {
 	static mappings = {
@@ -32,8 +27,6 @@ class UrlMappings {
 		"/api/v1/streams/$id/detectFields"(method: "POST", controller: "streamApi", action: "detectFields")
 		"/api/v1/streams/$id/detectFields"(method: "GET", controller: "streamApi", action: "detectFields")
 		"/api/v1/streams/$id/range"(controller: "streamApi", action: "range")
-		"/api/v1/streams/$id/uploadCsvFile"(method: "POST", controller: "streamApi", action: "uploadCsvFile")
-		"/api/v1/streams/$id/confirmCsvFileUpload"(method: "POST", controller: "streamApi", action: "confirmCsvFileUpload")
 		"/api/v1/streams/$id/dataFiles"(controller: "streamApi", action: "dataFiles")
 		"/api/v1/streams/$id/validation"(method: "GET", controller: "streamApi", action: "validation")
 		"/api/v1/streams/$id/publishers"(controller: "streamApi", action: "publishers")
@@ -43,9 +36,11 @@ class UrlMappings {
 		"/api/v1/streams/$id/status"(controller: "streamApi", action: "status")
 		"/api/v1/streams/$resourceId/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
 		"/api/v1/streams/$streamId/keys/$keyId"(method: "PUT", controller: "keyApi", action: "updateStreamKey")
-		"/api/v1/streams/$id/deleteDataUpTo"(method: "DELETE", controller: "streamApi", action: "deleteDataUpTo")
-		"/api/v1/streams/$id/deleteAllData"(method: "DELETE", controller: "streamApi", action: "deleteAllData")
-		"/api/v1/streams/$id/deleteDataRange"(method: "DELETE", controller: "streamApi", action: "deleteDataRange")
+
+		"/api/v1/storageNodes/$storageNodeAddress/streams"(method: "GET", controller: "storageNodeApi", action: "findStreamsByStorageNode")
+		"/api/v1/streams/$streamId/storageNodes"(method: "GET", controller: "storageNodeApi", action: "findStorageNodesByStream")
+		"/api/v1/streams/$streamId/storageNodes"(method: "POST", controller: "storageNodeApi", action: "addStorageNodeToStream")
+		"/api/v1/streams/$streamId/storageNodes/$storageNodeAddress"(method: "DELETE", controller: "storageNodeApi", action: "removeStorageNodeFromStream")
 
 		"/api/v1/dashboards"(resources: "dashboardApi", excludes: ["create", "edit"])
 		"/api/v1/dashboards/$dashboardId/items"(resources: "dashboardItemApi", excludes: ["create", "edit"])
@@ -111,17 +106,17 @@ class UrlMappings {
 
 		"/api/v1/dataunions/$contractAddress/joinRequests"(resources: "dataUnionJoinRequestApi", excludes: ["create", "edit"])
 		"/api/v1/dataunions/$contractAddress/secrets"(resources: "dataUnionSecretApi", excludes: ["create", "edit"])
-		"/api/v1/dataunions/$contractAddress/stats"(method: "GET", controller: "dataUnionOperatorApi", action: "stats")
-		"/api/v1/dataunions/$contractAddress/members"(method: "GET", controller: "dataUnionOperatorApi", action: "members")
-		"/api/v1/dataunions/$contractAddress/members/$memberAddress"(method: "GET", controller: "dataUnionOperatorApi", action: "memberStats")
-		"/api/v1/dataunions"(method: "GET", controller: "dataUnionOperatorApi", action: "summary")
+		"/api/v1/dataunions/$contractAddress/stats"(method: "GET", controller: "dataUnionApi", action: "stats")
+		"/api/v1/dataunions/$contractAddress/members"(method: "GET", controller: "dataUnionApi", action: "members")
+		"/api/v1/dataunions/$contractAddress/members/$memberAddress"(method: "GET", controller: "dataUnionApi", action: "memberStats")
+		"/api/v1/dataunions"(method: "GET", controller: "dataUnionApi", action: "summary")
 
 		// Deprecated aliases of the above, remove once no one is calling them
 		"/api/v1/communities/$contractAddress/joinRequests"(resources: "dataUnionJoinRequestApi", excludes: ["create", "edit"])
 		"/api/v1/communities/$contractAddress/secrets"(resources: "dataUnionSecretApi", excludes: ["create", "edit"])
-		"/api/v1/communities/$contractAddress/stats"(method: "GET", controller: "dataUnionOperatorApi", action: "stats")
-		"/api/v1/communities/$contractAddress/members"(method: "GET", controller: "dataUnionOperatorApi", action: "members")
-		"/api/v1/communities/$contractAddress/members/$memberAddress"(method: "GET", controller: "dataUnionOperatorApi", action: "memberStats")
-		"/api/v1/communities"(method: "GET", controller: "dataUnionOperatorApi", action: "summary")
+		"/api/v1/communities/$contractAddress/stats"(method: "GET", controller: "dataUnionApi", action: "stats")
+		"/api/v1/communities/$contractAddress/members"(method: "GET", controller: "dataUnionApi", action: "members")
+		"/api/v1/communities/$contractAddress/members/$memberAddress"(method: "GET", controller: "dataUnionApi", action: "memberStats")
+		"/api/v1/communities"(method: "GET", controller: "dataUnionApi", action: "summary")
 	}
 }

@@ -2,16 +2,7 @@ package com.unifina.service
 
 import com.streamr.client.StreamrClient
 import com.streamr.client.options.StreamrClientOptions
-import com.unifina.api.NotFoundException
-import com.unifina.api.UpdateDataUnionJoinRequestCommand
-import com.unifina.domain.DataUnionJoinRequest
-import com.unifina.domain.Stream
-import com.unifina.domain.Category
-import com.unifina.domain.Product
-import com.unifina.domain.Permission
-import com.unifina.domain.User
-import com.unifina.domain.Module
-import com.unifina.domain.ModuleCategory
+import com.unifina.domain.*
 import groovy.json.JsonBuilder
 import spock.lang.Specification
 
@@ -51,7 +42,7 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 
 		service.ethereumService = Mock(EthereumService)
 		service.permissionService = Mock(PermissionService)
-		service.dataUnionOperatorService = Mock(DataUnionOperatorService)
+		service.dataUnionService = Mock(DataUnionService)
 	}
 
 	void "findAll"() {
@@ -166,13 +157,13 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
+		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
 			state: "ACCEPTED",
 		)
 
-		DataUnionOperatorService.ProxyResponse notFoundStats = new DataUnionOperatorService.ProxyResponse()
+		DataUnionService.ProxyResponse notFoundStats = new DataUnionService.ProxyResponse()
 		notFoundStats.statusCode = 404
-		DataUnionOperatorService.ProxyResponse okStats = new DataUnionOperatorService.ProxyResponse()
+		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
 		okStats.statusCode = 200
 		okStats.body =  new JsonBuilder([
 			active: true,
@@ -182,8 +173,8 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		def c = service.update(contractAddress, r.id, cmd)
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		2 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> notFoundStats
-		1 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> okStats
+		2 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> notFoundStats
+		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> okStats
 		1 * streamrClientMock.publish(_, [type: "join", addresses: [r.memberAddress]])
 		c.state == DataUnionJoinRequest.State.ACCEPTED
 		// no changes below
@@ -204,7 +195,7 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
+		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
 			state: "REJECTED",
 		)
 
@@ -258,9 +249,14 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
 		1 * streamrClientMock.publish(_, [type: "part", addresses: [r.memberAddress]])
 		1 * service.permissionService.systemRevoke(me, s1, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemRevoke(me, s1, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemRevoke(me, s2, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemRevoke(me, s2, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemRevoke(me, s3, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemRevoke(me, s3, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemRevoke(me, s4, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemRevoke(me, s4, Permission.Operation.STREAM_GET)
+		0 * service.permissionService._
 		DataUnionJoinRequest.findById(r.id) == null
 	}
 

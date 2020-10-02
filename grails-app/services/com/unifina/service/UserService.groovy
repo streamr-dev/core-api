@@ -1,12 +1,8 @@
 package com.unifina.service
 
-import com.unifina.api.InvalidAPIKeyException
-import com.unifina.api.InvalidUsernameAndPasswordException
-import com.unifina.api.NotFoundException
+
 import com.unifina.domain.*
-import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.security.PasswordEncoder
-import com.unifina.security.Userish
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.context.MessageSource
 import org.springframework.validation.FieldError
@@ -176,5 +172,13 @@ class UserService {
 			return key.user
 		}
 		return key // is an anonymous key
+	}
+
+	User getUserById(Long id) {
+		if (id != null) {
+			return User.get(id)
+		} else {
+			return null
+		}
 	}
 }

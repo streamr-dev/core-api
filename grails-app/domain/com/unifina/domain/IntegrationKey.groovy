@@ -32,7 +32,9 @@ class IntegrationKey implements Serializable {
 	}
 
 	enum Service {
+		// Ethereum keys for canvases on Profile page
 		ETHEREUM,
+		// Ethereum Accounts on Profile page
 		ETHEREUM_ID
 	}
 
@@ -56,4 +58,9 @@ class IntegrationKey implements Serializable {
 		}
 	}
 
+	String parsePrivateKey() {
+		JSONObject element = JSON.parse(json) as JSONObject
+		String key = element.get("privateKey")
+		return key
+	}
 }

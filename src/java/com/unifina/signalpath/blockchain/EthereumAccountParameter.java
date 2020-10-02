@@ -1,9 +1,9 @@
 package com.unifina.signalpath.blockchain;
 
-import com.unifina.api.NotPermittedException;
 import com.unifina.domain.IntegrationKey;
 import com.unifina.domain.User;
 import com.unifina.service.EthereumIntegrationKeyService;
+import com.unifina.service.NotPermittedException;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Parameter;
 import com.unifina.signalpath.PossibleValue;

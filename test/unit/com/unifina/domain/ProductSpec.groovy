@@ -117,6 +117,7 @@ class ProductSpec extends Specification {
 		then:
 		p.errors.errorCount == 0
 	}
+
 	void "pendingChanges field is shown to the owner"() {
 		setup:
 		Category category = new Category(name: "category")
@@ -171,5 +172,18 @@ class ProductSpec extends Specification {
 		map.priceCurrency == "DATA"
 		map.minimumSubscriptionInSeconds == 0L
 		map.pendingChanges == [name: "new name"]
+	}
+
+	@Unroll
+	void "isFree(#price) == #expected"(Long price, Object expected) {
+		expect:
+		Product p = new Product(pricePerSecond: price)
+		p.isFree() == expected
+
+		where:
+		price | expected
+		-1L | false
+		0L | true
+		1L | false
 	}
 }

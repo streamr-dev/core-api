@@ -3,7 +3,6 @@ package com.unifina.domain
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
-
 @TestFor(DataUnionJoinRequest)
 class DataUnionJoinRequestSpec extends Specification {
 	DataUnionJoinRequest req
@@ -26,6 +25,21 @@ class DataUnionJoinRequestSpec extends Specification {
 			lastUpdated: new Date(),
 		)
     }
+
+	void "state parameter is null or State"(String value, Object expected) {
+		expect:
+		DataUnionJoinRequest.State.isState(value) == expected
+		where:
+		value      | expected
+		null       | null
+		""         | null
+		" "        | null
+		"\t"       | null
+		"abcxyz"   | null
+		"accepted" | DataUnionJoinRequest.State.ACCEPTED
+		"rejected" | DataUnionJoinRequest.State.REJECTED
+		"pending"  | DataUnionJoinRequest.State.PENDING
+	}
 
 	void "valid DataUnionJoinRequest validates ok"() {
 		setup:

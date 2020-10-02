@@ -1,6 +1,6 @@
 package com.unifina.signalpath;
 
-import com.unifina.exceptions.ModuleExceptionMessage;
+import com.unifina.signalpath.custom.ModuleExceptionMessage;
 
 import java.util.ArrayList;
 import java.util.HashMap;

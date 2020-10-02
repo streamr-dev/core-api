@@ -2,7 +2,6 @@ package com.unifina.signalpath.utils;
 
 import com.streamr.client.utils.StreamPartition;
 import com.unifina.domain.Stream;
-import com.unifina.exceptions.InvalidStreamConfigException;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
 import grails.converters.JSON;

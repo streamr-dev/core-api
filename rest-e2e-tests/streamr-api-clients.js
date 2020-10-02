@@ -236,21 +236,6 @@ class Streams {
             .withBody(body)
     }
 
-    uploadCsvFile(id, fileBytes) {
-        const formData = new FormData()
-        formData.append('file', fileBytes)
-
-        return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', `streams/${id}/uploadCsvFile`)
-            .withRawBody(formData)
-    }
-
-    confirmCsvUpload(id, body) {
-        return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', `streams/${id}/confirmCsvFileUpload`)
-            .withBody(body)
-    }
-
     grantPublic(id, operation) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `streams/${id}/permissions`)
@@ -404,6 +389,33 @@ class DataUnions {
     }
 }
 
+class StorageNodes {
+	constructor(options) {
+		this.options = options
+	}
+
+	findStreamsByStorageNode(address) {
+		return new StreamrApiRequest(this.options)
+			.methodAndPath('GET', `storageNodes/${address}/streams`)
+	}
+
+	findStorageNodesByStream(id) {
+		return new StreamrApiRequest(this.options)
+			.methodAndPath('GET', `streams/${id}/storageNodes`)
+	}
+
+	addStorageNodeToStream(storageNodeAddress, streamId) {
+		return new StreamrApiRequest(this.options)
+			.methodAndPath('POST', `streams/${streamId}/storageNodes`)
+			.withBody({address: storageNodeAddress})
+	}
+
+	removeStorageNodeFromStream(storageNodeAddress, streamId) {
+		return new StreamrApiRequest(this.options)
+			.methodAndPath('DELETE', `streams/${streamId}/storageNodes/${storageNodeAddress}`)
+	}
+}
+
 class NotFound {
     constructor(options) {
         this.options = options
@@ -442,6 +454,7 @@ module.exports = (baseUrl, logging) => {
                 streams: new Streams(options),
                 subscriptions: new Subscriptions(options),
                 dataunions: new DataUnions(options),
+                storagenodes: new StorageNodes(options),
                 not_found: new NotFound(options),
             }
         }

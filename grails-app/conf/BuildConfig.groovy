@@ -70,7 +70,6 @@ grails.project.dependency.resolution = {
 		compile('com.mashape.unirest:unirest-java:1.4.9')
 		compile('org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.1')
 		compile('org.antlr:ST4:4.0.8')
-		compile('org.postgresql:postgresql:9.4.1208.jre7')
 		compile('biz.paluch.redis:lettuce:3.5.0.Final') {
 			excludes('com.google.guava:guava:*')
 		}
@@ -83,24 +82,16 @@ grails.project.dependency.resolution = {
 			excludes('org.springframework:spring-context:*')
 			excludes('org.springframework:spring-orm:*')
 		}
-		compile('org.springframework.security:spring-security-core:3.2.9.RELEASE') { // Needed for bcrypt password encoder
-			excludes('aopalliance', 'aspectjrt', 'cglib-nodep', 'commons-collections', 'commons-logging',
-				'ehcache', 'fest-assert', 'hsqldb', 'jcl-over-slf4j', 'jsr250-api', 'junit',
-				'logback-classic', 'mockito-core', 'powermock-api-mockito', 'powermock-api-support',
-				'powermock-core', 'powermock-module-junit4', 'powermock-module-junit4-common',
-				'powermock-reflect', 'spring-aop', 'spring-beans', 'spring-context', 'spring-core',
-				'spring-expression', 'spring-jdbc', 'spring-test', 'spring-tx')
+		compile('org.springframework.security:spring-security-core:4.2.9.RELEASE') { // Needed for bcrypt and PBKDF2 password encoders
+			excludes('org.springframework:spring-aop:*')
+			excludes('org.springframework:spring-beans:*')
+			excludes('org.springframework:spring-context:*')
+			excludes('org.springframework:spring-core:*')
+			excludes('org.springframework:spring-expression:*')
 		}
-		compile('org.springframework.security:spring-security-web:3.2.9.RELEASE') { // Needed for CORS
-			excludes('aopalliance', 'commons-codec', 'commons-logging', 'fest-assert', 'groovy', 'hsqldb',
-				'jcl-over-slf4j', 'junit', 'logback-classic', 'mockito-core', 'powermock-api-mockito',
-				'powermock-api-support', 'powermock-core', 'powermock-module-junit4',
-				'powermock-module-junit4-common', 'powermock-reflect', 'spock-core', 'spring-beans',
-				'spring-context', 'spring-core', 'spring-expression', 'spring-jdbc',
-				'spring-security-core', 'spring-test', 'spring-tx', 'spring-web', 'spring-webmvc',
-				'tomcat-servlet-api')
+		compile('org.springframework.security:spring-security-web:4.2.9.RELEASE') { // Needed for CORS plugin
+			excludes('org.springframework:spring-web:*')
 		}
-
 		compile('org.web3j:core:5.0.0') {
 			excludes "org.java-websocket:Java-WebSocket:1.3.8" // Version conflict with com.streamr:client
 		}
@@ -112,13 +103,13 @@ grails.project.dependency.resolution = {
 		compile('org.glassfish.jersey.media:jersey-media-json-jackson:2.27')
 		compile('com.fasterxml.jackson.core:jackson-databind:2.9.6')
 		compile('com.fasterxml.jackson.core:jackson-annotations:2.9.6')
-		compile('com.streamr:client:2.0.0')
+		compile('com.streamr:client:2.0.1')
 
 		compile('com.google.code.gson:gson:2.8.5')
 		runtime('mysql:mysql-connector-java:5.1.20')
 		runtime('commons-net:commons-net:3.3')
 		runtime('org.apache.commons:commons-math3:3.2')
-		runtime('commons-codec:commons-codec:1.6')
+		runtime('commons-codec:commons-codec:1.15')
 		runtime('com.opencsv:opencsv:3.3')
 		runtime('de.ruedigermoeller:fst:2.56')
 		runtime('joda-time:joda-time:2.10.6')
@@ -137,7 +128,7 @@ grails.project.dependency.resolution = {
 
 		compile(":mail:1.0.8-SNAPSHOT")
 
-		runtime(':hibernate:3.6.10.19') // or :hibernate4:4.3.10
+		runtime(':hibernate4:4.3.10')
 		runtime(":cors:1.3.0") {
 			excludes('spring-security-core')
 			excludes('spring-security-web')
@@ -145,6 +136,5 @@ grails.project.dependency.resolution = {
 		runtime(':database-migration:1.4.2-SNAPSHOT')
 
 		test(":plastic-criteria:1.6.7")
-		test(":rest-client-builder:2.1.1")
 	}
 }

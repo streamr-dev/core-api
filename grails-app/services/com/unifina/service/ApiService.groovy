@@ -2,12 +2,10 @@ package com.unifina.service
 
 import com.mashape.unirest.http.HttpResponse
 import com.mashape.unirest.http.Unirest
-import com.unifina.api.*
-import com.unifina.domain.Key
+import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
 import com.unifina.domain.Permission
 import com.unifina.domain.User
-import com.unifina.exceptions.UnexpectedApiResponseException
-import com.unifina.security.Userish
+import com.unifina.domain.Userish
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import groovy.transform.CompileStatic
@@ -52,7 +50,9 @@ class ApiService {
 	@GrailsCompileStatic
 	void addLinkHintToHeader(ListParams listParams, int numOfResults, Map params, HttpServletResponse response) {
 		if (numOfResults == listParams.max) {
-			Map paramMap = listParams.toMap() + [offset: listParams.offset + listParams.max]
+			Map<String, Object> paramMap = listParams.toMap()
+			Integer offset = listParams.offset + listParams.max
+			paramMap.put("offset", offset)
 
 			String url = grailsLinkGenerator.link(
 				controller: params.controller,
@@ -87,12 +87,11 @@ class ApiService {
 	}
 
 	@CompileStatic
-	Map post(String url, Map body, Key key) {
-		// TODO: Migrate to Streamr API Java client lib when such a thing is made
+	Map post(String url, Map body, AuthorizationHeader authorizationHeader) {
 		def req = Unirest.post(url)
 
-		if (key) {
-			req.header("Authorization", "token $key.id")
+		if (authorizationHeader) {
+			req.header("Authorization", authorizationHeader.toString())
 		}
 
 		req.header("Content-Type", "application/json")

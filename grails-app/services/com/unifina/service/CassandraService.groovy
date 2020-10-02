@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Row
@@ -72,20 +71,8 @@ class CassandraService implements DisposableBean {
 	}
 
 	void deleteAll(Stream stream) {
-		for (int partition=0; partition<stream.partitions; partition++) {
+		for (int partition = 0; partition < stream.partitions; partition++) {
 			session.execute("DELETE FROM stream_data where id = ? and partition = ?", stream.id, partition)
-		}
-	}
-
-	void deleteRange(Stream stream, Date from, Date to) {
-		for (int partition=0; partition<stream.partitions; partition++) {
-			session.execute("DELETE FROM stream_data WHERE id = ? AND partition = ? AND ts >= ? AND ts <= ?", stream.id, partition, from, to)
-		}
-	}
-
-	void deleteUpTo(Stream stream, Date to) {
-		for (int partition=0; partition<stream.partitions; partition++) {
-			session.execute("DELETE FROM stream_data WHERE id = ? AND partition = ? AND ts <= ?", stream.id, partition, to)
 		}
 	}
 

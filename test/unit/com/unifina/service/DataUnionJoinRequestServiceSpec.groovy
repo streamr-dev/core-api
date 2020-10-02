@@ -3,20 +3,7 @@ package com.unifina.service
 import com.streamr.client.StreamrClient
 import com.streamr.client.options.StreamrClientOptions
 import com.unifina.BeanMockingSpecification
-import com.unifina.api.ApiException
-import com.unifina.api.DataUnionJoinRequestCommand
-import com.unifina.api.NotFoundException
-import com.unifina.api.ProxyException
-import com.unifina.api.UpdateDataUnionJoinRequestCommand
-import com.unifina.domain.Stream
-import com.unifina.domain.DataUnionJoinRequest
-import com.unifina.domain.DataUnionSecret
-import com.unifina.domain.Category
-import com.unifina.domain.Product
-import com.unifina.domain.IntegrationKey
-import com.unifina.domain.Permission
-import com.unifina.domain.User
-import com.unifina.exceptions.JoinRequestException
+import com.unifina.domain.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import groovy.json.JsonBuilder
@@ -36,7 +23,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		service.ethereumService = mockBean(EthereumService)
 		service.streamrClientService = mockBean(StreamrClientService)
 		service.permissionService = mockBean(PermissionService)
-		service.dataUnionOperatorService = mockBean(DataUnionOperatorService)
+		service.dataUnionService = mockBean(DataUnionService)
 
 		joinPartStream = new com.streamr.client.rest.Stream("join part stream", "")
 		joinPartStream.setId("joinPartStream")
@@ -94,9 +81,9 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 			secret: "secret",
 		)
 
-		DataUnionOperatorService.ProxyResponse notFoundStats = new DataUnionOperatorService.ProxyResponse()
+		DataUnionService.ProxyResponse notFoundStats = new DataUnionService.ProxyResponse()
 		notFoundStats.statusCode = 404
-		DataUnionOperatorService.ProxyResponse okStats = new DataUnionOperatorService.ProxyResponse()
+		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
 		okStats.statusCode = 200
 		okStats.body =  new JsonBuilder([
 			active: true,
@@ -107,8 +94,8 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		2 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> notFoundStats
-		1 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> okStats
+		2 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> notFoundStats
+		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> okStats
 		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
 		c.state == DataUnionJoinRequest.State.ACCEPTED
     }
@@ -183,9 +170,9 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
 
-		DataUnionOperatorService.ProxyResponse notFoundStats = new DataUnionOperatorService.ProxyResponse()
+		DataUnionService.ProxyResponse notFoundStats = new DataUnionService.ProxyResponse()
 		notFoundStats.statusCode = 404
-		DataUnionOperatorService.ProxyResponse okStats = new DataUnionOperatorService.ProxyResponse()
+		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
 		okStats.statusCode = 200
 		okStats.body =  new JsonBuilder([
 			active: true,
@@ -196,8 +183,8 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		2 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> notFoundStats
-		1 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> okStats
+		2 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> notFoundStats
+		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> okStats
 		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
 		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.STREAM_PUBLISH)
@@ -248,9 +235,9 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
 
-		DataUnionOperatorService.ProxyResponse notFoundStats = new DataUnionOperatorService.ProxyResponse()
+		DataUnionService.ProxyResponse notFoundStats = new DataUnionService.ProxyResponse()
 		notFoundStats.statusCode = 404
-		DataUnionOperatorService.ProxyResponse okStats = new DataUnionOperatorService.ProxyResponse()
+		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
 		okStats.statusCode = 200
 		okStats.body =  new JsonBuilder([
 			active: true,
@@ -261,8 +248,8 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		2 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> notFoundStats
-		1 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> okStats
+		2 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> notFoundStats
+		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> okStats
 		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
 		1 * service.permissionService.check(user, s1, Permission.Operation.STREAM_PUBLISH) >> true
 		1 * service.permissionService.check(user, s2, Permission.Operation.STREAM_PUBLISH) >> true
@@ -388,11 +375,11 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
+		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
 			state: "ACCEPTED",
 		)
 
-		DataUnionOperatorService.ProxyResponse stats = new DataUnionOperatorService.ProxyResponse()
+		DataUnionService.ProxyResponse stats = new DataUnionService.ProxyResponse()
 		stats.statusCode = 200
 		stats.body = new JsonBuilder([
 			active: true,
@@ -401,7 +388,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		when:
 		service.update(contractAddress, r.id, cmd)
 		then:
-		1 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> stats
+		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> stats
 		0 * service.ethereumService._
 		0 * streamrClientMock._
 		0 * service.permissionService._
@@ -455,11 +442,11 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
+		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
 			state: "ACCEPTED",
 		)
 
-		DataUnionOperatorService.ProxyResponse okStats = new DataUnionOperatorService.ProxyResponse()
+		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
 		okStats.statusCode = 200
 		okStats.body =  new JsonBuilder([
 			active: true,
@@ -469,10 +456,10 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		service.update(contractAddress, r.id, cmd)
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		1 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >>  {
-			throw new ProxyException("mocked exception")
+		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >>  {
+			throw new DataUnionProxyException("mocked exception")
 		}
-		1 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> okStats
+		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> okStats
 		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
 		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.STREAM_PUBLISH)
@@ -528,24 +515,24 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
+		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
 			state: "ACCEPTED",
 		)
 
-		DataUnionOperatorService.ProxyResponse notFoundStats = new DataUnionOperatorService.ProxyResponse()
+		DataUnionService.ProxyResponse notFoundStats = new DataUnionService.ProxyResponse()
 		notFoundStats.statusCode = 404
 
 		when:
 		service.update(contractAddress, r.id, cmd)
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		11 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> notFoundStats
+		11 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> notFoundStats
 		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
 		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.STREAM_PUBLISH)
-		thrown(JoinRequestException)
+		thrown(DataUnionJoinRequestException)
 	}
 
 	void "update sets permissions"() {
@@ -596,13 +583,13 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
+		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
 			state: "ACCEPTED",
 		)
 
-		DataUnionOperatorService.ProxyResponse notFoundStats = new DataUnionOperatorService.ProxyResponse()
+		DataUnionService.ProxyResponse notFoundStats = new DataUnionService.ProxyResponse()
 		notFoundStats.statusCode = 404
-		DataUnionOperatorService.ProxyResponse okStats = new DataUnionOperatorService.ProxyResponse()
+		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
 		okStats.statusCode = 200
 		okStats.body =  new JsonBuilder([
 			active: true,
@@ -612,8 +599,8 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		service.update(contractAddress, r.id, cmd)
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		2 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> notFoundStats
-		1 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> okStats
+		2 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> notFoundStats
+		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> okStats
 		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
 		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.STREAM_PUBLISH)
@@ -633,7 +620,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
+		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
 			state: "ACCEPTED",
 		)
 
@@ -657,7 +644,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
+		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
 			state: "NOT_IN_OUR_ENUM",
 		)
 

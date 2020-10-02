@@ -1,17 +1,7 @@
 package com.unifina.service
 
 import com.unifina.BeanMockingSpecification
-import com.unifina.api.*
-import com.unifina.domain.ExampleType
-import com.unifina.domain.Dashboard
-import com.unifina.domain.DashboardItem
-import com.unifina.domain.Stream
-import com.unifina.domain.Permission
-import com.unifina.domain.User
-import com.unifina.domain.Canvas
-import com.unifina.domain.Module
-import com.unifina.domain.Serialization
-import com.unifina.exceptions.CanvasUnreachableException
+import com.unifina.domain.*
 import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.signalpath.charts.Heatmap
@@ -55,6 +45,8 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		moduleWithUi = new Module(implementingClass: Heatmap.name).save(validate: false)
 
 		me = new User(username: "me@me.com").save(validate: false)
+		def userService = mockBean(UserService, new UserService())
+		userService.getUserById(_) >> me
 
 		myFirstCanvas = new Canvas(
 			name: "my_canvas_1",
@@ -479,10 +471,10 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		myFirstCanvas.save(failOnError: true)
 
 		when:
-		service.stop(myFirstCanvas, me)
+		service.stop(myFirstCanvas, me, null)
 
 		then:
-		1 * signalPathService.stopRemote(myFirstCanvas, me) >> [:]
+		1 * signalPathService.stopRemote(myFirstCanvas, me, _) >> [:]
 		0 * signalPathService._
 
 	}
@@ -492,10 +484,10 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		service.signalPathService = signalPathService
 		myFirstCanvas.state = Canvas.State.RUNNING
 
-		signalPathService.stopRemote(myFirstCanvas, me) >> { throw new CanvasUnreachableException("") }
+		signalPathService.stopRemote(myFirstCanvas, me, _) >> { throw new CanvasUnreachableException("") }
 
 		when:
-		service.stop(myFirstCanvas, me)
+		service.stop(myFirstCanvas, me, null)
 
 		then:
 		thrown(CanvasUnreachableException)
@@ -506,10 +498,10 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		service.signalPathService = signalPathService
 		myFirstCanvas.state = Canvas.State.STOPPED
 
-		signalPathService.stopRemote(myFirstCanvas, me) >> { throw new CanvasUnreachableException("") }
+		signalPathService.stopRemote(myFirstCanvas, me, _) >> { throw new CanvasUnreachableException("") }
 
 		when:
-		service.stop(myFirstCanvas, me)
+		service.stop(myFirstCanvas, me, null)
 
 		then:
 		thrown(InvalidStateException)

@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
+
 import com.unifina.domain.IntegrationKey
 import com.unifina.domain.User
 import com.unifina.signalpath.blockchain.EthereumModuleOptions

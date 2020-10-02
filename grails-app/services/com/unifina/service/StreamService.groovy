@@ -3,13 +3,11 @@ package com.unifina.service
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.unifina.api.ValidationException
 import com.unifina.data.StreamPartitioner
 import com.unifina.domain.*
 import com.unifina.feed.DataRange
 import com.unifina.feed.FieldDetector
 import com.unifina.task.DelayedDeleteStreamTask
-import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
@@ -33,12 +31,6 @@ class StreamService {
 		.create()
 
 	Stream getStream(String id) {
-		if (EthereumAddressValidator.validate(id)) {
-			Stream inboxStream = Stream.get(id.toLowerCase())
-			if (inboxStream.inbox) {
-				return inboxStream
-			}
-		}
 		return Stream.get(id)
 	}
 
@@ -105,24 +97,6 @@ class StreamService {
 		cassandraService.save(msg)
 	}
 
-	// Ref to Cassandra will be abstracted out when Feed abstraction is reworked
-	@CompileStatic
-	void deleteDataRange(Stream stream, Date from, Date to) {
-		cassandraService.deleteRange(stream, from, to)
-	}
-
-	// Ref to Cassandra will be abstracted out when Feed abstraction is reworked
-	@CompileStatic
-	void deleteDataUpTo(Stream stream, Date to) {
-		cassandraService.deleteUpTo(stream, to)
-	}
-
-	// Ref to Cassandra will be abstracted out when Feed abstraction is reworked
-	@CompileStatic
-	void deleteAllData(Stream stream) {
-		cassandraService.deleteAll(stream)
-	}
-
 	@CompileStatic
 	DataRange getDataRange(Stream stream) {
 		return cassandraService.getDataRange(stream)
@@ -174,17 +148,6 @@ class StreamService {
 			return false
 		}
 		return permissionService.check(key.user, stream, Permission.Operation.STREAM_SUBSCRIBE)
-	}
-
-	List<Stream> getInboxStreams(List<User> users) {
-		if (users.isEmpty()) return new ArrayList<Stream>()
-		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
-			user {
-				'in'("id", users*.id)
-			}
-			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
-		}
-		return Stream.findAllByIdInListAndInbox(keys*.idInService, true)
 	}
 
 	static class StreamStatus {

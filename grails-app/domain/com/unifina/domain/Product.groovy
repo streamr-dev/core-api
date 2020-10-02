@@ -32,6 +32,8 @@ class Product {
 	// Product's legal terms of use.
 	TermsOfUse termsOfUse = new TermsOfUse()
 
+	Integer dataUnionVersion
+
 	static embedded = [
 		'contact',
 		'termsOfUse',
@@ -87,6 +89,7 @@ class Product {
 		owner(nullable: false)
 		contact(nullable: true)
 		termsOfUse(nullable: true)
+		dataUnionVersion(nullable: true, validator: { Integer d, p -> (p.type == Type.DATAUNION) ? ((d == 1) || (d == 2) || (d == null)) : (d == null)})
 	}
 
 	static mapping = {
@@ -122,7 +125,7 @@ class Product {
 			ownerAddress: ownerAddress,
 			beneficiaryAddress: beneficiaryAddress,
 			pricePerSecond: pricePerSecond.toString(),
-			isFree: pricePerSecond == 0L,
+			isFree: this.isFree(),
 			priceCurrency: priceCurrency.toString(),
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
 			owner: owner.name,
@@ -133,12 +136,15 @@ class Product {
 			JsonSlurper slurper = new JsonSlurper()
 			map.put("pendingChanges", (HashMap<String, Serializable>) slurper.parseText(pendingChanges))
 		}
+		if (type == Type.DATAUNION) {
+			map.put("dataUnionVersion", dataUnionVersion)
+		}
 		return map
 	}
 
 	@GrailsCompileStatic
 	Map toSummaryMap() {
-		[
+		def map = [
 			id: id,
 			type: type.toString(),
 			name: name,
@@ -155,15 +161,19 @@ class Product {
 			ownerAddress: ownerAddress,
 			beneficiaryAddress: beneficiaryAddress,
 			pricePerSecond: pricePerSecond.toString(),
-			isFree: pricePerSecond == 0L,
+			isFree: this.isFree(),
 			priceCurrency: priceCurrency.toString(),
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
 			owner: owner.name
 		]
+		if (type == Type.DATAUNION) {
+			map.put("dataUnionVersion", dataUnionVersion)
+		}
+		return map;
 	}
 
 	boolean isFree() {
-		return pricePerSecond == 0
+		return pricePerSecond == 0L
 	}
 
 	static isEthereumAddressOrIsNull = { String value ->

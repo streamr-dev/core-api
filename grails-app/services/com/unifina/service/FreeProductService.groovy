@@ -1,7 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.InvalidStateTransitionException
-import com.unifina.api.ProductNotFreeException
+
 import com.unifina.domain.Permission
 import com.unifina.domain.Product
 import grails.compiler.GrailsCompileStatic
@@ -48,7 +47,7 @@ class FreeProductService {
 	}
 
 	static void verifyThatProductIsFree(Product product) {
-		if (product.pricePerSecond != 0) {
+		if (!product.isFree()) {
 			throw new ProductNotFreeException(product)
 		}
 	}
