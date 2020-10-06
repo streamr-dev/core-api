@@ -23,8 +23,8 @@ CATALINA_OPTS="\
 	-Dstreamr.ethereum.nodePrivateKey=$ETHEREUM_NODE_PRIVATE_KEY \
 	-Dstreamr.encryption.password=$STREAMR_ENCRYPTION_PASSWORD \
 "
-wait-for-it.sh "$DB_HOST:$DB_PORT" --timeout=120 \
+wait-for-it.sh "$DB_HOST:$DB_PORT" --timeout=300 \
 	&& while ! mysql --user="$DB_USER" --host="$DB_HOST" --password="$DB_PASS" "$DB_NAME" -e "SELECT 1;" 1>/dev/null; do echo "waiting for db"; sleep 1; done \
-	&& wait-for-it.sh "$CASSANDRA_HOST:$CASSANDRA_PORT" --timeout=120 && \
+	&& wait-for-it.sh "$CASSANDRA_HOST:$CASSANDRA_PORT" --timeout=300 && \
 	CATALINA_OPTS="$CATALINA_OPTS" catalina.sh run
 
