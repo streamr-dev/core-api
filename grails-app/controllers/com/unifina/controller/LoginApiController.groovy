@@ -4,6 +4,7 @@ package com.unifina.controller
 import com.unifina.domain.SignupMethod
 import com.unifina.domain.User
 import com.unifina.domain.Userish
+import com.unifina.security.ApiKeyConverter
 import com.unifina.service.*
 import grails.converters.JSON
 
@@ -48,13 +49,16 @@ class LoginApiController {
 		if (cmd.hasErrors()) {
 			throw new InvalidArgumentsException(cmd.errors.getFieldErrors().collect {it.field+" expected."}.join(" "))
 		}
-		// returns either a User or a Key (anonymous key)
-		Userish userish = userService.getUserishFromApiKey(cmd.apiKey)
-		if (userish instanceof User) {
-			assertEnabled((User) userish)
+		String privateKey = ApiKeyConverter.createEthereumPrivateKey(cmd.apiKey);
+		String address = "0x" + EthereumIntegrationKeyService.getAddress(privateKey);
+		User user = ethereumIntegrationKeyService.getEthereumUser(address);
+		if (user != null) {
+			assertEnabled(user)
+			SessionToken token = sessionService.generateToken(user)
+			render(token.toMap() as JSON)
+		} else {
+			throw new InvalidAPIKeyException("Invalid API key")
 		}
-		SessionToken token = sessionService.generateToken(userish)
-		render(token.toMap() as JSON)
 	}
 
 	private void assertEnabled(User user) {

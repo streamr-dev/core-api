@@ -8,7 +8,8 @@ import javax.servlet.http.HttpServletRequest
 enum SignupMethod {
 	API,
 	CORE,
-	UNKNOWN
+	UNKNOWN,
+	MIGRATED
 
 	private final static String SERVER_URL_CONFIG_KEY = "grails.serverURL"
 
