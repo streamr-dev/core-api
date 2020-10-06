@@ -2,7 +2,6 @@ package com.unifina.service
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.unifina.api.*
 import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
 import com.unifina.domain.*
 import com.unifina.serialization.SerializationException

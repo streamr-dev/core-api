@@ -1,11 +1,9 @@
 package com.unifina.signalpath.streams
 
 import com.unifina.BeanMockingSpecification
-import com.unifina.api.ValidationException
-
 import com.unifina.domain.Stream
-
 import com.unifina.service.StreamService
+import com.unifina.service.ValidationException
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock

@@ -1,13 +1,11 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
 import com.unifina.domain.IntegrationKey
 import com.unifina.domain.User
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
-
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 import grails.test.runtime.FreshRuntime
 import org.web3j.exceptions.MessageDecodingException
 import spock.lang.Specification

@@ -153,8 +153,7 @@ class AuthApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def resetPassword(ResetPasswordCommand command) {
 
-		String token = params.t
-
+		String token = command.t
 		def registrationCode = token ? RegistrationCode.findByToken(token) : null
 
 		if (!registrationCode) {
@@ -216,6 +215,7 @@ class ResetPasswordCommand {
 	String username
 	String password
 	String password2
+	String t
 
 	UserService userService
 

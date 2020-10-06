@@ -1,6 +1,5 @@
 package com.unifina.controller
 
-import com.unifina.ControllerSpecification
 import com.unifina.domain.Key
 import com.unifina.domain.Module
 import com.unifina.domain.User

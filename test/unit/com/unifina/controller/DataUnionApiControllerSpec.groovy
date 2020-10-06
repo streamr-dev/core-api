@@ -1,6 +1,6 @@
 package com.unifina.controller
 
-import com.unifina.api.BadRequestException
+import com.unifina.service.BadRequestException
 import com.unifina.service.DataUnionService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor

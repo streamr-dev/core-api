@@ -1,15 +1,7 @@
 package com.unifina.service
 
 import com.unifina.BeanMockingSpecification
-import com.unifina.api.ProductNotFreeException
-import com.unifina.domain.Stream
-import com.unifina.domain.FreeSubscription
-import com.unifina.domain.PaidSubscription
-import com.unifina.domain.Product
-import com.unifina.domain.Subscription
-import com.unifina.domain.IntegrationKey
-import com.unifina.domain.Permission
-import com.unifina.domain.User
+import com.unifina.domain.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 

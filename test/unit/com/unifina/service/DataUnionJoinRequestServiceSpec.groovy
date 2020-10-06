@@ -3,8 +3,6 @@ package com.unifina.service
 import com.streamr.client.StreamrClient
 import com.streamr.client.options.StreamrClientOptions
 import com.unifina.BeanMockingSpecification
-import com.unifina.api.ApiException
-import com.unifina.api.NotFoundException
 import com.unifina.domain.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor

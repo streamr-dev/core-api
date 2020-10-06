@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
+
 import com.unifina.domain.Category
 import com.unifina.domain.Product
 import com.unifina.domain.User

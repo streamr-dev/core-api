@@ -1,7 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.DuplicateNotAllowedException
-import com.unifina.api.NotFoundException
+
 import com.unifina.domain.Stream
 import com.unifina.domain.StreamStorageNode
 import grails.compiler.GrailsCompileStatic
