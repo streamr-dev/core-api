@@ -2,9 +2,6 @@ package com.unifina.service
 
 import com.google.common.collect.Lists
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.unifina.api.InvalidStateTransitionException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.ValidationException
 import com.unifina.domain.*
 import com.unifina.utils.TestUtils
 import grails.test.mixin.Mock

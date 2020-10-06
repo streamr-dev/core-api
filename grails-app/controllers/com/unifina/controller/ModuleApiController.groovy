@@ -1,10 +1,10 @@
 package com.unifina.controller
 
-import com.unifina.api.NotFoundException
 import com.unifina.domain.Module
 import com.unifina.domain.ModuleCategory
 import com.unifina.domain.User
 import com.unifina.service.ModuleService
+import com.unifina.service.NotFoundException
 import com.unifina.service.PermissionService
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.ModuleException

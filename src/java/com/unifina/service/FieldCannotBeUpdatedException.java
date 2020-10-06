@@ -1,4 +1,4 @@
-package com.unifina.api;
+package com.unifina.service;
 
 public class FieldCannotBeUpdatedException extends RuntimeException {
 

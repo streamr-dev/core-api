@@ -1,4 +1,4 @@
-package com.unifina.api;
+package com.unifina.service;
 
 public class BadRequestException extends ApiException {
 	public BadRequestException(String message) {

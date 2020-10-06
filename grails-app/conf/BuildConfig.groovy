@@ -70,7 +70,6 @@ grails.project.dependency.resolution = {
 		compile('com.mashape.unirest:unirest-java:1.4.9')
 		compile('org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.1')
 		compile('org.antlr:ST4:4.0.8')
-		compile('org.postgresql:postgresql:9.4.1208.jre7')
 		compile('biz.paluch.redis:lettuce:3.5.0.Final') {
 			excludes('com.google.guava:guava:*')
 		}
@@ -110,7 +109,7 @@ grails.project.dependency.resolution = {
 		runtime('mysql:mysql-connector-java:5.1.20')
 		runtime('commons-net:commons-net:3.3')
 		runtime('org.apache.commons:commons-math3:3.2')
-		runtime('commons-codec:commons-codec:1.6')
+		runtime('commons-codec:commons-codec:1.15')
 		runtime('com.opencsv:opencsv:3.3')
 		runtime('de.ruedigermoeller:fst:2.56')
 		runtime('joda-time:joda-time:2.10.6')
@@ -137,6 +136,5 @@ grails.project.dependency.resolution = {
 		runtime(':database-migration:1.4.2-SNAPSHOT')
 
 		test(":plastic-criteria:1.6.7")
-		test(":rest-client-builder:2.1.1")
 	}
 }

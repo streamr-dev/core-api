@@ -1,15 +1,8 @@
 package com.unifina.controller
 
-import com.unifina.ControllerSpecification
-import com.unifina.api.*
 import com.unifina.domain.SignupMethod
 import com.unifina.domain.User
-import com.unifina.security.Challenge
-import com.unifina.service.ChallengeService
-import com.unifina.service.EthereumIntegrationKeyService
-import com.unifina.service.SessionService
-import com.unifina.service.SessionToken
-import com.unifina.service.UserService
+import com.unifina.service.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 

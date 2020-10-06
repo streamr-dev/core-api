@@ -1,11 +1,11 @@
 package com.unifina.signalpath.blockchain
 
 import com.unifina.BeanMockingSpecification
-import com.unifina.api.NotPermittedException
 import com.unifina.domain.IntegrationKey
 import com.unifina.domain.User
 import com.unifina.security.StringEncryptor
 import com.unifina.service.EthereumIntegrationKeyService
+import com.unifina.service.NotPermittedException
 import com.unifina.signalpath.PossibleValue
 import com.unifina.signalpath.simplemath.Multiply
 import com.unifina.utils.Globals

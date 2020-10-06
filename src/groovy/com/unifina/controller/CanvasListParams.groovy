@@ -48,10 +48,10 @@ class CanvasListParams extends ListParams {
 
 	@CompileStatic
 	Map toMap() {
-		super.toMap() + [
-			name: name,
+		return super.toMap() + ([
+			name : name,
 			adhoc: adhoc,
 			state: state?.toString()
-		]
+		] as Map<String, Object>)
 	}
 }

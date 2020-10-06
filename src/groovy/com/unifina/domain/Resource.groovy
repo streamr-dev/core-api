@@ -1,7 +1,7 @@
 package com.unifina.domain
 
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
+import com.unifina.service.NotFoundException
+import com.unifina.service.NotPermittedException
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import grails.compiler.GrailsCompileStatic

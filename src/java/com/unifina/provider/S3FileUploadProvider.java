@@ -2,8 +2,6 @@ package com.unifina.provider;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -11,11 +9,10 @@ import com.amazonaws.services.s3.AmazonS3URI;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.unifina.api.ApiException;
+import com.unifina.service.ApiException;
 import org.apache.log4j.Logger;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.net.URL;
 
 public class S3FileUploadProvider implements FileUploadProvider {

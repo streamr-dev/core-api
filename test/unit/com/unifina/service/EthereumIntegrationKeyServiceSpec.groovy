@@ -1,13 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.CannotRemoveEthereumKeyException
-import com.unifina.api.DuplicateNotAllowedException
-import com.unifina.domain.Stream
-import com.unifina.domain.Permission
-import com.unifina.domain.SignupMethod
-import com.unifina.security.Challenge
-import com.unifina.domain.IntegrationKey
-import com.unifina.domain.User
+import com.unifina.domain.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
@@ -196,30 +189,6 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		IntegrationKey.count() == 0
 	}
 
-	void "delete() deletes corresponding inbox stream and its permissions"() {
-		service.subscriptionService = Stub(SubscriptionService)
-
-		def integrationKey = new IntegrationKey(user: me)
-		integrationKey.id = "integration-key"
-		integrationKey.idInService = "address"
-		integrationKey.save(failOnError: true, validate: false)
-		Stream inbox = new Stream()
-		inbox.id = "address"
-		inbox.inbox = true
-		inbox.save(failOnError: true, validate: false)
-		Permission perm = new Permission(operation: Permission.Operation.STREAM_SUBSCRIBE)
-		perm.stream = inbox
-		perm.user = me
-		perm.save(failOnError: true, validate: false)
-
-		when:
-		service.delete("integration-key", me)
-		then:
-		IntegrationKey.count() == 0
-		Stream.get("address") == null
-		Permission.findAllByStream(inbox) == []
-	}
-
 	void "delete() invokes subscriptionService#beforeIntegrationKeyRemoved for Ethereum IDs"() {
 		def subscriptionService = service.subscriptionService = Mock(SubscriptionService)
 
@@ -295,42 +264,6 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		user.username == me.username
 		IntegrationKey.count == 1
 		User.count == 1
-	}
-
-	void "createEthereumUser() creates inbox stream"() {
-		User someoneElse = new User(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
-		when:
-		service.createEthereumUser("address", SignupMethod.UNKNOWN)
-		then:
-		1 * userService.createUser(_) >> someoneElse
-		1 * permissionService.systemGrantAll(_, _)
-		Stream.count == 1
-		Stream.get("address").inbox
-	}
-
-	void "createEthereumID() creates inbox stream"() {
-		service.subscriptionService = Stub(SubscriptionService)
-
-		Challenge ch = new Challenge("id", "foobar", 300)
-		final String signature = "0x50ba6f6df25ba593cb8188df29ca27ea0a7cd38fadc4d40ef9fad455117e190f2a7ec880a76b930071205fee19cf55eb415bd33b2f6cb5f7be36f79f740da6e81b"
-		final String address = "0x10705c0b408eb64860f67a81f5908b51b62a86fc"
-		final String name = "foobar"
-		when:
-		service.createEthereumID(me, name, ch.getId(), ch.getChallenge(), signature)
-		then:
-		1 * permissionService.systemGrantAll(_, _)
-		1 * challengeService.verifyChallengeAndGetAddress(ch.getId(), ch.getChallenge(), signature) >> address
-		Stream.count == 1
-		Stream.get(address).inbox
-	}
-
-	void "createEthereumAccount() creates inbox stream"() {
-		when:
-		service.createEthereumAccount(me, "ethKey", "fa7d31d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361365")
-		then:
-		1 * permissionService.systemGrantAll(_, _)
-		Stream.count == 1
-		Stream.get("0xf4f683a8502b2796392bedb05dbbcc8c6e582e59").inbox
 	}
 
 	void "cannot remove only key of ethereum user"() {

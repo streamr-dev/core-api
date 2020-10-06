@@ -1,8 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.InvalidAPIKeyException
-import com.unifina.api.InvalidUsernameAndPasswordException
-import com.unifina.api.NotFoundException
+
 import com.unifina.domain.*
 import com.unifina.security.PasswordEncoder
 import org.codehaus.groovy.grails.commons.GrailsApplication

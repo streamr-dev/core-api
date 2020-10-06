@@ -1,9 +1,9 @@
 package com.unifina.controller
 
-import com.unifina.api.NotPermittedException
-import com.unifina.api.ValidationException
 import com.unifina.domain.User
+import com.unifina.service.NotPermittedException
 import com.unifina.service.SubscriptionService
+import com.unifina.service.ValidationException
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 

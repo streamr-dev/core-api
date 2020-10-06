@@ -2,10 +2,6 @@ package com.unifina.service
 
 import com.mashape.unirest.http.HttpResponse
 import com.mashape.unirest.http.Unirest
-import com.unifina.api.ApiException
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.ValidationException
 import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
 import com.unifina.domain.Permission
 import com.unifina.domain.User
@@ -54,7 +50,9 @@ class ApiService {
 	@GrailsCompileStatic
 	void addLinkHintToHeader(ListParams listParams, int numOfResults, Map params, HttpServletResponse response) {
 		if (numOfResults == listParams.max) {
-			Map paramMap = listParams.toMap() + [offset: listParams.offset + listParams.max]
+			Map<String, Object> paramMap = listParams.toMap()
+			Integer offset = listParams.offset + listParams.max
+			paramMap.put("offset", offset)
 
 			String url = grailsLinkGenerator.link(
 				controller: params.controller,

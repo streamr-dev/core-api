@@ -1,16 +1,14 @@
 package com.unifina.controller
 
-import com.unifina.ControllerSpecification
-import com.unifina.api.ApiException
-import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.domain.Key
 import com.unifina.domain.User
-import com.unifina.controller.RESTAPIFilters
 import com.unifina.security.PasswordEncoder
+import com.unifina.service.InvalidUsernameAndPasswordException
 import com.unifina.service.SessionService
 import com.unifina.service.UserAvatarImageService
 import com.unifina.service.UserService
 import com.unifina.service.EthereumIntegrationKeyService
+import com.unifina.service.ApiException
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin

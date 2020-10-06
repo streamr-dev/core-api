@@ -1,14 +1,11 @@
 package com.unifina.controller
 
-import com.unifina.api.DisabledUserException
-import com.unifina.api.InvalidArgumentsException
+
 import com.unifina.domain.SignupMethod
 import com.unifina.domain.User
 import com.unifina.domain.Userish
-import com.unifina.security.Challenge
 import com.unifina.security.ApiKeyConverter
 import com.unifina.service.*
-import com.unifina.api.InvalidAPIKeyException
 import grails.converters.JSON
 
 class LoginApiController {

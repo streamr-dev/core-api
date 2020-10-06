@@ -1,4 +1,4 @@
-package com.unifina.filters
+package com.unifina.controller
 
 import com.unifina.domain.Key
 import com.unifina.domain.User

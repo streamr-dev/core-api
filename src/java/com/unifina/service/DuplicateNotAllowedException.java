@@ -1,4 +1,4 @@
-package com.unifina.api;
+package com.unifina.service;
 
 public class DuplicateNotAllowedException extends TypedApiException {
 	public DuplicateNotAllowedException(String message, String type, String id) {

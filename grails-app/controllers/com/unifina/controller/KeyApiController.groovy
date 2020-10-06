@@ -1,12 +1,12 @@
 package com.unifina.controller
 
-import com.unifina.api.ApiException
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
 import com.unifina.domain.Key
 import com.unifina.domain.Permission
 import com.unifina.domain.Stream
 import com.unifina.domain.User
+import com.unifina.service.ApiException
+import com.unifina.service.NotFoundException
+import com.unifina.service.NotPermittedException
 import com.unifina.service.PermissionService
 import grails.converters.JSON
 import grails.transaction.Transactional

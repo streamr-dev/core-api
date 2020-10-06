@@ -1,6 +1,6 @@
 package com.unifina.controller
 
-import com.unifina.api.ApiException
+import com.unifina.service.ApiException
 import grails.converters.JSON
 import grails.util.Holders
 
