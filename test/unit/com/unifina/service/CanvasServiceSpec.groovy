@@ -38,7 +38,7 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		service.permissionService.check(_, _, _) >> true
 		service.dashboardService = mockBean(DashboardService, Mock(DashboardService))
 		service.streamService = mockBean(StreamService, Mock(StreamService))
-		service.streamService.createStream(_,_,_) >> new Stream()
+		service.streamService.createStream(_,_,_,_,_) >> new Stream()
 		mockBean(ModuleService, new ModuleService())
 		service.signalPathService = mockBean(SignalPathService, new SignalPathService())
 

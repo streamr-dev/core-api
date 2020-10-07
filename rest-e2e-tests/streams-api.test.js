@@ -25,6 +25,60 @@ describe('Streams API', () => {
         streamId = response.id
     })
 
+	describe('POST /api/v1/streams', function() {
+
+		it('happy path', async function() {
+			const assertValidResponse = async (response, json, properties, expectedId) => {
+				assert.equal(response.status, 200)
+				assert.equal(json.name, properties.name)
+				assert.equal(json.description, properties.description)
+				assert.deepEqual(json.config, JSON.parse(properties.config))
+				assert.equal(json.partitions, properties.partitions)
+				assert.equal(json.uiChannel, properties.uiChannel)
+				if (expectedId !== undefined) {
+					assert.equal(json.id, expectedId)
+				}
+			}
+			const properties = {
+				name: 'Mock name',
+				description: "Mock description",
+				config: JSON.stringify({
+				   fields: [
+					  {
+						 name: 'mock-field',
+						 type: 'string'
+					  }
+				   ]
+				}),
+				partitions: 12,
+				uiChannel: false
+			}
+			const createResponse = await Streamr.api.v1.streams
+				.create(properties)
+				.withApiKey(API_KEY)
+				.call()
+			const createResponseJson = await createResponse.json()
+			await assertValidResponse(createResponse, createResponseJson, properties)
+			const streamId = createResponseJson.id
+			const fetchResponse = await Streamr.api.v1.streams
+				.get(streamId)
+				.withApiKey(API_KEY)
+				.call()
+			await assertValidResponse(fetchResponse, await fetchResponse.json(), properties, streamId)
+		});
+
+		it('invalid properties', async function() {
+			const response = await Streamr.api.v1.streams
+				.create({
+					partitions: 0
+				})
+				.withApiKey(API_KEY)
+				.call()
+			assert.equal(response.status, 422)
+		})
+
+	})
+
     describe('GET /api/v1/streams/:id/permissions/me', () => {
         it('responds with status 404 when authenticated but stream does not exist', async () => {
             const response = await Streamr.api.v1.streams.permissions

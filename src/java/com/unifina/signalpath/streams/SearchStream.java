@@ -39,7 +39,7 @@ public class SearchStream extends AbstractSignalPathModule {
 		} else {
 			found.send(true);
 			Stream stream = streams.get(0);
-			Map<String, Object> config = stream.getStreamConfigAsMap();
+			Map<String, Object> config = Stream.getStreamConfigAsMap(stream.getConfig());
 			if (config.containsKey("fields")) {
 				fields.send(listOfFieldConfigsToMap((List<Map<String, String>>) config.get("fields")));
 			}

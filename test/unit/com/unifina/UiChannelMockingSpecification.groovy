@@ -8,6 +8,7 @@ import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import com.unifina.service.StreamrClientService
 import com.unifina.service.UserService
+import com.unifina.service.CreateStreamCommand
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
@@ -30,12 +31,7 @@ class UiChannelMockingSpecification extends ModuleTestingSpecification {
 			s.uiChannelCanvas = canvas
 			return s
 		}
-		streamService.createStream(_, _, _) >> { Map params, User user, String id->
-			Stream s = new Stream(params)
-			s.id = id
-			return s
-		}
-
+		
 		StreamrClient streamrClient = Mock(StreamrClient)
 		streamrClient.getStream(_) >> {String streamId ->
 			com.streamr.client.rest.Stream stream = new com.streamr.client.rest.Stream("mock stream name", "mock description")
