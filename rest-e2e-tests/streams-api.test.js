@@ -25,6 +25,30 @@ describe('Streams API', () => {
         streamId = response.id
     })
 
+    describe('POST /api/v1/streams', function() {
+        const sandboxDomain = 'sandbox.eth'
+        it('creates stream with given ENS domain and path', async function() {
+            const streamId = sandboxDomain + '/path/dir' + Date.now()
+            const response = await Streamr.api.v1.streams
+                .create({
+                    id: streamId,
+                })
+                .withApiKey(API_KEY)
+                .execute()
+            assert.equal(response.id, streamId)
+            assert.equal(response.status, 200)
+        })
+        it('invalid stream id', async function() {
+            const response = await Streamr.api.v1.streams
+                .create({
+                    id: 'foobar.eth/path/dir/',
+                })
+                .withApiKey(API_KEY)
+                .call()
+            assert.equal(response.status, 422)
+        })
+    })
+
     describe('GET /api/v1/streams/:id/permissions/me', () => {
         it('responds with status 404 when authenticated but stream does not exist', async () => {
             const response = await Streamr.api.v1.streams.permissions

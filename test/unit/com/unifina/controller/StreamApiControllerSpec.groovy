@@ -41,10 +41,10 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		streamService = mainContext.getBean(StreamService)
 		streamService.permissionService = permissionService
 		streamService.cassandraService = mockBean(CassandraService, Mock(CassandraService))
-		streamOne = streamService.createStream([name: "stream", description: "description"], me)
-		streamTwoId = streamService.createStream([name: "ztream"], me).id
-		streamThreeId = streamService.createStream([name: "atream"], me).id
-		streamFourId = streamService.createStream([name: "otherUserStream"], otherUser).id
+		streamOne = streamService.createStream(new CreateStreamCommand(name: "stream", description: "description"), me)
+		streamTwoId = streamService.createStream(new CreateStreamCommand(name: "ztream"), me).id
+		streamThreeId = streamService.createStream(new CreateStreamCommand(name: "atream"), me).id
+		streamFourId = streamService.createStream(new CreateStreamCommand(name: "otherUserStream"), otherUser).id
 
 		controller.streamService = streamService
 	}
@@ -128,23 +128,6 @@ class StreamApiControllerSpec extends ControllerSpecification {
 
 		then:
 		response.status == 401
-	}
-
-	void "save() calls StreamService.createStream() and returns it.toMap()"() {
-		setup:
-		controller.streamService = streamService = Mock(StreamService)
-		def stream = new Stream()
-		stream.id = "test-stream"
-
-
-		when:
-		request.json = [test: "test"]
-		request.method = 'POST'
-		authenticatedAs(me) { controller.save() }
-
-		then:
-		1 * streamService.createStream([test: "test"], me) >> { stream }
-		response.json.id == stream.toMap().id
 	}
 
 	void "show a Stream of logged in user"() {

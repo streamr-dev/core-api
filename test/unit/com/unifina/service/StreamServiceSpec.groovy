@@ -66,7 +66,7 @@ class StreamServiceSpec extends Specification {
 
 	void "createStream replaces empty name with default value"() {
 		when:
-		Stream s = service.createStream([name: ""], me)
+		Stream s = service.createStream(new CreateStreamCommand(name: ""), me)
 
 		then:
 		s.name == "Untitled Stream"
@@ -74,7 +74,7 @@ class StreamServiceSpec extends Specification {
 
 	void "createStream results in persisted Stream"() {
 		when:
-		service.createStream([name: "name"], me)
+		service.createStream(new CreateStreamCommand(name: "name"), me)
 
 		then:
 		Stream.count() == 1
@@ -83,7 +83,7 @@ class StreamServiceSpec extends Specification {
 
 	void "createStream results in all permissions for Stream"() {
 		when:
-		def stream = service.createStream([name: "name"], me)
+		def stream = service.createStream(new CreateStreamCommand(name: "name"), me)
 
 		then:
 		Permission.findAllByStream(stream)*.toMap() == [
@@ -98,17 +98,16 @@ class StreamServiceSpec extends Specification {
 
 	void "createStream uses its params"() {
 		when:
-		def params = [
+		def params = new CreateStreamCommand(
 				name       : "Test stream",
 				description: "Test stream",
 				config     : [
 						fields: [
 								[name: "profit", type: "number"],
-								[name: "keyword", type: "string"]
+								[name: "keyword", type: "string"],
 						]
 				],
-				requireSignedData: "true"
-		]
+		)
 		service.createStream(params, me)
 
 		then: "stream is created"
@@ -116,7 +115,6 @@ class StreamServiceSpec extends Specification {
 		def stream = Stream.findAll().get(0)
 		stream.name == "Test stream"
 		stream.description == "Test stream"
-		stream.requireSignedData
 	}
 
 	void "getStreamEthereumPublishers should return Ethereum addresses of users with write permission to the Stream"() {
