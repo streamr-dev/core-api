@@ -1,6 +1,7 @@
 package com.unifina.service
 
-
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.streamr.client.protocol.message_layer.StreamMessage
 import com.unifina.data.StreamPartitioner
 import com.unifina.domain.*
@@ -8,31 +9,11 @@ import com.unifina.feed.DataRange
 import com.unifina.feed.FieldDetector
 import com.unifina.task.DelayedDeleteStreamTask
 import com.unifina.utils.IdGenerator
-import com.unifina.utils.JSONUtil
 import grails.converters.JSON
-import grails.validation.Validateable
 import groovy.transform.CompileStatic
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
-@Validateable
-@ToString
-@EqualsAndHashCode
-class CreateStreamCommand {
-	String name
-	String description
-	String config
-	// NOTE! Fields below are for Streamr internal use
-	Boolean uiChannel
-	String uiChannelPath
-	Canvas uiChannelCanvas
-
-	static constraints = {
-		importFrom(Stream)
-		name(nullable: true)
-	}
-}
+import java.text.DateFormat
 
 class StreamService {
 
@@ -43,6 +24,12 @@ class StreamService {
 
 	private final StreamPartitioner partitioner = new StreamPartitioner()
 
+	// Use Gson instead of Grails "as JSON" converter because there's no easy way to get that working in func tests that want to produce data to Streams
+	private Gson gson = new GsonBuilder()
+		.serializeNulls()
+		.setDateFormat(DateFormat.LONG)
+		.create()
+
 	Stream getStream(String id) {
 		return Stream.get(id)
 	}
@@ -51,17 +38,19 @@ class StreamService {
 		return Stream.findByUiChannelPath(uiChannelPath)
 	}
 
-	Stream createStream(CreateStreamCommand cmd, User user, String id = IdGenerator.getShort()) {
-		Stream stream = new Stream(
-			description: cmd.description,
-			config: Stream.normalizeConfig(cmd.config),
-		)
+	Stream createStream(Map params, User user, String id = IdGenerator.getShort()) {
+		Stream stream = new Stream(params)
 		stream.id = id
-		if (cmd.name == null || cmd.name.trim() == "") {
+		stream.config = params.config
+		if (stream.name == null || stream.name.trim() == "") {
 			stream.name = Stream.DEFAULT_NAME
-		} else {
-			stream.name = cmd.name
 		}
+
+		Map config = stream.getStreamConfigAsMap()
+		if (!config.fields) {
+			config.fields = []
+		}
+		stream.config = gson.toJson(config)
 
 		if (!stream.validate()) {
 			throw new ValidationException(stream.errors)
@@ -92,9 +81,9 @@ class StreamService {
 			return false
 		} else {
 			List<FieldDetector.FieldConfig> fields = FieldDetector.detectFields(latest, flattenHierarchies)
-			Map config = Stream.getStreamConfigAsMap(stream.config)
+			Map config = stream.getStreamConfigAsMap()
 			config.fields = fields*.toMap()
-			stream.config = JSONUtil.createGsonBuilder().toJson(config)
+			stream.config = gson.toJson(config)
 			if (saveFields) {
 				stream.save(flush: false, failOnError: true)
 			} else {

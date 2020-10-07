@@ -1,6 +1,5 @@
 package com.unifina.domain
 
-import com.unifina.utils.JSONUtil
 import grails.converters.JSON
 import grails.persistence.Entity
 import groovy.transform.CompileStatic
@@ -144,15 +143,7 @@ class Stream implements Comparable {
 		return obj instanceof Stream && obj.id == this.id
 	}
 
-	static String normalizeConfig(String config) {
-		Map<String, Object> map = getStreamConfigAsMap(config)
-		if (!map.fields) {
-			map.fields = []
-		}
-		return JSONUtil.createGsonBuilder().toJson(map)
-	}
-
-	static Map<String, Object> getStreamConfigAsMap(String config) {
+	Map<String, Object> getStreamConfigAsMap() {
 		if (config!=null)
 			return ((Map)JSON.parse(config));
 		else return [:]

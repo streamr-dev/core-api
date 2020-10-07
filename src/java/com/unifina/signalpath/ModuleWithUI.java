@@ -4,7 +4,6 @@ import com.unifina.domain.Stream;
 import com.unifina.domain.Permission;
 import com.unifina.domain.User;
 import com.unifina.domain.Module;
-import com.unifina.service.CreateStreamCommand;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
 import com.unifina.service.UserService;
@@ -193,13 +192,12 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 			if (stream == null) {
 				// Initialize a new UI channel Stream
 				Map<String, Object> params = new LinkedHashMap<>();
-				CreateStreamCommand cmd = new CreateStreamCommand();
-				cmd.setName(getUiChannelName());
-				cmd.setUiChannel(true);
-				cmd.setUiChannelPath(getRuntimePath());
-				cmd.setUiChannelCanvas(getRootSignalPath().getCanvas());
+				params.put("name", getUiChannelName());
+				params.put("uiChannel", true);
+				params.put("uiChannelPath", getRuntimePath());
+				params.put("uiChannelCanvas", getRootSignalPath().getCanvas());
 				log.warn("uiChannel stream " + id + " was not found. Creating a new stream with params: "+params);
-				stream = getStreamService().createStream(cmd, user, id);
+				stream = getStreamService().createStream(params, user, id);
 			}
 
 			// Fix for CORE-893: Guard against excessive memory use by setting stream.uiChannelCanvas to the instance already in memory

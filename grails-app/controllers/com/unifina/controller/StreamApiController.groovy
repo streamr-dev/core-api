@@ -28,8 +28,8 @@ class StreamApiController {
 	}
 
 	@StreamrApi
-	def save(CreateStreamCommand cmd) {
-		Stream stream = streamService.createStream(cmd, request.apiUser)
+	def save() {
+		Stream stream = streamService.createStream(request.JSON, request.apiUser)
 		render(stream.toMap() as JSON)
 	}
 
