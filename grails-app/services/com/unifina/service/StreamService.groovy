@@ -15,6 +15,7 @@ import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.validation.FieldError
 
 @Validateable
 @ToString
@@ -28,12 +29,6 @@ class CreateStreamCommand {
 	Boolean uiChannel = false
 	Boolean requireSignedData = false
 	Boolean requireEncryptedData = false
-
-	static constraints = {
-		importFrom(Stream)
-		id(nullable: true, validator: CustomStreamIDValidator.validate)
-		name(nullable: true, blank: true)
-	}
 }
 
 class StreamService {
@@ -53,14 +48,11 @@ class StreamService {
 		return Stream.findByUiChannelPath(uiChannelPath)
 	}
 
-	Stream createStream(CreateStreamCommand cmd, User user, String id = IdGenerator.getShort()) {
-		return createStream(cmd, user, id, null, null)
+	Stream createStream(CreateStreamCommand cmd, User user) {
+		return createStream(cmd, user, null, null, true)
 	}
 
-	Stream createStream(CreateStreamCommand cmd, User user, String id, String uiChannelPath, Canvas uiChannelCanvas) {
-		if (!cmd.validate()) {
-			throw new ValidationException(cmd.errors)
-		}
+	Stream createStream(CreateStreamCommand cmd, User user, String uiChannelPath, Canvas uiChannelCanvas, boolean validateIDField) {
 		Stream stream = new Stream(
 			name: ((cmd.name == null || cmd.name.trim() == "")) ? Stream.DEFAULT_NAME : cmd.name,
 			description: cmd.description,
@@ -72,7 +64,14 @@ class StreamService {
 			uiChannelPath: uiChannelPath,
 			uiChannelCanvas: uiChannelCanvas
 		)
-		stream.id = (cmd.id != null) ? cmd.id : id
+		if (cmd.id != null) {
+			if (validateIDField && !CustomStreamIDValidator.validate(cmd.id)) {
+				throw new ValidationException(new FieldError("stream", "id", null))
+			}
+			stream.id = cmd.id
+		} else {
+			stream.id = IdGenerator.getShort()
+		}
 
 		if (!stream.validate()) {
 			throw new ValidationException(stream.errors)

@@ -127,7 +127,7 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		and: "a new Stream is not created"
 		1 * permissionService.check(permittedUser, uiChannel, Permission.Operation.STREAM_PUBLISH) >> true
 		1 * userService.getUserById(_) >> permittedUser
-		0 * streamService.createStream(_, _, _)
+		0 * streamService.createStream(_, _)
 	}
 
 	def "when the datasource starts, the Stream object is loaded by uiChannelPath if the parent SignalPath is not root"() {
@@ -157,7 +157,7 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		and: "a new Stream is not created"
 		1 * permissionService.check(permittedUser, uiChannel, Permission.Operation.STREAM_PUBLISH) >> true
 		1 * userService.getUserById(_) >> permittedUser
-		0 * streamService.createStream(_, _, _)
+		0 * streamService.createStream(_, _)
 	}
 
 	def "when the datasource starts, the Stream object is created if it does not exist"() {
@@ -185,9 +185,10 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		1 * permissionService.check(permittedUser, uiChannel, Permission.Operation.STREAM_PUBLISH) >> true
 		1 * userService.getUserById(_) >> permittedUser
 		1 * streamService.createStream(new CreateStreamCommand(
+			id: "nonexistent",
 			name: uiChannel.name,
 			uiChannel: true
-		), permittedUser, "nonexistent", "/canvases/id/modules/1", canvas) >> uiChannel
+		), permittedUser, "/canvases/id/modules/1", canvas, false) >> uiChannel
 	}
 
 	def "users must not be allowed to write to ui channels for canvases they don't have write permission to"() {

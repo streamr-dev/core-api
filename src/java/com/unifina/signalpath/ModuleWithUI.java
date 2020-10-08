@@ -194,10 +194,11 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 				// Initialize a new UI channel Stream
 				Map<String, Object> params = new LinkedHashMap<>();
 				CreateStreamCommand cmd = new CreateStreamCommand();
+				cmd.setId(id);
 				cmd.setName(getUiChannelName());
 				cmd.setUiChannel(true);
 				log.warn("uiChannel stream " + id + " was not found. Creating a new stream with params: "+params);
-				stream = getStreamService().createStream(cmd, user, id, getRuntimePath(), getRootSignalPath().getCanvas());
+				stream = getStreamService().createStream(cmd, user, getRuntimePath(), getRootSignalPath().getCanvas(), false);
 			}
 
 			// Fix for CORE-893: Guard against excessive memory use by setting stream.uiChannelCanvas to the instance already in memory
