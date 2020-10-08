@@ -66,7 +66,7 @@ public class CreateStream extends AbstractSignalPathModule {
 		cmd.setDescription(description.getValue());
 		Map<String, Object> config = new HashMap<>();
 		config.put("fields", mapToListOfFieldConfigs(fields.getValue()));
-		cmd.setConfig(JSONUtil.createGsonBuilder().toJson(config));
+		cmd.setConfig(config);
 		return cmd;
 	}
 

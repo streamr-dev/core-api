@@ -52,7 +52,7 @@ class CreateStreamSpec extends BeanMockingSpecification {
 		4 * streamService.createStream(new CreateStreamCommand(
 			name: "stream-1",
 			description: "my 1st stream",
-			config: [fields: []] as JSON,
+			config: [fields: []],
 		), null) >> {
 			Stream s = new Stream()
 			s.id = "666"
@@ -61,7 +61,7 @@ class CreateStreamSpec extends BeanMockingSpecification {
 		4 * streamService.createStream(new CreateStreamCommand(
 			name: "stream-2",
 			description: "",
-			config: [fields: [[name: "a", type: "boolean"], [name: "b", type: "string"]]] as JSON,
+			config: [fields: [[name: "a", type: "boolean"], [name: "b", type: "string"]]],
 		), null) >> {
 			Stream s = new Stream()
 			s.id = "111"
@@ -70,7 +70,7 @@ class CreateStreamSpec extends BeanMockingSpecification {
 		4 * streamService.createStream(new CreateStreamCommand(
 			name: "error",
 			description: "error",
-			config: [fields: []] as JSON
+			config: [fields: []]
 		), null) >> {
 			throw new ValidationException()
 		}

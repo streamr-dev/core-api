@@ -144,12 +144,14 @@ class Stream implements Comparable {
 		return obj instanceof Stream && obj.id == this.id
 	}
 
-	static String normalizeConfig(String config) {
-		Map<String, Object> map = getStreamConfigAsMap(config)
-		if (!map.fields) {
-			map.fields = []
+	static Map<String, Object> normalizeConfig(Map<String, Object> config) {
+		if (config == null) {
+			config = new HashMap<String,Object>()
 		}
-		return JSONUtil.createGsonBuilder().toJson(map)
+		if (!config.fields) {
+			config.fields = []
+		}
+		return config
 	}
 
 	static Map<String, Object> getStreamConfigAsMap(String config) {

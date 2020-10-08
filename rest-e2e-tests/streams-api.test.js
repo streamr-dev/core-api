@@ -32,7 +32,7 @@ describe('Streams API', () => {
 				assert.equal(response.status, 200)
 				assert.equal(json.name, properties.name)
 				assert.equal(json.description, properties.description)
-				assert.deepEqual(json.config, JSON.parse(properties.config))
+				assert.deepEqual(json.config, properties.config)
 				assert.equal(json.partitions, properties.partitions)
 				assert.equal(json.uiChannel, properties.uiChannel)
 				if (expectedId !== undefined) {
@@ -42,14 +42,14 @@ describe('Streams API', () => {
 			const properties = {
 				name: 'Mock name',
 				description: "Mock description",
-				config: JSON.stringify({
+				config: {
 				   fields: [
 					  {
 						 name: 'mock-field',
 						 type: 'string'
 					  }
 				   ]
-				}),
+				},
 				partitions: 12,
 				uiChannel: false
 			}
@@ -70,7 +70,7 @@ describe('Streams API', () => {
 		it('invalid properties', async function() {
 			const response = await Streamr.api.v1.streams
 				.create({
-					partitions: 0
+					partitions: 999
 				})
 				.withApiKey(API_KEY)
 				.call()

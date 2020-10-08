@@ -24,7 +24,7 @@ class CreateStreamCommand {
 	String id
 	String name
 	String description
-	String config
+	Map<String,Object> config
 	Integer partitions = 1
 	Boolean uiChannel = false
 	Boolean requireSignedData = false
@@ -56,7 +56,7 @@ class StreamService {
 		Stream stream = new Stream(
 			name: ((cmd.name == null || cmd.name.trim() == "")) ? Stream.DEFAULT_NAME : cmd.name,
 			description: cmd.description,
-			config: Stream.normalizeConfig(cmd.config),
+			config: JSONUtil.createGsonBuilder().toJson(Stream.normalizeConfig(cmd.config)),
 			partitions: cmd.partitions,
 			uiChannel: cmd.uiChannel,
 			requireSignedData: cmd.requireSignedData,
