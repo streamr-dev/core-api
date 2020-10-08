@@ -77,6 +77,33 @@ describe('Streams API', () => {
 			assert.equal(response.status, 422)
 		})
 
+		it('create with sandbox domain id', async function() {
+			const sandboxDomainId = 'sandbox/foo/bar' + Date.now()
+			const properties = {
+				id: sandboxDomainId
+			}
+			const response = await Streamr.api.v1.streams
+				.create(properties)
+				.withApiKey(API_KEY)
+				.call()
+
+			assert.equal(response.status, 200)
+			const json = await response.json()
+			assert.equal(json.id, sandboxDomainId)
+		})
+
+		it('create with invalid domain id', async function() {
+			const sandboxDomainId = 'foobar.eth/loremipsum'
+			const properties = {
+				id: sandboxDomainId
+			}
+			const response = await Streamr.api.v1.streams
+				.create(properties)
+				.withApiKey(API_KEY)
+				.call()
+			assert.equal(response.status, 422)
+		})
+
 	})
 
     describe('GET /api/v1/streams/:id/permissions/me', () => {

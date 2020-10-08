@@ -20,6 +20,7 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 @ToString
 @EqualsAndHashCode
 class CreateStreamCommand {
+	String id
 	String name
 	String description
 	String config
@@ -30,7 +31,8 @@ class CreateStreamCommand {
 
 	static constraints = {
 		importFrom(Stream)
-		name(nullable: true)
+		id(nullable: true, validator: CustomStreamIDValidator.validate)
+		name(nullable: true, blank: true)
 	}
 }
 
@@ -56,6 +58,9 @@ class StreamService {
 	}
 
 	Stream createStream(CreateStreamCommand cmd, User user, String id, String uiChannelPath, Canvas uiChannelCanvas) {
+		if (!cmd.validate()) {
+			throw new ValidationException(cmd.errors)
+		}
 		Stream stream = new Stream(
 			name: ((cmd.name == null || cmd.name.trim() == "")) ? Stream.DEFAULT_NAME : cmd.name,
 			description: cmd.description,
@@ -67,7 +72,7 @@ class StreamService {
 			uiChannelPath: uiChannelPath,
 			uiChannelCanvas: uiChannelCanvas
 		)
-		stream.id = id
+		stream.id = (cmd.id != null) ? cmd.id : id
 
 		if (!stream.validate()) {
 			throw new ValidationException(stream.errors)
@@ -75,7 +80,7 @@ class StreamService {
 
 		stream.save(failOnError: true)
 		permissionService.systemGrantAll(user, stream)
-		
+
 		return stream
 	}
 
