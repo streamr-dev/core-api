@@ -1,19 +1,19 @@
 package com.unifina.service
 
 import com.unifina.domain.User
-import com.unifina.utils.Web3jWrapper
+import com.unifina.signalpath.blockchain.Web3jHelper
 
 class ENSService {
 	static transactional = false
+	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
-	Web3jWrapper web3jWrapper = new Web3jWrapper()
-
-	boolean isENSOwnedBy(String domain, User user) {
-		if (!user.isEthereumUser()) {
+	boolean isENSOwnedBy(String domain, User expectedOwner) {
+		if (!expectedOwner.isEthereumUser()) {
 			throw new EthereumUserRequiredException()
 		}
-		String owner = web3jWrapper.getENSDomainOwner(domain)
-		return user.username == owner
+		String actualOwnerAddress = Web3jHelper.getENSDomainOwner(domain)
+		User actualOwner = ethereumIntegrationKeyService.getEthereumUser(actualOwnerAddress)
+		return (actualOwner != null) && (actualOwner.id == expectedOwner.id)
 	}
 }
 

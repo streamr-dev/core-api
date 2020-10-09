@@ -1,48 +1,55 @@
 package com.unifina.signalpath.blockchain;
 
+import com.unifina.utils.MapTraversal;
 import com.unifina.utils.ThreadUtil;
+import grails.util.Holders;
 import org.apache.log4j.Logger;
 import org.web3j.abi.EventValues;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.*;
+import org.web3j.ens.NameHash;
+import org.web3j.ens.contracts.generated.ENS;
+import org.web3j.ens.contracts.generated.PublicResolver;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameter;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.Request;
-import org.web3j.protocol.core.Response;
+import org.web3j.protocol.core.*;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.*;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.tx.ClientTransactionManager;
 import org.web3j.tx.Contract;
+import org.web3j.tx.TransactionManager;
+import org.web3j.tx.exceptions.ContractCallException;
+import org.web3j.tx.gas.DefaultGasProvider;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 public class Web3jHelper {
+	private final static String ADDRESS_NONE = "0x0000000000000000000000000000000000000000";
 
-	public static class BlockchainException extends Exception{
-		public BlockchainException(String msg){
+	public static class BlockchainException extends Exception {
+		public BlockchainException(String msg) {
 			super(msg);
 		}
-	};
-	public static class BlockTimestampIsNullException extends BlockchainException{
-		public BlockTimestampIsNullException(String msg){
+		public BlockchainException(Throwable cause) {
+			super(cause);
+		}
+	}
+	public static class BlockTimestampIsNullException extends BlockchainException {
+		public BlockTimestampIsNullException(String msg) {
 			super(msg);
 		}
-	};
-	public static class BlockWasNullException extends BlockchainException{
-		public BlockWasNullException(String msg){
+	}
+	public static class BlockWasNullException extends BlockchainException {
+		public BlockWasNullException(String msg) {
 			super(msg);
 		}
-	};
+	}
 
 	private static final Logger log = Logger.getLogger(Web3jHelper.class);
 
@@ -269,4 +276,33 @@ public class Web3jHelper {
 		List<Type> rslt = FunctionReturnDecoder.decode(response.getValue(), balanceOf.getOutputParameters());
 		return ((Uint) rslt.iterator().next()).getValue();
 	}
+
+	private static <T> T send(RemoteCall<T> call) throws BlockchainException {
+		try {
+			return call.send();
+		} catch (Exception e) {
+			throw new BlockchainException(e);
+		}
+	}
+
+	public static String getENSDomainOwner(String domain) throws BlockchainException {
+		Web3j web3j = Web3jHelper.getWeb3jConnectionFromConfig();
+		TransactionManager transactionManager = new ClientTransactionManager(web3j, null);
+		String ensContractAddress = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.ensRegistryContractAddress");
+		ENS ensRegistry = ENS.load(ensContractAddress, web3j, transactionManager, new DefaultGasProvider());
+		byte[] nameHash = NameHash.nameHashAsBytes(domain);
+		String resolverAddress = send(ensRegistry.resolver(nameHash));
+		if (!Objects.equals(resolverAddress, ADDRESS_NONE)) {
+			PublicResolver resolver = PublicResolver.load(resolverAddress, web3j, transactionManager, new DefaultGasProvider());
+			String contractAddress = send(resolver.addr(NameHash.nameHashAsBytes(domain)));
+			if (!Objects.equals(contractAddress, ADDRESS_NONE)) {
+				return contractAddress;
+			} else {
+				return null;
+			}
+		} else {
+			return null;
+		}
+	}
+
 }
