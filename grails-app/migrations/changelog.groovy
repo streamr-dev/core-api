@@ -157,4 +157,5 @@ databaseChangeLog = {
 	include file: 'core/2020-10-01-remove-anonymous-keys-delete-and-edit-permissions.groovy'
 	include file: 'core/2020-10-01-remove-inbox-stream.groovy'
 	include file: 'core/2020-09-18-convert-API-keys-to-Ethereum-IDs.groovy'
+	include file: 'core/2020-10-12-fix-subscription-column-class.groovy'
 }
