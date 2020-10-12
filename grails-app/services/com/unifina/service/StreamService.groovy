@@ -9,6 +9,7 @@ import com.unifina.feed.FieldDetector
 import com.unifina.task.DelayedDeleteStreamTask
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.JSONUtil
+import org.springframework.dao.DataIntegrityViolationException
 import grails.converters.JSON
 import grails.validation.Validateable
 import groovy.transform.CompileStatic
@@ -77,9 +78,13 @@ class StreamService {
 			throw new ValidationException(stream.errors)
 		}
 
-		stream.save(failOnError: true)
+		try {
+			stream.save(flush:true, failOnError: true)
+		} catch (DataIntegrityViolationException e) {
+			// the failed integrity is most likely stream.id (the only reference field that can be set manually by the user)
+			throw new DuplicateNotAllowedException("Stream", stream.id)
+		}
 		permissionService.systemGrantAll(user, stream)
-
 		return stream
 	}
 
