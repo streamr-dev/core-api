@@ -70,7 +70,10 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def index(ProductListParams listParams) {
 		def products = productService.list(listParams, loggedInUser())
-		apiService.addLinkHintToHeader(listParams, products.size(), params, response)
+		String link = apiService.addLinkHintToHeader(listParams, products.size(), params)
+		if (link != null) {
+			response.addHeader("Link", link)
+		}
 		render(products*.toSummaryMap() as JSON)
 	}
 

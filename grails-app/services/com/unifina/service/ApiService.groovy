@@ -14,8 +14,6 @@ import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
-import javax.servlet.http.HttpServletResponse
-
 class ApiService {
 
 	static transactional = false
@@ -48,7 +46,7 @@ class ApiService {
 	 * Generate link to more results in API index() methods
 	 */
 	@GrailsCompileStatic
-	void addLinkHintToHeader(ListParams listParams, int numOfResults, Map params, HttpServletResponse response) {
+	String addLinkHintToHeader(ListParams listParams, int numOfResults, Map params) {
 		if (numOfResults == listParams.max) {
 			Map<String, Object> paramMap = listParams.toMap()
 			Integer offset = listParams.offset + listParams.max
@@ -60,8 +58,9 @@ class ApiService {
 				absolute: true,
 				params: paramMap.findAll { k, v -> v } // remove null valued entries
 			)
-			response.addHeader("Link", "<${url}>; rel=\"more\"")
+			return "<${url}>; rel=\"more\""
 		}
+		return null
 	}
 
 	/**

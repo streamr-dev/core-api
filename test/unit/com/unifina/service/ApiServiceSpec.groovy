@@ -90,9 +90,9 @@ class ApiServiceSpec extends Specification {
 	void "addLinkHintToHeader() does nothing if offset != max"() {
 		def response = Mock(HttpServletResponse)
 		when:
-		service.addLinkHintToHeader(new DashboardListParams(), 99, [:], response)
+		String link = service.addLinkHintToHeader(new DashboardListParams(), 99, [:])
 		then:
-		0 * response._
+		link == null
 	}
 
 	void "addLinkHintToHeader() adds link header"() {
@@ -100,9 +100,9 @@ class ApiServiceSpec extends Specification {
 		def params = new DashboardListParams(offset: 150, name: "dashboard", publicAccess: true)
 
 		when:
-		service.addLinkHintToHeader(params, 1000, [action: "index", controller: "dashboardApi"], response)
+		String link = service.addLinkHintToHeader(params, 1000, [action: "index", controller: "dashboardApi"])
 		then:
-		1 * response.addHeader("Link", '<'+ Holders.grailsApplication.config.grails.serverURL+'/api/v1/dashboards?max=1000&offset=1150&grantedAccess=true&publicAccess=true&name=dashboard>; rel="more"')
+		link == '<'+ Holders.grailsApplication.config.grails.serverURL+'/api/v1/dashboards?max=1000&offset=1150&grantedAccess=true&publicAccess=true&name=dashboard>; rel="more"'
 	}
 
 	void "getByIdAndThrowIfNotFound() throws NotFoundException if domain object cannot be found"() {

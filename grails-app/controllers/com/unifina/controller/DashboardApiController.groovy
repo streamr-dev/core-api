@@ -18,7 +18,10 @@ class DashboardApiController {
 			listParams.publicAccess = params.boolean("public")
 		}
 		def results = apiService.list(Dashboard, listParams, (User) request.apiUser)
-		apiService.addLinkHintToHeader(listParams, results.size(), params, response)
+		String link = apiService.addLinkHintToHeader(listParams, results.size(), params)
+		if (link != null) {
+			response.addHeader("Link", link)
+		}
 		render(results*.toMap() as JSON)
 	}
 
