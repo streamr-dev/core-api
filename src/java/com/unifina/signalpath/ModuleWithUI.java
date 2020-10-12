@@ -7,7 +7,6 @@ import com.unifina.domain.Module;
 import com.unifina.service.CreateStreamCommand;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
-import com.unifina.service.UserService;
 import com.unifina.utils.IdGenerator;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
@@ -52,10 +51,6 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 			streamService = Holders.getApplicationContext().getBean(StreamService.class);
 		}
 		return streamService;
-	}
-
-	private UserService getUserService() {
-		return Holders.getApplicationContext().getBean(UserService.class);
 	}
 
 	public void pushToUiChannel(Map<String, Object> content) {
@@ -122,6 +117,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		if (options.getOption("uiResendLast")!=null) {
 			resendLast = options.getOption("uiResendLast").getInt();
 		}
+
 	}
 
 	public void ensureUiChannel() {
@@ -187,7 +183,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 				}
 			}
 
-			User user = getUser();
+			User user = User.getViaJava(getGlobals().getUserId());
 
 			// Else create a new Stream object for this UI channel
 			if (stream == null) {
@@ -212,11 +208,6 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 			}
 
 			isNew = false;
-		}
-
-		private User getUser() {
-			Long userId = getGlobals().getUserId();
-			return getUserService().getUserById(userId);
 		}
 
 		public boolean isInitialized() {

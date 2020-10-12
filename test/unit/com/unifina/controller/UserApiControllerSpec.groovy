@@ -3,7 +3,12 @@ package com.unifina.controller
 import com.unifina.domain.Key
 import com.unifina.domain.User
 import com.unifina.security.PasswordEncoder
-import com.unifina.service.*
+import com.unifina.service.InvalidUsernameAndPasswordException
+import com.unifina.service.SessionService
+import com.unifina.service.UserAvatarImageService
+import com.unifina.service.UserService
+import com.unifina.service.EthereumIntegrationKeyService
+import com.unifina.service.ApiException
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
@@ -19,6 +24,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 	User ethUser
 	PasswordEncoder passwordEncoder = new UnitTestPasswordEncoder()
 	SessionService sessionService
+	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
 	def setup() {
 		me = new User(
@@ -41,6 +47,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		ethUser.save(validate: false)
 		controller.passwordEncoder = passwordEncoder
 		sessionService = mockBean(SessionService, Mock(SessionService))
+		ethereumIntegrationKeyService = mockBean(EthereumIntegrationKeyService, Mock(EthereumIntegrationKeyService))
 	}
 
 	void "unauthenticated user gets back 401"() {

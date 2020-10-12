@@ -10,7 +10,6 @@ import com.unifina.domain.Canvas
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import com.unifina.service.StreamrClientService
-import com.unifina.service.UserService
 import com.unifina.service.CreateStreamCommand
 import com.unifina.utils.Globals
 import grails.test.mixin.Mock
@@ -25,7 +24,6 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 	ModuleWithUI module
 	PermissionService permissionService
 	StreamService streamService
-	UserService userService
 	StreamrClient streamrClient
     User permittedUser = new User(username: 'permittedUser')
 	User nonPermitterUser = new User(username: 'nonPermittedUser')
@@ -50,8 +48,6 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		permittedUser.save(failOnError: true, validate: false)
 		nonPermitterUser.save(failOnError: true, validate: false)
 		permissionService.systemGrantAll(permittedUser, canvas)
-
-		userService = mockBean(UserService, Mock(UserService))
 	}
 
 	private ModuleWithUI createModule(Map config, User user) {
@@ -126,7 +122,6 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		module.getUiChannel().getStream() == uiChannel
 		and: "a new Stream is not created"
 		1 * permissionService.check(permittedUser, uiChannel, Permission.Operation.STREAM_PUBLISH) >> true
-		1 * userService.getUserById(_) >> permittedUser
 		0 * streamService.createStream(_, _)
 	}
 
@@ -156,7 +151,6 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		module.getUiChannel().getId() == "stream-loaded-by-uiChannelPath"
 		and: "a new Stream is not created"
 		1 * permissionService.check(permittedUser, uiChannel, Permission.Operation.STREAM_PUBLISH) >> true
-		1 * userService.getUserById(_) >> permittedUser
 		0 * streamService.createStream(_, _)
 	}
 
@@ -183,7 +177,6 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		1 * streamService.getStreamByUiChannelPath(_) >> null
 		then: "the Stream object is created"
 		1 * permissionService.check(permittedUser, uiChannel, Permission.Operation.STREAM_PUBLISH) >> true
-		1 * userService.getUserById(_) >> permittedUser
 		1 * streamService.createStream(new CreateStreamCommand(
 			id: "nonexistent",
 			name: uiChannel.name,
@@ -207,7 +200,6 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		then: "the Stream object is loaded"
 		1 * streamService.getStream("uiChannel-id") >> uiChannel
 		1 * permissionService.check(_, _, Permission.Operation.STREAM_PUBLISH) >> false
-		1 * userService.getUserById(_) >> nonPermitterUser
 		thrown(AccessControlException)
 	}
 
@@ -227,7 +219,6 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		listener.onStart()
 		then: "the Stream object is loaded"
 		1 * permissionService.check(permittedUser, uiChannel, Permission.Operation.STREAM_PUBLISH) >> true
-		1 * userService.getUserById(_) >> permittedUser
 		1 * streamService.getStream("uiChannel-id") >> uiChannel
 
 		when:
