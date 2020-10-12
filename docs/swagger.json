@@ -2216,6 +2216,12 @@
             "schema": {
               "$ref": "#/definitions/Stream"
             }
+          },
+          "400": {
+            "description": "Duplicate stream id"
+          },
+          "422": {
+            "description": "Validation error"
           }
         }
       }
@@ -2274,10 +2280,10 @@
           {
             "name": "body",
             "in": "body",
-            "description": "StreamCreateRequest object",
+            "description": "StreamUpdateRequest object",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/StreamCreateRequest"
+              "$ref": "#/definitions/StreamUpdateRequest"
             }
           }
         ],
@@ -4949,7 +4955,33 @@
 		  }
 		}
 	  },
-      "StreamCreateRequest": {
+	"StreamCreateRequest": {
+		"type": "object",
+		"required": [
+			"name"
+		],
+		"properties": {
+			"id": {
+				"type": "string",
+				"description": "ID of this stream.",
+				"example": "sandbox/foo/bar"
+			},
+			"name": {
+				"type": "string",
+				"description": "Name of this stream.",
+				"example": "My stream"
+			},
+			"description": {
+				"type": "string",
+				"description": "Description of this stream.",
+				"example": "My stream description"
+			},
+			"config": {
+				"$ref": "#/definitions/StreamConfig"
+			}
+		}
+	},
+    "StreamUpdateRequest": {
       "type": "object",
       "required": [
         "name"
