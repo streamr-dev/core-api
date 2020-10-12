@@ -6,7 +6,7 @@ import grails.compiler.GrailsCompileStatic
 class CustomStreamIDValidator {
 
 	public static final String SANDBOX_PREFIX = "sandbox"
-	public static final String PATH_REGEX = "^/(?:[\\w\\.]+/?)*\\w\$"
+	public static final String PATH_REGEX = "^/(?:[\\w\\.-]+/?)*\\w\$"
 
 	static final Closure validate = { String id ->
 		if (id == null) {
