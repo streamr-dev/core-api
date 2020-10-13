@@ -3,7 +3,7 @@ package com.unifina.service
 import com.unifina.domain.User
 import com.unifina.signalpath.blockchain.Web3jHelper
 
-class ENSService {
+class EnsService {
 	static transactional = false
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
