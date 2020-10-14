@@ -12,6 +12,7 @@ class StreamApiController {
 	StreamService streamService
 	PermissionService permissionService
 	ApiService apiService
+	EnsService ensService
 
 	@StreamrApi
 	def index(StreamListParams listParams) {
@@ -29,7 +30,8 @@ class StreamApiController {
 
 	@StreamrApi
 	def save(CreateStreamCommand cmd) {
-		Stream stream = streamService.createStream(cmd, request.apiUser)
+		CustomStreamIDValidator streamIdValidator = new CustomStreamIDValidator({domain, creator -> ensService.isENSOwnedBy(domain, creator)})
+		Stream stream = streamService.createStream(cmd, request.apiUser, streamIdValidator)
 		render(stream.toMap() as JSON)
 	}
 
