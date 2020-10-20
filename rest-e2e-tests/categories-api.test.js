@@ -3,7 +3,7 @@ const initStreamrApi = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 
 
-const URL = 'http://localhost:8081/streamr-core/api/v1/'
+const URL = 'http://localhost/api/v1'
 const LOGGING_ENABLED = false
 
 const Streamr = initStreamrApi(URL, LOGGING_ENABLED)

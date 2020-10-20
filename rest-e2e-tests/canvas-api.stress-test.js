@@ -5,8 +5,8 @@ const fs = require('fs')
 const Emitter = require('events')
 const initStreamrApi = require('./streamr-api-clients')
 
-const REST_URL = 'http://localhost:8081/streamr-core/api/v1'
-const WS_URL = 'ws://localhost:8890/api/v1/ws'
+const REST_URL = 'http://localhost/api/v1'
+const WS_URL = 'ws://localhost/api/v1/ws'
 const LOGGING_ENABLED = false
 
 const Streamr = initStreamrApi(REST_URL, LOGGING_ENABLED)

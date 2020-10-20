@@ -4,7 +4,7 @@ const initStreamrApi = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
 
-const URL = 'http://localhost:8081/streamr-core/api/v1/'
+const URL = 'http://localhost/api/v1'
 const LOGGING_ENABLED = false
 
 const API_KEY = 'stream-api-tester-key'

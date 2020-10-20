@@ -439,7 +439,8 @@ class NotFound {
 
 module.exports = (baseUrl, logging) => {
     const options = {
-        baseUrl,
+        // Append a trailing "/" if not present
+        baseUrl: baseUrl.slice(-1) === "/" ? baseUrl : baseUrl + '/',
         logging
     }
 
