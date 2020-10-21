@@ -1266,7 +1266,7 @@
           {
             "in": "path",
             "name": "streamId",
-            "description": "unique identifier of a Stream",
+            "description": "unique identifier of a Stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           }
@@ -2237,7 +2237,7 @@
           {
             "in": "path",
             "name": "id",
-            "description": "ID of the stream to be fetched",
+            "description": "ID of the stream to be fetched (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           }
@@ -2350,7 +2350,7 @@
           {
             "in": "path",
             "name": "id",
-            "description": "ID of the stream",
+            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           },
@@ -2428,7 +2428,7 @@
           {
             "in": "path",
             "name": "id",
-            "description": "ID of the stream",
+            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           },
@@ -2501,7 +2501,7 @@
           {
             "in": "path",
             "name": "id",
-            "description": "ID of the stream",
+            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           },
@@ -2555,7 +2555,7 @@
           {
             "in": "path",
             "name": "id",
-            "description": "ID of the stream",
+            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           },
@@ -2636,7 +2636,7 @@
           {
             "in": "path",
             "name": "id",
-            "description": "ID of the stream",
+            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           },
@@ -2703,7 +2703,7 @@
           {
             "in": "path",
             "name": "id",
-            "description": "ID of the stream",
+            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           }
@@ -2791,7 +2791,7 @@
           {
             "in": "path",
             "name": "id",
-            "description": "ID of the stream",
+            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           }
@@ -2888,7 +2888,7 @@
           {
             "in": "path",
             "name": "streamId",
-            "description": "ID of the stream",
+            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           },
@@ -2970,7 +2970,7 @@
           {
             "in": "path",
             "name": "id",
-            "description": "ID of the stream",
+            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           },
@@ -3080,6 +3080,7 @@
 				{
 					"in": "path",
 					"name": "streamId",
+					"description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
 					"required": true,
 					"type": "string"
 				}
@@ -3150,6 +3151,7 @@
 				{
 					"in": "path",
 					"name": "streamId",
+					"description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
 					"required": true,
 					"type": "string"
 				},
