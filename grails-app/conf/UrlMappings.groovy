@@ -20,7 +20,11 @@ class UrlMappings {
 		"/api/v1/canvases/$canvasId/modules/$moduleId"(controller: "canvasApi", action: "module") // for internal use
 		"/api/v1/canvases/downloadCsv"(method: "GET", controller: "canvasApi", action: "downloadCsv")
 
-		"/api/v1/streams"(resources: "streamApi", excludes: ["create", "edit"])
+		"/api/v1/streams"(method: "GET", controller: "streamApi", action: "index")
+		"/api/v1/streams"(method: "POST", controller: "streamApi", action: "save")
+		"/api/v1/streams/$id"(method: "GET", controller: "streamApi", action: "show")
+		"/api/v1/streams/$id"(method: "PUT", controller: "streamApi", action: "update")
+		"/api/v1/streams/$id"(method: "DELETE", controller: "streamApi", action: "delete")
 		"/api/v1/streams/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
 		"/api/v1/streams/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Stream }
 		"/api/v1/streams/$id/fields"(method: "POST", controller: "streamApi", action: "setFields")

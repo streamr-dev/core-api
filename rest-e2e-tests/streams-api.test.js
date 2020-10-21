@@ -4,7 +4,7 @@ const initStreamrApi = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
 
-const URL = 'http://localhost:8081/streamr-core/api/v1/'
+const URL = 'http://localhost/api/v1'
 const LOGGING_ENABLED = false
 
 const API_KEY = 'stream-api-tester-key'
@@ -105,6 +105,27 @@ describe('Streams API', () => {
 		})
 
 	})
+
+    describe('GET /api/v1/streams/:id', () => {
+        it('works with uri-encoded ids', async () => {
+            const id = 'sandbox/streams-api.test.js/stream-' + Date.now()
+            let response = await Streamr.api.v1.streams
+                .create({
+                    id,
+                })
+                .withApiKey(API_KEY)
+                .call()
+            assert.equal(response.status, 200)
+
+            response = await Streamr.api.v1.streams
+                .get(encodeURIComponent(id))
+                .withApiKey(API_KEY)
+                .call()
+            const json = await response.json()
+            assert.equal(response.status, 200, `Error getting stream ${id}: ${JSON.stringify(json)}`)
+            assert.equal(json.id, id)
+        })
+    })
 
     describe('GET /api/v1/streams/:id/permissions/me', () => {
         it('responds with status 404 when authenticated but stream does not exist', async () => {

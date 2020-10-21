@@ -1,7 +1,7 @@
 const assert = require('chai').assert
 const StreamrClient = require('streamr-client')
 const initStreamrApi = require('./streamr-api-clients')
-const REST_URL = 'http://localhost:8081/streamr-core/api/v1'
+const REST_URL = 'http://localhost/api/v1'
 const LOGGING_ENABLED = false
 const Streamr = initStreamrApi(REST_URL, LOGGING_ENABLED)
 const API_KEY = 'product-api-tester-key'
