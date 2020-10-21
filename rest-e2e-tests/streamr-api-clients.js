@@ -18,9 +18,13 @@ class StreamrApiRequest {
         this.headers = null
     }
 
-    methodAndPath(method, relativePath) {
-        this.method = method
-        this.relativePath = relativePath
+    method(methodId) {
+        this.methodId = methodId
+        return this
+    }
+
+    endpoint(...pathParts) {
+        this.relativePath = pathParts.map(part => encodeURIComponent(part)).join('/')
         return this
     }
 
@@ -60,7 +64,7 @@ class StreamrApiRequest {
     }
 
     async call() {
-        if (!this.method) {
+        if (!this.methodId) {
             throw 'Method not set.'
         }
         if (!this.relativePath) {
@@ -84,7 +88,7 @@ class StreamrApiRequest {
 
         if (this.logging) {
             console.info(
-                this.method,
+                this.methodId,
                 apiUrl,
                 '\n\n' + Object.keys(headers)
                     .map(key => `${key}: ${headers[key]}`)
@@ -96,7 +100,7 @@ class StreamrApiRequest {
         }
 
         return fetch(apiUrl, {
-            method: this.method,
+            method: this.methodId,
             body: this.body,
             headers: headers
         })
@@ -123,7 +127,8 @@ class Categories {
 
     list() {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('GET', 'categories')
+            .method('GET')
+            .endpoint('categories')
     }
 }
 
@@ -135,57 +140,67 @@ class Products {
 
     list(queryParams) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('GET', 'products')
+            .method('GET')
+            .endpoint('products')
             .withQueryParams(queryParams)
     }
 
     get(id) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('GET', `products/${id}`)
+            .method('GET')
+            .endpoint('products', id)
     }
 
     create(body) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', 'products')
+            .method('POST')
+            .endpoint('products')
             .withBody(body)
     }
 
     update(id, body) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('PUT', `products/${id}`)
+            .method('PUT')
+            .endpoint('products', id)
             .withBody(body)
     }
 
     setDeploying(id) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', `products/${id}/setDeploying`)
+            .method('POST')
+            .endpoint('products', id, 'setDeploying')
     }
 
     setDeployed(id, body) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', `products/${id}/setDeployed`)
+            .method('POST')
+            .endpoint('products', id, 'setDeployed')
             .withBody(body)
     }
 
     setUndeploying(id) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', `products/${id}/setUndeploying`)
+            .method('POST')
+            .endpoint('products', id, 'setUndeploying')
     }
 
     setUndeployed(id, body) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', `products/${id}/setUndeployed`)
+            .method('POST')
+            .endpoint('products', id, 'setUndeployed')
             .withBody(body)
     }
 
     deployFree(id) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', `products/${id}/deployFree`)
+            .method('POST')
+            .endpoint('products', id, 'deployFree')
     }
 
     undeployFree(id) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', `products/${id}/undeployFree`)
+            .method('POST')
+            .endpoint('products', id, 'undeployFree')
     }
 
     uploadImage(id, fileBytes) {
@@ -193,23 +208,27 @@ class Products {
         formData.append('file', fileBytes)
 
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', `products/${id}/images`)
+            .method('POST')
+            .endpoint('products', id, 'images')
             .withFormData(formData)
     }
 
     listStreams(id) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('GET', `products/${id}/streams`)
+            .method('GET')
+            .endpoint('products', id, 'streams')
     }
 
     addStream(id, streamId) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('PUT', `products/${id}/streams/${streamId}`)
+            .method('PUT')
+            .endpoint('products', id, 'streams', streamId)
     }
 
     removeStream(id, streamId) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('DELETE', `products/${id}/streams/${streamId}`)
+            .method('DELETE')
+            .endpoint('products', id, 'streams', streamId)
     }
 }
 
@@ -221,24 +240,28 @@ class Streams {
 
     create(body) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', 'streams')
+            .method('POST')
+            .endpoint('streams')
             .withBody(body)
     }
 
     get(id) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('GET', `streams/${id}`)
+            .method('GET')
+            .endpoint('streams', id)
     }
 
     setFields(id, body) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', `streams/${id}/fields`)
+            .method('POST')
+            .endpoint('streams', id, 'fields')
             .withBody(body)
     }
 
     grantPublic(id, operation) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', `streams/${id}/permissions`)
+            .method('POST')
+            .endpoint('streams', id, 'permissions')
             .withBody({
                 anonymous: true,
                 operation,
@@ -247,7 +270,8 @@ class Streams {
 
     grant(id, targetUser, operation) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', `streams/${id}/permissions`)
+            .method('POST')
+            .endpoint('streams', id, 'permissions')
             .withBody({
                 user: targetUser,
                 operation,
@@ -256,37 +280,44 @@ class Streams {
 
     getOwnPermissions(id) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('GET', `streams/${id}/permissions/me`)
+            .method('GET')
+            .endpoint('streams', id, 'permissions', 'me')
     }
 
     getValidationInfo(id) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('GET', `streams/${id}/validation`)
+            .method('GET')
+            .endpoint('streams', id, 'validation')
     }
 
     getPublishers(id) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('GET', `streams/${id}/publishers`)
+            .method('GET')
+            .endpoint('streams', id, 'publishers')
     }
 
     getSubscribers(id) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('GET', `streams/${id}/subscribers`)
+            .method('GET')
+            .endpoint('streams', id, 'subscribers')
     }
 
     isPublisher(streamId, address) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('GET', `streams/${streamId}/publisher/${address}`)
+            .method('GET')
+            .endpoint('streams', streamId, 'publisher', address)
     }
 
     isSubscriber(streamId, address) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('GET', `streams/${streamId}/subscriber/${address}`)
+            .method('GET')
+            .endpoint('streams', streamId, 'subscriber', address)
     }
 
     delete(streamId, permissionId) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('DELETE', `streams/${streamId}/permissions/${permissionId}`)
+            .method('DELETE')
+            .endpoint('streams', streamId, 'permissions', permissionId)
     }
 }
 
@@ -297,28 +328,33 @@ class Canvases {
 
     create(body) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', 'canvases')
+            .method('POST')
+            .endpoint('canvases')
             .withBody(body)
     }
 
     get(id) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('GET', `canvases/${id}`)
+            .method('GET')
+            .endpoint('canvases', id)
     }
 
     start(id) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', `canvases/${id}/start`)
+            .method('POST')
+            .endpoint('canvases', id, 'start')
     }
 
     stop(id) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', `canvases/${id}/stop`)
+            .method('POST')
+            .endpoint('canvases', id, 'stop')
     }
 
     getRuntimeState(id, path) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', `canvases/${id}/${path}/request`)
+            .method('POST')
+            .endpoint('canvases', id, path, 'request')
             .withBody({
                 type: 'json'
             })
@@ -332,13 +368,15 @@ class Subscriptions {
 
     create(body) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', 'subscriptions')
+            .method('POST')
+            .endpoint('subscriptions')
             .withBody(body)
     }
 
     list() {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('GET', 'subscriptions')
+            .method('GET')
+            .endpoint('subscriptions')
     }
 }
 
@@ -349,7 +387,8 @@ class Login {
 
     challenge(address) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', `login/challenge/${address}`)
+            .method('POST')
+            .endpoint('login', 'challenge', address)
             .withBody()
     }
 }
@@ -361,7 +400,8 @@ class IntegrationKeys {
 
     create(body) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', 'integration_keys')
+            .method('POST')
+            .endpoint('integration_keys')
             .withBody(body)
     }
 }
@@ -374,7 +414,8 @@ class Permissions {
 
     getOwnPermissions(id) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('GET', `${this.resourcesName}/${id}/permissions/me`)
+            .method('GET')
+            .endpoint(this.resourcesName, id, 'permissions', 'me')
     }
 }
 
@@ -385,7 +426,8 @@ class DataUnions {
 
     list() {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('GET', 'dataunions')
+            .method('GET')
+            .endpoint('dataunions')
     }
 }
 
@@ -396,23 +438,27 @@ class StorageNodes {
 
 	findStreamsByStorageNode(address) {
 		return new StreamrApiRequest(this.options)
-			.methodAndPath('GET', `storageNodes/${address}/streams`)
+			.method('GET')
+            .endpoint('storageNodes', address, 'streams')
 	}
 
 	findStorageNodesByStream(id) {
 		return new StreamrApiRequest(this.options)
-			.methodAndPath('GET', `streams/${id}/storageNodes`)
+			.method('GET')
+			.endpoint('streams', id, 'storageNodes')
 	}
 
 	addStorageNodeToStream(storageNodeAddress, streamId) {
 		return new StreamrApiRequest(this.options)
-			.methodAndPath('POST', `streams/${streamId}/storageNodes`)
+			.method('POST')
+			.endpoint('streams', streamId, 'storageNodes')
 			.withBody({address: storageNodeAddress})
 	}
 
 	removeStorageNodeFromStream(storageNodeAddress, streamId) {
 		return new StreamrApiRequest(this.options)
-			.methodAndPath('DELETE', `streams/${streamId}/storageNodes/${storageNodeAddress}`)
+			.method('DELETE')
+            .endpoint('streams', streamId, 'storageNodes', storageNodeAddress)
 	}
 }
 
@@ -423,7 +469,8 @@ class NotFound {
 
     notFound() {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('GET', 'page-not-found')
+            .method('GET')
+            .endpoint('page-not-found')
     }
 
     withApiKey(apiKey) {
