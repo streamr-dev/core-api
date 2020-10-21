@@ -1,7 +1,7 @@
 const assert = require('chai').assert
 const initStreamrApi = require('./streamr-api-clients')
 const StreamrClient = require('streamr-client')
-const URL = 'http://localhost/api/v1/'
+const URL = 'http://localhost/api/v1'
 const LOGGING_ENABLED = false
 const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
 
