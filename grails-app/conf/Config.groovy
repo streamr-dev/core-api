@@ -1,5 +1,6 @@
 import com.unifina.service.NodeService
 import com.unifina.utils.PropertiesUtil
+import org.web3j.ens.Contracts
 
 /**
  * Base URL
@@ -236,6 +237,18 @@ streamr.ethereum.wss = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.
 // Ethereum identity of this instance. Don't use this silly development private key for anything.
 streamr.ethereum.nodePrivateKey = "".equals(System.getProperty("streamr.ethereum.nodePrivateKey", "")) ? "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF" : System.getProperty("streamr.ethereum.nodePrivateKey")
 streamr.ethereum.defaultNetwork = System.getProperty("streamr.ethereum.defaultNetwork") ?: streamr.ethereum.networks.keySet().first()
+
+environments {
+	development {
+		streamr.ethereum.ensRegistryContractAddress = "0x92E8435EB56fD01BF4C79B66d47AC1A94338BB03"
+	}
+	test {
+		streamr.ethereum.ensRegistryContractAddress = "0x9Ac9ef900B7E43058169b2AaD8BF6ce31f3703Da"
+	}
+	production {
+		streamr.ethereum.ensRegistryContractAddress = Contracts.MAINNET
+	}
+}
 
 /**
  * Redis config

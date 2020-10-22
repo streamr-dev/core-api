@@ -112,6 +112,9 @@ class EthereumIntegrationKeyService {
 	}
 
     User getEthereumUser(String address) {
+		if (address == null) {
+			return null
+		}
 		IntegrationKey key = IntegrationKey.createCriteria().get {
 			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
 			ilike("idInService", address) // ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
