@@ -28,7 +28,7 @@ describe('Streams API', () => {
 	describe('POST /api/v1/streams', function() {
 
 		it('happy path', async function() {
-			const assertValidResponse = async (response, json, properties, expectedId) => {
+			const assertValidResponse = (response, json, properties, expectedId) => {
 				assert.equal(response.status, 200)
 				assert.equal(json.name, properties.name)
 				assert.equal(json.description, properties.description)
@@ -58,13 +58,13 @@ describe('Streams API', () => {
 				.withApiKey(API_KEY)
 				.call()
 			const createResponseJson = await createResponse.json()
-			await assertValidResponse(createResponse, createResponseJson, properties)
+			assertValidResponse(createResponse, createResponseJson, properties)
 			const streamId = createResponseJson.id
 			const fetchResponse = await Streamr.api.v1.streams
 				.get(streamId)
 				.withApiKey(API_KEY)
 				.call()
-			await assertValidResponse(fetchResponse, await fetchResponse.json(), properties, streamId)
+			assertValidResponse(fetchResponse, await fetchResponse.json(), properties, streamId)
 		});
 
 		it('invalid properties', async function() {
