@@ -4628,9 +4628,6 @@
 	  },
 	"StreamCreateRequest": {
 		"type": "object",
-		"required": [
-			"name"
-		],
 		"properties": {
 			"id": {
 				"type": "string",
@@ -4654,9 +4651,6 @@
 	},
     "StreamUpdateRequest": {
       "type": "object",
-      "required": [
-        "name"
-      ],
       "properties": {
         "name": {
           "type": "string",
