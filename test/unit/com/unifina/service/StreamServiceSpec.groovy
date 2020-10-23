@@ -64,21 +64,21 @@ class StreamServiceSpec extends Specification {
 		1 * service.permissionService.systemGrant(me, s1, Permission.Operation.STREAM_SUBSCRIBE)
 	}
 
-	void "createStream replaces empty name with default value"() {
+	void "createStream replaces empty name with stream id"() {
 		when:
-		Stream s = service.createStream(new CreateStreamCommand(name: ""), me)
+		Stream s = service.createStream(new CreateStreamCommand(id: "sandbox/foobar"), me)
 
 		then:
-		s.name == "Untitled Stream"
+		s.name == "sandbox/foobar"
 	}
 
 	void "createStream results in persisted Stream"() {
 		when:
-		service.createStream(new CreateStreamCommand(name: "name"), me)
+		service.createStream(new CreateStreamCommand(id: "sandbox/foobar"), me)
 
 		then:
 		Stream.count() == 1
-		Stream.list().first().name == "name"
+		Stream.list().first().id == "sandbox/foobar"
 	}
 
 	void "createStream results in all permissions for Stream"() {

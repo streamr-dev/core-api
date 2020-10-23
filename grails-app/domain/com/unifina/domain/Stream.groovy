@@ -6,13 +6,14 @@ import groovy.transform.CompileStatic
 
 @Entity
 class Stream implements Comparable {
-	public final static String DEFAULT_NAME = "Untitled Stream"
 	public final static Integer DEFAULT_STORAGE_DAYS = 365
 	public final static Integer DEFAULT_INACTIVITY_THRESHOLD_HOURS = 48
+
 	String id
 	Integer partitions = 1
 
-	String name = DEFAULT_NAME
+	String name
+
 	String config
 	String description
 

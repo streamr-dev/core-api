@@ -55,7 +55,6 @@ class StreamService {
 
 	Stream createStream(CreateStreamCommand cmd, User user, String uiChannelPath, Canvas uiChannelCanvas, boolean validateIDField) {
 		Stream stream = new Stream(
-			name: ((cmd.name == null || cmd.name.trim() == "")) ? Stream.DEFAULT_NAME : cmd.name,
 			description: cmd.description,
 			config: JSONUtil.createGsonBuilder().toJson(Stream.normalizeConfig(cmd.config)),
 			partitions: cmd.partitions,
@@ -73,6 +72,7 @@ class StreamService {
 		} else {
 			stream.id = IdGenerator.getShort()
 		}
+		stream.name = ((cmd.name == null || cmd.name.trim() == "")) ? stream.id : cmd.name
 
 		if (!stream.validate()) {
 			throw new ValidationException(stream.errors)
