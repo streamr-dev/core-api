@@ -15,9 +15,14 @@ class CustomStreamIDValidatorSpec extends Specification {
 		"sandbox/abc/def/file.txt" | true
 		"sandbox/foo.bar/lorem.ipsum" | true
 		"sandbox/foo-bar/lorem.ipsum" | true
+		"sandbox/foo-bar/lorem~ipsum" | false
 		"sandbox/abc/def/" | false
 		"sandbox/abc/def/file." | false
 		"sandbox/foo//bar" | false
 		"foobar.eth/abc/def" | false
+		"foo" | false
+		"sandbox" | false
+		"" | false
+		" " | false
 	}
 }
