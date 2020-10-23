@@ -35,6 +35,7 @@ class CreateStreamSpec extends BeanMockingSpecification {
 	void "creates streams from valid input value specifications"() {
 		when:
 		Map inputValues = [
+			id: ["sandbox/1", "sandbox/2", "sandbox/error"],
 			name: ["stream-1", "stream-2", "error"],
 			description: ["my 1st stream", "", "error"],
 			fields: [[:], [a: "boolean", b: "string"], [:]]
@@ -50,6 +51,7 @@ class CreateStreamSpec extends BeanMockingSpecification {
 
 		then:
 		4 * streamService.createStream(new CreateStreamCommand(
+			id: "sandbox/1",
 			name: "stream-1",
 			description: "my 1st stream",
 			config: [fields: []],
@@ -59,6 +61,7 @@ class CreateStreamSpec extends BeanMockingSpecification {
 			return s
 		}
 		4 * streamService.createStream(new CreateStreamCommand(
+			id: "sandbox/2",
 			name: "stream-2",
 			description: "",
 			config: [fields: [[name: "a", type: "boolean"], [name: "b", type: "string"]]],
@@ -68,6 +71,7 @@ class CreateStreamSpec extends BeanMockingSpecification {
 			return s
 		}
 		4 * streamService.createStream(new CreateStreamCommand(
+			id: "sandbox/error",
 			name: "error",
 			description: "error",
 			config: [fields: []]

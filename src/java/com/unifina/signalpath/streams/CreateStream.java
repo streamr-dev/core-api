@@ -17,6 +17,7 @@ import java.util.Map;
 public class CreateStream extends AbstractSignalPathModule {
 
 	private final MapParameter fields = new MapParameter(this, "fields");
+	private final StringInput idInput = new StringInput(this, "id");
 	private final StringInput nameInput = new StringInput(this, "name");
 	private final StringInput description = new StringInput(this, "description");
 
@@ -29,6 +30,7 @@ public class CreateStream extends AbstractSignalPathModule {
 	@Override
 	public void init() {
 		addInput(fields);
+		addInput(idInput);
 		addInput(nameInput);
 		addInput(description);
 		addOutput(created);
@@ -62,6 +64,9 @@ public class CreateStream extends AbstractSignalPathModule {
 
 	private CreateStreamCommand buildCommand() {
 		CreateStreamCommand cmd = new CreateStreamCommand();
+		if (!idInput.getValue().isEmpty()) {
+			cmd.setId(idInput.getValue());
+		}
 		cmd.setName(nameInput.getValue());
 		cmd.setDescription(description.getValue());
 		Map<String, Object> config = new HashMap<>();

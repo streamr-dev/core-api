@@ -54,6 +54,7 @@ class GetOrCreateStreamSpec extends ModuleTestingSpecification {
 
 	void "GetOrCreateStreamSpec works as expected"() {
 		Map inputValues = [
+			id: ["sandbox/1", "sandbox/2", "sandbox/3", "sandbox/4", "sandbox/5"],
 			name: ["doesnotexist", "exists", "doesnotexist2", "exists-with-fields", "doesnotexist"],
 			description: ["test-stream"] * 5,
 			fields: [[a: "boolean", b: "string"]] * 5
@@ -70,6 +71,7 @@ class GetOrCreateStreamSpec extends ModuleTestingSpecification {
 
 	void "found streams are cached"() {
 		Map inputValues = [
+				id: ["sandbox/foo", "sandbox/foo"],
 				name: ["exists", "exists"],
 				description: ["test-stream"] * 2,
 				fields: [[a: "boolean", b: "string"]] * 2
