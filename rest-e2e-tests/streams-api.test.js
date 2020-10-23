@@ -4,7 +4,7 @@ const initStreamrApi = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
 
-const URL = 'http://localhost:8081/streamr-core/api/v1/'
+const URL = 'http://localhost/api/v1'
 const LOGGING_ENABLED = false
 
 const API_KEY = 'stream-api-tester-key'
@@ -23,6 +23,108 @@ describe('Streams API', () => {
             .withApiKey(API_KEY)
             .execute()
         streamId = response.id
+    })
+
+	describe('POST /api/v1/streams', function() {
+
+		it('happy path', async function() {
+			const assertValidResponse = (response, json, properties, expectedId) => {
+				assert.equal(response.status, 200)
+				assert.equal(json.name, properties.name)
+				assert.equal(json.description, properties.description)
+				assert.deepEqual(json.config, properties.config)
+				assert.equal(json.partitions, properties.partitions)
+				assert.equal(json.uiChannel, properties.uiChannel)
+				if (expectedId !== undefined) {
+					assert.equal(json.id, expectedId)
+				}
+			}
+			const properties = {
+				name: 'Mock name',
+				description: "Mock description",
+				config: {
+				   fields: [
+					  {
+						 name: 'mock-field',
+						 type: 'string'
+					  }
+				   ]
+				},
+				partitions: 12,
+				uiChannel: false
+			}
+			const createResponse = await Streamr.api.v1.streams
+				.create(properties)
+				.withApiKey(API_KEY)
+				.call()
+			const createResponseJson = await createResponse.json()
+			assertValidResponse(createResponse, createResponseJson, properties)
+			const streamId = createResponseJson.id
+			const fetchResponse = await Streamr.api.v1.streams
+				.get(streamId)
+				.withApiKey(API_KEY)
+				.call()
+			assertValidResponse(fetchResponse, await fetchResponse.json(), properties, streamId)
+		});
+
+		it('invalid properties', async function() {
+			const response = await Streamr.api.v1.streams
+				.create({
+					partitions: 999
+				})
+				.withApiKey(API_KEY)
+				.call()
+			assert.equal(response.status, 422)
+		})
+
+		it('create with sandbox domain id', async function() {
+			const sandboxDomainId = 'sandbox/foo/bar' + Date.now()
+			const properties = {
+				id: sandboxDomainId
+			}
+			const response = await Streamr.api.v1.streams
+				.create(properties)
+				.withApiKey(API_KEY)
+				.call()
+
+			assert.equal(response.status, 200)
+			const json = await response.json()
+			assert.equal(json.id, sandboxDomainId)
+		})
+
+		it('create with invalid domain id', async function() {
+			const sandboxDomainId = 'foobar.eth/loremipsum'
+			const properties = {
+				id: sandboxDomainId
+			}
+			const response = await Streamr.api.v1.streams
+				.create(properties)
+				.withApiKey(API_KEY)
+				.call()
+			assert.equal(response.status, 422)
+		})
+
+	})
+
+    describe('GET /api/v1/streams/:id', () => {
+        it('works with uri-encoded ids', async () => {
+            const id = 'sandbox/streams-api.test.js/stream-' + Date.now()
+            let response = await Streamr.api.v1.streams
+                .create({
+                    id,
+                })
+                .withApiKey(API_KEY)
+                .call()
+            assert.equal(response.status, 200)
+
+            response = await Streamr.api.v1.streams
+                .get(encodeURIComponent(id))
+                .withApiKey(API_KEY)
+                .call()
+            const json = await response.json()
+            assert.equal(response.status, 200, `Error getting stream ${id}: ${JSON.stringify(json)}`)
+            assert.equal(json.id, id)
+        })
     })
 
     describe('GET /api/v1/streams/:id/permissions/me', () => {

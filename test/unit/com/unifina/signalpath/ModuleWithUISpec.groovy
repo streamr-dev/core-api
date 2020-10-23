@@ -10,6 +10,7 @@ import com.unifina.domain.Canvas
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import com.unifina.service.StreamrClientService
+import com.unifina.service.CreateStreamCommand
 import com.unifina.utils.Globals
 import grails.test.mixin.Mock
 
@@ -121,7 +122,7 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		module.getUiChannel().getStream() == uiChannel
 		and: "a new Stream is not created"
 		1 * permissionService.check(permittedUser, uiChannel, Permission.Operation.STREAM_PUBLISH) >> true
-		0 * streamService.createStream(_, _, _)
+		0 * streamService.createStream(_, _)
 	}
 
 	def "when the datasource starts, the Stream object is loaded by uiChannelPath if the parent SignalPath is not root"() {
@@ -150,7 +151,7 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		module.getUiChannel().getId() == "stream-loaded-by-uiChannelPath"
 		and: "a new Stream is not created"
 		1 * permissionService.check(permittedUser, uiChannel, Permission.Operation.STREAM_PUBLISH) >> true
-		0 * streamService.createStream(_, _, _)
+		0 * streamService.createStream(_, _)
 	}
 
 	def "when the datasource starts, the Stream object is created if it does not exist"() {
@@ -176,7 +177,11 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		1 * streamService.getStreamByUiChannelPath(_) >> null
 		then: "the Stream object is created"
 		1 * permissionService.check(permittedUser, uiChannel, Permission.Operation.STREAM_PUBLISH) >> true
-		1 * streamService.createStream([name: uiChannel.name, uiChannel: true, uiChannelPath: "/canvases/id/modules/1", uiChannelCanvas: canvas], permittedUser, "nonexistent") >> uiChannel
+		1 * streamService.createStream(new CreateStreamCommand(
+			id: "nonexistent",
+			name: uiChannel.name,
+			uiChannel: true
+		), permittedUser, "/canvases/id/modules/1", canvas, false) >> uiChannel
 	}
 
 	def "users must not be allowed to write to ui channels for canvases they don't have write permission to"() {

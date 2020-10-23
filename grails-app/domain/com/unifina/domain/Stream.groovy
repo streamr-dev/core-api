@@ -6,13 +6,14 @@ import groovy.transform.CompileStatic
 
 @Entity
 class Stream implements Comparable {
-	public final static String DEFAULT_NAME = "Untitled Stream"
 	public final static Integer DEFAULT_STORAGE_DAYS = 365
 	public final static Integer DEFAULT_INACTIVITY_THRESHOLD_HOURS = 48
+
 	String id
 	Integer partitions = 1
 
-	String name = DEFAULT_NAME
+	String name
+
 	String config
 	String description
 
@@ -143,7 +144,17 @@ class Stream implements Comparable {
 		return obj instanceof Stream && obj.id == this.id
 	}
 
-	Map<String, Object> getStreamConfigAsMap() {
+	static Map<String, Object> normalizeConfig(Map<String, Object> config) {
+		if (config == null) {
+			config = new HashMap<String,Object>()
+		}
+		if (!config.fields) {
+			config.fields = []
+		}
+		return config
+	}
+
+	static Map<String, Object> getStreamConfigAsMap(String config) {
 		if (config!=null)
 			return ((Map)JSON.parse(config));
 		else return [:]

@@ -15,7 +15,10 @@ grails.project.fork = [
 		minMemory: 256,
 		debug: false,
 		maxPerm: 512,
-		forkReserve:false
+		forkReserve:false,
+		jvmArgs: [
+			"-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true"
+		]
 	],
 	test: [
 		maxMemory: System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
@@ -25,7 +28,8 @@ grails.project.fork = [
 		forkReserve:false,
 		daemon:true,
 		jvmArgs: [
-			"-Djava.awt.headless=true"
+			"-Djava.awt.headless=true",
+			"-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true"
 		]
 	]
 ]
