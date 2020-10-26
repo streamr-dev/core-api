@@ -1,6 +1,8 @@
 const assert = require('chai').assert
 const StreamrClient = require('streamr-client')
 
+const REST_URL = 'http://localhost/api/v1'
+
 async function assertResponseIsError(response, statusCode, programmaticCode, includeInMessage) {
     const json = await response.json()
     assert.equal(response.status, statusCode)
@@ -10,21 +12,14 @@ async function assertResponseIsError(response, statusCode, programmaticCode, inc
     }
 }
 
-async function newSessionToken(restURL, privateKey) {
+async function newSessionToken(privateKey) {
 	const client = new StreamrClient({
-		restUrl: restURL,
+		restUrl: REST_URL,
 		auth: {
 			privateKey
 		},
 	})
-	await client.connect()
-
-	const sessionToken = await client.session.getSessionToken()
-	if (client.isConnected()) {
-		await client.disconnect()
-	}
-
-	return sessionToken
+	return await client.session.getSessionToken()
 }
 
 module.exports = {

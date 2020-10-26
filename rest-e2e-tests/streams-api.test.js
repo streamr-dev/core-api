@@ -98,7 +98,7 @@ describe('Streams API', () => {
 			const properties = {
 				id: streamId
 			}
-			const sessionToken = await newSessionToken(URL, ENS_TEST_USER_PRIVATE_KEY)
+			const sessionToken = await newSessionToken(ENS_TEST_USER_PRIVATE_KEY)
 			const response = await Streamr.api.v1.streams
 				.create(properties)
 				.withSessionToken(sessionToken)

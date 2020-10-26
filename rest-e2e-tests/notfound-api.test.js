@@ -31,7 +31,7 @@ describe('REST API', function() {
         it('with session token responds with 404', async () => {
 			// Generate a new user to isolate the test and not require any pre-existing resources
 			const freshUser = StreamrClient.generateEthereumAccount()
-            const sessionToken = await newSessionToken(REST_URL, freshUser.privateKey)
+            const sessionToken = await newSessionToken(freshUser.privateKey)
             const response = await Streamr.api.v1.not_found.withSessionToken(sessionToken).notFound().call()
             assert.equal(response.status, 404)
             await assertContentLengthIsZero(response)
