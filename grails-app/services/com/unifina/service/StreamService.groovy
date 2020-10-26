@@ -49,11 +49,11 @@ class StreamService {
 		return Stream.findByUiChannelPath(uiChannelPath)
 	}
 
-	Stream createStream(CreateStreamCommand cmd, User user) {
-		return createStream(cmd, user, null, null, true)
+	Stream createStream(CreateStreamCommand cmd, User user, CustomStreamIDValidator customStreamIDValidator) {
+		return createStream(cmd, user, customStreamIDValidator, null, null)
 	}
 
-	Stream createStream(CreateStreamCommand cmd, User user, String uiChannelPath, Canvas uiChannelCanvas, boolean validateIDField) {
+	Stream createStream(CreateStreamCommand cmd, User user, CustomStreamIDValidator customStreamIDValidator, String uiChannelPath, Canvas uiChannelCanvas) {
 		Stream stream = new Stream(
 			description: cmd.description,
 			config: JSONUtil.createGsonBuilder().toJson(Stream.normalizeConfig(cmd.config)),
@@ -65,7 +65,7 @@ class StreamService {
 			uiChannelCanvas: uiChannelCanvas
 		)
 		if (cmd.id != null) {
-			if (validateIDField && !CustomStreamIDValidator.validate(cmd.id)) {
+			if ((customStreamIDValidator != null) && (!customStreamIDValidator.validate(cmd.id, user))) {
 				throw new ValidationException(new FieldError("stream", "id", null))
 			}
 			stream.id = cmd.id

@@ -3,13 +3,14 @@ const fs = require('fs')
 const initStreamrApi = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
+const newSessionToken = require('./test-utilities.js').newSessionToken
 
 const URL = 'http://localhost/api/v1'
 const LOGGING_ENABLED = false
 
 const API_KEY = 'stream-api-tester-key'
 const API_KEY_2 = 'stream-api-tester2-key'
-
+const ENS_TEST_USER_PRIVATE_KEY = '0xe5af7834455b7239881b85be89d905d6881dcb4751063897f12be1b0dd546bdb'
 const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
 
 describe('Streams API', () => {
@@ -23,7 +24,7 @@ describe('Streams API', () => {
             .withApiKey(API_KEY)
             .execute()
         streamId = response.id
-    })
+	})
 
 	describe('POST /api/v1/streams', function() {
 
@@ -78,9 +79,9 @@ describe('Streams API', () => {
 		})
 
 		it('create with sandbox domain id', async function() {
-			const sandboxDomainId = 'sandbox/foo/bar' + Date.now()
+			const streamId = 'sandbox/foo/bar' + Date.now()
 			const properties = {
-				id: sandboxDomainId
+				id: streamId
 			}
 			const response = await Streamr.api.v1.streams
 				.create(properties)
@@ -89,7 +90,23 @@ describe('Streams API', () => {
 
 			assert.equal(response.status, 200)
 			const json = await response.json()
-			assert.equal(json.id, sandboxDomainId)
+			assert.equal(json.id, streamId)
+		})
+
+		it('create with owned domain id', async function() {
+			const streamId = 'testdomain1.eth/foo/bar' + Date.now()
+			const properties = {
+				id: streamId
+			}
+			const sessionToken = await newSessionToken(URL, ENS_TEST_USER_PRIVATE_KEY)
+			const response = await Streamr.api.v1.streams
+				.create(properties)
+				.withSessionToken(sessionToken)
+				.call()
+
+			assert.equal(response.status, 200)
+			const json = await response.json()
+			assert.equal(json.id, streamId)
 		})
 
 		it('create with invalid domain id', async function() {

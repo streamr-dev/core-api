@@ -10,16 +10,15 @@ import groovy.transform.EqualsAndHashCode
  * EqualsAndHashCode are used in PermissionService to build a Set in a special case of UI Channels.
  * @see com.unifina.service.PermissionService#getPermissionsTo(Object r, Userish u)
  */
-@EqualsAndHashCode(includes="anonymous,user,key,invite,canvas,dashboard,stream,product,operation,subscription,endsAt,parent")
+@EqualsAndHashCode(includes="anonymous,user,invite,canvas,dashboard,stream,product,operation,subscription,endsAt,parent")
 @Entity
 class Permission {
 
 	/** Permission can be global, that is, let (also) anonymous users execute the operation */
 	Boolean anonymous = false
 
-	/** Permission "belongs to" either a User, Key, or (transiently) a SignupInvite. Ignored for anonymous Permissions */
+	/** Permission "belongs to" either a User or (transiently) a SignupInvite. Ignored for anonymous Permissions */
 	User user
-	Key key
 	SignupInvite invite
 
 	/**
@@ -220,7 +219,6 @@ class Permission {
 
 	static constraints = {
 		user(nullable: true)
-		key(nullable: true)
 		invite(nullable: true)
 		canvas(nullable: true)
 		dashboard(nullable: true)
@@ -256,14 +254,8 @@ class Permission {
 					user: user?.username ?: invite?.email,
 					operation: operation.id
 			]
-		} else if (key) {
-			return [
-					id: id,
-					key: key.toMap(),
-					operation: operation.id
-			]
 		} else {
-			throw new IllegalStateException("Invalid Permission! Must relate to one of: anonymous, user, invite, key")
+			throw new IllegalStateException("Invalid Permission! Must relate to one of: anonymous, user, invite")
 		}
 	}
 
@@ -277,9 +269,6 @@ class Permission {
 		}
 		if (user) {
 			map["user"] = user.id
-		}
-		if (key) {
-			map["key"] = key.id
 		}
 		if (invite) {
 			map["invite"] = invite.id

@@ -41,10 +41,10 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		streamService = mainContext.getBean(StreamService)
 		streamService.permissionService = permissionService
 		streamService.cassandraService = mockBean(CassandraService, Mock(CassandraService))
-		streamOne = streamService.createStream(new CreateStreamCommand(name: "stream", description: "description"), me)
-		streamTwoId = streamService.createStream(new CreateStreamCommand(name: "ztream"), me).id
-		streamThreeId = streamService.createStream(new CreateStreamCommand(name: "atream"), me).id
-		streamFourId = streamService.createStream(new CreateStreamCommand(name: "otherUserStream"), otherUser).id
+		streamOne = streamService.createStream(new CreateStreamCommand(name: "stream", description: "description"), me, null)
+		streamTwoId = streamService.createStream(new CreateStreamCommand(name: "ztream"), me, null).id
+		streamThreeId = streamService.createStream(new CreateStreamCommand(name: "atream"), me, null).id
+		streamFourId = streamService.createStream(new CreateStreamCommand(name: "otherUserStream"), otherUser, null).id
 
 		controller.streamService = streamService
 	}
@@ -141,7 +141,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.save() }
 
 		then:
-		1 * streamService.createStream(_, me) >> { stream }
+		1 * streamService.createStream(_, me, _) >> { stream }
 		response.json.id == stream.id
 	}
 
@@ -172,21 +172,6 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		then:
 		NotPermittedException ex = thrown(NotPermittedException)
 		ex.getUser() == me.getUsername()
-	}
-
-	void "shows a Stream of logged in Key"() {
-		Key key = new Key(name: "anonymous key")
-		key.id = "anonymousKeyKey"
-		key.save(failOnError: true)
-		permissionService.systemGrant(key, streamOne, Permission.Operation.STREAM_GET)
-
-		when:
-		params.id = streamOne.id
-		authenticatedAs(me) { controller.show() }
-
-		then:
-		response.status == 200
-		response.json.name == "stream"
 	}
 
 	void "does not show Stream if key not permitted"() {

@@ -55,7 +55,7 @@ class CreateStreamSpec extends BeanMockingSpecification {
 			name: "stream-1",
 			description: "my 1st stream",
 			config: [fields: []],
-		), null) >> {
+		), null, null) >> {
 			Stream s = new Stream()
 			s.id = "666"
 			return s
@@ -65,7 +65,7 @@ class CreateStreamSpec extends BeanMockingSpecification {
 			name: "stream-2",
 			description: "",
 			config: [fields: [[name: "a", type: "boolean"], [name: "b", type: "string"]]],
-		), null) >> {
+		), null, null) >> {
 			Stream s = new Stream()
 			s.id = "111"
 			return s
@@ -75,7 +75,7 @@ class CreateStreamSpec extends BeanMockingSpecification {
 			name: "error",
 			description: "error",
 			config: [fields: []]
-		), null) >> {
+		), null, null) >> {
 			throw new ValidationException()
 		}
 		0 * streamService._

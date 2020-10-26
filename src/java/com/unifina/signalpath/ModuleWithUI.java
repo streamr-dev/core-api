@@ -194,7 +194,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 				cmd.setName(getUiChannelName());
 				cmd.setUiChannel(true);
 				log.warn("uiChannel stream " + id + " was not found. Creating a new stream with params: "+params);
-				stream = getStreamService().createStream(cmd, user, getRuntimePath(), getRootSignalPath().getCanvas(), false);
+				stream = getStreamService().createStream(cmd, user, null, getRuntimePath(), getRootSignalPath().getCanvas());
 			}
 
 			// Fix for CORE-893: Guard against excessive memory use by setting stream.uiChannelCanvas to the instance already in memory
