@@ -12,7 +12,7 @@ const LOGGING_ENABLED = false
 
 const productOwner = StreamrClient.generateEthereumAccount()
 const otherUser = StreamrClient.generateEthereumAccount()
-const DEVOPS_USER_TOKEN = 'devops-user-key'
+const devOpsUser = require('./test-utilities.js').testUsers.devOpsUser
 
 const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
 const schemaValidator = new SchemaValidator()
@@ -33,7 +33,7 @@ async function createProductAndReturnId(productBody) {
 async function createSubscription(subscriptionBody) {
     await Streamr.api.v1.subscriptions
         .create(subscriptionBody)
-        .withApiKey(DEVOPS_USER_TOKEN)
+        .withAuthenticatedUser(devOpsUser)
         .execute()
 }
 
@@ -143,7 +143,7 @@ describe('Subscriptions API', () => {
                 }
                 const response = await Streamr.api.v1.subscriptions
                     .create(body)
-                    .withApiKey(DEVOPS_USER_TOKEN)
+                    .withAuthenticatedUser(devOpsUser)
                     .call()
                 assert.equal(response.status, 204)
             })

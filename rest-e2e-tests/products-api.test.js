@@ -13,7 +13,7 @@ const LOGGING_ENABLED = process.env.LOGGING_ENABLED || false
 
 const productOwner = StreamrClient.generateEthereumAccount()
 const otherUser = StreamrClient.generateEthereumAccount()
-const DEVOPS_USER_TOKEN = 'devops-user-key'
+const devOpsUser = require('./test-utilities.js').testUsers.devOpsUser
 
 const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
 const schemaValidator = new SchemaValidator()
@@ -550,7 +550,7 @@ describe('Products API', function() {
 
             await Streamr.api.v1.products
                 .setDeployed(productId, deployedBody)
-                .withApiKey(DEVOPS_USER_TOKEN)
+                .withAuthenticatedUser(devOpsUser)
                 .execute()
 
             await Streamr.api.v1.products
@@ -563,7 +563,7 @@ describe('Products API', function() {
                     ...deployedBody,
                     blockNumber: 35005
                 })
-                .withApiKey(DEVOPS_USER_TOKEN)
+                .withAuthenticatedUser(devOpsUser)
                 .call()
 
             await assertResponseIsError(response, 409, 'INVALID_STATE_TRANSITION')
@@ -576,7 +576,7 @@ describe('Products API', function() {
             before(async () => {
                 response = await Streamr.api.v1.products
                     .setDeployed(createdProductId, deployedBody)
-                    .withApiKey(DEVOPS_USER_TOKEN)
+                    .withAuthenticatedUser(devOpsUser)
                     .call()
                 json = await response.json()
             })
@@ -616,19 +616,19 @@ describe('Products API', function() {
             it('is an idempotent operation', async () => {
                 const response1 = await Streamr.api.v1.products
                     .setDeployed(createdProductId, deployedBody)
-                    .withApiKey(DEVOPS_USER_TOKEN)
+                    .withAuthenticatedUser(devOpsUser)
                     .call()
                 const json1 = await response1.json()
 
                 const response2 = await Streamr.api.v1.products
                     .setDeployed(createdProductId, deployedBody)
-                    .withApiKey(DEVOPS_USER_TOKEN)
+                    .withAuthenticatedUser(devOpsUser)
                     .call()
                 const json2 = await response2.json()
 
                 const response3 = await Streamr.api.v1.products
                     .setDeployed(createdProductId, deployedBody)
-                    .withApiKey(DEVOPS_USER_TOKEN)
+                    .withAuthenticatedUser(devOpsUser)
                     .call()
                 const json3 = await response3.json()
 
@@ -700,7 +700,7 @@ describe('Products API', function() {
                         blockNumber: 35000,
                         blockIndex: 80
                     })
-                    .withApiKey(DEVOPS_USER_TOKEN)
+                    .withAuthenticatedUser(devOpsUser)
                     .call()
 
                 response = await Streamr.api.v1.products
@@ -764,7 +764,7 @@ describe('Products API', function() {
                     blockNumber: 35000,
                     blockIndex: 80
                 })
-                .withApiKey(DEVOPS_USER_TOKEN)
+                .withAuthenticatedUser(devOpsUser)
                 .call()
 
             const response = await Streamr.api.v1.products
@@ -777,7 +777,7 @@ describe('Products API', function() {
         it('verifies legality of state transition', async () => {
             const response = await Streamr.api.v1.products
                 .setUndeployed(createdProductId, undeployedBody)
-                .withApiKey(DEVOPS_USER_TOKEN)
+                .withAuthenticatedUser(devOpsUser)
                 .call()
             await assertResponseIsError(response, 409, 'INVALID_STATE_TRANSITION')
         })
@@ -797,12 +797,12 @@ describe('Products API', function() {
                         blockNumber: 35000,
                         blockIndex: 80
                     })
-                    .withApiKey(DEVOPS_USER_TOKEN)
+                    .withAuthenticatedUser(devOpsUser)
                     .call()
 
                 response = await Streamr.api.v1.products
                     .setUndeployed(createdProductId, undeployedBody)
-                    .withApiKey(DEVOPS_USER_TOKEN)
+                    .withAuthenticatedUser(devOpsUser)
                     .call()
 
                 json = await response.json()
@@ -831,24 +831,24 @@ describe('Products API', function() {
                         blockNumber: 35000,
                         blockIndex: 80
                     })
-                    .withApiKey(DEVOPS_USER_TOKEN)
+                    .withAuthenticatedUser(devOpsUser)
                     .call()
 
                 const response1 = await Streamr.api.v1.products
                     .setUndeployed(createdProductId, undeployedBody)
-                    .withApiKey(DEVOPS_USER_TOKEN)
+                    .withAuthenticatedUser(devOpsUser)
                     .call()
                 const json1 = await response1.json()
 
                 const response2 = await Streamr.api.v1.products
                     .setUndeployed(createdProductId, undeployedBody)
-                    .withApiKey(DEVOPS_USER_TOKEN)
+                    .withAuthenticatedUser(devOpsUser)
                     .call()
                 const json2 = await response2.json()
 
                 const response3 = await Streamr.api.v1.products
                     .setUndeployed(createdProductId, undeployedBody)
-                    .withApiKey(DEVOPS_USER_TOKEN)
+                    .withAuthenticatedUser(devOpsUser)
                     .call()
                 const json3 = await response3.json()
 

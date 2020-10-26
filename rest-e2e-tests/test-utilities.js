@@ -1,4 +1,5 @@
 const assert = require('chai').assert
+const _ = require('lodash');
 const StreamrClient = require('streamr-client')
 
 const REST_URL = 'http://localhost/api/v1'
@@ -30,7 +31,13 @@ async function getSessionToken(privateKey) {
 	}
 }
 
+const testUsers = _.mapValues({
+	// user_id=6 in the test DB, has ROLE_DEV_OPS authority
+	devOpsUser: '0x628acb12df34bb30a0b2f95ec2e6a743b386c5d4f63aa9f338bec6f613160e78'
+}, privateKey => ( { privateKey } ))
+
 module.exports = {
 	assertResponseIsError: assertResponseIsError,
-	getSessionToken: getSessionToken
+	getSessionToken: getSessionToken,
+	testUsers: testUsers
 }
