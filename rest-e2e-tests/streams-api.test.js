@@ -36,6 +36,9 @@ describe('Streams API', () => {
 				assert.deepEqual(json.config, properties.config)
 				assert.equal(json.partitions, properties.partitions)
 				assert.equal(json.uiChannel, properties.uiChannel)
+				assert.equal(json.autoConfigure, properties.autoConfigure)
+				assert.equal(json.storageDays, properties.storageDays)
+				assert.equal(json.inactivityThresholdHours, properties.inactivityThresholdHours)
 				if (expectedId !== undefined) {
 					assert.equal(json.id, expectedId)
 				}
@@ -52,6 +55,9 @@ describe('Streams API', () => {
 				   ]
 				},
 				partitions: 12,
+				autoConfigure: false,
+				storageDays: 66,
+				inactivityThresholdHours: 4,
 				uiChannel: false
 			}
 			const createResponse = await Streamr.api.v1.streams

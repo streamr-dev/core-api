@@ -4626,29 +4626,59 @@
 		  }
 		}
 	  },
-	"StreamCreateRequest": {
-		"type": "object",
-		"properties": {
-			"id": {
-				"type": "string",
-				"description": "ID of this stream.",
-				"example": "sandbox/foo/bar"
-			},
-			"name": {
-				"type": "string",
-				"description": "Name of this stream.",
-				"example": "My stream"
-			},
-			"description": {
-				"type": "string",
-				"description": "Description of this stream.",
-				"example": "My stream description"
-			},
-			"config": {
-				"$ref": "#/definitions/StreamConfig"
-			}
-		}
-	},
+    "StreamCreateRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID of this stream.",
+          "example": "sandbox/foo/bar"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of this stream.",
+          "example": "My stream"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of this stream.",
+          "example": "My stream description"
+        },
+        "config": {
+          "$ref": "#/definitions/StreamConfig"
+        },
+        "partitions": {
+          "type": "integer",
+          "description": "Number of partitions in this stream. Defaults to 1 (unpartitioned).",
+          "example": 1
+        },
+        "requireSignedData": {
+          "type": "boolean",
+          "description": "If true, all messages in this stream must be cryptographically signed. Client's should not accept unsigned messages.",
+          "example": false
+        },
+        "requireEncryptedData": {
+          "type": "boolean",
+          "description": "If true, all data in this stream must be encrypted.",
+          "example": false
+        },
+        "autoConfigure": {
+          "type": "boolean",
+          "description": "If true, always try to automatically configure field names and types.",
+          "example": true
+        },
+        "storageDays": {
+          "type": "integer",
+          "description": "Historical data storage period (days)",
+          "example": 365
+        },
+        "inactivityThresholdHours": {
+          "type": "integer",
+          "description": "Inactivity period for a stream in hours.",
+          "example": 48
+        }
+      }
+    },
     "StreamUpdateRequest": {
       "type": "object",
       "properties": {
@@ -4664,6 +4694,36 @@
         },
         "config": {
           "$ref": "#/definitions/StreamConfig"
+        },
+        "partitions": {
+          "type": "integer",
+          "description": "Number of partitions in this stream. Defaults to 1 (unpartitioned).",
+          "example": 1
+        },
+        "requireSignedData": {
+          "type": "boolean",
+          "description": "If true, all messages in this stream must be cryptographically signed. Client's should not accept unsigned messages.",
+          "example": false
+        },
+        "requireEncryptedData": {
+          "type": "boolean",
+          "description": "If true, all data in this stream must be encrypted.",
+          "example": false
+        },
+        "autoConfigure": {
+          "type": "boolean",
+          "description": "If true, always try to automatically configure field names and types.",
+          "example": true
+        },
+        "storageDays": {
+          "type": "integer",
+          "description": "Historical data storage period (days)",
+          "example": 365
+        },
+        "inactivityThresholdHours": {
+          "type": "integer",
+          "description": "Inactivity period for a stream in hours.",
+          "example": 48
         }
       }
     },
