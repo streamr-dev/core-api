@@ -6,12 +6,13 @@ const fetch = require('node-fetch')
 const initStreamrApi = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
+const StreamrClient = require('streamr-client')
 
 const URL = 'http://localhost/api/v1'
 const LOGGING_ENABLED = process.env.LOGGING_ENABLED || false
 
-const AUTH_TOKEN = 'product-api-tester-key'
-const AUTH_TOKEN_2 = 'product-api-tester2-key'
+const productOwner = StreamrClient.generateEthereumAccount()
+const otherUser = StreamrClient.generateEthereumAccount()
 const DEVOPS_USER_TOKEN = 'devops-user-key'
 
 const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
@@ -35,15 +36,15 @@ function assertIsStream(data) {
 async function createProductAndReturnId(productBody) {
     const json = await Streamr.api.v1.products
         .create(productBody)
-        .withApiKey(AUTH_TOKEN)
+        .withAuthenticatedUser(productOwner)
         .execute()
     return json.id
 }
 
-async function createStreamAndReturnId(streamBody, authToken) {
+async function createStreamAndReturnId(streamBody, user) {
     const json = await Streamr.api.v1.streams
         .create(streamBody)
-        .withApiKey(authToken)
+        .withAuthenticatedUser(user)
         .execute()
     return json.id
 }
@@ -60,13 +61,13 @@ describe('Products API', function() {
     before(async () => {
         streamId1 = await createStreamAndReturnId({
             name: 'stream-1'
-        }, AUTH_TOKEN)
+        }, productOwner)
         streamId2 = await createStreamAndReturnId({
             name: 'stream-2'
-        }, AUTH_TOKEN)
+        }, productOwner)
         streamId3 = await createStreamAndReturnId({
             name: 'stream-3'
-        }, AUTH_TOKEN)
+        }, productOwner)
 
         genericProductBody = {
             name: 'Product',
@@ -121,7 +122,7 @@ describe('Products API', function() {
             const body = {}
             const response = await Streamr.api.v1.products
                 .create(body)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             assert.equal(response.status, 200)
         })
@@ -133,7 +134,7 @@ describe('Products API', function() {
             body.category = 'non-existing-category-id'
             const response = await Streamr.api.v1.products
                 .create(body)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 422, 'VALIDATION_ERROR', 'category (typeMismatch)')
         })
@@ -148,7 +149,7 @@ describe('Products API', function() {
             }
             const response = await Streamr.api.v1.products
                 .create(body)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 422, 'VALIDATION_ERROR', 'streams (typeMismatch)')
         })
@@ -156,7 +157,7 @@ describe('Products API', function() {
         it('requires stream_share permission on streams (in body)', async () => {
             const streamId = await createStreamAndReturnId({
                 name: 'other user\'s stream'
-            }, AUTH_TOKEN_2)
+            }, otherUser)
 
             const body = {
                 ...genericProductBody,
@@ -165,7 +166,7 @@ describe('Products API', function() {
 
             const response = await Streamr.api.v1.products
                 .create(body)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 403, 'FORBIDDEN')
         })
@@ -176,7 +177,7 @@ describe('Products API', function() {
             before(async () => {
                 response = await Streamr.api.v1.products
                     .create(genericProductBody)
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
             })
 
@@ -215,7 +216,7 @@ describe('Products API', function() {
                     isFree: false,
                     priceCurrency: 'USD',
                     minimumSubscriptionInSeconds: 60,
-                    owner: 'Product API Test User',
+                    owner: 'Anonymous User',
                     contact: {
                         email: 'contact@streamr.network',
                         url: 'https://streamr.network',
@@ -242,7 +243,7 @@ describe('Products API', function() {
 					type: 'DATAUNION',
 					dataUnionVersion: 2
 				})
-				.withApiKey(AUTH_TOKEN)
+				.withAuthenticatedUser(productOwner)
 				.call()
 			assert.equal(response.status, 200)
 			const json = await response.json()
@@ -283,7 +284,7 @@ describe('Products API', function() {
             before(async () => {
                 response = await Streamr.api.v1.products
                     .get(createdProductId)
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
                 json = await response.json()
             })
@@ -345,7 +346,7 @@ describe('Products API', function() {
             const body = {}
             const response = await Streamr.api.v1.products
                 .update(createdProductId, body)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 422, 'VALIDATION_ERROR')
         })
@@ -353,7 +354,7 @@ describe('Products API', function() {
         it('requires existing Product', async () => {
             const response = await Streamr.api.v1.products
                 .update('non-existing-product-id', newBody)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
@@ -361,7 +362,7 @@ describe('Products API', function() {
         it('requires product_edit permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .update(createdProductId, newBody)
-                .withApiKey(AUTH_TOKEN_2)
+                .withAuthenticatedUser(otherUser)
                 .call()
             const json = await response.json()
 
@@ -377,7 +378,7 @@ describe('Products API', function() {
             before(async () => {
                 response = await Streamr.api.v1.products
                     .update(createdProductId, newBody)
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
                 json = await response.json()
             })
@@ -413,7 +414,7 @@ describe('Products API', function() {
                     isFree: false,
                     priceCurrency: 'DATA',
                     minimumSubscriptionInSeconds: 30000,
-                    owner: 'Product API Test User',
+                    owner: 'Anonymous User',
                     contact: {
                         email: 'contact@streamr.network',
                         url: 'https://streamr.network',
@@ -453,7 +454,7 @@ describe('Products API', function() {
         it('requires existing Product', async () => {
             const response = await Streamr.api.v1.products
                 .setDeploying('non-existing-product-id')
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
@@ -461,7 +462,7 @@ describe('Products API', function() {
         it('requires product_edit permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .setDeploying(createdProductId)
-                .withApiKey(AUTH_TOKEN_2)
+                .withAuthenticatedUser(otherUser)
                 .call()
             const json = await response.json()
 
@@ -477,7 +478,7 @@ describe('Products API', function() {
             before(async () => {
                 response = await Streamr.api.v1.products
                     .setDeploying(createdProductId)
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
                 json = await response.json()
             })
@@ -523,7 +524,7 @@ describe('Products API', function() {
         it('validates body', async () => {
             const response = await Streamr.api.v1.products
                 .setDeployed(createdProductId, {})
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 422, 'VALIDATION_ERROR')
         })
@@ -531,7 +532,7 @@ describe('Products API', function() {
         it('requires existing Product', async () => {
             const response = await Streamr.api.v1.products
                 .setDeployed('non-existing-product-id', deployedBody)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
@@ -539,7 +540,7 @@ describe('Products API', function() {
         it('requires DevOps role', async () => {
             const response = await Streamr.api.v1.products
                 .setDeployed(createdProductId, deployedBody)
-                .withApiKey(AUTH_TOKEN_2)
+                .withAuthenticatedUser(otherUser)
                 .call()
             await assertResponseIsError(response, 403, 'FORBIDDEN', 'DevOps role required')
         })
@@ -554,7 +555,7 @@ describe('Products API', function() {
 
             await Streamr.api.v1.products
                 .setUndeploying(productId)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .execute()
 
             const response = await Streamr.api.v1.products
@@ -659,7 +660,7 @@ describe('Products API', function() {
         it('requires existing Product', async () => {
             const response = await Streamr.api.v1.products
                 .setUndeploying('non-existing-id')
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
@@ -667,7 +668,7 @@ describe('Products API', function() {
         it('requires product_edit permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .setUndeploying(createdProductId)
-                .withApiKey(AUTH_TOKEN_2)
+                .withAuthenticatedUser(otherUser)
                 .call()
             const json = await response.json()
 
@@ -679,7 +680,7 @@ describe('Products API', function() {
         it('verifies legality of state transition', async () => {
             const response = await Streamr.api.v1.products
                 .setUndeploying(createdProductId)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 409, 'INVALID_STATE_TRANSITION')
         })
@@ -704,7 +705,7 @@ describe('Products API', function() {
 
                 response = await Streamr.api.v1.products
                     .setUndeploying(createdProductId)
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
 
                 json = await response.json()
@@ -746,7 +747,7 @@ describe('Products API', function() {
         it('requires existing Product', async () => {
             const response = await Streamr.api.v1.products
                 .setUndeployed('non-existing-id', undeployedBody)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
@@ -768,7 +769,7 @@ describe('Products API', function() {
 
             const response = await Streamr.api.v1.products
                 .setUndeployed(productId, undeployedBody)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 403, 'FORBIDDEN', 'DevOps role required')
         })
@@ -886,7 +887,7 @@ describe('Products API', function() {
         it('requires existing Product', async () => {
             const response = await Streamr.api.v1.products
                 .listStreams('non-existing-id')
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
@@ -894,7 +895,7 @@ describe('Products API', function() {
         it('requires product_get permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .listStreams(createdProductId)
-                .withApiKey(AUTH_TOKEN_2)
+                .withAuthenticatedUser(otherUser)
                 .call()
             const json = await response.json()
 
@@ -910,7 +911,7 @@ describe('Products API', function() {
             before(async () => {
                 response = await Streamr.api.v1.products
                     .listStreams(createdProductId)
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
 
                 json = await response.json()
@@ -953,7 +954,7 @@ describe('Products API', function() {
             const fileBytes = Buffer.from([])
             const response = await Streamr.api.v1.products
                 .uploadImage('non-existing-product-id', fileBytes)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
@@ -962,7 +963,7 @@ describe('Products API', function() {
             const fileBytes = Buffer.from([])
             const response = await Streamr.api.v1.products
                 .uploadImage(createdProductId, fileBytes)
-                .withApiKey(AUTH_TOKEN_2)
+                .withAuthenticatedUser(otherUser)
                 .call()
             const json = await response.json()
 
@@ -975,7 +976,7 @@ describe('Products API', function() {
             const fileBytes = 'I am not a file'
             const response = await Streamr.api.v1.products
                 .uploadImage(createdProductId, fileBytes)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 400, 'PARAMETER_MISSING')
         })
@@ -991,7 +992,7 @@ describe('Products API', function() {
             wstream.on('finish', async () => {
                 const response = await Streamr.api.v1.products
                     .uploadImage(createdProductId, fs.createReadStream('./test-data/bigfile.txt'))
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
                 await assertResponseIsError(response, 413, 'FILE_TOO_LARGE')
                 done()
@@ -1002,7 +1003,7 @@ describe('Products API', function() {
         it('verifies file contents', async () => {
             const response = await Streamr.api.v1.products
                 .uploadImage(createdProductId,  fs.createReadStream('./test-data/file.txt'))
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 415, 'UNSUPPORTED_FILE_TYPE')
         })
@@ -1014,7 +1015,7 @@ describe('Products API', function() {
             before(async () => {
                 response = await Streamr.api.v1.products
                     .uploadImage(createdProductId,  fs.createReadStream('./test-data/500-by-400-image.png'))
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
                 json = await response.json()
             })
@@ -1057,7 +1058,7 @@ describe('Products API', function() {
             it('can replace existing image with a new image', async () => {
                 const response2 = await Streamr.api.v1.products
                     .uploadImage(createdProductId,  fs.createReadStream('./test-data/500-by-400-image-2.png'))
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
                 const json2 = await response2.json()
 
@@ -1076,7 +1077,7 @@ describe('Products API', function() {
         it('requires existing Product', async () => {
             const response = await Streamr.api.v1.products
                 .addStream('non-existing-id', streamId3)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 404, 'NOT_FOUND', 'Product')
         })
@@ -1084,7 +1085,7 @@ describe('Products API', function() {
         it('requires product_edit permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .addStream(createdProductId, streamId3)
-                .withApiKey(AUTH_TOKEN_2)
+                .withAuthenticatedUser(otherUser)
                 .call()
             const json = await response.json()
 
@@ -1096,7 +1097,7 @@ describe('Products API', function() {
         it('requires existing Stream', async () => {
             const response = await Streamr.api.v1.products
                 .addStream(createdProductId, 'non-existing-id')
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 404, 'NOT_FOUND', 'Stream')
         })
@@ -1104,11 +1105,11 @@ describe('Products API', function() {
         it('requires stream_share permission on Stream', async () => {
             const streamId4 = await createStreamAndReturnId({
                 name: 'stream-3'
-            }, AUTH_TOKEN_2)
+            }, otherUser)
 
             const response = await Streamr.api.v1.products
                 .addStream(createdProductId, streamId4)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             const json = await response.json()
 
@@ -1123,7 +1124,7 @@ describe('Products API', function() {
             before(async () => {
                 response = await Streamr.api.v1.products
                     .addStream(createdProductId, streamId3)
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
             })
 
@@ -1134,7 +1135,7 @@ describe('Products API', function() {
             it('adds stream to Product', async () => {
                 const response = await Streamr.api.v1.products
                     .listStreams(createdProductId)
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
                 const json = await response.json()
                 assert.include(json.map(stream => stream.id), streamId3)
@@ -1152,7 +1153,7 @@ describe('Products API', function() {
         it('requires existing Product', async () => {
             const response = await Streamr.api.v1.products
                 .removeStream('non-existing-id', streamId3)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 404, 'NOT_FOUND', 'Product')
         })
@@ -1160,7 +1161,7 @@ describe('Products API', function() {
         it('requires product_delete permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .removeStream(createdProductId, streamId3)
-                .withApiKey(AUTH_TOKEN_2)
+                .withAuthenticatedUser(otherUser)
                 .call()
             const json = await response.json()
 
@@ -1172,7 +1173,7 @@ describe('Products API', function() {
         it('requires existing Stream', async () => {
             const response = await Streamr.api.v1.products
                 .removeStream(createdProductId, 'non-existing-id')
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 404, 'NOT_FOUND', 'Stream')
         })
@@ -1183,7 +1184,7 @@ describe('Products API', function() {
             before(async () => {
                 response = await Streamr.api.v1.products
                     .removeStream(createdProductId, streamId1)
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
             })
 
@@ -1194,7 +1195,7 @@ describe('Products API', function() {
             it('removes stream to Product', async () => {
                 const response = await Streamr.api.v1.products
                     .listStreams(createdProductId)
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
                 const json = await response.json()
                 assert.deepEqual(json.map(stream => stream.id), [streamId2])
@@ -1204,7 +1205,7 @@ describe('Products API', function() {
         it('responds with 204 when removing stream that is not associated with Product', async () => {
             const response = await Streamr.api.v1.products
                 .removeStream(createdProductId, streamId3)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             assert.equal(response.status, 204)
         })
@@ -1224,7 +1225,7 @@ describe('Products API', function() {
             before(async () => {
                 response = await Streamr.api.v1.products.permissions
                     .getOwnPermissions(createdProductId)
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
 
                 json = await response.json()
@@ -1271,7 +1272,7 @@ describe('Products API', function() {
         it('requires existing Product', async () => {
             const response = await Streamr.api.v1.products
                 .deployFree('non-existing-id')
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
@@ -1279,7 +1280,7 @@ describe('Products API', function() {
         it('requires product_share permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .deployFree(freeProductId)
-                .withApiKey(AUTH_TOKEN_2)
+                .withAuthenticatedUser(otherUser)
                 .call()
             const json = await response.json()
 
@@ -1293,7 +1294,7 @@ describe('Products API', function() {
 
             const response = await Streamr.api.v1.products
                 .deployFree(paidProductId)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 400, 'PRODUCT_IS_NOT_FREE')
         })
@@ -1305,7 +1306,7 @@ describe('Products API', function() {
             before(async () => {
                 response = await Streamr.api.v1.products
                     .deployFree(freeProductId)
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
 
                 json = await response.json()
@@ -1326,7 +1327,7 @@ describe('Products API', function() {
             it('cannot be called again (already DEPLOYED)', async () => {
                 const response = await Streamr.api.v1.products
                     .deployFree(freeProductId)
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
                 await assertResponseIsError(response, 409, 'INVALID_STATE_TRANSITION')
             })
@@ -1362,7 +1363,7 @@ describe('Products API', function() {
         it('requires existing Product', async () => {
             const response = await Streamr.api.v1.products
                 .undeployFree('non-existing-id')
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
@@ -1370,7 +1371,7 @@ describe('Products API', function() {
         it('requires product_share permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .undeployFree(freeProductId)
-                .withApiKey(AUTH_TOKEN_2)
+                .withAuthenticatedUser(otherUser)
                 .call()
             const json = await response.json()
 
@@ -1384,7 +1385,7 @@ describe('Products API', function() {
 
             const response = await Streamr.api.v1.products
                 .undeployFree(paidProductId)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 400, 'PRODUCT_IS_NOT_FREE')
         })
@@ -1392,7 +1393,7 @@ describe('Products API', function() {
         it('verifies that Product is deployed', async () => {
             const response = await Streamr.api.v1.products
                 .undeployFree(freeProductId)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 409, 'INVALID_STATE_TRANSITION')
         })
@@ -1405,12 +1406,12 @@ describe('Products API', function() {
                 // Deploy 1st
                 await Streamr.api.v1.products
                     .deployFree(freeProductId)
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
 
                 response = await Streamr.api.v1.products
                     .undeployFree(freeProductId)
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
 
                 json = await response.json()
