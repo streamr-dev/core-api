@@ -49,7 +49,7 @@ public class CreateStream extends AbstractSignalPathModule {
 		}
 
 		try {
-			Stream s = streamService.createStream(buildCommand(), User.loadViaJava(getGlobals().getUserId()));
+			Stream s = streamService.createStream(buildCommand(), User.loadViaJava(getGlobals().getUserId()), null);
 			sendOutputs(true, s.getId());
 			cachedStreamIdsByName.put(nameInput.getValue(), s.getId());
 		} catch (ValidationException ex) {

@@ -21,6 +21,7 @@ CATALINA_OPTS="\
 	-Dstreamr.ethereum.defaultNetwork=$ETHEREUM_DEFAULT_NETWORK \
 	-Dstreamr.ethereum.networks.local=$ETHEREUM_NETWORKS_LOCAL \
 	-Dstreamr.ethereum.nodePrivateKey=$ETHEREUM_NODE_PRIVATE_KEY \
+	-Dstreamr.ethereum.ensRegistryContractAddress=$ETHEREUM_ENS_REGISTRY_CONTRACT_ADDRESS \
 	-Dstreamr.encryption.password=$STREAMR_ENCRYPTION_PASSWORD \
 "
 wait-for-it.sh "$DB_HOST:$DB_PORT" --timeout=300 \

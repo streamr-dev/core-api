@@ -66,7 +66,7 @@ class StreamServiceSpec extends Specification {
 
 	void "createStream replaces empty name with stream id"() {
 		when:
-		Stream s = service.createStream(new CreateStreamCommand(id: "sandbox/foobar"), me)
+		Stream s = service.createStream(new CreateStreamCommand(id: "sandbox/foobar"), me, null)
 
 		then:
 		s.name == "sandbox/foobar"
@@ -74,7 +74,7 @@ class StreamServiceSpec extends Specification {
 
 	void "createStream results in persisted Stream"() {
 		when:
-		service.createStream(new CreateStreamCommand(id: "sandbox/foobar"), me)
+		service.createStream(new CreateStreamCommand(id: "sandbox/foobar"), me, null)
 
 		then:
 		Stream.count() == 1
@@ -83,7 +83,7 @@ class StreamServiceSpec extends Specification {
 
 	void "createStream results in all permissions for Stream"() {
 		when:
-		def stream = service.createStream(new CreateStreamCommand(name: "name"), me)
+		def stream = service.createStream(new CreateStreamCommand(name: "name"), me, null)
 
 		then:
 		Permission.findAllByStream(stream)*.toMap() == [
@@ -103,7 +103,7 @@ class StreamServiceSpec extends Specification {
 				description: "Test stream",
 				requireSignedData: true
 		)
-		service.createStream(params, me)
+		service.createStream(params, me, null)
 
 		then: "stream is created"
 		Stream.count() == 1
