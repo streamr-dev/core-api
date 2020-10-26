@@ -13,7 +13,7 @@ class StreamApiController {
 	PermissionService permissionService
 	ApiService apiService
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def index(StreamListParams listParams) {
 		if (params.public) {
 			listParams.publicAccess = params.boolean("public")
