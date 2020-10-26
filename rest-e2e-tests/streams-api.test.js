@@ -135,7 +135,7 @@ describe('Streams API', () => {
             assert.equal(response.status, 200)
 
             response = await Streamr.api.v1.streams
-                .get(encodeURIComponent(id))
+                .get(id)
                 .withApiKey(API_KEY)
                 .call()
             const json = await response.json()
