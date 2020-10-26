@@ -3,6 +3,7 @@ const url = require('url')
 const querystring = require('querystring')
 const FormData = require('form-data')
 const StreamrClient = require('streamr-client')
+const getSessionToken = require('./test-utilities.js').getSessionToken
 
 class StreamrApiRequest {
     constructor(options) {
@@ -12,7 +13,8 @@ class StreamrApiRequest {
         }
 
         this.logging = options.logging || false
-        this.authHeader = null
+        this.authHeader = null  // TODO remove this and always use "authenticatedUser" field
+        this.authenticatedUser = null
         this.contentType = null
         this.queryParams = ''
         this.headers = null
@@ -35,6 +37,11 @@ class StreamrApiRequest {
 
     withSessionToken(sessionToken) {
         this.authHeader = `Bearer ${sessionToken}`
+        return this
+    }
+
+    withAuthenticatedUser(authenticatedUser) {
+        this.authenticatedUser = authenticatedUser;
         return this
     }
 
@@ -81,6 +88,9 @@ class StreamrApiRequest {
         }
         if (this.authHeader) {
             headers['Authorization'] = this.authHeader
+        } else if (this.authenticatedUser) {
+            const sessionToken = await getSessionToken(this.authenticatedUser.privateKey)
+            headers['Authorization'] = `Bearer ${sessionToken}`
         }
         if (this.headers) {
             Object.assign(headers, this.headers)
@@ -432,34 +442,34 @@ class DataUnions {
 }
 
 class StorageNodes {
-	constructor(options) {
-		this.options = options
-	}
+    constructor(options) {
+        this.options = options
+    }
 
-	findStreamsByStorageNode(address) {
-		return new StreamrApiRequest(this.options)
-			.method('GET')
+    findStreamsByStorageNode(address) {
+        return new StreamrApiRequest(this.options)
+            .method('GET')
             .endpoint('storageNodes', address, 'streams')
-	}
+    }
 
-	findStorageNodesByStream(id) {
-		return new StreamrApiRequest(this.options)
-			.method('GET')
-			.endpoint('streams', id, 'storageNodes')
-	}
+    findStorageNodesByStream(id) {
+        return new StreamrApiRequest(this.options)
+            .method('GET')
+            .endpoint('streams', id, 'storageNodes')
+    }
 
-	addStorageNodeToStream(storageNodeAddress, streamId) {
-		return new StreamrApiRequest(this.options)
-			.method('POST')
-			.endpoint('streams', streamId, 'storageNodes')
-			.withBody({address: storageNodeAddress})
-	}
+    addStorageNodeToStream(storageNodeAddress, streamId) {
+        return new StreamrApiRequest(this.options)
+            .method('POST')
+            .endpoint('streams', streamId, 'storageNodes')
+            .withBody({address: storageNodeAddress})
+    }
 
-	removeStorageNodeFromStream(storageNodeAddress, streamId) {
-		return new StreamrApiRequest(this.options)
-			.method('DELETE')
+    removeStorageNodeFromStream(storageNodeAddress, streamId) {
+        return new StreamrApiRequest(this.options)
+            .method('DELETE')
             .endpoint('streams', streamId, 'storageNodes', storageNodeAddress)
-	}
+    }
 }
 
 class NotFound {
@@ -471,16 +481,6 @@ class NotFound {
         return new StreamrApiRequest(this.options)
             .method('GET')
             .endpoint('page-not-found')
-    }
-
-    withApiKey(apiKey) {
-        this.authHeader = `Token ${apiKey}`
-        return this
-    }
-
-    withSessionToken(sessionToken) {
-        this.authHeader = `Bearer ${sessionToken}`
-        return this
     }
 }
 

@@ -3,7 +3,6 @@ const fs = require('fs')
 const initStreamrApi = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
-const newSessionToken = require('./test-utilities.js').newSessionToken
 
 const URL = 'http://localhost/api/v1'
 const LOGGING_ENABLED = false
@@ -98,10 +97,9 @@ describe('Streams API', () => {
 			const properties = {
 				id: streamId
 			}
-			const sessionToken = await newSessionToken(ENS_TEST_USER_PRIVATE_KEY)
 			const response = await Streamr.api.v1.streams
 				.create(properties)
-				.withSessionToken(sessionToken)
+				.withAuthenticatedUser({ privateKey: ENS_TEST_USER_PRIVATE_KEY })
 				.call()
 
 			assert.equal(response.status, 200)

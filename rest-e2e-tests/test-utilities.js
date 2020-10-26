@@ -12,17 +12,25 @@ async function assertResponseIsError(response, statusCode, programmaticCode, inc
     }
 }
 
-async function newSessionToken(privateKey) {
-	const client = new StreamrClient({
-		restUrl: REST_URL,
-		auth: {
-			privateKey
-		},
-	})
-	return await client.session.getSessionToken()
+const cachedSessionTokens = {}
+
+async function getSessionToken(privateKey) {
+	if (cachedSessionTokens[privateKey] === undefined) {
+		const client = new StreamrClient({
+			restUrl: REST_URL,
+			auth: {
+				privateKey
+			},
+		})
+		const sessionToken = await client.session.getSessionToken()
+		cachedSessionTokens[privateKey] = sessionToken
+		return sessionToken
+	} else {
+		return cachedSessionTokens[privateKey]
+	}
 }
 
 module.exports = {
 	assertResponseIsError: assertResponseIsError,
-	newSessionToken: newSessionToken
+	getSessionToken: getSessionToken
 }

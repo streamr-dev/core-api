@@ -2,7 +2,6 @@ const assert = require('chai').assert
 const initStreamrApi = require('./streamr-api-clients')
 const _ = require('lodash');
 const StreamrClient = require('streamr-client')
-const newSessionToken = require('./test-utilities.js').newSessionToken
 
 const URL = 'http://localhost/api/v1'
 const LOGGING_ENABLED = false;
@@ -15,7 +14,7 @@ const createMockEthereumAddress = () => {
 const createStream = async (user) => {
 	return Streamr.api.v1.streams
 		.create()
-		.withSessionToken(await newSessionToken(user.privateKey))
+		.withAuthenticatedUser(user)
 		.execute()
 		.then((json) => json.id);
 };
@@ -32,13 +31,13 @@ const findStorageNodesByStream = (streamId) => {
 const addStorageNodeToStream = async (storageNodeAddress, streamId, user) => {
 	return Streamr.api.v1.storagenodes
 		.addStorageNodeToStream(storageNodeAddress, streamId)
-		.withSessionToken((user !== undefined) ? await newSessionToken(user.privateKey) : undefined)
+		.withAuthenticatedUser(user)
 		.call();
 };
 const removeStorageNodeFromStream = async (storageNodeAddress, streamId, user) => {
 	return Streamr.api.v1.storagenodes
 		.removeStorageNodeFromStream(storageNodeAddress, streamId)
-		.withSessionToken((user !== undefined) ? await newSessionToken(user.privateKey) : undefined)
+		.withAuthenticatedUser(user)
 		.call();
 };
 const getStorageNodeCount = async (streamId) => {

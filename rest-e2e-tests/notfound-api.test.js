@@ -1,7 +1,6 @@
 const assert = require('chai').assert
 const StreamrClient = require('streamr-client')
 const initStreamrApi = require('./streamr-api-clients')
-const newSessionToken = require('./test-utilities.js').newSessionToken
 
 const REST_URL = 'http://localhost/api/v1'
 const LOGGING_ENABLED = false
@@ -24,15 +23,14 @@ describe('REST API', function() {
             await assertContentLengthIsZero(response)
         })
         it('with auth token responds with 404', async () => {
-            const response = await Streamr.api.v1.not_found.withApiKey(API_KEY).notFound().call()
+            const response = await Streamr.api.v1.not_found.notFound().withApiKey(API_KEY).call()
             assert.equal(response.status, 404)
             await assertContentLengthIsZero(response)
         })
         it('with session token responds with 404', async () => {
 			// Generate a new user to isolate the test and not require any pre-existing resources
 			const freshUser = StreamrClient.generateEthereumAccount()
-            const sessionToken = await newSessionToken(freshUser.privateKey)
-            const response = await Streamr.api.v1.not_found.withSessionToken(sessionToken).notFound().call()
+            const response = await Streamr.api.v1.not_found.notFound().withAuthenticatedUser(freshUser).call()
             assert.equal(response.status, 404)
             await assertContentLengthIsZero(response)
         })
