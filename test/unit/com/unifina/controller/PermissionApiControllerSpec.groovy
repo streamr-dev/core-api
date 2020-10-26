@@ -92,7 +92,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.json[0].id == canvasPermission.id
 		response.json[0].user == "me@me.net"
 		response.json[0].operation == "canvas_share"
-		1 * permissionService.findAllPermissions(resource, request.apiUser, null, true) >> [canvasPermission, *ownerPermissions]
+		1 * permissionService.findAllPermissions(resource, request.apiUser, true) >> [canvasPermission, *ownerPermissions]
 		0 * permissionService._
     }
 
@@ -112,7 +112,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.json[0].id == streamPermission.id
 		response.json[0].user == "me@me.net"
 		response.json[0].operation == "stream_share"
-		1 * permissionService.findAllPermissions(resource, request.apiUser, null, true) >> [streamPermission, *ownerPermissions]
+		1 * permissionService.findAllPermissions(resource, request.apiUser, true) >> [streamPermission, *ownerPermissions]
 		0 * permissionService._
 	}
 
@@ -133,7 +133,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.json[0].id == streamPermission.id
 		response.json[0].user == "me@me.net"
 		response.json[0].operation == "stream_share"
-		1 * permissionService.findAllPermissions(resource, request.apiUser, null,false) >> [streamPermission, *ownerPermissions]
+		1 * permissionService.findAllPermissions(resource, request.apiUser, false) >> [streamPermission, *ownerPermissions]
 		0 * permissionService._
 	}
 
@@ -150,7 +150,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 		response.json.user == "me@me.net"
 		response.json.operation == "canvas_share"
-		1 * permissionService.findPermission(canvasPermission.id, resource, request.apiUser, null) >> canvasPermission
+		1 * permissionService.findPermission(canvasPermission.id, resource, request.apiUser) >> canvasPermission
 		0 * permissionService._
 	}
 
@@ -168,7 +168,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.json.id == 2
 		response.json.user == "me@me.net"
 		response.json.operation == "stream_share"
-		1 * permissionService.findPermission(streamPermission.id, resource, request.apiUser, null) >> streamPermission
+		1 * permissionService.findPermission(streamPermission.id, resource, request.apiUser) >> streamPermission
 		0 * permissionService._
 	}
 
@@ -204,7 +204,6 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		then:
 		1 * controller.permissionService.savePermissionAndSendShareResourceEmail(
 			_,
-			_,
 			Permission.Operation.CANVAS_GET,
 			_,
 			_
@@ -227,7 +226,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.delete() }
 		then:
 		response.status == 204
-		1 * permissionService.deletePermission(_, resource, request.apiUser, null)
+		1 * permissionService.deletePermission(_, resource, request.apiUser)
 		0 * permissionService._
 	}
 
@@ -255,7 +254,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 200
 		response.json*.operation == ownerPermissions*.toMap()*.operation
-		1 * permissionService.getOwnPermissions(resource, me, null) >> [*ownerPermissions]
+		1 * permissionService.getOwnPermissions(resource, me) >> [*ownerPermissions]
 		0 * permissionService._
 	}
 
@@ -271,7 +270,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 200
 		response.json == [[id: 1, operation: "canvas_share", user: "me@me.net"]]
-		1 * permissionService.getOwnPermissions(resource, me, null) >> [canvasPermission]
+		1 * permissionService.getOwnPermissions(resource, me) >> [canvasPermission]
 		0 * permissionService._
 	}
 

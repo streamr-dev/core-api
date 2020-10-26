@@ -46,7 +46,7 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 		Resource res = new Resource(Canvas, resource.id)
 
 		when:
-		service.deletePermission(permission.id, res, user, null)
+		service.deletePermission(permission.id, res, user)
 
 		then:
 		Permission.get(permission.id) == null
@@ -58,7 +58,7 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 		Resource res = new Resource(Canvas, resource.id)
 
 		when:
-		service.deletePermission(permission.id, res, user, null)
+		service.deletePermission(permission.id, res, user)
 
 		then:
 		def e = thrown(NotPermittedException)
@@ -71,7 +71,7 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 		Resource res = new Resource(Canvas, resource.id)
 
 		when:
-		service.deletePermission(permission.id, res, user, null)
+		service.deletePermission(permission.id, res, user)
 
 		then:
 		Permission.get(permission.id) == null
@@ -84,7 +84,7 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 		Resource res = new Resource(Canvas, anotherResource.id)
 
 		when:
-		service.deletePermission(anotherPermission.id, res, user, null)
+		service.deletePermission(anotherPermission.id, res, user)
 
 		then:
 		def e = thrown(NotPermittedException)
@@ -95,12 +95,11 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 		setup:
 		Resource res = new Resource(Canvas, resource.id)
 		User apiUser = user
-		Key apiKey = null
 		Permission share = service.systemGrant(apiUser, resource, Permission.Operation.CANVAS_SHARE)
 		Permission share2 = service.systemGrant(apiUser, resource, Permission.Operation.CANVAS_SHARE)
 		Permission p = service.systemGrant(apiUser, resource, Permission.Operation.CANVAS_INTERACT)
 		when:
-		service.deletePermission(p.id, res, apiUser, apiKey)
+		service.deletePermission(p.id, res, apiUser)
 		then:
 		Permission.get(p.id) == null
 	}
@@ -109,11 +108,10 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 		setup:
 		Resource res = new Resource(Canvas, resource.id)
 		User apiUser = user
-		Key apiKey = null
 		Permission share = service.systemGrant(apiUser, resource, Permission.Operation.CANVAS_SHARE)
 		Permission p = service.systemGrant(apiUser, resource, Permission.Operation.CANVAS_INTERACT)
 		when:
-		service.deletePermission(null, res, apiUser, apiKey)
+		service.deletePermission(null, res, apiUser)
 		then:
 		def e = thrown(NotFoundException)
 		e.type == "Canvas"

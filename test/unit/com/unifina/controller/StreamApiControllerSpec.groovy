@@ -174,21 +174,6 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		ex.getUser() == me.getUsername()
 	}
 
-	void "shows a Stream of logged in Key"() {
-		Key key = new Key(name: "anonymous key")
-		key.id = "anonymousKeyKey"
-		key.save(failOnError: true)
-		permissionService.systemGrant(key, streamOne, Permission.Operation.STREAM_GET)
-
-		when:
-		params.id = streamOne.id
-		authenticatedAs(me) { controller.show() }
-
-		then:
-		response.status == 200
-		response.json.name == "stream"
-	}
-
 	void "does not show Stream if key not permitted"() {
 		Key key = new Key(name: "anonymous key")
 		key.id = "anonymousKeyKey"
