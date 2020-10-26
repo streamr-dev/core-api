@@ -4,7 +4,7 @@
     "title": "Streamr API",
     "version": "1.0.0"
   },
-  "host": "www.streamr.com",
+  "host": "streamr.network",
   "schemes": [
     "https"
   ],
