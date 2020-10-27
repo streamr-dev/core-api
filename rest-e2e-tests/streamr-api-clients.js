@@ -13,11 +13,10 @@ class StreamrApiRequest {
         }
 
         this.logging = options.logging || false
-        this.authHeader = null  // TODO remove this and always use "authenticatedUser" field
         this.authenticatedUser = null
         this.contentType = null
         this.queryParams = ''
-        this.headers = null
+        this.headers = {}
     }
 
     method(methodId) {
@@ -27,16 +26,6 @@ class StreamrApiRequest {
 
     endpoint(...pathParts) {
         this.relativePath = pathParts.map(part => encodeURIComponent(part)).join('/')
-        return this
-    }
-
-    withApiKey(apiKey) {
-        this.authHeader = `Token ${apiKey}`
-        return this
-    }
-
-    withSessionToken(sessionToken) {
-        this.authHeader = `Bearer ${sessionToken}`
         return this
     }
 
@@ -60,13 +49,19 @@ class StreamrApiRequest {
 
     withFormData(formData) {
         this.body = formData
-        this.headers = formData.getHeaders()
+        this.headers = Object.assign(this.headers, formData.getHeaders())
         return this
     }
 
     withRawBody(body) {
         this.body = body
         this.contentType = null
+        return this
+    }
+
+    withHeader(key, value) {
+		this.headers = { ...this.headers }
+		this.headers[key] = value
         return this
     }
 
@@ -81,19 +76,15 @@ class StreamrApiRequest {
         const apiUrl = url.resolve(this.baseUrl, this.relativePath) + this.queryParams
 
         let headers = {
-            'Accept': 'application/json'
+			'Accept': 'application/json',
+			...this.headers
         }
         if (this.body && this.contentType) {
             headers['Content-type'] = this.contentType
         }
-        if (this.authHeader) {
-            headers['Authorization'] = this.authHeader
-        } else if (this.authenticatedUser) {
+        if (this.authenticatedUser) {
             const sessionToken = await getSessionToken(this.authenticatedUser.privateKey)
             headers['Authorization'] = `Bearer ${sessionToken}`
-        }
-        if (this.headers) {
-            Object.assign(headers, this.headers)
         }
 
         if (this.logging) {

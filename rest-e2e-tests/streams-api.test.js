@@ -166,16 +166,18 @@ describe('Streams API', () => {
             assert.equal(response.status, 200)
         })
         it('responds with status 401 when wrong token even if endpoint does not require authentication', async () => {
+            const sessionToken = 'wrong-token';
             const response = await Streamr.api.v1.streams.permissions
                 .getOwnPermissions(streamId)
-                .withSessionToken('wrong-token')
+                .withHeader('Authorization', `Bearer ${sessionToken}`)
                 .call()
             assert.equal(response.status, 401)
         })
         it('responds with status 401 when wrong API key even if endpoint does not require authentication', async () => {
+            const apiKey = 'wrong-api-key'
             const response = await Streamr.api.v1.streams.permissions
                 .getOwnPermissions(streamId)
-                .withApiKey('wrong-api-key')
+                .withHeader('Authorization', `Token ${apiKey}`)
                 .call()
             assert.equal(response.status, 401)
         })
