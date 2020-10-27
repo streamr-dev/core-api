@@ -30,6 +30,9 @@ class CreateStreamCommand {
 	Boolean uiChannel = false
 	Boolean requireSignedData = false
 	Boolean requireEncryptedData = false
+	Boolean autoConfigure = true
+	Integer storageDays = Stream.DEFAULT_STORAGE_DAYS
+	Integer inactivityThresholdHours = Stream.DEFAULT_INACTIVITY_THRESHOLD_HOURS
 }
 
 class StreamService {
@@ -61,6 +64,9 @@ class StreamService {
 			uiChannel: cmd.uiChannel,
 			requireSignedData: cmd.requireSignedData,
 			requireEncryptedData: cmd.requireEncryptedData,
+			autoConfigure: cmd.autoConfigure,
+			storageDays: cmd.storageDays,
+			inactivityThresholdHours: cmd.inactivityThresholdHours,
 			uiChannelPath: uiChannelPath,
 			uiChannelCanvas: uiChannelCanvas
 		)
