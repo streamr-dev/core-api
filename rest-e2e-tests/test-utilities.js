@@ -32,12 +32,12 @@ async function getSessionToken(privateKey) {
 }
 
 const testUsers = _.mapValues({
-	// user_id=6 in the test DB, has ROLE_DEV_OPS authority
-	devOpsUser: '0x628acb12df34bb30a0b2f95ec2e6a743b386c5d4f63aa9f338bec6f613160e78'
+	devOpsUser: '0x628acb12df34bb30a0b2f95ec2e6a743b386c5d4f63aa9f338bec6f613160e78',     // user_id=6 in the test DB, has ROLE_DEV_OPS authority
+	ensDomainOwner: '0xe5af7834455b7239881b85be89d905d6881dcb4751063897f12be1b0dd546bdb'  // owns testdomain1.eth ENS domain in dev mainchain
 }, privateKey => ( { privateKey } ))
 
 module.exports = {
-	assertResponseIsError: assertResponseIsError,
-	getSessionToken: getSessionToken,
-	testUsers: testUsers
+	assertResponseIsError,
+	getSessionToken,
+	testUsers
 }

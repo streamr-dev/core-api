@@ -12,7 +12,7 @@ const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
 
 const streamOwner = StreamrClient.generateEthereumAccount()
 const otherUser = StreamrClient.generateEthereumAccount()
-const ensTestUser = { privateKey: '0xe5af7834455b7239881b85be89d905d6881dcb4751063897f12be1b0dd546bdb' }
+const ensDomainOwner = require('./test-utilities.js').testUsers.ensDomainOwner
 
 describe('Streams API', () => {
     let streamId
@@ -101,7 +101,7 @@ describe('Streams API', () => {
 			}
 			const response = await Streamr.api.v1.streams
 				.create(properties)
-				.withAuthenticatedUser(ensTestUser)
+				.withAuthenticatedUser(ensDomainOwner)
 				.call()
 
 			assert.equal(response.status, 200)
