@@ -6,7 +6,7 @@ const StreamrClient = require('streamr-client')
 
 class StreamrApiRequest {
     constructor(options) {
-        this.baseUrl = options.baseUrl || 'https://www.streamr.com/api/v1/'
+        this.baseUrl = options.baseUrl || 'https://streamr.network/api/v1/'
         if (!this.baseUrl.endsWith('/')) {
             this.baseUrl += '/'
         }
