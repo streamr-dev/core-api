@@ -159,4 +159,5 @@ databaseChangeLog = {
 	include file: 'core/2020-09-18-convert-API-keys-to-Ethereum-IDs.groovy'
 	include file: 'core/2020-10-12-fix-subscription-column-class.groovy'
 	include file: 'core/2020-10-23-remove-API-key-permission.groovy'
+	include file: 'core/2020-10-27-rename-streamr_com-to-streamr_network.groovy'
 }
