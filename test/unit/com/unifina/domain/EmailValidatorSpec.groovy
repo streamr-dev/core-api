@@ -11,13 +11,13 @@ class EmailValidatorSpec extends Specification {
 
 		where:
 		result | email
-		true   | "tester1@streamr.com"
-		true   | "tester_1@streamr.com"
-		true   | "tester.1@streamr.com"
+		true   | "tester1@streamr.network"
+		true   | "tester_1@streamr.network"
+		true   | "tester.1@streamr.network"
 		true   | "huuuuuuuuugeeeeee.loooooooooooong.eeeeeemmmmmaiaaaaaaail.aaaaaaaaaaaaaaaaaadressss@streamrrrrrrrrrrrrrrrrrrrrrrrrr.com"
 		true   | "weird@tld.hocuspocus"
-		true   | "google-style+addition@streamr.com"
-		false  | "@streamr.com"
+		true   | "google-style+addition@streamr.network"
+		false  | "@streamr.network"
 		false  | "test@streamr."
 		false  | "test@streamr"
 		false  | "test"

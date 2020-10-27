@@ -378,7 +378,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		def adminRole = new Role(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
 		new UserRole(user: me, role: adminRole).save(failOnError: true, validate: false)
 
-		def someoneElse = new User(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+		def someoneElse = new User(username: "someoneElse@streamr.network").save(failOnError: true, validate: false)
 
 		when:
 		params.id = "1"

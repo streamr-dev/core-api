@@ -52,32 +52,32 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	void setup() {
 		service = Holders.getApplicationContext().getBean(PermissionService)
-		User.findByUsername("me-permission-service-integration-spec@streamr.com")?.delete(flush: true)
-		User.findByUsername("him-permission-service-integration-spec@streamr.com")?.delete(flush: true)
-		User.findByUsername("stranger-permission-service-integration-spec@streamr.com")?.delete(flush: true)
-		User.findByUsername("someone-service-integration-spec@streamr.com")?.delete(flush: true)
+		User.findByUsername("me-permission-service-integration-spec@streamr.network")?.delete(flush: true)
+		User.findByUsername("him-permission-service-integration-spec@streamr.network")?.delete(flush: true)
+		User.findByUsername("stranger-permission-service-integration-spec@streamr.network")?.delete(flush: true)
+		User.findByUsername("someone-service-integration-spec@streamr.network")?.delete(flush: true)
 
 		// Users
 		me = new User(
-			username: "me-permission-service-integration-spec@streamr.com",
+			username: "me-permission-service-integration-spec@streamr.network",
 			name: "me",
 			password: "foo",
 		).save(failOnError: true)
 
 		anotherUser = new User(
-			username: "him-permission-service-integration-spec@streamr.com",
+			username: "him-permission-service-integration-spec@streamr.network",
 			name: "him",
 			password: "bar",
 		).save(failOnError: true)
 
 		stranger = new User(
-			username: "stranger-permission-service-integration-spec@streamr.com",
+			username: "stranger-permission-service-integration-spec@streamr.network",
 			name: "stranger",
 			password: "x",
 		).save(failOnError: true)
 
 		someone = new User(
-			username: "someone-service-integration-spec@streamr.com",
+			username: "someone-service-integration-spec@streamr.network",
 			name: "someone",
 			password: "x",
 		).save(failOnError: true)
@@ -145,7 +145,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		secretItem.save(failOnError: true, validate: true, flush: true)
 
 		// Sign-up invitations can also receive Permissions; they will later be converted to User permissions
-		invite = new SignupInvite(email: "him-permission-service-integration-spec@streamr.com", code: "sikritCode", sent: true, used: false).save(validate: false, flush: true)
+		invite = new SignupInvite(email: "him-permission-service-integration-spec@streamr.network", code: "sikritCode", sent: true, used: false).save(validate: false, flush: true)
 
 		anonymousStream = new Stream(name: "anonymous stream")
 		anonymousStream.id = "stream-id-3"

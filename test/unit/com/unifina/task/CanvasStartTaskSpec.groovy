@@ -19,7 +19,7 @@ class CanvasStartTaskSpec extends Specification {
 		canvasService = Mock(CanvasService)
 		canvas = new Canvas(state: "stopped")
 		canvas.save(validate: false)
-		user = new User(username: "user@streamr.com")
+		user = new User(username: "user@streamr.network")
 		user.save(validate: false, failOnError: true)
     }
 

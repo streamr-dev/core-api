@@ -205,7 +205,7 @@ class ProductServiceSpec extends Specification {
 
 	void "list() delegates to ApiService#list"() {
 		def apiService = service.apiService = Mock(ApiService)
-		def me = new User(username: "me@streamr.com")
+		def me = new User(username: "me@streamr.network")
 
 		when:
 		service.list(new ProductListParams(max: 5), me)
@@ -219,7 +219,7 @@ class ProductServiceSpec extends Specification {
 
 	void "findById() delegates to ApiService#authorizedGetById"() {
 		def apiService = service.apiService = Mock(ApiService)
-		def me = new User(username: "me@streamr.com")
+		def me = new User(username: "me@streamr.network")
 
 		when:
 		service.findById("product-id", me, Permission.Operation.PRODUCT_GET)
@@ -306,7 +306,7 @@ class ProductServiceSpec extends Specification {
 			pricePerSecond: 10,
 			minimumSubscriptionInSeconds: 1
 		)
-		def me = new User(username: "me@streamr.com")
+		def me = new User(username: "me@streamr.network")
 
 		when:
 		service.create(validCommand, me)
@@ -328,7 +328,7 @@ class ProductServiceSpec extends Specification {
 			pricePerSecond: 10,
 			minimumSubscriptionInSeconds: 1
 		)
-		def me = new User(username: "me@streamr.com")
+		def me = new User(username: "me@streamr.network")
 
 		when:
 		service.create(validCommand, me)
@@ -352,7 +352,7 @@ class ProductServiceSpec extends Specification {
 			pricePerSecond: 0,
 			minimumSubscriptionInSeconds: 0,
 		)
-		def me = new User(username: "me@streamr.com")
+		def me = new User(username: "me@streamr.network")
 
 		when:
 		service.create(validCommand, me)
@@ -379,7 +379,7 @@ class ProductServiceSpec extends Specification {
 			pricePerSecond: 10,
 			minimumSubscriptionInSeconds: 1
 		)
-		def me = new User(username: "me@streamr.com")
+		def me = new User(username: "me@streamr.network")
 
 		when:
 		service.create(validCommand, me)
@@ -489,7 +489,7 @@ class ProductServiceSpec extends Specification {
 				priceCurrency: Product.Currency.DATA,
 				minimumSubscriptionInSeconds: 1000
 		)
-		def user = new User(username: "me@streamr.com")
+		def user = new User(username: "me@streamr.network")
 
 		when:
 		service.update("product-id", validCommand, user)
@@ -522,7 +522,7 @@ class ProductServiceSpec extends Specification {
 			priceCurrency: Product.Currency.DATA,
 			minimumSubscriptionInSeconds: 0
 		)
-		def user = new User(username: "me@streamr.com")
+		def user = new User(username: "me@streamr.network")
 
 		when:
 		service.update("product-id", validCommand, user)
@@ -569,7 +569,7 @@ class ProductServiceSpec extends Specification {
 			priceCurrency: Product.Currency.DATA,
 			minimumSubscriptionInSeconds: 0
 		)
-		def user = new User(username: "me@streamr.com")
+		def user = new User(username: "me@streamr.network")
 
 		when:
 		service.update("product-id", validCommand, user)
@@ -618,7 +618,7 @@ class ProductServiceSpec extends Specification {
 			priceCurrency: Product.Currency.DATA,
 			minimumSubscriptionInSeconds: 0
 		)
-		def user = new User(username: "me@streamr.com")
+		def user = new User(username: "me@streamr.network")
 
 		when:
 		service.update("product-id", validCommand, user)
@@ -667,7 +667,7 @@ class ProductServiceSpec extends Specification {
 				priceCurrency: Product.Currency.DATA,
 				minimumSubscriptionInSeconds: 1000
 		)
-		def user = new User(username: "me@streamr.com")
+		def user = new User(username: "me@streamr.network")
 
 		when:
 		service.update("product-id", validCommand, user)
@@ -697,7 +697,7 @@ class ProductServiceSpec extends Specification {
 			priceCurrency: Product.Currency.DATA,
 			minimumSubscriptionInSeconds: 1000
 		)
-		def user = new User(username: "me@streamr.com")
+		def user = new User(username: "me@streamr.network")
 
 		when:
 		service.update("product-id", validCommand, user)

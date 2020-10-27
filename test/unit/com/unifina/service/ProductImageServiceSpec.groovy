@@ -22,7 +22,7 @@ class ProductImageServiceSpec extends Specification {
 	void setup() {
 		service.imageResizer = Stub(ImageResizer)
 		service.fileUploadProvider = Stub(FileUploadProvider) {
-			uploadFile(_, _) >> new URL("https://www.streamr.com/files/id-0")
+			uploadFile(_, _) >> new URL("https://www.streamr.network/files/id-0")
 		}
 		service.idGenerator = new FakeIdGenerator()
 
@@ -106,14 +106,14 @@ class ProductImageServiceSpec extends Specification {
 		def fileUploadProvider = service.fileUploadProvider = Mock(FileUploadProvider)
 		service.imageVerifier = Mock(ImageVerifier)
 		def bytes = new byte[256]
-		product.imageUrl = "https://www.streamr.com/files/2.png"
-		product.thumbnailUrl = "https://www.streamr.com/files/t.png"
+		product.imageUrl = "https://www.streamr.network/files/2.png"
+		product.thumbnailUrl = "https://www.streamr.network/files/t.png"
 
 		when:
 		service.replaceImage(product, bytes, filename)
 		then:
-		1 * fileUploadProvider.deleteFile("https://www.streamr.com/files/2.png")
-		1 * fileUploadProvider.deleteFile("https://www.streamr.com/files/t.png")
+		1 * fileUploadProvider.deleteFile("https://www.streamr.network/files/2.png")
+		1 * fileUploadProvider.deleteFile("https://www.streamr.network/files/t.png")
 	}
 
 	void "replaceImage() updates Product.imageUrl"() {
@@ -124,7 +124,7 @@ class ProductImageServiceSpec extends Specification {
 		when:
 		service.replaceImage(product, bytes, filename)
 		then:
-		Product.get("1").imageUrl == "https://www.streamr.com/files/id-0"
+		Product.get("1").imageUrl == "https://www.streamr.network/files/id-0"
 	}
 
 	void "replaceImage() updates Product.thumbnailUrl"() {
@@ -135,6 +135,6 @@ class ProductImageServiceSpec extends Specification {
 		when:
 		service.replaceImage(product, bytes, filename)
 		then:
-		Product.get("1").thumbnailUrl == "https://www.streamr.com/files/id-0"
+		Product.get("1").thumbnailUrl == "https://www.streamr.network/files/id-0"
 	}
 }
