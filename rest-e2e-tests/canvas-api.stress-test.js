@@ -227,12 +227,12 @@ describe('Canvas API', function() {
                 .start(canvas.id)
                 .withSessionToken(sessionToken)
                 .call()
-            assert.equal(r1.status, 200)
+            assert.equal(r1.status, 200, 'Canvas start failed')
             const r2 = await Streamr.api.v1.canvases
                 .stop(canvas.id)
                 .withSessionToken(sessionToken)
                 .call()
-            assert.equal(r2.status, 200)
+            assert.equal(r2.status, 200, 'Canvas stop failed')
 
             const table = canvas.modules.find(({ name }) => name === 'Table')
             subscription = streamrClient.subscribe({
@@ -264,7 +264,7 @@ describe('Canvas API', function() {
                     .start(canvas.id)
                     .withSessionToken(sessionToken)
                     .call()
-                assert.equal(r3.status, 200)
+                assert.equal(r3.status, 200, 'Canvas restart failed')
 
                 // reduce flakiness by allowing the subscriptions of the canvas some time to get set up
                 await sleep(5000)

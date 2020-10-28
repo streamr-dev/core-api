@@ -130,6 +130,7 @@ class CanvasService {
 	}
 
 	void start(Canvas canvas, boolean clearSerialization, User asUser) {
+		log.info("Start canvas: id=" + canvas.id)
 		if (canvas.state == Canvas.State.RUNNING) {
 			throw new InvalidStateException("Cannot run canvas $canvas.id because it's already running. Stop it first.")
 		}
@@ -157,6 +158,7 @@ class CanvasService {
 
 	@Transactional(noRollbackFor=[CanvasUnreachableException])
 	void stop(Canvas canvas, User user, AuthorizationHeader authorizationHeader) {
+		log.info("Stop canvas: id=" + canvas.id)
 		if (canvas.state != Canvas.State.RUNNING) {
 			throw new InvalidStateException("Canvas $canvas.id not currently running.")
 		}
