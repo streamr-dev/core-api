@@ -172,7 +172,8 @@ db-rollback-1:
 # Docker recipes
 
 .PHONY: docker-build-dev
-docker-build-dev: build-war-dev ## Build Docker dev container
+docker-build-dev: ## Build Docker dev container
+	grails war
 	docker build -t streamr/engine-and-editor:dev .
 
 .PHONY: docker-push-dev
