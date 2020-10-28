@@ -13,16 +13,31 @@ async function assertResponseIsError(response, statusCode, programmaticCode, inc
     }
 }
 
+const assertStreamrClientResponseError = async (request, expectedStatusCode) => {
+	return request
+		.then(() => {
+			assert.fail('Should response with an error code')
+		})
+		.catch(e => {
+			assert.equal(e.response.status, expectedStatusCode)
+		})
+}
+
+const getStreamrClient = (user) => {
+	return new StreamrClient({
+		restUrl: REST_URL,
+		auth: {
+			privateKey: user.privateKey
+		}
+	})
+}
+
 const cachedSessionTokens = {}
 
-async function getSessionToken(privateKey) {
+async function getSessionToken(user) {
+	const privateKey = user.privateKey
 	if (cachedSessionTokens[privateKey] === undefined) {
-		const client = new StreamrClient({
-			restUrl: REST_URL,
-			auth: {
-				privateKey
-			},
-		})
+		const client = getStreamrClient(user)
 		const sessionToken = await client.session.getSessionToken()
 		cachedSessionTokens[privateKey] = sessionToken
 		return sessionToken
@@ -38,6 +53,8 @@ const testUsers = _.mapValues({
 
 module.exports = {
 	assertResponseIsError,
+	assertStreamrClientResponseError,
 	getSessionToken,
-	testUsers
+	testUsers,
+	getStreamrClient
 }

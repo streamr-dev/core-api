@@ -6,6 +6,7 @@ const fetch = require('node-fetch')
 const initStreamrApi = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
+const getStreamrClient = require('./test-utilities.js').getStreamrClient
 const StreamrClient = require('streamr-client')
 
 const URL = 'http://localhost/api/v1'
@@ -42,11 +43,8 @@ async function createProductAndReturnId(productBody) {
 }
 
 async function createStreamAndReturnId(streamBody, user) {
-    const json = await Streamr.api.v1.streams
-        .create(streamBody)
-        .withAuthenticatedUser(user)
-        .execute()
-    return json.id
+    const stream = await getStreamrClient(user).createStream(streamBody)
+    return stream.id
 }
 
 describe('Products API', function() {

@@ -83,7 +83,7 @@ class StreamrApiRequest {
             headers['Content-type'] = this.contentType
         }
         if (this.authenticatedUser) {
-            const sessionToken = await getSessionToken(this.authenticatedUser.privateKey)
+            const sessionToken = await getSessionToken(this.authenticatedUser)
             headers['Authorization'] = `Bearer ${sessionToken}`
         }
 
@@ -237,13 +237,6 @@ class Streams {
     constructor(options) {
         this.options = options
         this.permissions = new Permissions('streams', options)
-    }
-
-    create(body) {
-        return new StreamrApiRequest(this.options)
-            .method('POST')
-            .endpoint('streams')
-            .withBody(body)
     }
 
     get(id) {

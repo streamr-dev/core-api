@@ -2,6 +2,7 @@ const assert = require('chai').assert
 const initStreamrApi = require('./streamr-api-clients')
 const _ = require('lodash');
 const StreamrClient = require('streamr-client')
+const getStreamrClient = require('./test-utilities.js').getStreamrClient
 
 const URL = 'http://localhost/api/v1'
 const LOGGING_ENABLED = false;
@@ -12,11 +13,8 @@ const createMockEthereumAddress = () => {
 	return '0x' + _.padStart(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16),LENGTH, '0');
 };
 const createStream = async (user) => {
-	return Streamr.api.v1.streams
-		.create()
-		.withAuthenticatedUser(user)
-		.execute()
-		.then((json) => json.id);
+	const stream = await getStreamrClient(user).createStream();
+	return stream.id;
 };
 const findStreamsByStorageNode = (storageNodeAddress) => {
 	return Streamr.api.v1.storagenodes

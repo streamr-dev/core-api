@@ -1,6 +1,8 @@
 const assert = require('chai').assert
 const initStreamrApi = require('./streamr-api-clients')
 const StreamrClient = require('streamr-client')
+const getStreamrClient = require('./test-utilities.js').getStreamrClient
+
 const URL = 'http://localhost/api/v1'
 const LOGGING_ENABLED = false
 const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
@@ -13,12 +15,9 @@ describe('POST /api/v1/streams/{id}/permissions', function() {
 	const me = StreamrClient.generateEthereumAccount()
 
 	before(async () => {
-		stream = await Streamr.api.v1.streams
-			.create({
-				name: `permissions-api.test.js-${Date.now()}`
-			})
-			.withAuthenticatedUser(me)
-			.execute()
+		stream = await getStreamrClient(me).createStream({
+			name: `permissions-api.test.js-${Date.now()}`
+		})
 	})
 
 	describe('race conditions', () => {

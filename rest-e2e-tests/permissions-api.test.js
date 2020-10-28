@@ -3,6 +3,7 @@ const initStreamrApi = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 const StreamrClient = require('streamr-client')
 const getSessionToken = require('./test-utilities.js').getSessionToken
+const getStreamrClient = require('./test-utilities.js').getStreamrClient
 
 const URL = 'http://localhost/api/v1'
 const LOGGING_ENABLED = false
@@ -19,19 +20,16 @@ describe('Permissions API', () => {
 
     before(async () => {
         // Make sure the "existingUser" exists by logging them in
-        await getSessionToken(existingUser.privateKey)
+        await getSessionToken(existingUser)
     })
 
     describe('POST /api/v1/streams/{id}/permissions', () => {
         let stream
 
         before(async () => {
-            stream = await Streamr.api.v1.streams
-                .create({
-                    name: `permissions-api.test.js-${Date.now()}`
-                })
-                .withAuthenticatedUser(me)
-                .execute()
+            stream = await getStreamrClient(me).createStream({
+                name: `permissions-api.test.js-${Date.now()}`
+            })
         })
 
         it('can grant a permission to an existing user using email address', async () => {
@@ -71,12 +69,9 @@ describe('Permissions API', () => {
         let stream
 
         before(async function() {
-            stream = await Streamr.api.v1.streams
-                .create({
-                    name: `permissions-api.test.js-delete-${Date.now()}`
-                })
-                .withAuthenticatedUser(me)
-                .execute()
+            stream = await getStreamrClient(me).createStream({
+                name: `permissions-api.test.js-delete-${Date.now()}`
+            })
         })
 
         it('delete a permission', async function() {

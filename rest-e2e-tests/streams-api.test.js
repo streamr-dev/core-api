@@ -3,6 +3,8 @@ const fs = require('fs')
 const initStreamrApi = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
+const assertStreamrClientResponseError = require('./test-utilities.js').assertStreamrClientResponseError
+const getStreamrClient = require('./test-utilities.js').getStreamrClient
 const StreamrClient = require('streamr-client')
 
 const URL = 'http://localhost/api/v1'
@@ -18,20 +20,16 @@ describe('Streams API', () => {
     let streamId
 
     before(async () => {
-        const response = await Streamr.api.v1.streams
-            .create({
-                name: 'stream-id-' + Date.now()
-            })
-            .withAuthenticatedUser(streamOwner)
-            .execute()
+        const response = await getStreamrClient(streamOwner).createStream({
+            name: 'stream-id-' + Date.now()
+        })
         streamId = response.id
 	})
 
 	describe('POST /api/v1/streams', function() {
 
 		it('happy path', async function() {
-			const assertValidResponse = (response, json, properties, expectedId) => {
-				assert.equal(response.status, 200)
+			const assertValidResponse = (json, properties, expectedId) => {
 				assert.equal(json.name, properties.name)
 				assert.equal(json.description, properties.description)
 				assert.deepEqual(json.config, properties.config)
@@ -55,28 +53,22 @@ describe('Streams API', () => {
 				partitions: 12,
 				uiChannel: false
 			}
-			const createResponse = await Streamr.api.v1.streams
-				.create(properties)
-				.withAuthenticatedUser(streamOwner)
-				.call()
-			const createResponseJson = await createResponse.json()
-			assertValidResponse(createResponse, createResponseJson, properties)
-			const streamId = createResponseJson.id
+			const createResponse = await getStreamrClient(streamOwner).createStream(properties)
+			assertValidResponse(createResponse, properties)
+			const streamId = createResponse.id
 			const fetchResponse = await Streamr.api.v1.streams
 				.get(streamId)
 				.withAuthenticatedUser(streamOwner)
 				.call()
-			assertValidResponse(fetchResponse, await fetchResponse.json(), properties, streamId)
+			assert.equal(fetchResponse.status, 200)
+			assertValidResponse(await fetchResponse.json(), properties, streamId)
 		});
 
 		it('invalid properties', async function() {
-			const response = await Streamr.api.v1.streams
-				.create({
-					partitions: 999
-				})
-				.withAuthenticatedUser(streamOwner)
-				.call()
-			assert.equal(response.status, 422)
+			const request = getStreamrClient(streamOwner).createStream({
+				partitions: 999
+			})
+			await assertStreamrClientResponseError(request, 422)
 		})
 
 		it('create with sandbox domain id', async function() {
@@ -84,14 +76,8 @@ describe('Streams API', () => {
 			const properties = {
 				id: streamId
 			}
-			const response = await Streamr.api.v1.streams
-				.create(properties)
-				.withAuthenticatedUser(streamOwner)
-				.call()
-
-			assert.equal(response.status, 200)
-			const json = await response.json()
-			assert.equal(json.id, streamId)
+			const response = await getStreamrClient(streamOwner).createStream(properties)
+			assert.equal(response.id, streamId)
 		})
 
 		it('create with owned domain id', async function() {
@@ -99,14 +85,8 @@ describe('Streams API', () => {
 			const properties = {
 				id: streamId
 			}
-			const response = await Streamr.api.v1.streams
-				.create(properties)
-				.withAuthenticatedUser(ensDomainOwner)
-				.call()
-
-			assert.equal(response.status, 200)
-			const json = await response.json()
-			assert.equal(json.id, streamId)
+			const response = await getStreamrClient(ensDomainOwner).createStream(properties)
+			assert.equal(response.id, streamId)
 		})
 
 		it('create with invalid domain id', async function() {
@@ -114,11 +94,8 @@ describe('Streams API', () => {
 			const properties = {
 				id: sandboxDomainId
 			}
-			const response = await Streamr.api.v1.streams
-				.create(properties)
-				.withAuthenticatedUser(streamOwner)
-				.call()
-			assert.equal(response.status, 422)
+			const request = getStreamrClient(streamOwner).createStream(properties)
+			await assertStreamrClientResponseError(request, 422)
 		})
 
 	})
@@ -126,15 +103,10 @@ describe('Streams API', () => {
     describe('GET /api/v1/streams/:id', () => {
         it('works with uri-encoded ids', async () => {
             const id = 'sandbox/streams-api.test.js/stream-' + Date.now()
-            let response = await Streamr.api.v1.streams
-                .create({
-                    id,
-                })
-                .withAuthenticatedUser(streamOwner)
-                .call()
-            assert.equal(response.status, 200)
-
-            response = await Streamr.api.v1.streams
+            await getStreamrClient(streamOwner).createStream({
+                id
+            })
+            const response = await Streamr.api.v1.streams
                 .get(id)
                 .withAuthenticatedUser(streamOwner)
                 .call()
