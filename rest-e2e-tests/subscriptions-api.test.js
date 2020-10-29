@@ -1,7 +1,4 @@
 const assert = require('chai').assert
-const Web3 = require('web3')
-const keythereum = require('keythereum')
-const ethereumJsUtil = require('ethereumjs-util')
 const initStreamrApi = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
@@ -11,7 +8,7 @@ const URL = 'http://localhost/api/v1'
 const LOGGING_ENABLED = false
 
 const productOwner = StreamrClient.generateEthereumAccount()
-const otherUser = StreamrClient.generateEthereumAccount()
+const subscriber = StreamrClient.generateEthereumAccount()
 const devOpsUser = require('./test-utilities.js').testUsers.devOpsUser
 
 const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
@@ -35,26 +32,6 @@ async function createSubscription(subscriptionBody) {
         .create(subscriptionBody)
         .withAuthenticatedUser(devOpsUser)
         .execute()
-}
-
-async function obtainChallenge(address) {
-    const json = await Streamr.api.v1.login
-        .challenge(address)
-        .execute()
-    return json
-}
-
-async function submitChallenge(challenge, signature) {
-    const json = await Streamr.api.v1.integration_keys
-        .create({
-            name: 'My Ethereum ID',
-            service: 'ETHEREUM_ID',
-            challenge: challenge,
-            signature: signature
-        })
-        .withAuthenticatedUser(otherUser)
-        .execute()
-    return json
 }
 
 describe('Subscriptions API', () => {
@@ -178,7 +155,6 @@ describe('Subscriptions API', () => {
 
     describe('GET /api/v1/subscriptions', () => {
         let productId
-        let publicAddress
 
         before(async () => {
             productId = await createProductAndReturnId({
@@ -192,10 +168,6 @@ describe('Subscriptions API', () => {
                 priceCurrency: 'USD',
                 minimumSubscriptionInSeconds: 60,
             })
-
-            const generatedKey = keythereum.create()
-            const privateKey = '0x' + generatedKey.privateKey.toString('hex')
-            publicAddress = '0x' + ethereumJsUtil.privateToAddress(generatedKey.privateKey).toString('hex')
 
             await createSubscription({
                 product: productId,
@@ -211,16 +183,9 @@ describe('Subscriptions API', () => {
 
             await createSubscription({
                 product: productId,
-                address: publicAddress,
+                address: subscriber.address,
                 endsAt: 1540840312
             })
-
-            const challenge = await obtainChallenge(publicAddress)
-            const web3 = new Web3()
-
-            const signedChallenge = web3.eth.accounts.sign(challenge.challenge, privateKey)
-
-            await submitChallenge(challenge, signedChallenge.signature)
         })
 
         it('requires authentication', async () => {
@@ -237,7 +202,7 @@ describe('Subscriptions API', () => {
             before(async () => {
                 response = await Streamr.api.v1.subscriptions
                     .list()
-                    .withAuthenticatedUser(otherUser)
+                    .withAuthenticatedUser(subscriber)
                     .call()
                 json = await response.json()
             })
@@ -249,7 +214,7 @@ describe('Subscriptions API', () => {
             it('responds with list of subscriptions', () => {
                 assert.isAtLeast(json.length, 1)
                 json.forEach(subscriptionData => assertIsSubscription(subscriptionData))
-                const picked = json.find(subscriptionData => subscriptionData.address === publicAddress)
+                const picked = json.find(subscriptionData => subscriptionData.address === subscriber.address)
                 assert.isNotNull(picked)
                 assert.deepEqual(picked.endsAt, '2018-10-29T19:11:52Z')
                 assert.deepEqual(picked.product.id, productId)
