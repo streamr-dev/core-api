@@ -272,18 +272,6 @@ class Streams {
             .endpoint('streams', id, 'permissions', 'me')
     }
 
-    isPublisher(streamId, address) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('streams', streamId, 'publisher', address)
-    }
-
-    isSubscriber(streamId, address) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('streams', streamId, 'subscriber', address)
-    }
-
     delete(streamId, permissionId) {
         return new StreamrApiRequest(this.options)
             .method('DELETE')
