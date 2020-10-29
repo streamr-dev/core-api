@@ -13,7 +13,7 @@ const LOGGING_ENABLED = false
 const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
 
 const streamOwner = StreamrClient.generateEthereumAccount()
-const otherUser = StreamrClient.generateEthereumAccount()
+const anonymousUser = StreamrClient.generateEthereumAccount()
 const ensDomainOwner = require('./test-utilities.js').testUsers.ensDomainOwner
 
 describe('Streams API', () => {
@@ -56,12 +56,8 @@ describe('Streams API', () => {
 			const createResponse = await getStreamrClient(streamOwner).createStream(properties)
 			assertValidResponse(createResponse, properties)
 			const streamId = createResponse.id
-			const fetchResponse = await Streamr.api.v1.streams
-				.get(streamId)
-				.withAuthenticatedUser(streamOwner)
-				.call()
-			assert.equal(fetchResponse.status, 200)
-			assertValidResponse(await fetchResponse.json(), properties, streamId)
+			const fetchResponse = await getStreamrClient(streamOwner).getStream(streamId)
+			assertValidResponse(fetchResponse, properties, streamId)
 		});
 
 		it('invalid properties', async function() {
@@ -106,12 +102,7 @@ describe('Streams API', () => {
             await getStreamrClient(streamOwner).createStream({
                 id
             })
-            const response = await Streamr.api.v1.streams
-                .get(id)
-                .withAuthenticatedUser(streamOwner)
-                .call()
-            const json = await response.json()
-            assert.equal(response.status, 200, `Error getting stream ${id}: ${JSON.stringify(json)}`)
+            const json = await getStreamrClient(streamOwner).getStream(id)
             assert.equal(json.id, id)
         })
     })
@@ -157,22 +148,22 @@ describe('Streams API', () => {
 
     describe('GET /api/v1/streams/:id/validation', () => {
         it('does not require authentication', async () => {
-            const response = await Streamr.api.v1.streams.getValidationInfo(streamId).call()
-            assert.equal(response.status, 200)
+            const json = await getStreamrClient(anonymousUser).getStreamValidationInfo(streamId)
+            assert.isOk(json)
         })
     })
 
     describe('GET /api/v1/streams/:id/publishers', () => {
         it('does not require authentication', async () => {
-            const response = await Streamr.api.v1.streams.getPublishers(streamId).call()
-            assert.equal(response.status, 200)
+            const json = await getStreamrClient(anonymousUser).getStreamPublishers(streamId)
+            assert.isOk(json)
         })
     })
 
     describe('GET /api/v1/streams/:id/subscribers', () => {
         it('does not require authentication', async () => {
-            const response = await Streamr.api.v1.streams.getSubscribers(streamId).call()
-            assert.equal(response.status, 200)
+            const json = await getStreamrClient(anonymousUser).getStreamSubscribers(streamId)
+            assert.isOk(json)
         })
     })
 
@@ -224,7 +215,7 @@ describe('Streams API', () => {
                         type: 'map'
                     }
                 ])
-                .withAuthenticatedUser(otherUser)
+                .withAuthenticatedUser(anonymousUser)
                 .call()
 
             await assertResponseIsError(response, 403, 'FORBIDDEN', 'stream_edit')

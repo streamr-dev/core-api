@@ -239,12 +239,6 @@ class Streams {
         this.permissions = new Permissions('streams', options)
     }
 
-    get(id) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('streams', id)
-    }
-
     setFields(id, body) {
         return new StreamrApiRequest(this.options)
             .method('POST')
@@ -276,24 +270,6 @@ class Streams {
         return new StreamrApiRequest(this.options)
             .method('GET')
             .endpoint('streams', id, 'permissions', 'me')
-    }
-
-    getValidationInfo(id) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('streams', id, 'validation')
-    }
-
-    getPublishers(id) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('streams', id, 'publishers')
-    }
-
-    getSubscribers(id) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('streams', id, 'subscribers')
     }
 
     isPublisher(streamId, address) {
