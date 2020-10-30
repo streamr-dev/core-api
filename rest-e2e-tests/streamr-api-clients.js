@@ -6,12 +6,8 @@ const getSessionToken = require('./test-utilities.js').getSessionToken
 
 class StreamrApiRequest {
     constructor(options) {
-        this.baseUrl = options.baseUrl || 'https://www.streamr.com/api/v1/'
-        if (!this.baseUrl.endsWith('/')) {
-            this.baseUrl += '/'
-        }
-
-        this.logging = options.logging || false
+        this.baseUrl = options.baseUrl
+        this.logging = options.logging
         this.authenticatedUser = null
         this.contentType = null
         this.queryParams = ''
