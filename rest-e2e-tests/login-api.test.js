@@ -82,23 +82,5 @@ describe('Login API', () => {
             const lastLogin = new Date(me.lastLogin).getTime()
             assert(lastLogin >= testStartTime, `user lastLogin was not updated. lastLogin: ${lastLogin}, testStartTime: ${testStartTime}`)
         }).timeout(TIMEOUT)
-
-        it('does not fail even when flooded with simultaneous logins for same user (CORE-1660)', () => {
-            const promises = []
-            for (let i=0; i<100; i++) {
-                promises.push(loginWithApiKey(API_KEY))
-            }
-
-            return Promise.all(promises)
-                .then((results) => {
-                    const errors = results.filter(it => it.status !== 200)
-                    return Promise.all(errors.map(it => it.json()))
-                })
-                .then((errorsJson) => {
-                    if (errorsJson.length) {
-                        throw new Error(`Got errors: ${JSON.stringify(errorsJson)}`)
-                    }
-                })
-        }).timeout(TIMEOUT)
     })
 })
