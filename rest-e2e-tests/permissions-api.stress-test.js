@@ -30,32 +30,35 @@ describe('POST /api/v1/streams/{id}/permissions', function() {
 		// Tests here are repeated 50 times, as they have some chance of an individual attempt
 		// succeeding even if the race condition is not handled properly
 		const ITERATIONS = 50
+		const assertSuccessResponses = (responses) => {
+			const httpStatuses = responses.map((r) => r.status)
+			const fails = httpStatuses.filter(status => status !== 200)
+			if (fails.length > 0) {
+				assert.fail(`Race condition test failed on ${fails.length}/${ITERATIONS} iterations: [${fails}]`)
+			}
+		}
 
 		it('survives a race condition when granting multiple permissions to a non-existing user using Ethereum address', async () => {
 			for (let i=0; i<ITERATIONS; i++) {
-				console.log("\titeration: " + (i + 1))
 				const responses = await Promise.all(operations.map((operation) => {
 					return Streamr.api.v1.streams
 						.grant(stream.id, StreamrClient.generateEthereumAccount().address, operation)
 						.withAuthenticatedUser(me)
 						.call()
 				}))
-				// All response statuses must be 200
-				assert.deepEqual(responses.map((r) => r.status), operations.map((op) => 200), `Race condition test failed on iteration ${i}`)
+				assertSuccessResponses(responses)
 			}
 		})
 
 		it('survives a race condition when granting multiple permissions to a non-existing user using email address', async () => {
 			for (let i=0; i<ITERATIONS; i++) {
-				console.log("\titeration: " + (i + 1))
 				const responses = await Promise.all(operations.map((operation) => {
 					return Streamr.api.v1.streams
 						.grant(stream.id, `race-condition-${i}@foobar.invalid`, operation)
 						.withAuthenticatedUser(me)
 						.call()
 				}))
-				// All response statuses must be 200
-				assert.deepEqual(responses.map((r) => r.status), operations.map((op) => 200), `Race condition test failed on iteration ${i}`)
+				assertSuccessResponses(responses)
 			}
 		})
 	})
