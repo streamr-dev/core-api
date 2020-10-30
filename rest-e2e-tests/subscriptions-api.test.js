@@ -1,17 +1,13 @@
 const assert = require('chai').assert
-const initStreamrApi = require('./streamr-api-clients')
+const Streamr = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
 const StreamrClient = require('streamr-client')
-
-const URL = 'http://localhost/api/v1'
-const LOGGING_ENABLED = false
 
 const productOwner = StreamrClient.generateEthereumAccount()
 const subscriber = StreamrClient.generateEthereumAccount()
 const devOpsUser = require('./test-utilities.js').testUsers.devOpsUser
 
-const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
 const schemaValidator = new SchemaValidator()
 
 function assertIsSubscription(data) {

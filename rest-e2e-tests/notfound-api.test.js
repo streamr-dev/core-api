@@ -1,10 +1,6 @@
 const assert = require('chai').assert
 const StreamrClient = require('streamr-client')
-const initStreamrApi = require('./streamr-api-clients')
-
-const REST_URL = 'http://localhost/api/v1'
-const LOGGING_ENABLED = false
-const Streamr = initStreamrApi(REST_URL, LOGGING_ENABLED)
+const Streamr = require('./streamr-api-clients')
 
 const testUser = StreamrClient.generateEthereumAccount()
 

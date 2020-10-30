@@ -432,27 +432,24 @@ class NotFound {
     }
 }
 
-module.exports = (baseUrl, logging) => {
-    const options = {
-        // Append a trailing "/" if not present
-        baseUrl: baseUrl.slice(-1) === "/" ? baseUrl : baseUrl + '/',
-        logging
-    }
-
-    return {
-        api: {
-            v1: {
-                canvases: new Canvases(options),
-                categories: new Categories(options),
-                integration_keys: new IntegrationKeys(options),
-                login: new Login(options),
-                products: new Products(options),
-                streams: new Streams(options),
-                subscriptions: new Subscriptions(options),
-                dataunions: new DataUnions(options),
-                storagenodes: new StorageNodes(options),
-                not_found: new NotFound(options),
-            }
+const LOGGING_ENABLED = process.env.LOGGING_ENABLED || false
+const options = {
+	baseUrl: 'http://localhost/api/v1/',
+	logging: LOGGING_ENABLED
+}
+module.exports = {
+    api: {
+        v1: {
+            canvases: new Canvases(options),
+            categories: new Categories(options),
+            integration_keys: new IntegrationKeys(options),
+            login: new Login(options),
+            products: new Products(options),
+            streams: new Streams(options),
+            subscriptions: new Subscriptions(options),
+            dataunions: new DataUnions(options),
+            storagenodes: new StorageNodes(options),
+            not_found: new NotFound(options),
         }
     }
 }

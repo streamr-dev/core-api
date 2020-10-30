@@ -1,14 +1,10 @@
 const assert = require('chai').assert
-const initStreamrApi = require('./streamr-api-clients')
+const Streamr = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 const StreamrClient = require('streamr-client')
 const getSessionToken = require('./test-utilities.js').getSessionToken
 const getStreamrClient = require('./test-utilities.js').getStreamrClient
 
-const URL = 'http://localhost/api/v1'
-const LOGGING_ENABLED = false
-
-const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
 const schemaValidator = new SchemaValidator()
 
 const API_KEY = 'tester1-api-key'

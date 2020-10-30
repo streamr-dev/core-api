@@ -1,11 +1,7 @@
 const assert = require('chai').assert
-const initStreamrApi = require('./streamr-api-clients')
+const Streamr = require('./streamr-api-clients')
 const StreamrClient = require('streamr-client')
 const getStreamrClient = require('./test-utilities.js').getStreamrClient
-
-const URL = 'http://localhost/api/v1'
-const LOGGING_ENABLED = false
-const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
 
 describe('POST /api/v1/streams/{id}/permissions', function() {
 

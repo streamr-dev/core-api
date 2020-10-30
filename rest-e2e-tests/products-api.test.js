@@ -3,20 +3,16 @@ const fs = require('fs')
 const zlib = require('zlib')
 const fetch = require('node-fetch')
 
-const initStreamrApi = require('./streamr-api-clients')
+const Streamr = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
 const getStreamrClient = require('./test-utilities.js').getStreamrClient
 const StreamrClient = require('streamr-client')
 
-const URL = 'http://localhost/api/v1'
-const LOGGING_ENABLED = process.env.LOGGING_ENABLED || false
-
 const productOwner = StreamrClient.generateEthereumAccount()
 const otherUser = StreamrClient.generateEthereumAccount()
 const devOpsUser = require('./test-utilities.js').testUsers.devOpsUser
 
-const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
 const schemaValidator = new SchemaValidator()
 
 function assertIsPermission(data) {
