@@ -50,7 +50,7 @@ describe('POST /api/v1/streams/{id}/permissions', function() {
 				console.log("\titeration: " + (i + 1))
 				const responses = await Promise.all(operations.map((operation) => {
 					return Streamr.api.v1.streams
-						.grant(stream.id, `race-condition-${i}@foobar.invalid`, 'stream_get')
+						.grant(stream.id, `race-condition-${i}@foobar.invalid`, operation)
 						.withAuthenticatedUser(me)
 						.call()
 				}))
