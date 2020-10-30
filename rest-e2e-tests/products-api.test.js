@@ -5,11 +5,8 @@ const Streamr = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
 const getStreamrClient = require('./test-utilities.js').getStreamrClient
+const testUsers = require('./test-utilities.js').testUsers
 const StreamrClient = require('streamr-client')
-
-const productOwner = StreamrClient.generateEthereumAccount()
-const otherUser = StreamrClient.generateEthereumAccount()
-const devOpsUser = require('./test-utilities.js').testUsers.devOpsUser
 
 const schemaValidator = new SchemaValidator()
 
@@ -28,10 +25,10 @@ function assertIsStream(data) {
     assert(errors.length === 0, schemaValidator.toMessages(errors))
 }
 
-async function createProductAndReturnId(productBody) {
+async function createProductAndReturnId(productBody, user) {
     const json = await Streamr.api.v1.products
         .create(productBody)
-        .withAuthenticatedUser(productOwner)
+        .withAuthenticatedUser(user)
         .execute()
     return json.id
 }
@@ -46,7 +43,10 @@ describe('Products API', function() {
 
     let streamId1
     let streamId2
-    let streamId3
+	let streamId3
+	const productOwner = StreamrClient.generateEthereumAccount()
+	const otherUser = StreamrClient.generateEthereumAccount()
+	const devOpsUser = testUsers.devOpsUser
 
     this.timeout(1000 * 25)
 
@@ -99,7 +99,7 @@ describe('Products API', function() {
         let createdProductId
 
         before(async () => {
-            createdProductId = await createProductAndReturnId(genericProductBody)
+            createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
         })
 
         it('requires authentication', async () => {
@@ -248,7 +248,7 @@ describe('Products API', function() {
         let createdProductId
 
         before(async () => {
-            createdProductId = await createProductAndReturnId(genericProductBody)
+            createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
         })
 
         it('requires existing Product', async () => {
@@ -324,7 +324,7 @@ describe('Products API', function() {
         let createdProductId
 
         before(async () => {
-            createdProductId = await createProductAndReturnId(genericProductBody)
+            createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
         })
 
         it('requires authentication', async () => {
@@ -433,7 +433,7 @@ describe('Products API', function() {
         let createdProductId
 
         before(async () => {
-            createdProductId = await createProductAndReturnId(genericProductBody)
+            createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
         })
 
         it('requires authentication', async () => {
@@ -503,7 +503,7 @@ describe('Products API', function() {
         let createdProductId
 
         before(async () => {
-            createdProductId = await createProductAndReturnId(genericProductBody)
+            createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
         })
 
         it('requires authentication', async () => {
@@ -538,7 +538,7 @@ describe('Products API', function() {
         })
 
         it('verifies legality of state transition', async () => {
-            const productId = await createProductAndReturnId(genericProductBody)
+            const productId = await createProductAndReturnId(genericProductBody, productOwner)
 
             await Streamr.api.v1.products
                 .setDeployed(productId, deployedBody)
@@ -639,7 +639,7 @@ describe('Products API', function() {
         let createdProductId
 
         before(async () => {
-            createdProductId = await createProductAndReturnId(genericProductBody)
+            createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
         })
 
         it('requires authentication', async () => {
@@ -726,7 +726,7 @@ describe('Products API', function() {
         let createdProductId
 
         before(async () => {
-            createdProductId = await createProductAndReturnId(genericProductBody)
+            createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
         })
 
         it('requires authentication', async () => {
@@ -745,7 +745,7 @@ describe('Products API', function() {
         })
 
         it('requires DevOps role', async () => {
-            const productId = await createProductAndReturnId(genericProductBody)
+            const productId = await createProductAndReturnId(genericProductBody, productOwner)
             await Streamr.api.v1.products
                 .setDeployed(productId, {
                     ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
@@ -873,7 +873,7 @@ describe('Products API', function() {
         let createdProductId
 
         before(async () => {
-            createdProductId = await createProductAndReturnId(genericProductBody)
+            createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
         })
 
         it('requires existing Product', async () => {
@@ -931,7 +931,7 @@ describe('Products API', function() {
         let createdProductId
 
         before(async () => {
-            createdProductId = await createProductAndReturnId(genericProductBody)
+            createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
         })
 
         it('requires authentication', async () => {
@@ -1063,7 +1063,7 @@ describe('Products API', function() {
         let createdProductId
 
         before(async () => {
-            createdProductId = await createProductAndReturnId(genericProductBody)
+            createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
         })
 
         it('requires existing Product', async () => {
@@ -1139,7 +1139,7 @@ describe('Products API', function() {
         let createdProductId
 
         before(async () => {
-            createdProductId = await createProductAndReturnId(genericProductBody)
+            createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
         })
 
         it('requires existing Product', async () => {
@@ -1207,7 +1207,7 @@ describe('Products API', function() {
         let createdProductId
 
         before(async () => {
-            createdProductId = await createProductAndReturnId(genericProductBody)
+            createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
         })
 
         context('when called with valid params, body, and headers', () => {
@@ -1251,7 +1251,7 @@ describe('Products API', function() {
                 priceCurrency: 'USD',
                 minimumSubscriptionInSeconds: 60,
             }
-            freeProductId = await createProductAndReturnId(freeProductBody)
+            freeProductId = await createProductAndReturnId(freeProductBody, productOwner)
         })
 
         it('requires authentication', async () => {
@@ -1282,7 +1282,7 @@ describe('Products API', function() {
         })
 
         it('verifies that Product is free', async () => {
-            const paidProductId = await createProductAndReturnId(genericProductBody)
+            const paidProductId = await createProductAndReturnId(genericProductBody, productOwner)
 
             const response = await Streamr.api.v1.products
                 .deployFree(paidProductId)
@@ -1342,7 +1342,7 @@ describe('Products API', function() {
                 priceCurrency: 'USD',
                 minimumSubscriptionInSeconds: 60,
             }
-            freeProductId = await createProductAndReturnId(freeProductBody)
+            freeProductId = await createProductAndReturnId(freeProductBody, productOwner)
         })
 
         it('requires authentication', async () => {
@@ -1373,7 +1373,7 @@ describe('Products API', function() {
         })
 
         it('verifies that Product is free', async () => {
-            const paidProductId = await createProductAndReturnId(genericProductBody)
+            const paidProductId = await createProductAndReturnId(genericProductBody, productOwner)
 
             const response = await Streamr.api.v1.products
                 .undeployFree(paidProductId)

@@ -2,9 +2,10 @@ const assert = require('chai').assert
 const StreamrClient = require('streamr-client')
 const Streamr = require('./streamr-api-clients')
 
-const testUser = StreamrClient.generateEthereumAccount()
-
 describe('REST API', function() {
+
+    const testUser = StreamrClient.generateEthereumAccount()
+
     describe('GET /api/v1/page-not-found', function() {
         const assertContentLengthIsZero = async function (response) {
             const body = await response.text()

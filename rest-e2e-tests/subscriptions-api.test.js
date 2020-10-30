@@ -2,11 +2,8 @@ const assert = require('chai').assert
 const Streamr = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
+const testUsers = require('./test-utilities.js').testUsers
 const StreamrClient = require('streamr-client')
-
-const productOwner = StreamrClient.generateEthereumAccount()
-const subscriber = StreamrClient.generateEthereumAccount()
-const devOpsUser = require('./test-utilities.js').testUsers.devOpsUser
 
 const schemaValidator = new SchemaValidator()
 
@@ -15,22 +12,27 @@ function assertIsSubscription(data) {
     assert(errors.length === 0, schemaValidator.toMessages(errors))
 }
 
-async function createProductAndReturnId(productBody) {
+async function createProductAndReturnId(productBody, user) {
     const json = await Streamr.api.v1.products
         .create(productBody)
-        .withAuthenticatedUser(productOwner)
+        .withAuthenticatedUser(user)
         .execute()
     return json.id
 }
 
-async function createSubscription(subscriptionBody) {
+async function createSubscription(subscriptionBody, user) {
     await Streamr.api.v1.subscriptions
         .create(subscriptionBody)
-        .withAuthenticatedUser(devOpsUser)
+        .withAuthenticatedUser(user)
         .execute()
 }
 
 describe('Subscriptions API', () => {
+
+	const productOwner = StreamrClient.generateEthereumAccount()
+	const subscriber = StreamrClient.generateEthereumAccount()
+	const devOpsUser = testUsers.devOpsUser
+
     describe('POST /api/v1/subscriptions', () => {
 
         let paidProductId
@@ -48,7 +50,7 @@ describe('Subscriptions API', () => {
                 pricePerSecond: 5,
                 priceCurrency: 'USD',
                 minimumSubscriptionInSeconds: 60,
-            })
+            }, productOwner)
 
             freeProductId = await createProductAndReturnId({
                 name: 'Free Product',
@@ -59,7 +61,7 @@ describe('Subscriptions API', () => {
                 pricePerSecond: 0,
                 priceCurrency: 'DATA',
                 minimumSubscriptionInSeconds: 30,
-            })
+            }, productOwner)
         })
 
         it('requires authentication', async () => {
@@ -163,25 +165,25 @@ describe('Subscriptions API', () => {
                 pricePerSecond: 5,
                 priceCurrency: 'USD',
                 minimumSubscriptionInSeconds: 60,
-            })
+            }, productOwner)
 
             await createSubscription({
                 product: productId,
                 address: '0x0000000000000000000000000000000000000000',
                 endsAt: 1520840312
-            })
+            }, devOpsUser)
 
             await createSubscription({
                 product: productId,
                 address: '0x0000000000000000000000000000000000000005',
                 endsAt: 1570840312
-            })
+            }, devOpsUser)
 
             await createSubscription({
                 product: productId,
                 address: subscriber.address,
                 endsAt: 1540840312
-            })
+            }, devOpsUser)
         })
 
         it('requires authentication', async () => {

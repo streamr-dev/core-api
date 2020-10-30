@@ -1,17 +1,17 @@
 const assert = require('chai').assert
-const fs = require('fs')
 const Streamr = require('./streamr-api-clients')
 const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
 const assertStreamrClientResponseError = require('./test-utilities.js').assertStreamrClientResponseError
 const getStreamrClient = require('./test-utilities.js').getStreamrClient
+const testUsers = require('./test-utilities.js').testUsers
 const StreamrClient = require('streamr-client')
 
-const streamOwner = StreamrClient.generateEthereumAccount()
-const anonymousUser = StreamrClient.generateEthereumAccount()
-const ensDomainOwner = require('./test-utilities.js').testUsers.ensDomainOwner
-
 describe('Streams API', () => {
-    let streamId
+
+	let streamId
+	const streamOwner = StreamrClient.generateEthereumAccount()
+	const anonymousUser = StreamrClient.generateEthereumAccount()
+	const ensDomainOwner = testUsers.ensDomainOwner
 
     before(async () => {
         const response = await getStreamrClient(streamOwner).createStream({

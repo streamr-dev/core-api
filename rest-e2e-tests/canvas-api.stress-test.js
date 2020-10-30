@@ -22,32 +22,32 @@ const pollCondition = async (condition, timeout = TIMEOUT, interval = 100) => {
     return result
 }
 
-const freshUser = StreamrClient.generateEthereumAccount()
-
-async function createStreamrClient() {
+async function createStreamrClient(user) {
     const client = new StreamrClient({
         url: WS_URL,
         restUrl: REST_URL,
         auth: {
-            privateKey: freshUser.privateKey,
+            privateKey: user.privateKey,
         },
     })
     await client.connect()
     return client
 }
 
+const freshUser = StreamrClient.generateEthereumAccount()
+
 // The tests should be run sequentially
 describe('Canvas API', function() {
 
     let streamrClient
     let stream
-    let canvas
+	let canvas
 
     // sets timeout on before and all test cases in this suite
     this.timeout(TIMEOUT)
 
     before(async () => {
-        streamrClient = await createStreamrClient()
+        streamrClient = await createStreamrClient(freshUser)
 
         // Create a unique stream for this test
         stream = await streamrClient.createStream({
@@ -336,7 +336,7 @@ function TestClockTable() {
     this.timeout(80000)
 
     before(async () => {
-        streamrClient = await createStreamrClient()
+        streamrClient = await createStreamrClient(freshUser)
     })
 
     before(async () => {
