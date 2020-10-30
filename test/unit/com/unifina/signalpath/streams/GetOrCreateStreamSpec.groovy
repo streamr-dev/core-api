@@ -27,7 +27,7 @@ class GetOrCreateStreamSpec extends ModuleTestingSpecification {
 		streamExistsWithFields.config = "{'fields': [{'name': 'x', 'type': 'number'}, {'name': 'y', 'type': 'string'}]}"
 
 		streamService = mockBean(StreamService, Mock(StreamService))
-		streamService.createStream(_, _) >> {params, user ->
+		streamService.createStream(_, _, _) >> {params, user, validator ->
 			Stream s = new Stream()
 			s.id = params.name
 			return s
@@ -54,6 +54,7 @@ class GetOrCreateStreamSpec extends ModuleTestingSpecification {
 
 	void "GetOrCreateStreamSpec works as expected"() {
 		Map inputValues = [
+			id: ["sandbox/1", "sandbox/2", "sandbox/3", "sandbox/4", "sandbox/5"],
 			name: ["doesnotexist", "exists", "doesnotexist2", "exists-with-fields", "doesnotexist"],
 			description: ["test-stream"] * 5,
 			fields: [[a: "boolean", b: "string"]] * 5
@@ -70,6 +71,7 @@ class GetOrCreateStreamSpec extends ModuleTestingSpecification {
 
 	void "found streams are cached"() {
 		Map inputValues = [
+				id: ["sandbox/foo", "sandbox/foo"],
 				name: ["exists", "exists"],
 				description: ["test-stream"] * 2,
 				fields: [[a: "boolean", b: "string"]] * 2
@@ -89,6 +91,6 @@ class GetOrCreateStreamSpec extends ModuleTestingSpecification {
 		1 * permissionService.get(_, _, _, _, _) >> {
 			return [streamExists]
 		}
-		0 * streamService.createStream(_, _)
+		0 * streamService.createStream(_, _, _)
 	}
 }

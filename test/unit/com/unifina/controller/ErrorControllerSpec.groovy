@@ -1,8 +1,8 @@
 package com.unifina.controller
 
-import com.unifina.api.ApiError
-import com.unifina.api.ApiException
-import com.unifina.exceptions.CanvasUnreachableException
+import com.unifina.service.ApiError
+import com.unifina.service.ApiException
+import com.unifina.service.CanvasUnreachableException
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 

@@ -1,20 +1,8 @@
 package com.unifina.service
 
 import com.unifina.BeanMockingSpecification
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.domain.EmailMessage
-import com.unifina.domain.Resource
-import com.unifina.domain.Dashboard
-import com.unifina.domain.Stream
-import com.unifina.domain.Key
-import com.unifina.domain.Permission
+import com.unifina.domain.*
 import com.unifina.domain.Permission.Operation
-import com.unifina.domain.SignupInvite
-import com.unifina.domain.User
-import com.unifina.domain.SignupMethod
-import com.unifina.domain.Canvas
-import com.unifina.domain.Module
 import grails.gsp.PageRenderer
 import grails.plugin.mail.MailService
 import grails.test.mixin.Mock
@@ -30,11 +18,10 @@ import java.security.AccessControlException
  */
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(PermissionService)
-@Mock([User, Key, SignupInvite, Module, Permission, Dashboard, Canvas])
+@Mock([User, SignupInvite, Module, Permission, Dashboard, Canvas])
 class PermissionServiceSpec extends BeanMockingSpecification {
 
 	User me, anotherUser, stranger
-	Key myKey, anotherUserKey, anonymousKey
 
 	Dashboard dashAllowed, dashRestricted, dashOwned, dashPublic
 	Permission dashReadPermission, dashAnonymousReadPermission
@@ -46,11 +33,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		me = new User(username: "me", password: "foo").save(validate:false)
 		anotherUser = new User(username: "him", password: "bar").save(validate:false)
 		stranger = new User(username: "stranger", password: "x").save(validate:false)
-
-		// Keys
-		myKey = new Key(name: "my key", user: me).save(failOnError: true)
-		anotherUserKey = new Key(name: "another user's key", user: anotherUser).save(failOnError: true)
-		anonymousKey = new Key(name: "anonymous key 1").save(failOnError: true)
 
 		// Dashboards
 		dashAllowed = new Dashboard(id: "allowed", name:"allowed").save(validate:false)
@@ -69,7 +51,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		// Set up the Permissions to the allowed resources
 		dashReadPermission = service.systemGrant(me, dashAllowed, Operation.DASHBOARD_GET)
 		dashAnonymousReadPermission = service.systemGrantAnonymousAccess(dashPublic, Operation.DASHBOARD_GET)
-		service.systemGrant(anonymousKey, dashAllowed, Operation.DASHBOARD_GET)
 
 		streamService = mockBean(StreamService, Mock(StreamService))
     }
@@ -77,10 +58,9 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 	void "test setup"() {
 		expect:
 		User.count() == 3
-		Key.count() == 3
 		Dashboard.count() == 4
 		Canvas.count() == 1
-		Permission.count() == 29
+		Permission.count() == 28
 
 		and: "anotherUser has an invitation"
 	}
@@ -88,26 +68,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 	void "access denied to non-permitted Dashboard"() {
 		expect:
 		!service.check(me, dashRestricted, Permission.Operation.DASHBOARD_GET)
-	}
-
-	void "access granted through key to permitted Dashboard"() {
-		expect:
-		service.check(myKey, dashAllowed, Permission.Operation.DASHBOARD_GET)
-	}
-
-	void "access denied through key to non-permitted Dashboard"() {
-		expect:
-		!service.check(myKey, dashRestricted, Permission.Operation.DASHBOARD_GET)
-	}
-
-	void "access granted through anonymous key to permitted Dashboard"() {
-		expect:
-		service.check(anonymousKey, dashAllowed, Permission.Operation.DASHBOARD_GET)
-	}
-
-	void "access denied through anonymous key to non-permitted Dashboard"() {
-		expect:
-		!service.check(anonymousKey, dashRestricted, Permission.Operation.DASHBOARD_GET)
 	}
 
 	void "non-permitted third-parties have no access to resources"() {
@@ -122,14 +82,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		!service.check(null, dashAllowed, Permission.Operation.DASHBOARD_GET)
 		!service.check(me, new Dashboard(), Permission.Operation.DASHBOARD_GET)
 		!service.check(me, null, Permission.Operation.DASHBOARD_GET)
-	}
-
-	void "canRead returns false on bad inputs using keys"() {
-		expect:
-		!service.check(null, dashAllowed, Permission.Operation.DASHBOARD_GET)
-		!service.check(myKey, new Dashboard(), Permission.Operation.DASHBOARD_GET)
-		!service.check(anonymousKey, new Dashboard(), Permission.Operation.DASHBOARD_GET)
-		!service.check(myKey, null, Permission.Operation.DASHBOARD_GET)
 	}
 
 	void "getPermissionsTo(resource, userish) returns permissions for single user"() {
@@ -150,22 +102,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.getPermissionsTo(dashPublic, anotherUser).size() == 6
 		service.getPermissionsTo(dashPublic, stranger)[0].operation == Operation.DASHBOARD_GET
 		service.getPermissionsTo(dashPublic, null)[0].operation == Operation.DASHBOARD_GET
-	}
-
-	void "getPermissionsTo(resource, userish) returns permissions for key"() {
-		expect:
-		service.getPermissionsTo(dashOwned, myKey).size() == Operation.dashboardOperations().size()
-		service.getPermissionsTo(dashOwned, anotherUserKey) == []
-		service.getPermissionsTo(dashOwned, anonymousKey) == []
-		service.getPermissionsTo(dashAllowed, myKey)[0].operation == Operation.DASHBOARD_GET
-		service.getPermissionsTo(dashAllowed, anotherUserKey).size() == 5
-		service.getPermissionsTo(dashAllowed, anonymousKey)[0].operation == Operation.DASHBOARD_GET
-		service.getPermissionsTo(dashRestricted, myKey) == []
-		service.getPermissionsTo(dashRestricted, anotherUserKey).size() == 5
-		service.getPermissionsTo(dashRestricted, anonymousKey) == []
-		service.getPermissionsTo(dashPublic, myKey)[0].operation == Operation.DASHBOARD_GET
-		service.getPermissionsTo(dashPublic, anotherUserKey).size() == 6
-		service.getPermissionsTo(dashPublic, anonymousKey)[0].operation == Operation.DASHBOARD_GET
 	}
 
 	void "get throws exceptions on invalid resource"() {
@@ -195,27 +131,27 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 	void "systemRevoke() on a stream also revokes the parent permissions"() {
 		User publisher = new User()
 		publisher.id = 7L
-		Stream pubInbox = new Stream(name: "publisher", inbox: true)
-		pubInbox.id = "publisher"
-		pubInbox.save(failOnError: true, validate: false)
+		Stream pub = new Stream(name: "publisher")
+		pub.id = "publisher"
+		pub.save(failOnError: true, validate: false)
 		User subscriber = new User(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
-		Stream subInbox = new Stream(name: subscriber.username, inbox: true)
-		subInbox.id = subscriber.username
-		subInbox.save(failOnError: true, validate: false)
+		Stream sub = new Stream(name: subscriber.username)
+		sub.id = subscriber.username
+		sub.save(failOnError: true, validate: false)
 		Stream stream = new Stream()
 		stream.id = "stream"
 		setup:
 		new Permission(user: publisher, stream: stream, operation: Operation.STREAM_PUBLISH).save(failOnError: true, validate: false)
 
 		Permission parent = new Permission(user: subscriber, stream: stream, operation: Operation.STREAM_SUBSCRIBE).save(failOnError: true, validate: false)
-		new Permission(user: subscriber, stream: pubInbox, operation: Operation.STREAM_PUBLISH, parent: parent).save(failOnError: true, validate: false)
-		new Permission(user: publisher, stream: subInbox, operation: Operation.STREAM_PUBLISH, parent: parent).save(failOnError: true, validate: false)
+		new Permission(user: subscriber, stream: pub, operation: Operation.STREAM_PUBLISH, parent: parent).save(failOnError: true, validate: false)
+		new Permission(user: publisher, stream: sub, operation: Operation.STREAM_PUBLISH, parent: parent).save(failOnError: true, validate: false)
 		when:
 		service.systemRevoke(subscriber, stream, Operation.STREAM_SUBSCRIBE)
 		then:
 		!service.check(subscriber, stream, Permission.Operation.STREAM_SUBSCRIBE)
-		!service.check(subscriber, pubInbox, Permission.Operation.STREAM_PUBLISH)
-		!service.check(publisher, subInbox, Permission.Operation.STREAM_PUBLISH)
+		!service.check(subscriber, pub, Permission.Operation.STREAM_PUBLISH)
+		!service.check(publisher, sub, Permission.Operation.STREAM_PUBLISH)
 	}
 
 	void "stranger can read public resources with anonymous read access"() {
@@ -313,7 +249,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Canvas canvasOwned = newCanvas("own")
 		Resource res = new Resource(Canvas, canvasOwned.id)
 		User apiUser = me
-		Key apiKey = null
 		Operation op = Operation.CANVAS_GET
 		String targetUsername = other.username
 		String sharer = me.username
@@ -322,7 +257,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		EmailMessage msg = new EmailMessage(sharer, recipient, subjectTemplate, res)
 		service.systemGrant(me, canvasOwned, Operation.CANVAS_SHARE)
 		when:
-		service.savePermissionAndSendShareResourceEmail(apiUser, apiKey, op, targetUsername, msg)
+		service.savePermissionAndSendShareResourceEmail(apiUser, op, targetUsername, msg)
 		then:
 		service.check(other, canvasOwned, Operation.CANVAS_GET)
 		1 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
@@ -338,7 +273,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Canvas canvasOwned = newCanvas("own")
 		Resource res = new Resource(Canvas, canvasOwned.id)
 		User apiUser = me
-		Key apiKey = null
 		Operation op = Operation.CANVAS_EDIT
 		String targetUsername = other.username
 		String sharer = me.username
@@ -347,7 +281,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		EmailMessage msg = new EmailMessage(sharer, recipient, subjectTemplate, res)
 		service.systemGrant(me, canvasOwned, Operation.CANVAS_SHARE)
 		when:
-		service.savePermissionAndSendShareResourceEmail(apiUser, apiKey, op, targetUsername, msg)
+		service.savePermissionAndSendShareResourceEmail(apiUser, op, targetUsername, msg)
 		then:
 		service.check(other, canvasOwned, Operation.CANVAS_EDIT)
 		0 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
@@ -363,7 +297,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Canvas canvasOwned = newCanvas("own")
 		Resource res = new Resource(Canvas, canvasOwned.id)
 		User apiUser = me
-		Key apiKey = null
 		Operation op = Operation.CANVAS_SHARE
 		String sharer = me.username
 		String recipient = other.username
@@ -372,7 +305,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		String targetUsername = other.username
 		service.systemGrant(me, canvasOwned, Operation.CANVAS_SHARE)
 		when:
-		service.savePermissionAndSendShareResourceEmail(apiUser, apiKey, op, targetUsername, msg)
+		service.savePermissionAndSendShareResourceEmail(apiUser, op, targetUsername, msg)
 		then:
 		service.check(other, canvasOwned, Operation.CANVAS_SHARE)
 		0 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
@@ -439,11 +372,10 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Canvas canvasOwned = newCanvas("own")
 		Resource res = new Resource(Canvas, canvasOwned.id)
 		User apiUser = me
-		Key apiKey = null
 		Operation op = Operation.CANVAS_GET
 		service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_SHARE)
 		when:
-		service.saveAnonymousPermission(apiUser, apiKey, op, res)
+		service.saveAnonymousPermission(apiUser, op, res)
 		then:
 		service.check(apiUser, canvasOwned, op)
 	}
@@ -454,10 +386,9 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		canvas.save()
 		Resource resource = new Resource(Canvas, canvas.id)
 		User apiUser = me
-		Key apiKey = null
 		boolean subscriptions = false
 		when:
-		service.findAllPermissions(resource, apiUser, apiKey, subscriptions)
+		service.findAllPermissions(resource, apiUser, subscriptions)
 		then:
 		thrown NotPermittedException
 	}
@@ -467,12 +398,11 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Canvas canvasOwned = newCanvas("own")
 		Resource resource = new Resource(Canvas, canvasOwned.id)
 		User apiUser = me
-		Key apiKey = null
 		service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_SHARE)
 		Permission p = service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_INTERACT)
 		p.save(flush: true)
 		when:
-		Permission permission = service.findPermission(p.id, resource, apiUser, apiKey)
+		Permission permission = service.findPermission(p.id, resource, apiUser)
 		then:
 		p == permission
 	}
@@ -482,12 +412,11 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Canvas canvasOwned = newCanvas("own")
 		Resource resource = new Resource(Canvas, canvasOwned.id)
 		User apiUser = me
-		Key apiKey = null
 		service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_SHARE)
 		Permission p = service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_INTERACT)
 		p.save(flush: true)
 		when:
-		Permission permission = service.findPermission(null, resource, apiUser, apiKey)
+		Permission permission = service.findPermission(null, resource, apiUser)
 		then:
 		def e = thrown(NotFoundException)
 		e.type == "Canvas"
@@ -501,10 +430,9 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		stream.save()
 		Resource resource = new Resource(Stream, stream.id)
 		User apiUser = me
-		Key apiKey = null
 		boolean subscriptions = false
 		when:
-		service.findAllPermissions(resource, apiUser, apiKey, subscriptions)
+		service.findAllPermissions(resource, apiUser, subscriptions)
 		then:
 		1 * streamService.getStream(stream.id) >> stream
 		thrown NotPermittedException

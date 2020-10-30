@@ -105,23 +105,12 @@ class AbstractSignalPathModuleSpec extends ModuleTestingSpecification {
 	}
 
 	private RuntimeResponse sendRuntimeRequest(LinkedHashMap<String, Object> msg, User user) {
-		def request = new RuntimeRequest(msg, user, null, "request/1", "request/1", [] as Set)
+		def request = new RuntimeRequest(msg, user, null, null, "request/1", "request/1", [] as Set)
 		// Will insert an event to the event queue
 		def future = module.onRequest(request, request.getPathReader())
 		// Dispatch the event from the event queue, executing the future
 		mockedEventQueue.poll().dispatch()
 		return future.get(1, TimeUnit.SECONDS)
-	}
-
-	void "supports 'ping' runtime requests"() {
-		setUpModuleWithRuntimeRequestEnv()
-
-		when:
-		Map msg = [type: "ping"]
-		def response = sendRuntimeRequest(msg, null)
-
-		then:
-		response == new RuntimeResponse(true, [request: msg])
 	}
 
 	void "supports 'paramChange' runtime requests"() {

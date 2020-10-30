@@ -1,16 +1,10 @@
 package com.unifina.controller
 
-import com.unifina.api.BadRequestException
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
 import com.unifina.domain.DataUnionJoinRequest
+import com.unifina.domain.EthereumAddressValidator
+import com.unifina.domain.IDValidator
 import com.unifina.domain.User
-import com.unifina.service.DataUnionJoinRequestCommand
-import com.unifina.service.DataUnionJoinRequestService
-import com.unifina.service.EthereumService
-import com.unifina.service.DataUnionUpdateJoinRequestCommand
-import com.unifina.utils.EthereumAddressValidator
-import com.unifina.utils.IDValidator
+import com.unifina.service.*
 import grails.converters.JSON
 
 class DataUnionJoinRequestApiController {

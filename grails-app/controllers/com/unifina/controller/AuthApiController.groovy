@@ -1,14 +1,10 @@
 package com.unifina.controller
 
-import com.unifina.domain.RegistrationCode
-import com.unifina.domain.SignupInvite
-import com.unifina.domain.SignupMethod
-import com.unifina.domain.User
-import com.unifina.exceptions.UserCreationFailedException
+import com.unifina.domain.*
 import com.unifina.security.PasswordEncoder
 import com.unifina.service.SignupCodeService
+import com.unifina.service.UserCreationFailedException
 import com.unifina.service.UserService
-import com.unifina.utils.EmailValidator
 import grails.converters.JSON
 
 class AuthApiController {
@@ -157,8 +153,7 @@ class AuthApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def resetPassword(ResetPasswordCommand command) {
 
-		String token = params.t
-
+		String token = command.t
 		def registrationCode = token ? RegistrationCode.findByToken(token) : null
 
 		if (!registrationCode) {
@@ -220,6 +215,7 @@ class ResetPasswordCommand {
 	String username
 	String password
 	String password2
+	String t
 
 	UserService userService
 

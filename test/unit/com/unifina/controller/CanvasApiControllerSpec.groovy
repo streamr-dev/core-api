@@ -1,15 +1,10 @@
 package com.unifina.controller
 
-import com.unifina.ControllerSpecification
-import com.unifina.api.BadRequestException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.ValidationException
 import com.unifina.domain.*
-import com.unifina.exceptions.CanvasUnreachableException
-import com.unifina.exceptions.JavaCompilerErrorMessage
-import com.unifina.exceptions.ModuleExceptionMessage
 import com.unifina.service.*
 import com.unifina.signalpath.ModuleException
+import com.unifina.signalpath.custom.JavaCompilerErrorMessage
+import com.unifina.signalpath.custom.ModuleExceptionMessage
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -410,7 +405,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 		response.json?.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_STARTSTOP) >> canvas1
-		1 * canvasService.stop(canvas1, me)
+		1 * canvasService.stop(canvas1, me, _)
 	}
 
 	void "stop() must return 204 for adhoc canvases"() {
@@ -424,7 +419,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 204
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_STARTSTOP) >> canvas1
-		1 * canvasService.stop(canvas1, me)
+		1 * canvasService.stop(canvas1, me, _)
 	}
 
 	void "stop() must not stop the canvas if authorization fails"() {
@@ -452,7 +447,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		then:
 		thrown(CanvasUnreachableException)
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_STARTSTOP) >> canvas1
-		1 * canvasService.stop(canvas1, me) >> { throw new CanvasUnreachableException("Test message") }
+		1 * canvasService.stop(canvas1, me, _) >> { throw new CanvasUnreachableException("Test message") }
 
 	}
 
@@ -502,7 +497,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 200
 		response.json == runtimeResponse
-		1 * controller.signalPathService.buildRuntimeRequest([bar: 'foo'], "canvases/$canvas1.id", me)
+		1 * controller.signalPathService.buildRuntimeRequest([bar: 'foo'], "canvases/$canvas1.id", me, _)
 		1 * controller.signalPathService.runtimeRequest(_, false) >> runtimeResponse
 	}
 

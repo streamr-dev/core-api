@@ -1,8 +1,6 @@
 package com.unifina.service
 
 import com.streamr.client.StreamrClient
-import com.unifina.api.ApiException
-import com.unifina.api.NotFoundException
 import com.unifina.domain.*
 import com.unifina.utils.ThreadUtil
 import groovy.json.JsonSlurper
@@ -15,11 +13,11 @@ class DataUnionJoinRequestService {
 	EthereumService ethereumService
 	PermissionService permissionService
 	StreamrClientService streamrClientService
-	DataUnionOperatorService dataUnionOperatorService
+	DataUnionService dataUnionService
 
 	private isMemberActive(String contractAddress, String memberAddress) {
 		try {
-			DataUnionOperatorService.ProxyResponse result = dataUnionOperatorService.memberStats(contractAddress, memberAddress)
+			DataUnionService.ProxyResponse result = dataUnionService.memberStats(contractAddress, memberAddress)
 			if (result.statusCode == 200 && result.body != null || result.body != "") {
 				Map<String, Object> json = new JsonSlurper().parseText(result.body)
 				if (json.active != null && json.active == true) {

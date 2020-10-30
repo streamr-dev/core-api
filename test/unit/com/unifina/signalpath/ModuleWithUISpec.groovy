@@ -10,6 +10,7 @@ import com.unifina.domain.Canvas
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import com.unifina.service.StreamrClientService
+import com.unifina.service.CreateStreamCommand
 import com.unifina.utils.Globals
 import grails.test.mixin.Mock
 
@@ -176,7 +177,11 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		1 * streamService.getStreamByUiChannelPath(_) >> null
 		then: "the Stream object is created"
 		1 * permissionService.check(permittedUser, uiChannel, Permission.Operation.STREAM_PUBLISH) >> true
-		1 * streamService.createStream([name: uiChannel.name, uiChannel: true, uiChannelPath: "/canvases/id/modules/1", uiChannelCanvas: canvas], permittedUser, "nonexistent") >> uiChannel
+		1 * streamService.createStream(new CreateStreamCommand(
+			id: "nonexistent",
+			name: uiChannel.name,
+			uiChannel: true
+		), permittedUser, null, "/canvases/id/modules/1", canvas) >> uiChannel
 	}
 
 	def "users must not be allowed to write to ui channels for canvases they don't have write permission to"() {

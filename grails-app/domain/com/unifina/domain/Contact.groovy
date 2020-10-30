@@ -1,6 +1,6 @@
 package com.unifina.domain
 
-import com.unifina.utils.EmailValidator
+
 import grails.compiler.GrailsCompileStatic
 import grails.validation.Validateable
 

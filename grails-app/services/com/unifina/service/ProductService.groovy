@@ -1,10 +1,6 @@
 package com.unifina.service
 
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.unifina.api.InvalidStateTransitionException
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.ValidationException
 import com.unifina.domain.Permission
 import com.unifina.domain.Product
 import com.unifina.domain.Stream
@@ -147,6 +143,9 @@ class ProductService {
 
 		Product product = new Product(command.properties)
 		product.owner = currentUser
+		if ((product.type == Product.Type.DATAUNION) && (product.dataUnionVersion == null)) {
+			product.dataUnionVersion = 1
+		}
 		product.save(failOnError: true)
 		permissionService.systemGrantAll(currentUser, product)
 		// A stream that is added when creating a new free product should inherit read access for anonymous user

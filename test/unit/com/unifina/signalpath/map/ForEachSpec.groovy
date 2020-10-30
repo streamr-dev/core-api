@@ -1,10 +1,9 @@
 package com.unifina.signalpath.map
 
 import com.unifina.BeanMockingSpecification
-import com.unifina.domain.User
 import com.unifina.domain.Canvas
 import com.unifina.domain.Module
-import com.unifina.exceptions.NoExportedInputsException
+import com.unifina.domain.User
 import com.unifina.service.CanvasService
 import com.unifina.service.ModuleService
 import com.unifina.service.PermissionService
@@ -14,7 +13,6 @@ import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.simplemath.Divide
 import com.unifina.signalpath.simplemath.Sum
 import com.unifina.utils.Globals
-
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.converters.JSON
 import grails.test.mixin.Mock

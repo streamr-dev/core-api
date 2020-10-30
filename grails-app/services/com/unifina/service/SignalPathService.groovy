@@ -1,11 +1,10 @@
 package com.unifina.service
 
-import com.unifina.api.CanvasCommunicationException
+
+import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
 import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
 import com.unifina.domain.*
-import com.unifina.exceptions.CanvasUnreachableException
-import com.unifina.exceptions.UnauthorizedStreamException
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.*
 import com.unifina.utils.Globals
@@ -219,25 +218,19 @@ class SignalPathService {
 
 	@NotTransactional
 	@CompileStatic
-	Map stopRemote(Canvas canvas, User user) {
-		return runtimeRequest(buildRuntimeRequest([type:"stopRequest"], "canvases/$canvas.id", user))
-	}
-
-	@CompileStatic
-	boolean ping(Canvas canvas, User user) {
-		runtimeRequest(buildRuntimeRequest([type:'ping'], "canvases/$canvas.id", user))
-		return true
+	Map stopRemote(Canvas canvas, User user, AuthorizationHeader authorizationHeader) {
+		return runtimeRequest(buildRuntimeRequest([type:"stopRequest"], "canvases/$canvas.id", user, authorizationHeader))
 	}
 
 	@CompileStatic
 	private Map sendRemoteRequest(RuntimeRequest req) {
 		// Require the request to be local to the receiving server to avoid redirect loops in case of invalid data
 		String url = req.getCanvas().getRequestUrl().replace("canvases/${req.getCanvas().id}", req.getOriginalPath() + "/request?local=true")
-		return apiService.post(url, req, req.getUser().keys.iterator().next())
+		return apiService.post(url, req, req.getAuthorizationHeader())
 	}
 
 	@CompileStatic
-	RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, User user) {
+	RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, User user, AuthorizationHeader authorizationHeader) {
 		RuntimeRequest.PathReader pathReader = RuntimeRequest.getPathReader(path)
 
 		// All runtime requests require at least read permission
@@ -251,7 +244,7 @@ class SignalPathService {
 		Set<Permission.Operation> checkedOperations = new HashSet<>()
 		checkedOperations.add(Permission.Operation.CANVAS_GET)
 
-		return new RuntimeRequest(msg, user, canvas, path, originalPath, checkedOperations)
+		return new RuntimeRequest(msg, user, authorizationHeader, canvas, path, originalPath, checkedOperations)
 	}
 
 	@CompileStatic

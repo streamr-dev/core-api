@@ -1,7 +1,7 @@
 package com.unifina.domain
 
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
+import com.unifina.service.NotFoundException
+import com.unifina.service.NotPermittedException
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import grails.compiler.GrailsCompileStatic
@@ -44,7 +44,7 @@ class Resource {
 		return "Unknown"
 	}
 
-	Object load(User apiUser, Key apiKey, boolean requireShareResourcePermission) {
+	Object load(User apiUser, boolean requireShareResourcePermission) {
 		Object resource
 		if (Canvas.isAssignableFrom(clazz)) {
 			resource = Canvas.get(idToString())
@@ -63,7 +63,7 @@ class Resource {
 		}
 		Permission.Operation shareOp = Permission.Operation.shareOperation(resource)
 		PermissionService permissionService = Holders.getApplicationContext().getBean(PermissionService)
-		if (requireShareResourcePermission && !permissionService.check(apiUser ?: apiKey, resource, shareOp)) {
+		if (requireShareResourcePermission && !permissionService.check(apiUser, resource, shareOp)) {
 			throw new NotPermittedException(apiUser?.username, clazz.simpleName, idToString(), shareOp.id)
 		}
 		return resource

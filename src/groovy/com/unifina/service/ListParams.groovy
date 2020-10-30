@@ -51,8 +51,8 @@ abstract class ListParams {
 	}
 
 	@CompileStatic
-	Map toMap() {
-		[
+	Map<String, Object> toMap() {
+		return [
 		    search: search,
 			sortBy: sortBy,
 			order: sortBy != null ? order : null,
@@ -60,6 +60,6 @@ abstract class ListParams {
 			offset: offset,
 			grantedAccess: grantedAccess,
 			publicAccess: publicAccess
-		]
+		] as Map<String, Object>
 	}
 }

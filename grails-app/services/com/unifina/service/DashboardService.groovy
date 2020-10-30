@@ -1,9 +1,6 @@
 package com.unifina.service
 
-
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.ValidationException
+import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
 import com.unifina.domain.*
 import com.unifina.domain.Permission.Operation
 import com.unifina.signalpath.RuntimeRequest
@@ -231,7 +228,7 @@ class DashboardService {
 	}
 
 	@CompileStatic
-	RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, User user) {
+	RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, User user, AuthorizationHeader authorizationHeader) {
 		RuntimeRequest.PathReader pathReader = RuntimeRequest.getPathReader(path)
 
 		Dashboard dashboard = authorizedGetById(pathReader.readDashboardId(), user, Operation.DASHBOARD_GET)
@@ -250,10 +247,10 @@ class DashboardService {
 		if (item) {
 			Set<Operation> checkedOperations = new HashSet<>()
 			checkedOperations.add(Operation.DASHBOARD_GET)
-			RuntimeRequest request = new RuntimeRequest(msg, user, canvas, path.replace("dashboards/$dashboard.id/", ""), path, checkedOperations)
+			RuntimeRequest request = new RuntimeRequest(msg, user, authorizationHeader, canvas, path.replace("dashboards/$dashboard.id/", ""), path, checkedOperations)
 			return request
 		} else {
-			return signalPathService.buildRuntimeRequest(msg, path.replace("dashboards/$dashboard.id/", ""), path, user)
+			return signalPathService.buildRuntimeRequest(msg, path.replace("dashboards/$dashboard.id/", ""), path, user, authorizationHeader)
 		}
 	}
 }

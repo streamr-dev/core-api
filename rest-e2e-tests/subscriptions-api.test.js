@@ -1,19 +1,10 @@
 const assert = require('chai').assert
-const Web3 = require('web3')
-const keythereum = require('keythereum')
-const ethereumJsUtil = require('ethereumjs-util')
-const initStreamrApi = require('./streamr-api-clients')
+const Streamr = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
+const testUsers = require('./test-utilities.js').testUsers
+const StreamrClient = require('streamr-client')
 
-const URL = 'http://localhost:8081/streamr-core/api/v1/'
-const LOGGING_ENABLED = false
-
-const AUTH_TOKEN = 'product-api-tester-key'
-const AUTH_TOKEN_2 = 'product-api-tester2-key'
-const DEVOPS_USER_TOKEN = 'devops-user-key'
-
-const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
 const schemaValidator = new SchemaValidator()
 
 function assertIsSubscription(data) {
@@ -21,42 +12,27 @@ function assertIsSubscription(data) {
     assert(errors.length === 0, schemaValidator.toMessages(errors))
 }
 
-async function createProductAndReturnId(productBody) {
+async function createProductAndReturnId(productBody, user) {
     const json = await Streamr.api.v1.products
         .create(productBody)
-        .withApiKey(AUTH_TOKEN)
+        .withAuthenticatedUser(user)
         .execute()
     return json.id
 }
 
-async function createSubscription(subscriptionBody) {
+async function createSubscription(subscriptionBody, user) {
     await Streamr.api.v1.subscriptions
         .create(subscriptionBody)
-        .withApiKey(DEVOPS_USER_TOKEN)
+        .withAuthenticatedUser(user)
         .execute()
-}
-
-async function obtainChallenge(address) {
-    const json = await Streamr.api.v1.login
-        .challenge(address)
-        .execute()
-    return json
-}
-
-async function submitChallenge(challenge, signature) {
-    const json = await Streamr.api.v1.integration_keys
-        .create({
-            name: 'My Ethereum ID',
-            service: 'ETHEREUM_ID',
-            challenge: challenge,
-            signature: signature
-        })
-        .withApiKey(AUTH_TOKEN_2)
-        .execute()
-    return json
 }
 
 describe('Subscriptions API', () => {
+
+	const productOwner = StreamrClient.generateEthereumAccount()
+	const subscriber = StreamrClient.generateEthereumAccount()
+	const devOpsUser = testUsers.devOpsUser
+
     describe('POST /api/v1/subscriptions', () => {
 
         let paidProductId
@@ -74,7 +50,7 @@ describe('Subscriptions API', () => {
                 pricePerSecond: 5,
                 priceCurrency: 'USD',
                 minimumSubscriptionInSeconds: 60,
-            })
+            }, productOwner)
 
             freeProductId = await createProductAndReturnId({
                 name: 'Free Product',
@@ -85,7 +61,7 @@ describe('Subscriptions API', () => {
                 pricePerSecond: 0,
                 priceCurrency: 'DATA',
                 minimumSubscriptionInSeconds: 30,
-            })
+            }, productOwner)
         })
 
         it('requires authentication', async () => {
@@ -103,7 +79,7 @@ describe('Subscriptions API', () => {
             const body = {}
             const response = await Streamr.api.v1.subscriptions
                 .create(body)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 422, 'VALIDATION_ERROR')
         })
@@ -115,7 +91,7 @@ describe('Subscriptions API', () => {
             }
             const response = await Streamr.api.v1.subscriptions
                 .create(body)
-                .withApiKey(AUTH_TOKEN)
+                .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 422, 'VALIDATION_ERROR', 'product')
         })
@@ -129,7 +105,7 @@ describe('Subscriptions API', () => {
                 }
                 const response = await Streamr.api.v1.subscriptions
                     .create(body)
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
                 await assertResponseIsError(response, 403, 'FORBIDDEN', 'DevOps role required')
             })
@@ -142,7 +118,7 @@ describe('Subscriptions API', () => {
                 }
                 const response = await Streamr.api.v1.subscriptions
                     .create(body)
-                    .withApiKey(DEVOPS_USER_TOKEN)
+                    .withAuthenticatedUser(devOpsUser)
                     .call()
                 assert.equal(response.status, 204)
             })
@@ -156,7 +132,7 @@ describe('Subscriptions API', () => {
                 }
                 const response = await Streamr.api.v1.subscriptions
                     .create(body)
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
                 await assertResponseIsError(response, 400, 'PRODUCT_IS_NOT_FREE')
             })
@@ -168,7 +144,7 @@ describe('Subscriptions API', () => {
                 }
                 const response = await Streamr.api.v1.subscriptions
                     .create(body)
-                    .withApiKey(AUTH_TOKEN)
+                    .withAuthenticatedUser(productOwner)
                     .call()
                 assert.equal(response.status, 204)
             })
@@ -177,7 +153,6 @@ describe('Subscriptions API', () => {
 
     describe('GET /api/v1/subscriptions', () => {
         let productId
-        let publicAddress
 
         before(async () => {
             productId = await createProductAndReturnId({
@@ -190,36 +165,25 @@ describe('Subscriptions API', () => {
                 pricePerSecond: 5,
                 priceCurrency: 'USD',
                 minimumSubscriptionInSeconds: 60,
-            })
-
-            const generatedKey = keythereum.create()
-            const privateKey = '0x' + generatedKey.privateKey.toString('hex')
-            publicAddress = '0x' + ethereumJsUtil.privateToAddress(generatedKey.privateKey).toString('hex')
+            }, productOwner)
 
             await createSubscription({
                 product: productId,
                 address: '0x0000000000000000000000000000000000000000',
                 endsAt: 1520840312
-            })
+            }, devOpsUser)
 
             await createSubscription({
                 product: productId,
                 address: '0x0000000000000000000000000000000000000005',
                 endsAt: 1570840312
-            })
+            }, devOpsUser)
 
             await createSubscription({
                 product: productId,
-                address: publicAddress,
+                address: subscriber.address,
                 endsAt: 1540840312
-            })
-
-            const challenge = await obtainChallenge(publicAddress)
-            const web3 = new Web3()
-
-            const signedChallenge = web3.eth.accounts.sign(challenge.challenge, privateKey)
-
-            await submitChallenge(challenge, signedChallenge.signature)
+            }, devOpsUser)
         })
 
         it('requires authentication', async () => {
@@ -236,7 +200,7 @@ describe('Subscriptions API', () => {
             before(async () => {
                 response = await Streamr.api.v1.subscriptions
                     .list()
-                    .withApiKey(AUTH_TOKEN_2)
+                    .withAuthenticatedUser(subscriber)
                     .call()
                 json = await response.json()
             })
@@ -248,7 +212,7 @@ describe('Subscriptions API', () => {
             it('responds with list of subscriptions', () => {
                 assert.isAtLeast(json.length, 1)
                 json.forEach(subscriptionData => assertIsSubscription(subscriptionData))
-                const picked = json.find(subscriptionData => subscriptionData.address === publicAddress)
+                const picked = json.find(subscriptionData => subscriptionData.address === subscriber.address)
                 assert.isNotNull(picked)
                 assert.deepEqual(picked.endsAt, '2018-10-29T19:11:52Z')
                 assert.deepEqual(picked.product.id, productId)

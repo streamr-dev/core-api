@@ -42,10 +42,6 @@
       "description": "Dashboards and their items"
     },
     {
-      "name": "keys",
-      "description": "Keys for authenticating users and resources"
-    },
-    {
       "name": "login",
       "description": "Methods for obtaining a session token for authentication"
     },
@@ -456,7 +452,7 @@
     "/dataunions/{contractAddress}/stats": {
       "get": {
         "summary": "Proxy calls to to data union server.",
-        "description": "Return operator stats",
+        "description": "Return data union stats",
         "tags": [
           "dataunions"
         ],
@@ -1266,7 +1262,7 @@
           {
             "in": "path",
             "name": "streamId",
-            "description": "unique identifier of a Stream",
+            "description": "unique identifier of a Stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           }
@@ -2216,6 +2212,12 @@
             "schema": {
               "$ref": "#/definitions/Stream"
             }
+          },
+          "400": {
+            "description": "Duplicate stream id"
+          },
+          "422": {
+            "description": "Validation error"
           }
         }
       }
@@ -2231,7 +2233,7 @@
           {
             "in": "path",
             "name": "id",
-            "description": "ID of the stream to be fetched",
+            "description": "ID of the stream to be fetched (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           }
@@ -2274,10 +2276,10 @@
           {
             "name": "body",
             "in": "body",
-            "description": "StreamCreateRequest object",
+            "description": "StreamUpdateRequest object",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/StreamCreateRequest"
+              "$ref": "#/definitions/StreamUpdateRequest"
             }
           }
         ],
@@ -2344,7 +2346,7 @@
           {
             "in": "path",
             "name": "id",
-            "description": "ID of the stream",
+            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           },
@@ -2422,7 +2424,7 @@
           {
             "in": "path",
             "name": "id",
-            "description": "ID of the stream",
+            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           },
@@ -2495,7 +2497,7 @@
           {
             "in": "path",
             "name": "id",
-            "description": "ID of the stream",
+            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           },
@@ -2549,7 +2551,7 @@
           {
             "in": "path",
             "name": "id",
-            "description": "ID of the stream",
+            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           },
@@ -2630,7 +2632,7 @@
           {
             "in": "path",
             "name": "id",
-            "description": "ID of the stream",
+            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           },
@@ -2697,7 +2699,7 @@
           {
             "in": "path",
             "name": "id",
-            "description": "ID of the stream",
+            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           }
@@ -2777,181 +2779,6 @@
         }
       }
     },
-    "/streams/{id}/keys": {
-      "get": {
-        "summary": "List keys",
-        "description": "List the keys for a given Stream.\n Requires 'share' permission or ownership.",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "ID of the stream",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "streams",
-          "keys"
-        ],
-        "responses": {
-          "200": {
-            "description": "List of keys",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/ResourceKey"
-              }
-            }
-          },
-          "403": {
-            "description": "No sharing rights to the stream",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Stream wasn't found",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Create a key",
-        "description": "Creates an API key for the given Stream.\n Requires 'share' permission or ownership.",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "ID of the stream",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "description": "Key to be created",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/ResourceKeyCreateRequest"
-            }
-          }
-        ],
-        "tags": [
-          "streams",
-          "keys"
-        ],
-        "responses": {
-          "200": {
-            "description": "The newly created key",
-            "schema": {
-              "$ref": "#/definitions/ResourceKey"
-            }
-          },
-          "403": {
-            "description": "No sharing rights to the stream",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Stream wasn't found",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/streams/{streamId}/keys/{id}": {
-      "put": {
-        "summary": "Update Stream's Key's name and permission",
-        "description": "Update Stream's Key's name and permission.",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "description": "UpdateStreamKeyRequest object",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/UpdateStreamKeyRequest"
-            }
-          },
-          {
-            "in": "path",
-            "name": "streamId",
-            "description": "ID of the stream",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "description": "ID of the key to be updated",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "streams",
-          "keys"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Invalid Request"
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete a key",
-        "description": "Deletes an API key from the given Stream.\n Requires 'share' permission or ownership.",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "streamId",
-            "description": "ID of the stream",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "description": "ID of the key",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "streams",
-          "keys"
-        ],
-        "responses": {
-          "204": {
-            "description": "Success (no content)"
-          },
-          "403": {
-            "description": "No sharing rights to the stream",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Stream wasn't found",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
     "/streams/{id}/permissions/{pid}": {
       "get": {
         "summary": "Get single permission object",
@@ -2964,7 +2791,7 @@
           {
             "in": "path",
             "name": "id",
-            "description": "ID of the stream",
+            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
             "required": true,
             "type": "string"
           },
@@ -3038,6 +2865,139 @@
           }
         }
       }
+    },
+	"/storageNodes/{storageNodeAddress}/streams": {
+		"get": {
+			"summary": "Get streams by storage node",
+			"parameters": [
+				{
+					"in": "path",
+					"name": "storageNodeAddress",
+					"required": true,
+					"type": "string"
+				}
+			],
+			"tags": ["streams"],
+			"responses": {
+				"200": {
+					"description": "An array of streams",
+					"schema": {
+						"type": "array",
+						"items": {
+							"$ref": "#/definitions/StreamSummary"
+						}
+					}
+				},
+				"500": {
+					"description": "Unexpected error"
+				}
+			}
+		}
+	},
+	"/streams/{streamId}/storageNodes": {
+		"get": {
+			"summary": "Get storage nodes by stream",
+			"parameters": [
+				{
+					"in": "path",
+					"name": "streamId",
+					"description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
+					"required": true,
+					"type": "string"
+				}
+			],
+			"tags": ["streams"],
+			"responses": {
+				"200": {
+					"description": "An array of stream storage nodes",
+					"schema": {
+						"type": "array",
+						"items": {
+							"$ref": "#/definitions/StreamStorageNode"
+						}
+					}
+				},
+				"404": {
+					"description": "Stream not found"
+				},
+				"500": {
+					"description": "Unexpected error"
+				}
+			}
+		},
+		"post": {
+			"summary": "Create stream storage node",
+			"tags": ["streams"],
+			"parameters": [
+				{
+					"in": "path",
+					"name": "streamId",
+					"required": true,
+					"type": "string"
+				},
+				{
+					"name": "body",
+					"in": "body",
+					"description": "StorageNodeAddRequest object",
+					"required": true,
+					"schema": {
+						"$ref": "#/definitions/StorageNodeAddRequest"
+					}
+				}
+			],
+			"responses": {
+				"200": {
+					"description": "Success"
+				},
+				"400": {
+					"description": "Storage node already exists"
+				},
+				"422": {
+					"description": "Validation error"
+				},
+				"401": {
+					"description": "No authentication"
+				},
+				"403": {
+					"description": "Authentication failed"
+				}
+			}
+		}
+	},
+	"/streams/{streamId}/storageNodes/{storageNodeAddress}": {
+		"delete": {
+			"summary": "Delete stream storage node",
+			"tags": ["streams"],
+			"parameters": [
+				{
+					"in": "path",
+					"name": "streamId",
+					"description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
+					"required": true,
+					"type": "string"
+				},
+				{
+					"in": "path",
+					"name": "storageNodeAddress",
+					"required": true,
+					"type": "string"
+				}
+			],
+			"responses": {
+				"204": {
+					"description": "Success"
+				},
+				"404": {
+					"description": "Not found"
+				},
+				"401": {
+					"description": "No authentication"
+				},
+				"403": {
+					"description": "Authentication failed"
+				}
+			}
+		}
     },
     "/subscriptions": {
       "get": {
@@ -4244,128 +4204,6 @@
         }
       }
     },
-    "/users/me/keys": {
-      "get": {
-        "summary": "List user's API keys",
-        "description": "List the API keys for the authenticated user.",
-        "parameters": [],
-        "tags": [
-          "users",
-          "keys"
-        ],
-        "responses": {
-          "200": {
-            "description": "List of keys",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/UserKey"
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Create a new user API key",
-        "description": "Creates a key that can be used for authenticating the user.",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "description": "Key to be created",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/UserKeyCreateRequest"
-            }
-          }
-        ],
-        "tags": [
-          "users",
-          "keys"
-        ],
-        "responses": {
-          "200": {
-            "description": "Newly created user key",
-            "schema": {
-              "$ref": "#/definitions/UserKey"
-            }
-          }
-        }
-      }
-    },
-    "/users/me/keys/{id}": {
-      "delete": {
-        "summary": "Delete user API key",
-        "description": "Revoke and delete a user API key. Can only be called by the user.",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "ID of the key",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "streams",
-          "keys"
-        ],
-        "responses": {
-          "204": {
-            "description": "Success (no content)"
-          },
-          "403": {
-            "description": "No sharing rights to the stream",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Stream wasn't found",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      },
-      "put": {
-        "summary": "Update User's Key's name",
-        "description": "Update User's Key's name.",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "description": "UpdateUserKeyRequest object",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/UpdateUserKeyRequest"
-            }
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "description": "ID of the key to be updated",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "users",
-          "keys"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Invalid Request"
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        }
-      }
-    },
     "/users/me/image": {
       "post": {
         "summary": "Upload user's avatar image",
@@ -4659,36 +4497,6 @@
         }
       }
     },
-    "UpdateStreamKeyRequest": {
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "permission": {
-          "type": "string",
-          "description": "Permission type."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the Key.",
-          "example": "Name of my Stream's Key"
-        }
-      }
-    },
-    "UpdateUserKeyRequest": {
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "Name of the Key.",
-          "example": "Name of my own key"
-        }
-      }
-    },
     "Stream": {
       "type": "object",
       "required": [
@@ -4733,11 +4541,6 @@
           "description": "If true, all data in this stream must be encrypted.",
           "example": false
         },
-        "inbox": {
-          "type": "boolean",
-          "description": "If true, this stream is a user's inbox.",
-          "example": false
-        },
         "dateCreated": {
           "type": "string",
           "description": "ISO-8601 timestamp of when stream was created.",
@@ -4765,11 +4568,119 @@
         }
       }
     },
+    "StreamSummary": {
+		"type": "object",
+		"required": [
+		  "name"
+		],
+		"properties": {
+		  "id": {
+			"type": "string",
+			"description": "Unique identifier for this stream.",
+			"example": "ln2g8OKHSdr7BcL-rcnh2r"
+		  },
+		  "name": {
+			"type": "string",
+			"description": "Name of this stream.",
+			"example": "My stream"
+		  },
+		  "description": {
+			"type": "string",
+			"description": "Description of this stream.",
+			"example": "My stream description"
+		  },
+		  "uiChannel": {
+			"type": "boolean",
+			"description": "Indicates whether this stream is an UI channel: a stream used internally to push updates to UI widgets.",
+			"example": false
+		  },
+		  "partitions": {
+			"type": "integer",
+			"description": "Number of partitions in this stream. Defaults to 1 (unpartitioned).",
+			"example": 1
+		  },
+		  "requireSignedData": {
+			"type": "boolean",
+			"description": "If true, all messages in this stream must be cryptographically signed. Client's should not accept unsigned messages.",
+			"example": false
+		  },
+		  "requireEncryptedData": {
+			"type": "boolean",
+			"description": "If true, all data in this stream must be encrypted.",
+			"example": false
+		  },
+		  "dateCreated": {
+			"type": "string",
+			"description": "ISO-8601 timestamp of when stream was created.",
+			"example": "2018-02-21T12:26:18Z"
+		  },
+		  "lastUpdated": {
+			"type": "string",
+			"description": "ISO-8601 timestamp of when stream details were updated.",
+			"example": "2018-02-21T12:26:18Z"
+		  },
+		  "storageDays": {
+			"type": "integer",
+			"description": "Historical data storage period (days)",
+			"example": 365
+		  }
+		}
+	  },
     "StreamCreateRequest": {
       "type": "object",
-      "required": [
-        "name"
-      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID of this stream.",
+          "example": "sandbox/foo/bar"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of this stream.",
+          "example": "My stream"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of this stream.",
+          "example": "My stream description"
+        },
+        "config": {
+          "$ref": "#/definitions/StreamConfig"
+        },
+        "partitions": {
+          "type": "integer",
+          "description": "Number of partitions in this stream. Defaults to 1 (unpartitioned).",
+          "example": 1
+        },
+        "requireSignedData": {
+          "type": "boolean",
+          "description": "If true, all messages in this stream must be cryptographically signed. Client's should not accept unsigned messages.",
+          "example": false
+        },
+        "requireEncryptedData": {
+          "type": "boolean",
+          "description": "If true, all data in this stream must be encrypted.",
+          "example": false
+        },
+        "autoConfigure": {
+          "type": "boolean",
+          "description": "If true, always try to automatically configure field names and types.",
+          "example": true
+        },
+        "storageDays": {
+          "type": "integer",
+          "description": "Historical data storage period (days)",
+          "example": 365
+        },
+        "inactivityThresholdHours": {
+          "type": "integer",
+          "description": "Inactivity period for a stream in hours.",
+          "example": 48
+        }
+      }
+    },
+    "StreamUpdateRequest": {
+      "type": "object",
       "properties": {
         "name": {
           "type": "string",
@@ -4783,6 +4694,36 @@
         },
         "config": {
           "$ref": "#/definitions/StreamConfig"
+        },
+        "partitions": {
+          "type": "integer",
+          "description": "Number of partitions in this stream. Defaults to 1 (unpartitioned).",
+          "example": 1
+        },
+        "requireSignedData": {
+          "type": "boolean",
+          "description": "If true, all messages in this stream must be cryptographically signed. Client's should not accept unsigned messages.",
+          "example": false
+        },
+        "requireEncryptedData": {
+          "type": "boolean",
+          "description": "If true, all data in this stream must be encrypted.",
+          "example": false
+        },
+        "autoConfigure": {
+          "type": "boolean",
+          "description": "If true, always try to automatically configure field names and types.",
+          "example": true
+        },
+        "storageDays": {
+          "type": "integer",
+          "description": "Historical data storage period (days)",
+          "example": 365
+        },
+        "inactivityThresholdHours": {
+          "type": "integer",
+          "description": "Inactivity period for a stream in hours.",
+          "example": 48
         }
       }
     },
@@ -5867,85 +5808,44 @@
         }
       }
     },
-    "UserKeyCreateRequest": {
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "Human-readable name",
-          "example": "Matti's key"
-        }
-      }
-    },
-    "UserKey": {
-      "type": "object",
-      "required": [
-        "id",
-        "name"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier of this Key",
-          "example": "FX2vYkh8kNAM"
-        },
-        "name": {
-          "type": "string",
-          "description": "Human-readable name",
-          "example": "My app backend key"
-        },
-        "user": {
-          "type": "string",
-          "description": "Username which the key authenticates if user-linked key. Null otherwise.",
-          "example": "some.user@streamr.com"
-        }
-      }
-    },
-    "ResourceKeyCreateRequest": {
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "Human-readable name",
-          "example": "Key for my app"
-        },
-        "permission": {
-          "type": "string",
-          "description": "Operation permitted by this key to the resource in question.",
-          "example": "read"
-        }
-      }
-    },
-    "ResourceKey": {
-      "type": "object",
-      "required": [
-        "id",
-        "name"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier of this Key",
-          "example": "FX2vYkh8kNAM"
-        },
-        "name": {
-          "type": "string",
-          "description": "Human-readable name",
-          "example": "Key for my public web app"
-        },
-        "permission": {
-          "type": "string",
-          "description": "Operation permitted by this key to the resource in question.",
-          "example": "read"
-        }
-      }
-    },
+	"StreamStorageNode": {
+		"type": "object",
+		"required": [
+			"streamId",
+			"storageNodeAddress",
+			"dateCreated"
+		],
+		"properties": {
+			"streamId": {
+				"type": "string",
+				"description": "Stream id"
+			},
+			"storageNodeAddress": {
+				"type": "string",
+				"description": "Ethereum address of the storage node",
+				"example": "0x1234567890123456789012345678901234567890"
+			},
+			"dateCreated": {
+				"type": "string",
+				"description": "ISO-8601 datetime",
+				"example": "2000-12-31T23:59:59Z"
+			}
+
+		}
+	},
+	"StorageNodeAddRequest": {
+		"type": "object",
+		"required": [
+			"address"
+		],
+		"properties": {
+			"address": {
+				"type": "string",
+				"description": "Ethereum address of the storage node",
+				"example": "0x1234567890123456789012345678901234567890"
+			}
+		}
+	},
     "Error": {
       "type": "object",
       "required": [

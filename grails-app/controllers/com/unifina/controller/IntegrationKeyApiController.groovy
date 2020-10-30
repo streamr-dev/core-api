@@ -1,10 +1,10 @@
 package com.unifina.controller
 
-import com.unifina.api.ApiException
-import com.unifina.api.NotFoundException
 import com.unifina.domain.IntegrationKey
 import com.unifina.domain.User
+import com.unifina.service.ApiException
 import com.unifina.service.EthereumIntegrationKeyService
+import com.unifina.service.NotFoundException
 import grails.converters.JSON
 import groovy.json.JsonSlurper
 

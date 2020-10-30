@@ -1,7 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.InvalidUsernameAndPasswordException
-import com.unifina.api.NotFoundException
+
 import com.unifina.controller.UnitTestPasswordEncoder
 import com.unifina.domain.*
 import grails.test.mixin.Mock

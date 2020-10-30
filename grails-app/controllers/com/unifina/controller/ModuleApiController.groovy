@@ -1,14 +1,14 @@
 package com.unifina.controller
 
-import com.unifina.api.NotFoundException
 import com.unifina.domain.Module
 import com.unifina.domain.ModuleCategory
 import com.unifina.domain.User
-import com.unifina.exceptions.ModuleExceptionMessage
 import com.unifina.service.ModuleService
+import com.unifina.service.NotFoundException
 import com.unifina.service.PermissionService
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.ModuleException
+import com.unifina.signalpath.custom.ModuleExceptionMessage
 import com.unifina.utils.Globals
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON

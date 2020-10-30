@@ -1,21 +1,39 @@
 package com.unifina.service
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
+
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.unifina.api.ValidationException
 import com.unifina.data.StreamPartitioner
 import com.unifina.domain.*
 import com.unifina.feed.DataRange
 import com.unifina.feed.FieldDetector
 import com.unifina.task.DelayedDeleteStreamTask
-import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.IdGenerator
+import com.unifina.utils.JSONUtil
+import org.springframework.dao.DataIntegrityViolationException
 import grails.converters.JSON
+import grails.validation.Validateable
 import groovy.transform.CompileStatic
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.validation.FieldError
 
-import java.text.DateFormat
+@Validateable
+@ToString
+@EqualsAndHashCode
+class CreateStreamCommand {
+	String id
+	String name
+	String description
+	Map<String,Object> config
+	Integer partitions = 1
+	Boolean uiChannel = false
+	Boolean requireSignedData = false
+	Boolean requireEncryptedData = false
+	Boolean autoConfigure = true
+	Integer storageDays = Stream.DEFAULT_STORAGE_DAYS
+	Integer inactivityThresholdHours = Stream.DEFAULT_INACTIVITY_THRESHOLD_HOURS
+}
 
 class StreamService {
 
@@ -26,19 +44,7 @@ class StreamService {
 
 	private final StreamPartitioner partitioner = new StreamPartitioner()
 
-	// Use Gson instead of Grails "as JSON" converter because there's no easy way to get that working in func tests that want to produce data to Streams
-	private Gson gson = new GsonBuilder()
-		.serializeNulls()
-		.setDateFormat(DateFormat.LONG)
-		.create()
-
 	Stream getStream(String id) {
-		if (EthereumAddressValidator.validate(id)) {
-			Stream inboxStream = Stream.get(id.toLowerCase())
-			if (inboxStream.inbox) {
-				return inboxStream
-			}
-		}
 		return Stream.get(id)
 	}
 
@@ -46,27 +52,45 @@ class StreamService {
 		return Stream.findByUiChannelPath(uiChannelPath)
 	}
 
-	Stream createStream(Map params, User user, String id = IdGenerator.getShort()) {
-		Stream stream = new Stream(params)
-		stream.id = id
-		stream.config = params.config
-		if (stream.name == null || stream.name.trim() == "") {
-			stream.name = Stream.DEFAULT_NAME
-		}
+	Stream createStream(CreateStreamCommand cmd, User user, CustomStreamIDValidator customStreamIDValidator) {
+		return createStream(cmd, user, customStreamIDValidator, null, null)
+	}
 
-		Map config = stream.getStreamConfigAsMap()
-		if (!config.fields) {
-			config.fields = []
+	Stream createStream(CreateStreamCommand cmd, User user, CustomStreamIDValidator customStreamIDValidator, String uiChannelPath, Canvas uiChannelCanvas) {
+		Stream stream = new Stream(
+			description: cmd.description,
+			config: JSONUtil.createGsonBuilder().toJson(Stream.normalizeConfig(cmd.config)),
+			partitions: cmd.partitions,
+			uiChannel: cmd.uiChannel,
+			requireSignedData: cmd.requireSignedData,
+			requireEncryptedData: cmd.requireEncryptedData,
+			autoConfigure: cmd.autoConfigure,
+			storageDays: cmd.storageDays,
+			inactivityThresholdHours: cmd.inactivityThresholdHours,
+			uiChannelPath: uiChannelPath,
+			uiChannelCanvas: uiChannelCanvas
+		)
+		if (cmd.id != null) {
+			if ((customStreamIDValidator != null) && (!customStreamIDValidator.validate(cmd.id, user))) {
+				throw new ValidationException(new FieldError("stream", "id", null))
+			}
+			stream.id = cmd.id
+		} else {
+			stream.id = IdGenerator.getShort()
 		}
-		stream.config = gson.toJson(config)
+		stream.name = ((cmd.name == null || cmd.name.trim() == "")) ? stream.id : cmd.name
 
 		if (!stream.validate()) {
 			throw new ValidationException(stream.errors)
 		}
 
-		stream.save(failOnError: true)
+		try {
+			stream.save(flush:true, failOnError: true)
+		} catch (DataIntegrityViolationException e) {
+			// the failed integrity is most likely stream.id (the only reference field that can be set manually by the user)
+			throw new DuplicateNotAllowedException("Stream", stream.id)
+		}
 		permissionService.systemGrantAll(user, stream)
-
 		return stream
 	}
 
@@ -89,9 +113,9 @@ class StreamService {
 			return false
 		} else {
 			List<FieldDetector.FieldConfig> fields = FieldDetector.detectFields(latest, flattenHierarchies)
-			Map config = stream.getStreamConfigAsMap()
+			Map config = Stream.getStreamConfigAsMap(stream.config)
 			config.fields = fields*.toMap()
-			stream.config = gson.toJson(config)
+			stream.config = JSONUtil.createGsonBuilder().toJson(config)
 			if (saveFields) {
 				stream.save(flush: false, failOnError: true)
 			} else {
@@ -156,17 +180,6 @@ class StreamService {
 			return false
 		}
 		return permissionService.check(key.user, stream, Permission.Operation.STREAM_SUBSCRIBE)
-	}
-
-	List<Stream> getInboxStreams(List<User> users) {
-		if (users.isEmpty()) return new ArrayList<Stream>()
-		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
-			user {
-				'in'("id", users*.id)
-			}
-			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
-		}
-		return Stream.findAllByIdInListAndInbox(keys*.idInService, true)
 	}
 
 	static class StreamStatus {

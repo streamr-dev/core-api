@@ -1,10 +1,12 @@
 package com.unifina.controller;
 
-import com.unifina.api.InvalidSessionTokenException;
 import com.unifina.domain.Key;
 import com.unifina.domain.User;
-import com.unifina.security.Userish;
+import com.unifina.domain.Userish;
+import com.unifina.service.InvalidSessionTokenException;
 import com.unifina.service.SessionService;
+import com.unifina.service.EthereumIntegrationKeyService;
+import com.unifina.security.ApiKeyConverter;
 import grails.util.Holders;
 import org.codehaus.groovy.runtime.InvokerHelper;
 
@@ -12,11 +14,14 @@ import javax.servlet.http.HttpServletRequest;
 
 public class TokenAuthenticator {
 	SessionService sessionService = Holders.getApplicationContext().getBean(SessionService.class);
+	EthereumIntegrationKeyService ethereumIntegrationKeyService = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService.class);
+
 	private enum HeaderType {
 		TOKEN,
 		BEARER
 	}
-	private static class AuthorizationHeader {
+
+	public static class AuthorizationHeader {
 
 		private HeaderType headerType;
 		private String headerValue;
@@ -33,11 +38,15 @@ public class TokenAuthenticator {
 		public String getHeaderValue() {
 			return headerValue;
 		}
+
+		public String toString() {
+			return headerType + " " + headerValue;
+		}
 	}
 	public AuthenticationResult authenticate(HttpServletRequest request) {
 		AuthorizationHeader header;
 		try {
-			header = parseAuthorizationHeader(request.getHeader("Authorization"));
+			header = getAuthorizationHeader(request);
 		} catch (AuthenticationMalformedException e) {
 			return new AuthenticationResult(false, true, true);
 		}
@@ -54,7 +63,11 @@ public class TokenAuthenticator {
 		return new AuthenticationResult(true, false, true);
 	}
 
-	public AuthorizationHeader parseAuthorizationHeader(String s) {
+	public static AuthorizationHeader getAuthorizationHeader(HttpServletRequest request) {
+		return parseAuthorizationHeader(request.getHeader("Authorization"));
+	}
+
+	public static AuthorizationHeader parseAuthorizationHeader(String s) {
 		s = s == null ? null : s.trim();
 		if (s != null && !s.isEmpty()) {
 			String[] parts = s.split("\\s+");
@@ -106,9 +119,11 @@ public class TokenAuthenticator {
 		if (apiKey == null) {
 			return new AuthenticationResult(true, false, true);
 		}
-		Key keyObject = (Key) InvokerHelper.invokeMethod(Key.class, "get", apiKey);
-		if (keyObject != null) {
-			return new AuthenticationResult(keyObject);
+		String privateKey = ApiKeyConverter.createEthereumPrivateKey(apiKey);
+		String address = "0x" + EthereumIntegrationKeyService.getAddress(privateKey);
+		User user = ethereumIntegrationKeyService.getEthereumUser(address);
+		if (user != null) {
+			return new AuthenticationResult(user);
 		}
 		return new AuthenticationResult(false, false, true);
 	}

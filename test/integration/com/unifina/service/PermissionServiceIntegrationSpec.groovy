@@ -3,7 +3,6 @@ package com.unifina.service
 import com.unifina.domain.Dashboard
 import com.unifina.domain.DashboardItem
 import com.unifina.domain.Stream
-import com.unifina.domain.Key
 import com.unifina.domain.Permission
 import com.unifina.domain.SignupInvite
 import com.unifina.domain.User
@@ -26,7 +25,6 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 	PermissionService service
 
 	User me, anotherUser, stranger, someone
-	Key myKey, anotherUserKey, anonymousKey
 
 	Dashboard dashAllowed, dashRestricted, dashOwned, dashPublic
 	Permission dashReadPermission, dashAnonymousReadPermission
@@ -84,11 +82,6 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 			password: "x",
 		).save(failOnError: true)
 
-		// Keys
-		myKey = new Key(name: "my key", user: me).save(failOnError: true)
-		anotherUserKey = new Key(name: "another user's key", user: anotherUser).save(failOnError: true)
-		anonymousKey = new Key(name: "anonymous key 1").save(failOnError: true)
-
 		// Dashboards
 		dashAllowed = new Dashboard(name:"allowed").save(failOnError: true)
 		dashRestricted = new Dashboard(name:"restricted").save(failOnError: true)
@@ -103,7 +96,6 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		// Set up the Permissions to the allowed resources
 		dashReadPermission = service.systemGrant(me, dashAllowed, Permission.Operation.DASHBOARD_GET)
 		dashAnonymousReadPermission = service.systemGrantAnonymousAccess(dashPublic, Permission.Operation.DASHBOARD_GET)
-		service.grant(anotherUser, dashAllowed, anonymousKey, Permission.Operation.DASHBOARD_GET)
 
 		canvas = new Canvas().save(validate: true, failOnError: true)
 		stream = new Stream(name: "ui channel", uiChannel: true, uiChannelCanvas: canvas, uiChannelPath: "/canvases/" + canvas.id + "/modules/2")
@@ -181,10 +173,6 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		dashOwned?.delete(flush: true)
 		dashPublic?.delete(flush: true)
 		dashboard?.delete(flush: true)
-
-		myKey?.delete(flush: true)
-		anotherUserKey?.delete(flush: true)
-		anonymousKey?.delete(flush: true)
 
 		me?.delete(flush: true)
 		anotherUser?.delete(flush: true)
@@ -298,13 +286,6 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		service.getAll(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == [dashPublic]
 	}
 
-	void "getAll lists public resources with keys"() {
-		expect:
-		service.getAll(Dashboard, myKey, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashPublic, dashAllowed, vulPubDash] as Set
-		service.getAll(Dashboard, anotherUserKey, Permission.Operation.DASHBOARD_GET) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
-		service.getAll(Dashboard, anonymousKey, Permission.Operation.DASHBOARD_GET) as Set == [dashPublic, dashAllowed] as Set
-	}
-
 	void "getAll returns public resources on bad/null user"() {
 		expect:
 		service.get(Dashboard, new User(), Permission.Operation.DASHBOARD_GET) == []
@@ -354,13 +335,6 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		service.get(Dashboard, me, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashAllowed, vulPubDash] as Set
 		service.get(Dashboard, anotherUser, Permission.Operation.DASHBOARD_GET) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
 		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == []
-	}
-
-	void "retrieve all readable Dashboards correctly with keys"() {
-		expect:
-		service.get(Dashboard, myKey, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashAllowed, vulPubDash] as Set
-		service.get(Dashboard, anotherUserKey, Permission.Operation.DASHBOARD_GET) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
-		service.get(Dashboard, anonymousKey, Permission.Operation.DASHBOARD_GET) as Set == [dashAllowed] as Set
 	}
 
 	void "getPermissionsTo(resource, userish) returns correct UI channel permissions via associated canvas"() {
@@ -429,7 +403,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		expect:
 		service.getPermissionsTo(dashOwned).size() == 6
 		service.getPermissionsTo(dashOwned).contains(perm)
-		service.getPermissionsTo(dashAllowed).size() == 7
+		service.getPermissionsTo(dashAllowed).size() == 6
 		service.getPermissionsTo(dashAllowed).contains(dashReadPermission)
 		service.getPermissionsTo(dashRestricted).size() == 5
 		service.getPermissionsTo(dashRestricted)[0].user == anotherUser

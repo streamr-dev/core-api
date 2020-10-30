@@ -43,7 +43,6 @@
     <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/plastic-criteria-1.6.7">
       <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/plastic-criteria-1.6.7/src/groovy" isTestSource="false" />
     </content>
-    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/rest-client-builder-2.1.1" />
     <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/tomcat-8.0.50">
       <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/tomcat-8.0.50/src/java" isTestSource="false" />
       <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/tomcat-8.0.50/src/groovy" isTestSource="false" />
@@ -167,7 +166,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk-dynamodb/1.11.294/aws-java-sdk-dynamodb-1.11.294.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk-ec2/1.11.294/aws-java-sdk-ec2-1.11.294.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk-elastictranscoder/1.11.294/aws-java-sdk-elastictranscoder-1.11.294.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/postgresql/postgresql/9.4.1208.jre7/postgresql-9.4.1208.jre7.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/antlr/antlr-runtime/3.5.2/antlr-runtime-3.5.2.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/antlr/ST4/4.0.8/ST4-4.0.8.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/paho/org.eclipse.paho.client.mqttv3/1.1.1/org.eclipse.paho.client.mqttv3-1.1.1.jar!/" />
@@ -328,12 +326,10 @@
           <root url="jar://$MAVEN_REPOSITORY$/com/sun/mail/javax.mail/1.5.1/javax.mail-1.5.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/de/ruedigermoeller/fst/2.56/fst-2.56.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/opencsv/opencsv/3.3/opencsv-3.3.jar!/" />
-          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/commons-codec/commons-codec/jars/commons-codec-1.6.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-math3/3.2/commons-math3-3.2.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/commons-net/commons-net/3.3/commons-net-3.3.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/mysql/mysql-connector-java/5.1.20/mysql-connector-java-5.1.20.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/javax.servlet/javax.servlet-api/jars/javax.servlet-api-3.0.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/grails/grails-datastore-rest-client/3.1.4.RELEASE/grails-datastore-rest-client-3.1.4.RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant-launcher/1.9.6/ant-launcher-1.9.6.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant/1.9.6/ant-1.9.6.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/cglib/cglib/3.2.6/cglib-3.2.6.jar!/" />
@@ -407,8 +403,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-logging-log4j/8.0.50/tomcat-embed-logging-log4j-8.0.50.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jdt/ecj/3.12.3/ecj-3.12.3.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-jasper/8.0.50/tomcat-embed-jasper-8.0.50.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-web/3.2.9.RELEASE/spring-security-web-3.2.9.RELEASE.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-core/3.2.9.RELEASE/spring-security-core-3.2.9.RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.10.6/joda-time-2.10.6.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/reactivestreams/reactive-streams/1.0.2/reactive-streams-1.0.2.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-buffer/4.0.37.Final/netty-buffer-4.0.37.Final.jar!/" />
@@ -431,6 +425,9 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/web3j/tuples/5.0.0/tuples-5.0.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/java-websocket/Java-WebSocket/1.4.1/Java-WebSocket-1.4.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/2.0.1/client-2.0.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-core/4.2.9.RELEASE/spring-security-core-4.2.9.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-web/4.2.9.RELEASE/spring-security-web-4.2.9.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/commons-codec/commons-codec/1.15/commons-codec-1.15.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

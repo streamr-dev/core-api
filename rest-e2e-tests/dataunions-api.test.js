@@ -1,13 +1,5 @@
 const assert = require('chai').assert
-const initStreamrApi = require('./streamr-api-clients')
-const SchemaValidator = require('./schema-validator')
-
-
-const URL = 'http://localhost:8081/streamr-core/api/v1/'
-const LOGGING_ENABLED = false
-
-const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
-const schemaValidator = new SchemaValidator()
+const Streamr = require('./streamr-api-clients')
 
 describe('DataUnions API', () => {
     describe('GET /api/v1/dataunions', () => {

@@ -9,7 +9,6 @@ import groovy.transform.CompileStatic
 class StreamListParams extends ListParams {
 	String name
 	Boolean uiChannel
-	Boolean inbox = false
 
 	StreamListParams() {
 		super()
@@ -19,7 +18,6 @@ class StreamListParams extends ListParams {
 	static constraints = {
 		name(nullable: true, blank: false)
 		uiChannel(nullable: true)
-		inbox(nullable: true)
 	}
 
 	@Override
@@ -38,19 +36,14 @@ class StreamListParams extends ListParams {
 			if (uiChannel != null) {
 				eq("uiChannel", uiChannel)
 			}
-			// Filter by inbox stream
-			if (inbox != null) {
-				eq("inbox", inbox)
-			}
 		}
 	}
 
 	@CompileStatic
 	Map toMap() {
-		super.toMap() + [
-			name: name,
+		return super.toMap() + ([
+			name     : name,
 			uiChannel: uiChannel,
-			inbox: inbox
-		]
+		] as Map<String, Object>)
 	}
 }

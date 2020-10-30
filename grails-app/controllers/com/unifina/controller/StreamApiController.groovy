@@ -1,19 +1,9 @@
 package com.unifina.controller
 
-import com.unifina.api.ApiException
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.ValidationException
-import com.unifina.domain.Key
-import com.unifina.domain.Permission
+import com.unifina.domain.*
 import com.unifina.domain.Permission.Operation
-import com.unifina.domain.Stream
-import com.unifina.domain.User
 import com.unifina.feed.DataRange
-import com.unifina.security.Userish
-import com.unifina.service.ApiService
-import com.unifina.service.PermissionService
-import com.unifina.service.StreamService
+import com.unifina.service.*
 import grails.converters.JSON
 
 import java.text.SimpleDateFormat
@@ -22,8 +12,9 @@ class StreamApiController {
 	StreamService streamService
 	PermissionService permissionService
 	ApiService apiService
+	EnsService ensService
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def index(StreamListParams listParams) {
 		if (params.public) {
 			listParams.publicAccess = params.boolean("public")
@@ -38,11 +29,11 @@ class StreamApiController {
 	}
 
 	@StreamrApi
-	def save() {
-		Stream stream = streamService.createStream(request.JSON, request.apiUser)
+	def save(CreateStreamCommand cmd) {
+		CustomStreamIDValidator streamIdValidator = new CustomStreamIDValidator({domain, creator -> ensService.isENSOwnedBy(domain, creator)})
+		Stream stream = streamService.createStream(cmd, request.apiUser, streamIdValidator)
 		render(stream.toMap() as JSON)
 	}
-
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(String id) {

@@ -1,11 +1,8 @@
 package com.unifina.service
 
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
+
 import com.unifina.domain.*
 import com.unifina.domain.Permission.Operation
-import com.unifina.security.Userish
-import com.unifina.utils.EmailValidator
 import grails.compiler.GrailsCompileStatic
 import grails.gsp.PageRenderer
 import grails.plugin.mail.MailService
@@ -72,10 +69,7 @@ class PermissionService {
 		if (!check(userish, resource, op)) {
 			String name
 			Userish u = userish?.resolveToUserish()
-			if (u instanceof Key) {
-				Key k = u as Key
-				name = k.user?.username
-			} else if (u instanceof User) {
+			if (u instanceof User) {
 				User s = u as User
 				name = s.username
 			}
@@ -144,24 +138,19 @@ class PermissionService {
 		// Special case of UI channels: they inherit permissions from the associated canvas
 		if (resource instanceof Stream && resource.isUIChannel()) {
 			Set<Permission> syntheticPermissions = new HashSet<>()
-			Key key = null
 			User user = null
-			if (userish instanceof Key) {
-				key = userish as Key
-			} else if (userish instanceof User) {
+			if (userish instanceof User) {
 				user = userish as User
 			}
 			if (userish != null && isPermissionToStreamViaDashboard(userish, resource)) {
 				syntheticPermissions.add(new Permission(
 					stream: resource,
 					operation: Permission.Operation.STREAM_GET,
-					key: key,
 					user: user,
 				))
 				syntheticPermissions.add(new Permission(
 					stream: resource,
 					operation: Permission.Operation.STREAM_SUBSCRIBE,
-					key: key,
 					user: user,
 				))
 			}
@@ -174,7 +163,6 @@ class PermissionService {
 						Permission sp = new Permission(
 							stream: resource,
 							operation: op,
-							key: key,
 							user: user,
 						)
 						syntheticPermissions.add(sp)
@@ -433,7 +421,7 @@ class PermissionService {
 	List<Permission> systemRevoke(Permission permission) {
 		return performRevoke(
 			permission.anonymous,
-			permission.user ?: permission.invite ?: permission.key,
+			permission.user ?: permission.invite,
 			getResourceFromPermission(permission),
 			permission.operation)
 	}
@@ -568,28 +556,26 @@ class PermissionService {
 			return "user"
 		} else if (userish instanceof SignupInvite) {
 			return "invite"
-		} else if (userish instanceof Key) {
-			return "key"
 		} else {
 			throw new IllegalArgumentException("Unexpected Userish instance: " + userish)
 		}
 	}
 
-	Permission savePermissionAndSendShareResourceEmail(User apiUser, Key apiKey, Operation op, String targetUsername, EmailMessage msg) {
+	Permission savePermissionAndSendShareResourceEmail(User apiUser, Operation op, String targetUsername, EmailMessage msg) {
 		User userish = User.findByUsername(targetUsername)
-		Permission permission = savePermission(msg.resource, apiUser, apiKey, userish, op)
+		Permission permission = savePermission(msg.resource, apiUser, userish, op)
 		sendEmailShareResource(op, msg)
 		return permission
 	}
 
-	Permission saveAnonymousPermission(User apiUser, Key apiKey, Operation op, Resource resource) {
-		Object res = resource.load(apiUser, apiKey, true)
+	Permission saveAnonymousPermission(User apiUser, Operation op, Resource resource) {
+		Object res = resource.load(apiUser, true)
 		Permission permission = grantAnonymousAccess(apiUser, res, op)
 		return permission
 	}
 
-	private Permission savePermission(Resource resource, User apiUser, Key apiKey, Userish targetUserish, Operation op) {
-		Object res = resource.load(apiUser, apiKey, true)
+	private Permission savePermission(Resource resource, User apiUser, Userish targetUserish, Operation op) {
+		Object res = resource.load(apiUser, true)
 		Permission permission = grant(apiUser, res, targetUserish, op)
 		return permission
 	}
@@ -645,7 +631,7 @@ class PermissionService {
 			invite.sent = true
 			invite.save(failOnError: true, validate: true)
 		}
-		Permission newPermission = savePermission(msg.resource, apiUser, null, invite, op)
+		Permission newPermission = savePermission(msg.resource, apiUser, invite, op)
 		return newPermission
 	}
 
@@ -653,27 +639,27 @@ class PermissionService {
 		EthereumIntegrationKeyService ethereumIntegrationKeyService = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService)
 		User user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(username, signupMethod)
 		User userish = User.findByUsername(user.username)
-		Permission newPermission = savePermission(res, grantor, null, userish, operation)
+		Permission newPermission = savePermission(res, grantor, userish, operation)
 		return newPermission
 	}
 
 	@Transactional(readOnly = true)
-	List<Permission> getOwnPermissions(Resource resource, User apiUser, Key apiKey) {
-		Object res = resource.load(apiUser, apiKey, false)
-		List<Permission> results = getPermissionsTo(res, apiUser ?: apiKey)
+	List<Permission> getOwnPermissions(Resource resource, User apiUser) {
+		Object res = resource.load(apiUser, false)
+		List<Permission> results = getPermissionsTo(res, apiUser)
 		return results
 	}
 
 	@Transactional(readOnly = true)
-	List<Permission> findAllPermissions(Resource resource, User apiUser, Key apiKey, boolean subscriptions) {
-		Object res = resource.load(apiUser, apiKey, true)
+	List<Permission> findAllPermissions(Resource resource, User apiUser, boolean subscriptions) {
+		Object res = resource.load(apiUser, true)
 		List<Permission> permissions = getPermissionsTo(res, subscriptions, null)
 		return permissions
 	}
 
 	@Transactional(readOnly = true)
-	Permission findPermission(Long permissionId, Resource resource, User apiUser, Key apiKey) {
-		Object res = resource.load(apiUser, apiKey, true)
+	Permission findPermission(Long permissionId, Resource resource, User apiUser) {
+		Object res = resource.load(apiUser, true)
 		List<Permission> permissions = getPermissionsTo(res)
 		Permission p = permissions.find { it.id == permissionId }
 		if (!p) {
@@ -682,14 +668,14 @@ class PermissionService {
 		return p
 	}
 
-	void deletePermission(Long permissionId, Resource resource, User apiUser, Key apiKey) {
-		Object res = resource.load(apiUser, apiKey, false)
+	void deletePermission(Long permissionId, Resource resource, User apiUser) {
+		Object res = resource.load(apiUser, false)
 		List<Permission> permissions = getPermissionsTo(res)
 		Permission p = permissions.find { it.id == permissionId }
 		if (!p) {
 			throw new NotFoundException("Permission not found", resource.type(), permissionId?.toString())
 		}
-		Userish user = apiUser ?: apiKey
+		Userish user = apiUser
 		boolean canShare = check(user, res, Permission.Operation.shareOperation(res))
 		if (canShare == false && p.user == user) {
 			// user without share permission to resource can delete their own permission to resource
