@@ -7,11 +7,8 @@ const Streamr = require('./streamr-api-clients')
 
 const REST_URL = 'http://localhost/api/v1'
 const WS_URL = 'ws://localhost/api/v1/ws'
-
 const TIMEOUT = 130 * 1000
-
 const NUM_MESSAGES = 50
-
 const WAIT_TIME = 15000
 
 const pollCondition = async (condition, timeout = TIMEOUT, interval = 100) => {

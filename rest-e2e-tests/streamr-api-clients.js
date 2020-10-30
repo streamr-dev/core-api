@@ -2,7 +2,6 @@ const fetch = require('node-fetch')
 const url = require('url')
 const querystring = require('querystring')
 const FormData = require('form-data')
-const StreamrClient = require('streamr-client')
 const getSessionToken = require('./test-utilities.js').getSessionToken
 
 class StreamrApiRequest {
@@ -338,19 +337,6 @@ class Subscriptions {
     }
 }
 
-class Login {
-    constructor(options) {
-        this.options = options
-    }
-
-    challenge(address) {
-        return new StreamrApiRequest(this.options)
-            .method('POST')
-            .endpoint('login', 'challenge', address)
-            .withBody()
-    }
-}
-
 class IntegrationKeys {
     constructor(options) {
         this.options = options
@@ -443,7 +429,6 @@ module.exports = {
             canvases: new Canvases(options),
             categories: new Categories(options),
             integration_keys: new IntegrationKeys(options),
-            login: new Login(options),
             products: new Products(options),
             streams: new Streams(options),
             subscriptions: new Subscriptions(options),

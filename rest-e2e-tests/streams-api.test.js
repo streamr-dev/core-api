@@ -1,7 +1,6 @@
 const assert = require('chai').assert
 const fs = require('fs')
 const Streamr = require('./streamr-api-clients')
-const SchemaValidator = require('./schema-validator')
 const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
 const assertStreamrClientResponseError = require('./test-utilities.js').assertStreamrClientResponseError
 const getStreamrClient = require('./test-utilities.js').getStreamrClient

@@ -1,17 +1,11 @@
 const assert = require('chai').assert
 const Streamr = require('./streamr-api-clients')
-const SchemaValidator = require('./schema-validator')
 const StreamrClient = require('streamr-client')
 const getSessionToken = require('./test-utilities.js').getSessionToken
 const getStreamrClient = require('./test-utilities.js').getStreamrClient
 
-const schemaValidator = new SchemaValidator()
-
-const API_KEY = 'tester1-api-key'
-
 describe('Permissions API', () => {
     const me = StreamrClient.generateEthereumAccount()
-    const nonExistingUser = StreamrClient.generateEthereumAccount()
     const existingUser = StreamrClient.generateEthereumAccount()
 
     before(async () => {

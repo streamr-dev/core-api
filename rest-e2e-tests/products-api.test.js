@@ -1,8 +1,6 @@
 const assert = require('chai').assert
 const fs = require('fs')
 const zlib = require('zlib')
-const fetch = require('node-fetch')
-
 const Streamr = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
