@@ -32,11 +32,12 @@ describe('POST /api/v1/streams/{id}/permissions', function() {
 		const ITERATIONS = 50
 
 		it('survives a race condition when granting multiple permissions to a non-existing user using Ethereum address', async () => {
+			const grantTargetUsers = await Promise.all(Array.from({ length: ITERATIONS }, () => Promise.resolve(StreamrClient.generateEthereumAccount())))
 			for (let i=0; i<ITERATIONS; i++) {
 				console.log("\titeration: " + (i + 1))
 				const responses = await Promise.all(operations.map((operation) => {
 					return Streamr.api.v1.streams
-						.grant(stream.id, StreamrClient.generateEthereumAccount().address, operation)
+						.grant(stream.id, grantTargetUsers[i].address, operation)
 						.withAuthenticatedUser(me)
 						.call()
 				}))
