@@ -1,5 +1,4 @@
 const Ajv = require('ajv')
-
 const categorySchema = require('./schemas/category.json')
 const permissionSchema = require('./schemas/permission.json')
 const productSchema = require('./schemas/product.json')
