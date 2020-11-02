@@ -4,7 +4,7 @@ dataSource {
 	dialect = 'org.hibernate.dialect.MySQL5InnoDBDialect'
 	properties {
 		initialSize = 2
-		maxActive = 50 // -1
+		maxActive = 150 // -1
 		minIdle = 2
 		maxIdle = 25
 		maxWait = 30000

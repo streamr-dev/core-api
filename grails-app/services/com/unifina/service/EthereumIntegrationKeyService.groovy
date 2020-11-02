@@ -1,14 +1,19 @@
 package com.unifina.service
 
-import com.unifina.domain.*
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.SignupMethod
+import com.unifina.domain.User
 import com.unifina.security.StringEncryptor
 import com.unifina.utils.AlphanumericStringGenerator
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
+import grails.transaction.NotTransactional
+import grails.transaction.Transactional
 import groovy.transform.CompileStatic
 import org.apache.commons.codec.DecoderException
 import org.apache.commons.codec.binary.Hex
 import org.ethereum.crypto.ECKey
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.util.Assert
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.Keys
@@ -16,6 +21,7 @@ import org.web3j.crypto.Keys
 import javax.annotation.PostConstruct
 import java.security.SignatureException
 
+@Transactional
 class EthereumIntegrationKeyService {
 
 	def grailsApplication
@@ -125,14 +131,23 @@ class EthereumIntegrationKeyService {
 		return key.user
 	}
 
+	@NotTransactional
 	User getOrCreateFromEthereumAddress(String address, SignupMethod signupMethod) {
 		User user = getEthereumUser(address)
 		if (user == null) {
-			user = createEthereumUser(address, signupMethod)
+			try {
+				user = createEthereumUser(address, signupMethod)
+			} catch (Exception e) {
+				println("CLASS: " + e.getClass())
+				println("ethereum user already created: " + address)
+				user = getEthereumUser(address)
+				println("USER: " + user)
+			}
 		}
 		return user
 	}
 
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	User createEthereumUser(String address, SignupMethod signupMethod) {
 		User user = userService.createUser([
 			username       : address,

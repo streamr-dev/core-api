@@ -4,7 +4,7 @@ const ITERATIONS = 50
 
 describe('Login API', function() {
 
-	this.timeout(30000)
+	this.timeout(40000)
 
 	it('survives a race condition when user does many simultaneous logins', () => {
 		const user = StreamrClient.generateEthereumAccount()
