@@ -138,10 +138,7 @@ class EthereumIntegrationKeyService {
 			try {
 				user = createEthereumUser(address, signupMethod)
 			} catch (Exception e) {
-				println("CLASS: " + e.getClass())
-				println("ethereum user already created: " + address)
 				user = getEthereumUser(address)
-				println("USER: " + user)
 			}
 		}
 		return user
