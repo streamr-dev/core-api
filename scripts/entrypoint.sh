@@ -1,6 +1,7 @@
 #!/bin/bash
 
 CATALINA_OPTS="\
+	-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true \
 	-Dstreamr.database.user=$DB_USER \
 	-Dstreamr.database.password=$DB_PASS \
 	-Dstreamr.database.host=$DB_HOST \

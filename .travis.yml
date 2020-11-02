@@ -116,3 +116,4 @@ jobs:
 after_failure:
   - docker ps
   - .travis_scripts/after_test_failure.sh
+  - docker logs streamr-dev-nginx

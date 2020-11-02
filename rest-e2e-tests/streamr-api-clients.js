@@ -2,20 +2,16 @@ const fetch = require('node-fetch')
 const url = require('url')
 const querystring = require('querystring')
 const FormData = require('form-data')
-const StreamrClient = require('streamr-client')
+const getSessionToken = require('./test-utilities.js').getSessionToken
 
 class StreamrApiRequest {
     constructor(options) {
-        this.baseUrl = options.baseUrl || 'https://streamr.network/api/v1/'
-        if (!this.baseUrl.endsWith('/')) {
-            this.baseUrl += '/'
-        }
-
-        this.logging = options.logging || false
-        this.authHeader = null
+        this.baseUrl = options.baseUrl
+        this.logging = options.logging
+        this.authenticatedUser = null
         this.contentType = null
         this.queryParams = ''
-        this.headers = null
+        this.headers = {}
     }
 
     method(methodId) {
@@ -28,13 +24,8 @@ class StreamrApiRequest {
         return this
     }
 
-    withApiKey(apiKey) {
-        this.authHeader = `Token ${apiKey}`
-        return this
-    }
-
-    withSessionToken(sessionToken) {
-        this.authHeader = `Bearer ${sessionToken}`
+    withAuthenticatedUser(authenticatedUser) {
+        this.authenticatedUser = authenticatedUser;
         return this
     }
 
@@ -53,13 +44,19 @@ class StreamrApiRequest {
 
     withFormData(formData) {
         this.body = formData
-        this.headers = formData.getHeaders()
+        this.headers = Object.assign(this.headers, formData.getHeaders())
         return this
     }
 
     withRawBody(body) {
         this.body = body
         this.contentType = null
+        return this
+    }
+
+    withHeader(key, value) {
+		this.headers = { ...this.headers }
+		this.headers[key] = value
         return this
     }
 
@@ -74,16 +71,15 @@ class StreamrApiRequest {
         const apiUrl = url.resolve(this.baseUrl, this.relativePath) + this.queryParams
 
         let headers = {
-            'Accept': 'application/json'
+			'Accept': 'application/json',
+			...this.headers
         }
         if (this.body && this.contentType) {
             headers['Content-type'] = this.contentType
         }
-        if (this.authHeader) {
-            headers['Authorization'] = this.authHeader
-        }
-        if (this.headers) {
-            Object.assign(headers, this.headers)
+        if (this.authenticatedUser) {
+            const sessionToken = await getSessionToken(this.authenticatedUser)
+            headers['Authorization'] = `Bearer ${sessionToken}`
         }
 
         if (this.logging) {
@@ -238,19 +234,6 @@ class Streams {
         this.permissions = new Permissions('streams', options)
     }
 
-    create(body) {
-        return new StreamrApiRequest(this.options)
-            .method('POST')
-            .endpoint('streams')
-            .withBody(body)
-    }
-
-    get(id) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('streams', id)
-    }
-
     setFields(id, body) {
         return new StreamrApiRequest(this.options)
             .method('POST')
@@ -282,36 +265,6 @@ class Streams {
         return new StreamrApiRequest(this.options)
             .method('GET')
             .endpoint('streams', id, 'permissions', 'me')
-    }
-
-    getValidationInfo(id) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('streams', id, 'validation')
-    }
-
-    getPublishers(id) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('streams', id, 'publishers')
-    }
-
-    getSubscribers(id) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('streams', id, 'subscribers')
-    }
-
-    isPublisher(streamId, address) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('streams', streamId, 'publisher', address)
-    }
-
-    isSubscriber(streamId, address) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('streams', streamId, 'subscriber', address)
     }
 
     delete(streamId, permissionId) {
@@ -380,19 +333,6 @@ class Subscriptions {
     }
 }
 
-class Login {
-    constructor(options) {
-        this.options = options
-    }
-
-    challenge(address) {
-        return new StreamrApiRequest(this.options)
-            .method('POST')
-            .endpoint('login', 'challenge', address)
-            .withBody()
-    }
-}
-
 class IntegrationKeys {
     constructor(options) {
         this.options = options
@@ -432,34 +372,34 @@ class DataUnions {
 }
 
 class StorageNodes {
-	constructor(options) {
-		this.options = options
-	}
+    constructor(options) {
+        this.options = options
+    }
 
-	findStreamsByStorageNode(address) {
-		return new StreamrApiRequest(this.options)
-			.method('GET')
+    findStreamsByStorageNode(address) {
+        return new StreamrApiRequest(this.options)
+            .method('GET')
             .endpoint('storageNodes', address, 'streams')
-	}
+    }
 
-	findStorageNodesByStream(id) {
-		return new StreamrApiRequest(this.options)
-			.method('GET')
-			.endpoint('streams', id, 'storageNodes')
-	}
+    findStorageNodesByStream(id) {
+        return new StreamrApiRequest(this.options)
+            .method('GET')
+            .endpoint('streams', id, 'storageNodes')
+    }
 
-	addStorageNodeToStream(storageNodeAddress, streamId) {
-		return new StreamrApiRequest(this.options)
-			.method('POST')
-			.endpoint('streams', streamId, 'storageNodes')
-			.withBody({address: storageNodeAddress})
-	}
+    addStorageNodeToStream(storageNodeAddress, streamId) {
+        return new StreamrApiRequest(this.options)
+            .method('POST')
+            .endpoint('streams', streamId, 'storageNodes')
+            .withBody({address: storageNodeAddress})
+    }
 
-	removeStorageNodeFromStream(storageNodeAddress, streamId) {
-		return new StreamrApiRequest(this.options)
-			.method('DELETE')
+    removeStorageNodeFromStream(storageNodeAddress, streamId) {
+        return new StreamrApiRequest(this.options)
+            .method('DELETE')
             .endpoint('streams', streamId, 'storageNodes', storageNodeAddress)
-	}
+    }
 }
 
 class NotFound {
@@ -472,39 +412,25 @@ class NotFound {
             .method('GET')
             .endpoint('page-not-found')
     }
-
-    withApiKey(apiKey) {
-        this.authHeader = `Token ${apiKey}`
-        return this
-    }
-
-    withSessionToken(sessionToken) {
-        this.authHeader = `Bearer ${sessionToken}`
-        return this
-    }
 }
 
-module.exports = (baseUrl, logging) => {
-    const options = {
-        // Append a trailing "/" if not present
-        baseUrl: baseUrl.slice(-1) === "/" ? baseUrl : baseUrl + '/',
-        logging
-    }
-
-    return {
-        api: {
-            v1: {
-                canvases: new Canvases(options),
-                categories: new Categories(options),
-                integration_keys: new IntegrationKeys(options),
-                login: new Login(options),
-                products: new Products(options),
-                streams: new Streams(options),
-                subscriptions: new Subscriptions(options),
-                dataunions: new DataUnions(options),
-                storagenodes: new StorageNodes(options),
-                not_found: new NotFound(options),
-            }
+const LOGGING_ENABLED = process.env.LOGGING_ENABLED || false
+const options = {
+	baseUrl: 'http://localhost/api/v1/',
+	logging: LOGGING_ENABLED
+}
+module.exports = {
+    api: {
+        v1: {
+            canvases: new Canvases(options),
+            categories: new Categories(options),
+            integration_keys: new IntegrationKeys(options),
+            products: new Products(options),
+            streams: new Streams(options),
+            subscriptions: new Subscriptions(options),
+            dataunions: new DataUnions(options),
+            storagenodes: new StorageNodes(options),
+            not_found: new NotFound(options),
         }
     }
 }

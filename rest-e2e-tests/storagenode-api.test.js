@@ -1,23 +1,16 @@
 const assert = require('chai').assert
-const initStreamrApi = require('./streamr-api-clients')
+const Streamr = require('./streamr-api-clients')
 const _ = require('lodash');
-
-const URL = 'http://localhost/api/v1'
-const API_KEY = 'product-api-tester-key';
-const API_KEY_OTHER_USER = 'product-api-tester2-key'
-const LOGGING_ENABLED = false;
-const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
+const StreamrClient = require('streamr-client')
+const getStreamrClient = require('./test-utilities.js').getStreamrClient
 
 const createMockEthereumAddress = () => {
 	const LENGTH = 40;
 	return '0x' + _.padStart(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16),LENGTH, '0');
 };
-const createStream = () => {
-	return Streamr.api.v1.streams
-		.create()
-		.withApiKey(API_KEY)
-		.execute()
-		.then((json) => json.id);
+const createStream = async (user) => {
+	const stream = await getStreamrClient(user).createStream();
+	return stream.id;
 };
 const findStreamsByStorageNode = (storageNodeAddress) => {
 	return Streamr.api.v1.storagenodes
@@ -29,16 +22,16 @@ const findStorageNodesByStream = (streamId) => {
 		.findStorageNodesByStream(streamId)
 		.call();
 };
-const addStorageNodeToStream = (storageNodeAddress, streamId, apiKey = API_KEY) => {
+const addStorageNodeToStream = async (storageNodeAddress, streamId, user) => {
 	return Streamr.api.v1.storagenodes
 		.addStorageNodeToStream(storageNodeAddress, streamId)
-		.withApiKey(apiKey)
+		.withAuthenticatedUser(user)
 		.call();
 };
-const removeStorageNodeFromStream = (storageNodeAddress, streamId, apiKey = API_KEY) => {
+const removeStorageNodeFromStream = async (storageNodeAddress, streamId, user) => {
 	return Streamr.api.v1.storagenodes
 		.removeStorageNodeFromStream(storageNodeAddress, streamId)
-		.withApiKey(apiKey)
+		.withAuthenticatedUser(user)
 		.call();
 };
 const getStorageNodeCount = async (streamId) => {
@@ -48,14 +41,18 @@ const getStorageNodeCount = async (streamId) => {
 };
 
 describe('Storage Node API', () => {
+
+	const streamOwner = StreamrClient.generateEthereumAccount()
+	const otherUser = StreamrClient.generateEthereumAccount()
+
 	describe('GET /storageNodes/:address/stream', () => {
 		let storageNodeAddress;
 		let streamId;
 
 		before(async () => {
 			storageNodeAddress = createMockEthereumAddress();
-			streamId = await createStream();
-			await addStorageNodeToStream(storageNodeAddress, streamId);
+			streamId = await createStream(streamOwner);
+			await addStorageNodeToStream(storageNodeAddress, streamId, streamOwner);
 		});
 
 		it('happy path', async () => {
@@ -84,8 +81,8 @@ describe('Storage Node API', () => {
 
 		before(async () => {
 			storageNodeAddress = createMockEthereumAddress();
-			streamId = await createStream();
-			await addStorageNodeToStream(storageNodeAddress, streamId);
+			streamId = await createStream(streamOwner);
+			await addStorageNodeToStream(storageNodeAddress, streamId, streamOwner);
 		});
 
 		it('happy path', async () => {
@@ -107,11 +104,11 @@ describe('Storage Node API', () => {
 
 		before(async () => {
 			storageNodeAddress = createMockEthereumAddress();
-			streamId = await createStream();
+			streamId = await createStream(streamOwner);
 		});
 
 		it('happy path', async () => {
-			const response = await addStorageNodeToStream(storageNodeAddress, streamId);
+			const response = await addStorageNodeToStream(storageNodeAddress, streamId, streamOwner);
 			assert.equal(response.status, 200)
 			const json = await response.json()
 			assert.equal(json.storageNodeAddress, storageNodeAddress);
@@ -120,22 +117,22 @@ describe('Storage Node API', () => {
 		});
 
 		it('duplicate', async () => {
-			const response = await addStorageNodeToStream(storageNodeAddress, streamId);
+			const response = await addStorageNodeToStream(storageNodeAddress, streamId, streamOwner);
 			assert.equal(response.status, 400)
 		});
 
 		it('validation error', async() => {
-			const response = await addStorageNodeToStream('foobar', streamId);
+			const response = await addStorageNodeToStream('foobar', streamId, streamOwner);
 			assert.equal(response.status, 422)
 		});
 
 		it('unauthorized', async() => {
-			const response = await addStorageNodeToStream(storageNodeAddress, streamId, null);
+			const response = await addStorageNodeToStream(storageNodeAddress, streamId, undefined);
 			assert.equal(response.status, 401)
 		});
 
 		it('forbidden', async() => {
-			const response = await addStorageNodeToStream(storageNodeAddress, streamId, API_KEY_OTHER_USER);
+			const response = await addStorageNodeToStream(storageNodeAddress, streamId, otherUser);
 			assert.equal(response.status, 403)
 		});
 	});
@@ -146,12 +143,12 @@ describe('Storage Node API', () => {
 
 		before(async () => {
 			storageNodeAddress = createMockEthereumAddress();
-			streamId = await createStream();
-			await addStorageNodeToStream(storageNodeAddress, streamId);
+			streamId = await createStream(streamOwner);
+			await addStorageNodeToStream(storageNodeAddress, streamId, streamOwner);
 		});
 
 		it('happy path', async () => {
-			const response = await removeStorageNodeFromStream(storageNodeAddress, streamId);
+			const response = await removeStorageNodeFromStream(storageNodeAddress, streamId, streamOwner);
 			assert.equal(response.status, 204);
 			const storageNodeCount = await getStorageNodeCount(streamId);
 			assert.equal(storageNodeCount, 0);
@@ -159,22 +156,22 @@ describe('Storage Node API', () => {
 
 		it('not found', async () => {
 			const nonExistingStorageNodeAddress = createMockEthereumAddress();
-			const response = await removeStorageNodeFromStream(nonExistingStorageNodeAddress, streamId);
+			const response = await removeStorageNodeFromStream(nonExistingStorageNodeAddress, streamId, streamOwner);
 			assert.equal(response.status, 404);
 		});
 
 		it('unauthorized', async() => {
-			const response = await removeStorageNodeFromStream(storageNodeAddress, streamId, null);
+			const response = await removeStorageNodeFromStream(storageNodeAddress, streamId, undefined);
 			assert.equal(response.status, 401)
 		});
 
 		it('forbidden', async() => {
-			const response = await removeStorageNodeFromStream(storageNodeAddress, streamId, API_KEY_OTHER_USER);
+			const response = await removeStorageNodeFromStream(storageNodeAddress, streamId, otherUser);
 			assert.equal(response.status, 403)
 		});
 
 		it('malformed storage node address', async () => {
-			const response = await removeStorageNodeFromStream('foobar', streamId);
+			const response = await removeStorageNodeFromStream('foobar', streamId, streamOwner);
 			assert.equal(response.status, 400);
 		});
 	});
