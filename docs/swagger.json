@@ -4,7 +4,7 @@
     "title": "Streamr API",
     "version": "1.0.0"
   },
-  "host": "www.streamr.com",
+  "host": "streamr.network",
   "schemes": [
     "https"
   ],
@@ -920,7 +920,7 @@
             "examples": {
               "application/json": {
                 "code": "FORBIDDEN",
-                "message": "me@streamr.com does not have permission to share Stream (id bqO9tp3wQVCPbKh6elAFLw)"
+                "message": "me@streamr.network does not have permission to share Stream (id bqO9tp3wQVCPbKh6elAFLw)"
               }
             }
           },
@@ -4655,6 +4655,7 @@
         "requireSignedData": {
           "type": "boolean",
           "description": "If true, all messages in this stream must be cryptographically signed. Client's should not accept unsigned messages.",
+
           "example": false
         },
         "requireEncryptedData": {

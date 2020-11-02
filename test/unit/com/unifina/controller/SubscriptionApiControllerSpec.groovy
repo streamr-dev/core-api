@@ -17,7 +17,7 @@ class SubscriptionApiControllerSpec extends Specification {
 	User devOpsUser
 
 	void setup() {
-		devOpsUser = new User(name: "me@streamr.com").save(failOnError: true, validate: false)
+		devOpsUser = new User(name: "me@streamr.network").save(failOnError: true, validate: false)
 		def devopsRole = new Role(authority: "ROLE_DEV_OPS").save(failOnError: true)
 		new UserRole(user: devOpsUser, role: devopsRole).save(failOnError: true)
 	}

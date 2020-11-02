@@ -77,10 +77,10 @@ class MqttSpec extends Specification {
 	void "test mqtt protocol is changed to tcp"() {
 		when:
 		Input urlInput = module.getInput("URL")
-		urlInput.receive("mqtt://streamr.com/never/give/up/on/your/streams")
+		urlInput.receive("mqtt://streamr.network/never/give/up/on/your/streams")
 
 		then:
-		TestableMqtt.getBrokerUrlFromInput(urlInput) == "tcp://streamr.com/never/give/up/on/your/streams"
+		TestableMqtt.getBrokerUrlFromInput(urlInput) == "tcp://streamr.network/never/give/up/on/your/streams"
 	}
 
 }

@@ -208,7 +208,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		integrationKey.id = "integration-key"
 		integrationKey.save(failOnError: true, validate: false)
 
-		User someoneElse = new User(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+		User someoneElse = new User(username: "someoneElse@streamr.network").save(failOnError: true, validate: false)
 
 		when:
 		service.delete("integration-key", someoneElse)
@@ -232,7 +232,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		integrationKey.id = "integration-key"
 		integrationKey.save(failOnError: true, validate: false)
 
-		User someoneElse = new User(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+		User someoneElse = new User(username: "someoneElse@streamr.network").save(failOnError: true, validate: false)
 
 		when:
 		service.delete("integration-key", someoneElse)
@@ -241,7 +241,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 	}
 
 	void "getOrCreateFromEthereumAddress() creates user if key does not exists"() {
-		User someoneElse = new User(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+		User someoneElse = new User(username: "someoneElse@streamr.network").save(failOnError: true, validate: false)
 		when:
 		service.getOrCreateFromEthereumAddress("address", SignupMethod.UNKNOWN)
 		then:

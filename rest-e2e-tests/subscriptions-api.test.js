@@ -42,7 +42,7 @@ describe('Subscriptions API', () => {
             paidProductId = await createProductAndReturnId({
                 name: 'Paid Product',
                 description: 'Description of the product.',
-                imageUrl: 'https://www.streamr.com/uploads/product.png',
+                imageUrl: 'https://streamr.network/uploads/product.png',
                 category: 'satellite-id',
                 streams: [],
                 ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
@@ -55,7 +55,7 @@ describe('Subscriptions API', () => {
             freeProductId = await createProductAndReturnId({
                 name: 'Free Product',
                 description: 'Description of the product.',
-                imageUrl: 'https://www.streamr.com/uploads/product2.png',
+                imageUrl: 'https://streamr.network/uploads/product2.png',
                 category: 'satellite-id',
                 streams: [],
                 pricePerSecond: 0,

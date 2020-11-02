@@ -98,7 +98,7 @@ value1: 1
 value2: abcd
 
 To view, edit, or stop the Canvas that sent this message, click the below link:
-https://www.streamr.com/canvas/editor/1
+https://streamr.network/canvas/editor/1
 """
 				ms.clear()
 			}
@@ -140,7 +140,7 @@ value1: 500
 value2: test value
 
 To view, edit, or stop the Canvas that sent this message, click the below link:
-https://www.streamr.com/canvas/editor/1
+https://streamr.network/canvas/editor/1
 """
 	}
 

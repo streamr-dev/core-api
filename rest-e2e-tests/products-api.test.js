@@ -295,7 +295,7 @@ describe('Products API', function() {
         const newBody = {
             name: 'Product (updated)',
             description: 'Description of the product.',
-            imageUrl: 'https://www.streamr.com/uploads/product-2.png',
+            imageUrl: 'https://streamr.network/uploads/product-2.png',
             category: 'automobile-id',
             streams: [],
             ownerAddress: '0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
