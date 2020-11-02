@@ -50,7 +50,7 @@ describe('Permissions API', () => {
 
         it('can grant a permission to an existing user using email address', async () => {
             const response = await Streamr.api.v1.streams
-                .grant(stream.id, 'tester1@streamr.network', 'stream_get')
+                .grant(stream.id, 'tester1@streamr.com', 'stream_get')
                 .withSessionToken(mySessionToken)
                 .call()
             assert.equal(response.status, 200)
