@@ -15,7 +15,11 @@ import org.web3j.crypto.Keys
 
 import javax.annotation.PostConstruct
 import java.security.SignatureException
+import grails.transaction.Transactional
+import grails.transaction.NotTransactional
+import org.springframework.transaction.annotation.Propagation
 
+@Transactional
 class EthereumIntegrationKeyService {
 
 	def grailsApplication
@@ -125,14 +129,21 @@ class EthereumIntegrationKeyService {
 		return key.user
 	}
 
+	@NotTransactional
 	User getOrCreateFromEthereumAddress(String address, SignupMethod signupMethod) {
 		User user = getEthereumUser(address)
 		if (user == null) {
-			user = createEthereumUser(address, signupMethod)
+			try {
+				user = createEthereumUser(address, signupMethod)
+			} catch (Exception e) {
+				println('This change will be done on BACK-71')
+				user = getEthereumUser(address)
+			}
 		}
 		return user
 	}
 
+	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	User createEthereumUser(String address, SignupMethod signupMethod) {
 		User user = userService.createUser([
 			username       : address,
