@@ -6,13 +6,13 @@ import com.streamr.client.authentication.*
 import com.streamr.client.dataunion.*
 import com.streamr.client.dataunion.contracts.*
 import com.streamr.client.options.*
-import com.streamr.client.utils.*
 import org.web3j.abi.datatypes.*
 import org.web3j.abi.datatypes.generated.*
 import com.unifina.service.StreamrClientService
 import com.unifina.service.ProductService
 import com.unifina.domain.Product
 import org.web3j.crypto.Credentials
+import org.web3j.abi.datatypes.Address
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import grails.util.Holders
 import com.unifina.utils.MapTraversal
@@ -38,20 +38,20 @@ class DevelopmentController {
 	}
 
 	def createDataUnion() {
-		String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
+		String nodePrivateKey = '0x5e98cce00cff5dea6b454889f359a4ec06b9fa6b88e9d69b86de8e1c81887da0' // MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
 		Credentials creds = Credentials.create(nodePrivateKey)
 		StreamrClient client = streamrClientService.getInstanceForThisEngineNode()
-		DataUnionClient duClient = client.dataUnionClient(getEngineNodeCredentials(), getEngineNodeCredentials())
+		DataUnionClient duClient = client.dataUnionClient(creds, creds)   // both chains have the same in dev and prod environment
 		Address deployer = new Address(creds.getAddress())
 		TransactionReceipt tr = duClient.factoryMainnet().deployNewDataUnion(
 				deployer,
 				new Uint256(0),
 				new DynamicArray<Address>(deployer),
-				'TEST DU'
+				new Utf8String('TEST DU')
 		).send()
 		println(tr)
 		println(tr.contractAddress)
-		client.waitForMainnetTx(tr.getTransactionHash(), 10000, 600000)
+		duClient.waitForMainnetTx(tr.getTransactionHash(), 10000, 600000)
 		println(duMainnet.token().send().getValue())
 		println(client.waitForSidechainContract(duSidechain.getContractAddress(), 10000, 600000))
 	}
