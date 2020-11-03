@@ -11,7 +11,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(PermissionApiController)
-@Mock([Permission, Key, Stream, User, Canvas])
+@Mock([Permission, Stream, User, Canvas])
 class PermissionApiControllerSpec extends ControllerSpecification {
 	def permissionService
 
@@ -32,14 +32,6 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 
 		me = new User(id: 1, username: "me@me.net").save(validate: false)
 		other = new User(id: 2, username: "0x0000000000000000000000000000000000000000").save(validate: false)
-
-		def meKey = new Key(name: "meKey", user: me)
-		meKey.id = "myApiKey"
-		meKey.save(failOnError: true, validate: true)
-
-		def otherKey = new Key(name: "otherKey", user: me)
-		otherKey.id = "otherApiKey"
-		otherKey.save(failOnError: true, validate: true)
 
 		def newCanvas = { String id ->
 			def c = new Canvas()

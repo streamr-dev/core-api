@@ -40,7 +40,6 @@ class PermissionApiController {
 		Operation op = cmd.operationToEnum()
 		Resource res = new Resource(params.resourceClass, params.resourceId)
 		User apiUser = request.apiUser
-		Key apiKey = request.apiKey
 		Permission newPermission
 		if (cmd.anonymous) {
 			newPermission = permissionService.saveAnonymousPermission(apiUser, op, res)
