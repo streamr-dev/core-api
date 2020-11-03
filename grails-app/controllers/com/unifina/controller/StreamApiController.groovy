@@ -42,7 +42,7 @@ class StreamApiController {
 			throw new NotFoundException("Stream", id)
 		}
 
-		Userish userish = request.apiKey ?: request.apiUser
+		Userish userish = request.apiUser
 		if (permissionService.check(userish, stream, Permission.Operation.STREAM_GET)) {
 			render(stream.toMap() as JSON)
 		} else {
