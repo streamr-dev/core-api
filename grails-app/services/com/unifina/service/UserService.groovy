@@ -42,9 +42,6 @@ class UserService {
 			throw new UserCreationFailedException("Registration failed:\n" + errorStrings.join(",\n"))
 		}
 
-		// Users must have at least one API key
-		user.addToKeys(new Key(name: "Default"))
-
 		if (!user.save(flush: false)) {
 			log.warn("Failed to save user data: " + checkErrors(user.errors.getAllErrors()))
 			throw new UserCreationFailedException()
@@ -161,16 +158,5 @@ class UserService {
 		} else {
 			throw new InvalidUsernameAndPasswordException("Invalid username or password")
 		}
-	}
-
-	Userish getUserishFromApiKey(String apiKey) throws InvalidAPIKeyException {
-		Key key = Key.get(apiKey)
-		if (!key) {
-			throw new InvalidAPIKeyException("Invalid API key")
-		}
-		if (key.user) { // is a 'real' user
-			return key.user
-		}
-		return key // is an anonymous key
 	}
 }

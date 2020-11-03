@@ -9,7 +9,7 @@ import org.springframework.validation.FieldError
 import spock.lang.Specification
 
 @TestFor(UserService)
-@Mock([Key, User, Role, UserRole, Module, Permission])
+@Mock([User, Role, UserRole, Module, Permission])
 class UserServiceSpec extends Specification {
 
 	void createData() {
@@ -38,15 +38,6 @@ class UserServiceSpec extends Specification {
 		then:
 		User.count() == 1
 		user.getAuthorities().size() == 0 // By default, user's have no roles
-	}
-
-	def "default API key is created for user"() {
-		when:
-		createData()
-		User user = service.createUser([username: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false])
-
-		then:
-		user.getKeys().size() == 1
 	}
 
 	void "censoring errors with checkErrors() works properly"() {
@@ -95,29 +86,6 @@ class UserServiceSpec extends Specification {
 		service.getUserFromUsernameAndPassword(username, wrongPassword)
 		then:
 		thrown(InvalidUsernameAndPasswordException)
-	}
-
-	def "should find user from api key"() {
-		User user = new User(username: "username", password: "password").save(failOnError: true, validate: false)
-		Key key = new Key(name: "key", user: user)
-		key.id = "myApiKey"
-		key.save(failOnError: true, validate: true)
-
-		when:
-		User retrievedUser = (User) service.getUserishFromApiKey(key.id)
-		then:
-		retrievedUser != null
-		retrievedUser.username == user.username
-	}
-
-	def "should find anonymous key from api key"() {
-		Key key = new Key(id: "myApiKey").save(failOnError: true, validate: false)
-
-		when:
-		Key retrievedKey = (Key) service.getUserishFromApiKey(key.id)
-		then:
-		retrievedKey != null
-		retrievedKey.id == retrievedKey.id
 	}
 
 	def "delete user"() {
