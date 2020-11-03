@@ -12,7 +12,8 @@ const schemaValidator = new SchemaValidator()
 const API_KEY = 'tester1-api-key'
 
 describe('Permissions API', () => {
-    const me = StreamrClient.generateEthereumAccount()
+	const me = StreamrClient.generateEthereumAccount()
+	console.log(me);
     const nonExistingUser = StreamrClient.generateEthereumAccount()
     const existingUser = StreamrClient.generateEthereumAccount()
 
