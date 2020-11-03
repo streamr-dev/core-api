@@ -6,7 +6,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(ProductApiController)
-@Mock([Product, User, Category])
+@Mock([Product, User, Category, Key])
 class RelatedProductsControllerSpec extends ControllerSpecification {
 	Product newProduct(String id, String name, String description, Category c, User user) {
 		Product p = new Product(
