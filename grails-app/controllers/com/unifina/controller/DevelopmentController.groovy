@@ -1,21 +1,21 @@
 package com.unifina.controller
-import grails.converters.JSON
-import com.streamr.client.*
-import com.streamr.client.rest.*
-import com.streamr.client.authentication.*
-import com.streamr.client.dataunion.*
-import com.streamr.client.dataunion.contracts.*
-import com.streamr.client.options.*
-import org.web3j.abi.datatypes.*
-import org.web3j.abi.datatypes.generated.*
-import com.unifina.service.StreamrClientService
-import com.unifina.service.ProductService
+
+import com.streamr.client.StreamrClient
+import com.streamr.client.dataunion.DataUnionClient
+import com.streamr.client.dataunion.contracts.DataUnionMainnet
+import com.streamr.client.dataunion.contracts.DataUnionSidechain
 import com.unifina.domain.Product
-import org.web3j.crypto.Credentials
-import org.web3j.abi.datatypes.Address
-import org.web3j.protocol.core.methods.response.TransactionReceipt
-import grails.util.Holders
+import com.unifina.service.ProductService
+import com.unifina.service.StreamrClientService
 import com.unifina.utils.MapTraversal
+import grails.converters.JSON
+import grails.util.Holders
+import org.web3j.abi.datatypes.Address
+import org.web3j.abi.datatypes.DynamicArray
+import org.web3j.abi.datatypes.Utf8String
+import org.web3j.abi.datatypes.generated.Uint256
+import org.web3j.crypto.Credentials
+import org.web3j.protocol.core.methods.response.TransactionReceipt
 
 // 0xa3d1f7...df847de1 eli Account3 teki streamin ja productin
 // 0xaab6c9774cb2a8e825961d5f40e445432d7589aa eli Account1 haluaa joinata
@@ -43,17 +43,22 @@ class DevelopmentController {
 		StreamrClient client = streamrClientService.getInstanceForThisEngineNode()
 		DataUnionClient duClient = client.dataUnionClient(creds, creds)   // both chains have the same in dev and prod environment
 		Address deployer = new Address(creds.getAddress())
+		Utf8String duname = new Utf8String("TEST DU-" + System.currentTimeMillis())
+		Address duAddress = duClient.factoryMainnet().mainnetAddress(deployer, duname).send()
+		Address sidechainAddress = duClient.factorySidechain().sidechainAddress(duAddress).send()
+		DataUnionSidechain duSidechain = duClient.sidechainDU(sidechainAddress.getValue())
+		DataUnionMainnet duMainnet = duClient.mainnetDU(duAddress.getValue())
 		TransactionReceipt tr = duClient.factoryMainnet().deployNewDataUnion(
 				deployer,
 				new Uint256(0),
 				new DynamicArray<Address>(deployer),
-				new Utf8String('TEST DU')
+				duname
 		).send()
 		println(tr)
-		println(tr.contractAddress)
 		duClient.waitForMainnetTx(tr.getTransactionHash(), 10000, 600000)
+		println(tr.contractAddress)
 		println(duMainnet.token().send().getValue())
-		println(client.waitForSidechainContract(duSidechain.getContractAddress(), 10000, 600000))
+		println(duClient.waitForSidechainContract(duSidechain.getContractAddress(), 10000, 600000))
 	}
 
 	def getDataUnionVersion(String contractAddress) {
