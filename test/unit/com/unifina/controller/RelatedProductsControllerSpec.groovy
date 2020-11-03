@@ -6,7 +6,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(ProductApiController)
-@Mock([Product, User, Category, Key])
+@Mock([Product, User, Category])
 class RelatedProductsControllerSpec extends ControllerSpecification {
 	Product newProduct(String id, String name, String description, Category c, User user) {
 		Product p = new Product(
@@ -42,9 +42,6 @@ class RelatedProductsControllerSpec extends ControllerSpecification {
 			name: "Regular API user",
 			password: "xxx"
 		)
-		def key = new Key(name: "meKey", user: me)
-		key.id = "myApiKey"
-		key.save(failOnError: true, validate: true)
 
 		// u1 is the user who owns the product p1 used to search for related products
 		u1 = new User(

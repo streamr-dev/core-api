@@ -1,6 +1,5 @@
 package com.unifina.controller
 
-import com.unifina.domain.Key
 import com.unifina.domain.User
 import com.unifina.security.PasswordEncoder
 import com.unifina.service.InvalidUsernameAndPasswordException
@@ -16,7 +15,7 @@ import grails.test.mixin.web.FiltersUnitTestMixin
 import org.springframework.mock.web.MockMultipartFile
 
 @TestFor(UserApiController)
-@Mock([User, Key, RESTAPIFilters])
+@Mock([User, RESTAPIFilters])
 @TestMixin(FiltersUnitTestMixin)
 class UserApiControllerSpec extends ControllerSpecification {
 

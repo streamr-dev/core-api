@@ -7,7 +7,6 @@ import com.unifina.domain.Dashboard
 import com.unifina.domain.DashboardItem
 import com.unifina.domain.Stream
 import com.unifina.domain.IntegrationKey
-import com.unifina.domain.Key
 import com.unifina.domain.Permission
 import com.unifina.domain.User
 import com.unifina.domain.Canvas
@@ -19,7 +18,7 @@ import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
 @TestFor(StreamService)
-@Mock([Canvas, Dashboard, DashboardItem, Stream, User, Key, IntegrationKey, Permission, PermissionService])
+@Mock([Canvas, Dashboard, DashboardItem, Stream, User, IntegrationKey, Permission, PermissionService])
 class StreamServiceSpec extends Specification {
 
 	DashboardService dashboardService = Mock(DashboardService)

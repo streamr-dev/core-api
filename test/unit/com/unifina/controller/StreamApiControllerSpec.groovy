@@ -7,11 +7,10 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(StreamApiController)
-@Mock([User, Stream, Key, Permission, PermissionService, StreamService, DashboardService, IntegrationKey, RESTAPIFilters])
+@Mock([User, Stream, Permission, PermissionService, StreamService, DashboardService, IntegrationKey, RESTAPIFilters])
 class StreamApiControllerSpec extends ControllerSpecification {
 
 	User me
-	Key key
 
 	StreamService streamService
 	PermissionService permissionService
@@ -30,10 +29,6 @@ class StreamApiControllerSpec extends ControllerSpecification {
 
 		me = new User(username: "me", password: "foo")
 		me.save(validate: false)
-
-		key = new Key(name: "key", user: me)
-		key.id = "apiKey"
-		key.save(failOnError: true, validate: true)
 
 		def otherUser = new User(username: "other", password: "bar").save(validate: false)
 
@@ -175,10 +170,6 @@ class StreamApiControllerSpec extends ControllerSpecification {
 	}
 
 	void "does not show Stream if key not permitted"() {
-		Key key = new Key(name: "anonymous key")
-		key.id = "anonymousKeyKey"
-		key.save(failOnError: true)
-
 		when:
 		params.id = streamOne.id
 		unauthenticated() { controller.show() }

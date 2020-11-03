@@ -11,7 +11,7 @@ import grails.test.mixin.TestFor
 import groovy.json.JsonBuilder
 
 @TestFor(CanvasApiController)
-@Mock([User, UserRole, Permission, Canvas, Key])
+@Mock([User, UserRole, Permission, Canvas])
 class CanvasApiControllerSpec extends ControllerSpecification {
 
 	ApiService apiService
@@ -28,14 +28,6 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 		me = new User(id: 1).save(validate: false)
 		User other = new User(id: 2).save(validate: false)
-
-		def k1 = new Key(name: "k1", user: me)
-		k1.id = "myApiKey"
-		k1.save(failOnError: true, validate: true)
-
-		def k2 = new Key(name: "k2", user: other)
-		k2.id = "otherApiKey"
-		k2.save(failOnError: true, validate: true)
 
 		canvas1 = new Canvas(
 			name: "mine",

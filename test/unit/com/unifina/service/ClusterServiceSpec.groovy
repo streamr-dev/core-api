@@ -2,7 +2,6 @@ package com.unifina.service
 
 import com.streamr.api.client.CanvasesPerNode
 import com.streamr.api.client.StreamrClient
-import com.unifina.domain.Key
 import com.unifina.domain.User
 import com.unifina.domain.Canvas
 import grails.test.mixin.Mock
@@ -10,16 +9,13 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(ClusterService)
-@Mock([Canvas, User, Key])
+@Mock([Canvas, User])
 class ClusterServiceSpec extends Specification {
 	User me
 	String apiKey = "token myApiKey"
 
 	def setup() {
 		me = new User().save(failOnError: true, validate: false)
-		Key key = new Key(name: "key", user: me)
-		key.id = "myApiKey"
-		key.save(failOnError: true, validate: false)
 
 		service.streamrClient = Mock(StreamrClient)
 		config.streamr.engine.nodes = ["10.0.0.5", "10.0.0.6"]
