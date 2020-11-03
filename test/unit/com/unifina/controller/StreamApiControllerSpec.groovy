@@ -352,19 +352,6 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 	}
 
-	void "can set fields with key"() {
-		when:
-		params.id = streamOne.id
-		request.method = "POST"
-		request.JSON = ["field1": "string"]
-		authenticatedAs(key) { controller.setFields()}
-
-		then:
-		1 * apiService.authorizedGetById(Stream, streamOne.id, key, Permission.Operation.STREAM_EDIT) >> streamOne
-		streamOne.config == '{"fields":{"field1":"string"}}'
-		response.status == 200
-	}
-
 	void "returns set of publisher addresses"() {
 		setup:
 		controller.streamService = streamService = Mock(StreamService)

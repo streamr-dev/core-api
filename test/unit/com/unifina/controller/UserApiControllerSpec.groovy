@@ -69,16 +69,6 @@ class UserApiControllerSpec extends ControllerSpecification {
 		!response.json.hasProperty("id")
 	}
 
-	void "authenticated anonymous key gets back the key info from /me"() {
-		Key key = new Key(name: 'anonymous-key')
-		when:
-		authenticatedAs(key) { controller.getUserInfo() }
-		then:
-		response.json.name == key.name
-		response.json.id == key.id
-		!response.json.hasProperty("password")
-	}
-
 	void "delete user account"() {
 		setup:
 		controller.userService = Mock(UserService)

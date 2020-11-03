@@ -47,9 +47,9 @@ class UserApiController {
 		render(status: 204, body: "")
 	}
 
-	@StreamrApi(authenticationLevel = AuthLevel.KEY)
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def getUserInfo() {
-		render((request.apiUser ?: request.apiKey)?.toMap() as JSON)
+		render(request.apiUser.toMap() as JSON)
 	}
 
 	@StreamrApi
