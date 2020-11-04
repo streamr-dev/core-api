@@ -5,7 +5,9 @@ class UrlMappings {
 		"500"(controller: "error", action: "index", exception: Exception)
 		"404"(controller: "error", action: "notFound")
 
-		"/api/v1/development"(method: "GET", controller: "development", action: "foobar")
+		"/api/v1/development/deploy"(method: "GET", controller: "development", action: "deploy")
+		"/api/v1/development/isMemberActive"(method: "GET", controller: "development", action: "isMemberActive")
+		"/api/v1/development/join"(method: "GET", controller: "development", action: "join")
 
 		// API v1 url mappings
 		"/api/v1/signups"(method: "POST", controller: "authApi", action: "signup")
