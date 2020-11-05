@@ -90,7 +90,7 @@ class ApiServiceSpec extends Specification {
 	void "addLinkHintToHeader() does nothing if offset != max"() {
 		def response = Mock(HttpServletResponse)
 		when:
-		String link = service.addLinkHintToHeader(new DashboardListParams(), 99, [:])
+		String link = service.createPaginationLink(new DashboardListParams(), 99, [:])
 		then:
 		link == null
 	}
@@ -100,7 +100,7 @@ class ApiServiceSpec extends Specification {
 		def params = new DashboardListParams(offset: 150, name: "dashboard", publicAccess: true)
 
 		when:
-		String link = service.addLinkHintToHeader(params, 1000, [action: "index", controller: "dashboardApi"])
+		String link = service.createPaginationLink(params, 1000, [action: "index", controller: "dashboardApi"])
 		then:
 		link == '<'+ Holders.grailsApplication.config.grails.serverURL+'/api/v1/dashboards?max=1000&offset=1150&grantedAccess=true&publicAccess=true&name=dashboard>; rel="more"'
 	}

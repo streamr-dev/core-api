@@ -150,7 +150,7 @@ class ProductApiControllerSpec extends Specification {
 			controller.index()
 		}
 		then:
-		1 * apiService.addLinkHintToHeader(_ as ProductListParams, 1, _ as Map) >> "<http://localhost>; rel=more"
+		1 * apiService.createPaginationLink(_ as ProductListParams, 1, _ as Map) >> "<http://localhost>; rel=more"
 	}
 
 	void "index() returns 200 and renders products"() {

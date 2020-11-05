@@ -1,6 +1,5 @@
 package com.unifina.controller
 
-
 import com.unifina.domain.Permission
 import com.unifina.domain.Product
 import com.unifina.domain.User
@@ -11,7 +10,7 @@ import grails.plugin.mail.MailService
 import org.apache.log4j.Logger
 import org.springframework.web.multipart.MultipartFile
 
-class ProductApiController {
+class ProductApiController implements SearchHeaderLink {
 	ApiService apiService
 	FreeProductService freeProductService
 	ProductService productService
@@ -70,10 +69,8 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def index(ProductListParams listParams) {
 		def products = productService.list(listParams, loggedInUser())
-		String link = apiService.addLinkHintToHeader(listParams, products.size(), params)
-		if (link != null) {
-			response.addHeader("Link", link)
-		}
+		String link = apiService.createPaginationLink(listParams, products.size(), params)
+		addPaginationLinkToHeader(response, link)
 		render(products*.toSummaryMap() as JSON)
 	}
 

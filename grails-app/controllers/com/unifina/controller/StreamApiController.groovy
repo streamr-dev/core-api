@@ -8,7 +8,7 @@ import grails.converters.JSON
 
 import java.text.SimpleDateFormat
 
-class StreamApiController {
+class StreamApiController implements SearchHeaderLink {
 	StreamService streamService
 	PermissionService permissionService
 	ApiService apiService
@@ -20,10 +20,8 @@ class StreamApiController {
 			listParams.publicAccess = params.boolean("public")
 		}
 		def results = apiService.list(Stream, listParams, (User) request.apiUser)
-		String link = apiService.addLinkHintToHeader(listParams, results.size(), params)
-		if (link != null) {
-			response.addHeader("Link", link)
-		}
+		String link = apiService.createPaginationLink(listParams, results.size(), params)
+		addPaginationLinkToHeader(response, link)
 		if (params.noConfig) {
 			render(results*.toSummaryMap() as JSON)
 			return

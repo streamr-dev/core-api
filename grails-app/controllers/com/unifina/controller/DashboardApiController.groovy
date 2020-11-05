@@ -1,12 +1,11 @@
 package com.unifina.controller
 
-
 import com.unifina.domain.Dashboard
 import com.unifina.domain.User
 import com.unifina.service.*
 import grails.converters.JSON
 
-class DashboardApiController {
+class DashboardApiController implements SearchHeaderLink {
 
 	DashboardService dashboardService
 	SignalPathService signalPathService
@@ -18,10 +17,8 @@ class DashboardApiController {
 			listParams.publicAccess = params.boolean("public")
 		}
 		def results = apiService.list(Dashboard, listParams, (User) request.apiUser)
-		String link = apiService.addLinkHintToHeader(listParams, results.size(), params)
-		if (link != null) {
-			response.addHeader("Link", link)
-		}
+		String link = apiService.createPaginationLink(listParams, results.size(), params)
+		addPaginationLinkToHeader(response, link)
 		render(results*.toMap() as JSON)
 	}
 

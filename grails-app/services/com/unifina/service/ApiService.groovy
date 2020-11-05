@@ -46,7 +46,7 @@ class ApiService {
 	 * Generate link to more results in API index() methods
 	 */
 	@GrailsCompileStatic
-	String addLinkHintToHeader(ListParams listParams, int numOfResults, Map params) {
+	String createPaginationLink(ListParams listParams, int numOfResults, Map params) {
 		if (numOfResults == listParams.max) {
 			Map<String, Object> paramMap = listParams.toMap()
 			Integer offset = listParams.offset + listParams.max
