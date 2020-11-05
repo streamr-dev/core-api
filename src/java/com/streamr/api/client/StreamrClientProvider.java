@@ -15,7 +15,7 @@ public class StreamrClientProvider implements StreamrClient {
 	// webTarget is the base URL for Streamr REST API service derived from baseUrl (without trailing slash).
 	private final WebTarget webTarget;
 
-	// client is a Jersey HTTP REST API client for accessing streamr.com.
+	// client is a Jersey HTTP REST API client for accessing streamr.network
 	private final Client client;
 
 	public StreamrClientProvider(final String baseUrl) {

@@ -240,7 +240,7 @@ class AuthApiControllerSpec extends Specification {
 		EmailCommand cmd = new EmailCommand()
 
 		when: "requested new password"
-		cmd.username = "test@streamr.com"
+		cmd.username = "test@streamr.network"
 		request.method = "POST"
 		controller.forgotPassword(cmd)
 		then:
@@ -251,11 +251,11 @@ class AuthApiControllerSpec extends Specification {
 	void "forgotPassword sends email and returns emailSent=true if the user exists"() {
 		EmailCommand cmd = new EmailCommand()
 		User me = new User()
-		me.username = "test@streamr.com"
+		me.username = "test@streamr.network"
 		me.save(validate: false)
 
 		when: "requested new password"
-		cmd.username = "test@streamr.com"
+		cmd.username = "test@streamr.network"
 		request.method = "POST"
 		controller.forgotPassword(cmd)
 		then:

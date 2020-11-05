@@ -25,14 +25,14 @@ class S3FileUploadProviderSpec extends Specification {
 
 	void "uploadFile() returns URL for uploaded File"() {
 		def s3Client = Stub(AmazonS3) {
-			getUrl("bucketName", "key/filename") >> new URL("https://www.streamr.com/files/file.png")
+			getUrl("bucketName", "key/filename") >> new URL("https://streamr.network/files/file.png")
 		}
 		def fileUploadProvider = new S3FileUploadProvider(s3Client, "bucketName")
 
 		when:
 		URL url = fileUploadProvider.uploadFile("key/filename", new byte[16])
 		then:
-		url.toString() == "https://www.streamr.com/files/file.png"
+		url.toString() == "https://streamr.network/files/file.png"
 	}
 
 	void "deleteFile() calls AmazonS3.deleteObject()"() {

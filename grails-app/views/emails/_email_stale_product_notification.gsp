@@ -1,6 +1,6 @@
 <p>Dear ${user.username?.encodeAsHTML()},<br/></p>
 
-<p>This is an automatic message to notify you that some of your products on the <a href="https://www.streamr.com/marketplace">Streamr Marketplace</a> are not receiving new data. We recommend checking that the data integration to these streams is healthy. Note that products with stale streams are unlikely to attract buyers.</p>
+<p>This is an automatic message to notify you that some of your products on the <a href="https://streamr.network/marketplace">Streamr Marketplace</a> are not receiving new data. We recommend checking that the data integration to these streams is healthy. Note that products with stale streams are unlikely to attract buyers.</p>
 <p>The affected products and streams are:</p>
 
 <ul>

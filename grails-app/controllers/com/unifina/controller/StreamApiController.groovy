@@ -14,7 +14,7 @@ class StreamApiController {
 	ApiService apiService
 	EnsService ensService
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def index(StreamListParams listParams) {
 		if (params.public) {
 			listParams.publicAccess = params.boolean("public")
