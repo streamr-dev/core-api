@@ -3,10 +3,13 @@ const Streamr = require('./streamr-api-clients')
 const _ = require('lodash');
 const StreamrClient = require('streamr-client')
 const getStreamrClient = require('./test-utilities.js').getStreamrClient
+const assertEqualEthereumAddresses = require('./test-utilities.js').assertEqualEthereumAddresses
 
+const ETHEREUM_ADDRESS_PREFIX = '0x';
 const createMockEthereumAddress = () => {
+	const PREFIX = 'ABCdeF'
 	const LENGTH = 40;
-	return '0x' + _.padStart(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16),LENGTH, '0');
+	return ETHEREUM_ADDRESS_PREFIX + PREFIX + _.padStart(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16), (LENGTH - PREFIX.length), '0');
 };
 const createStream = async (user) => {
 	const stream = await getStreamrClient(user).createStream();
@@ -62,6 +65,14 @@ describe('Storage Node API', () => {
 			assert.equal(json[0].id, streamId);
 		});
 
+		it('case insensitive', async () => {
+			const upperCaseAddress = ETHEREUM_ADDRESS_PREFIX + storageNodeAddress.substring(ETHEREUM_ADDRESS_PREFIX.length).toUpperCase()
+			const response = await findStreamsByStorageNode(upperCaseAddress);
+			const json = await response.json()
+			assert.equal(json.length, 1);
+			assert.equal(json[0].id, streamId);
+		});
+
 		it('no storage nodes', async () => {
 			const nonExistingStorageNodeAddress = createMockEthereumAddress();
 			const response = await findStreamsByStorageNode(nonExistingStorageNodeAddress);
@@ -71,7 +82,7 @@ describe('Storage Node API', () => {
 
 		it('malformed storage node address', async () => {
 			const response = await findStreamsByStorageNode('foobar');
-			assert.equal(response.status, 400);
+			assert.equal(response.status, 422);
 		});
 	});
 
@@ -89,7 +100,7 @@ describe('Storage Node API', () => {
 			const response = await findStorageNodesByStream(streamId);
 			const json = await response.json();
 			assert.equal(json.length, 1);
-			assert.equal(json[0].storageNodeAddress, storageNodeAddress);
+			assertEqualEthereumAddresses(json[0].storageNodeAddress, storageNodeAddress);
 		});
 
 		it('stream not found', async () => {
@@ -111,7 +122,7 @@ describe('Storage Node API', () => {
 			const response = await addStorageNodeToStream(storageNodeAddress, streamId, streamOwner);
 			assert.equal(response.status, 200)
 			const json = await response.json()
-			assert.equal(json.storageNodeAddress, storageNodeAddress);
+			assertEqualEthereumAddresses(json.storageNodeAddress, storageNodeAddress);
 			const storageNodeCount = await getStorageNodeCount(streamId);
 			assert.equal(storageNodeCount, 1);
 		});
@@ -172,7 +183,7 @@ describe('Storage Node API', () => {
 
 		it('malformed storage node address', async () => {
 			const response = await removeStorageNodeFromStream('foobar', streamId, streamOwner);
-			assert.equal(response.status, 400);
+			assert.equal(response.status, 422);
 		});
 	});
 });

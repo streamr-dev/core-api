@@ -23,6 +23,11 @@ const assertStreamrClientResponseError = async (request, expectedStatusCode) => 
 		})
 }
 
+const assertEqualEthereumAddresses = (actual, expected) => {
+	const normalized = address => address ? address.toLowerCase : address
+	assert.equal(normalized(actual), normalized(expected))
+}
+
 const getStreamrClient = (user) => {
 	return new StreamrClient({
 		restUrl: REST_URL,
@@ -54,6 +59,7 @@ const testUsers = _.mapValues({
 module.exports = {
 	assertResponseIsError,
 	assertStreamrClientResponseError,
+	assertEqualEthereumAddresses,
 	getSessionToken,
 	testUsers,
 	getStreamrClient

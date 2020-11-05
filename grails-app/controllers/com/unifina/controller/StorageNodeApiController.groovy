@@ -24,12 +24,8 @@ class StorageNodeApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def findStreamsByStorageNode(String storageNodeAddress) {
-		if (EthereumAddressValidator.validate(storageNodeAddress)) {
-			List<Stream> streams = storageNodeService.findStreamsByStorageNode(storageNodeAddress)
-			return render(streams*.toSummaryMap() as JSON)
-		} else {
-			throw new BadRequestException("Malformed storage node address")
-		}
+		List<Stream> streams = storageNodeService.findStreamsByStorageNode(new EthereumAddress(storageNodeAddress))
+		return render(streams*.toSummaryMap() as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
@@ -43,7 +39,7 @@ class StorageNodeApiController {
 		log.info("addStorageNodeToStream: storageNodeAddress=" + command.address + ", streamId=" + streamId)
 		if (command.validate()) {
 			if (checkEditPermission(streamId, request.apiUser)) {
-				StreamStorageNode streamStorageNode = storageNodeService.addStorageNodeToStream(command.address, streamId)
+				StreamStorageNode streamStorageNode = storageNodeService.addStorageNodeToStream(new EthereumAddress(command.address), streamId)
 				return render(streamStorageNode.toMap() as JSON)
 			} else {
 				throw new NotPermittedException(request.apiUser.username, "Stream", streamId)
@@ -55,16 +51,12 @@ class StorageNodeApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def removeStorageNodeFromStream(String storageNodeAddress, String streamId) {
-		if (EthereumAddressValidator.validate(storageNodeAddress)) {
-			log.info("removeStorageNodeFromStream: storageNodeAddress=" + storageNodeAddress + ", streamId=" + streamId)
-			if (checkEditPermission(streamId, request.apiUser)) {
-				storageNodeService.removeStorageNodeFromStream(storageNodeAddress, streamId)
-				return render(status: 204)
-			} else {
-				throw new NotPermittedException(request.apiUser.username, "Stream", streamId)
-			}
+		log.info("removeStorageNodeFromStream: storageNodeAddress=" + storageNodeAddress + ", streamId=" + streamId)
+		if (checkEditPermission(streamId, request.apiUser)) {
+			storageNodeService.removeStorageNodeFromStream(new EthereumAddress(storageNodeAddress), streamId)
+			return render(status: 204)
 		} else {
-			throw new BadRequestException("Malformed storage node address")
+			throw new NotPermittedException(request.apiUser.username, "Stream", streamId)
 		}
 	}
 
