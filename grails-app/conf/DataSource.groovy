@@ -17,6 +17,7 @@ dataSource {
 		testOnBorrow = true
 		testWhileIdle = true
 		testOnReturn = false
+		defaultTransactionIsolation = java.sql.Connection.TRANSACTION_REPEATABLE_READ
 	}
 }
 hibernate {
