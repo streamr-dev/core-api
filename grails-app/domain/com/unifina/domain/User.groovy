@@ -19,7 +19,6 @@ class User implements Userish {
 
 	String name
 
-	Set<Key> keys
 	Set<Permission> permissions
 
 	// dateCreated is the date when account is created.
@@ -30,7 +29,7 @@ class User implements Userish {
 	String imageUrlSmall
 	String imageUrlLarge
 
-	static hasMany = [permissions: Permission, keys: Key]
+	static hasMany = [permissions: Permission]
 
 	static constraints = {
 		username blank: false, unique: true, validator: UsernameValidator.validate

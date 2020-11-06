@@ -1,6 +1,5 @@
 package com.unifina.controller
 
-import com.unifina.domain.Key
 import com.unifina.domain.Role
 import com.unifina.domain.User
 import com.unifina.domain.UserRole
@@ -21,45 +20,22 @@ class AuthenticationResultSpec extends Specification {
 	}
 
 	@Unroll
-	void "guarantees level #level when constructed with user-linked Key"(AuthLevel level) {
-		expect:
-		new AuthenticationResult(new Key(user: new User())).guarantees(level)
-
-		where:
-		level << AuthLevel.values()
-	}
-
-	@Unroll
-	void "guarantees level #level when constructed with anonymous Key"(AuthLevel level) {
-		expect:
-		new AuthenticationResult(new Key()).guarantees(level)
-
-		where:
-		level << [AuthLevel.NONE, AuthLevel.KEY]
-	}
-
-	void "does not guarantee level USER when constructed with anonymous Key"() {
-		expect:
-		!new AuthenticationResult(new Key()).guarantees(AuthLevel.USER)
-	}
-
-	@Unroll
 	void "does not guarantee level #level when constructed with nothing"(AuthLevel level) {
 		expect:
-		!new AuthenticationResult(false, false, false).guarantees(level)
+		!new AuthenticationResult(false, false).guarantees(level)
 
 		where:
-		level << [AuthLevel.KEY, AuthLevel.USER]
+		level << [AuthLevel.USER]
 	}
 
 	void "guarantees level NONE when constructed with nothing"() {
 		expect:
-		new AuthenticationResult(false, false, false).guarantees(AuthLevel.NONE)
+		new AuthenticationResult(false, false).guarantees(AuthLevel.NONE)
 	}
 
 	void "does not guarantee level NONE when authentication failed"() {
 		expect:
-		!new AuthenticationResult(false, false, true).guarantees(AuthLevel.NONE)
+		!new AuthenticationResult(false, true).guarantees(AuthLevel.NONE)
 	}
 
 	void "hasOneOfRoles() returns false given empty array of roles"() {
@@ -68,17 +44,17 @@ class AuthenticationResultSpec extends Specification {
 	}
 
 	void "hasOneOfRoles() validates that user belongs to at least one of the allow roles"() {
-		User user = new User()
-		user.save(failOnError: true, validate: false)
-
+		User anonymousUser = new User()
+		anonymousUser.save(failOnError: true, validate: false)
+		User devOpsUser = new User()
+		devOpsUser.save(failOnError: true, validate: false)
 		Role secRole = new Role(authority: "ROLE_DEV_OPS")
 		secRole.save(failOnError: true)
-
-		new UserRole(user: user, role: secRole).save(failOnError: true)
+		new UserRole(user: devOpsUser, role: secRole).save(failOnError: true)
 
 		expect:
-		new AuthenticationResult(new Key()).hasOneOfRoles([AllowRole.NO_ROLE_REQUIRED] as AllowRole[])
-		!new AuthenticationResult(new Key()).hasOneOfRoles([AllowRole.ADMIN, AllowRole.DEVOPS] as AllowRole[])
-		new AuthenticationResult(user).hasOneOfRoles([AllowRole.ADMIN, AllowRole.DEVOPS] as AllowRole[])
+		new AuthenticationResult(anonymousUser).hasOneOfRoles([AllowRole.NO_ROLE_REQUIRED] as AllowRole[])
+		!new AuthenticationResult(anonymousUser).hasOneOfRoles([AllowRole.ADMIN, AllowRole.DEVOPS] as AllowRole[])
+		new AuthenticationResult(devOpsUser).hasOneOfRoles([AllowRole.ADMIN, AllowRole.DEVOPS] as AllowRole[])
 	}
 }

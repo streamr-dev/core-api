@@ -7,7 +7,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(DashboardItemApiController)
-@Mock([Canvas, Dashboard, DashboardItem, Key, User])
+@Mock([Canvas, Dashboard, DashboardItem, User])
 class DashboardItemApiControllerSpec extends ControllerSpecification {
 
 	DashboardService dashboardService
@@ -18,10 +18,6 @@ class DashboardItemApiControllerSpec extends ControllerSpecification {
 		dashboardService = controller.dashboardService = Mock(DashboardService)
 		me = new User().save(failOnError: true, validate: false)
 		dashboards = DashboardApiControllerSpec.initDashboards()
-
-		Key key = new Key(name: "key", user: me)
-		key.id = "myApiKey"
-		key.save(failOnError: true, validate: true)
 
 		Canvas c = new Canvas(json: '{"modules": [{"hash": 1, "uiChannel": {"webcomponent": "streamr-chart"}}]}')
 		c.id = "canvas"

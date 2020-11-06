@@ -42,7 +42,7 @@ class StreamApiController {
 			throw new NotFoundException("Stream", id)
 		}
 
-		Userish userish = request.apiKey ?: request.apiUser
+		Userish userish = request.apiUser
 		if (permissionService.check(userish, stream, Permission.Operation.STREAM_GET)) {
 			render(stream.toMap() as JSON)
 		} else {
@@ -101,10 +101,9 @@ class StreamApiController {
 		}
 	}
 
-	@StreamrApi(authenticationLevel = AuthLevel.KEY)
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def setFields(String id) {
-		Userish u = request.apiUser != null ? (User) request.apiUser : (Key) request.apiKey
-		Stream stream = apiService.authorizedGetById(Stream, id, u, Operation.STREAM_EDIT)
+		Stream stream = apiService.authorizedGetById(Stream, id, request.apiUser, Operation.STREAM_EDIT)
 		def givenFields = request.JSON
 
 		Map config = stream.config ? JSON.parse(stream.config) : [:]
