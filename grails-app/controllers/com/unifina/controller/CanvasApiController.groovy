@@ -14,7 +14,7 @@ import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.util.FileCopyUtils
 
-class CanvasApiController implements SearchHeaderLink {
+class CanvasApiController {
 
 	CanvasService canvasService
 	SignalPathService signalPathService
@@ -33,8 +33,7 @@ class CanvasApiController implements SearchHeaderLink {
 			listParams.publicAccess = params.boolean("public")
 		}
 		def results = apiService.list(Canvas, listParams, (User) request.apiUser)
-		String link = apiService.createPaginationLink(listParams, results.size(), params)
-		addPaginationLinkToHeader(response, link)
+		PaginationUtils.setHint(response, listParams, results.size(), params)
 		render(results*.toMap() as JSON)
 	}
 

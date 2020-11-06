@@ -10,7 +10,7 @@ import grails.plugin.mail.MailService
 import org.apache.log4j.Logger
 import org.springframework.web.multipart.MultipartFile
 
-class ProductApiController implements SearchHeaderLink {
+class ProductApiController {
 	ApiService apiService
 	FreeProductService freeProductService
 	ProductService productService
@@ -69,8 +69,7 @@ class ProductApiController implements SearchHeaderLink {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def index(ProductListParams listParams) {
 		def products = productService.list(listParams, loggedInUser())
-		String link = apiService.createPaginationLink(listParams, products.size(), params)
-		addPaginationLinkToHeader(response, link)
+		PaginationUtils.setHint(response, listParams, products.size(), params)
 		render(products*.toSummaryMap() as JSON)
 	}
 
