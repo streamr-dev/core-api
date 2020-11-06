@@ -87,24 +87,6 @@ class ApiServiceSpec extends Specification {
 		thrown(ValidationException)
 	}
 
-	void "addLinkHintToHeader() does nothing if offset != max"() {
-		def response = Mock(HttpServletResponse)
-		when:
-		String link = service.createPaginationLink(new DashboardListParams(), 99, [:])
-		then:
-		link == null
-	}
-
-	void "addLinkHintToHeader() adds link header"() {
-		def response = Mock(HttpServletResponse)
-		def params = new DashboardListParams(offset: 150, name: "dashboard", publicAccess: true)
-
-		when:
-		String link = service.createPaginationLink(params, 1000, [action: "index", controller: "dashboardApi"])
-		then:
-		link == '<'+ Holders.grailsApplication.config.grails.serverURL+'/api/v1/dashboards?max=1000&offset=1150&grantedAccess=true&publicAccess=true&name=dashboard>; rel="more"'
-	}
-
 	void "getByIdAndThrowIfNotFound() throws NotFoundException if domain object cannot be found"() {
 		when:
 		service.getByIdAndThrowIfNotFound(Dashboard, "dashboard-id")
