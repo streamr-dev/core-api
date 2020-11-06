@@ -16,6 +16,10 @@ public class ValidationException extends RuntimeException {
 		super(turnToMessage(Collections.singletonList(error)));
 	}
 
+	public ValidationException(String message) {
+		super(message);
+	}
+
 	private static String turnToMessage(List<FieldError> errors) {
 		String msg = "Validation failed for fields:\n";
 		for (FieldError error : errors) {

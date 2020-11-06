@@ -2890,6 +2890,9 @@
 				},
 				"500": {
 					"description": "Unexpected error"
+				},
+				"422": {
+					"description": "Validation error"
 				}
 			}
 		}
@@ -2952,14 +2955,14 @@
 				"400": {
 					"description": "Storage node already exists"
 				},
-				"422": {
-					"description": "Validation error"
-				},
 				"401": {
 					"description": "No authentication"
 				},
 				"403": {
 					"description": "Authentication failed"
+				},
+				"422": {
+					"description": "Validation error"
 				}
 			}
 		}
@@ -2995,6 +2998,9 @@
 				},
 				"403": {
 					"description": "Authentication failed"
+				},
+				"422": {
+					"description": "Validation error"
 				}
 			}
 		}
