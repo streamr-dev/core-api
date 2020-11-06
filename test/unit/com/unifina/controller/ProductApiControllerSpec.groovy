@@ -139,20 +139,6 @@ class ProductApiControllerSpec extends Specification {
 		1 * productService.list(_ as ProductListParams, null) >> []
 	}
 
-	void "index() invokes apiService#addLinkHintToHeader"() {
-		def apiService = controller.apiService = Mock(ApiService)
-		controller.productService = Stub(ProductService) {
-			list(_, _) >> [product]
-		}
-
-		when:
-		withFilters(action: "index") {
-			controller.index()
-		}
-		then:
-		1 * apiService.createPaginationLink(_ as ProductListParams, 1, _ as Map) >> "<http://localhost>; rel=more"
-	}
-
 	void "index() returns 200 and renders products"() {
 		controller.productService = Stub(ProductService) {
 			list(_, _) >> [product]
