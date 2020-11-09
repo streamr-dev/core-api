@@ -21,7 +21,7 @@ class DevelopmentController {
 	Credentials adminCreds = Credentials.create('0x7aa27733cfc64a44ae605bfd6ec4a2c73579d37a661ddb72fcbdb4f4a752f30d')
 	Credentials memberCreds = Credentials.create('0x172b2ac1381ec11e7e61f98756621220b65db49ab4663910483960fc803a6465')
 
-	String DU_NAME = 'testdu.20201109a'
+	String DU_NAME = 'testdu.20201109d'
 
 	StreamrClientService streamrClientService
 	ProductService productService
@@ -34,6 +34,7 @@ class DevelopmentController {
 		println(du)
 		boolean success = du.waitForDeployment(10000L, 600000L)
 		println('success: ' + success)
+		println('address: ' + du.mainnetAddress())
 		return render([success: success] as JSON)
 	}
 

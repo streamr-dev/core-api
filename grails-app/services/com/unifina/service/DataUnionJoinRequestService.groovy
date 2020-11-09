@@ -1,10 +1,15 @@
 package com.unifina.service
 
 import com.streamr.client.StreamrClient
+import com.streamr.client.dataunion.DataUnion
+import com.streamr.client.dataunion.DataUnionClient
+import com.streamr.client.dataunion.EthereumTransactionReceipt
+import org.web3j.crypto.Credentials
 import com.unifina.domain.*
 import com.unifina.utils.ThreadUtil
 import groovy.json.JsonSlurper
 import org.apache.log4j.Logger
+import grails.util.Holders
 
 class DataUnionJoinRequestService {
 
@@ -16,52 +21,69 @@ class DataUnionJoinRequestService {
 	DataUnionService dataUnionService
 
 	private isMemberActive(String contractAddress, String memberAddress) {
-		try {
-			DataUnionService.ProxyResponse result = dataUnionService.memberStats(contractAddress, memberAddress)
-			if (result.statusCode == 200 && result.body != null || result.body != "") {
-				Map<String, Object> json = new JsonSlurper().parseText(result.body)
-				if (json.active != null && json.active == true) {
-					return true
+		int version = getVersion(contractAddress)
+		if (version == 1) {
+			try {
+				DataUnionService.ProxyResponse result = dataUnionService.memberStats(contractAddress, memberAddress)
+				if (result.statusCode == 200 && result.body != null || result.body != "") {
+					Map<String, Object> json = new JsonSlurper().parseText(result.body)
+					if (json.active != null && json.active == true) {
+						return true
+					}
 				}
+			} catch (DataUnionProxyException e) {
+				// on error proceed with sending join message
+				log.error("DUS member stats query error", e)
 			}
-		} catch (DataUnionProxyException e) {
-			// on error proceed with sending join message
-			log.error("DUS member stats query error", e)
+			return false
+		} else if (version == 2) {
+			DataUnion du = getClient().dataUnionFromMainnetAddress(c.contractAddress)
+			return du.isMemberActive(memberAddress)
+		} else {
+			throw new IllegalArgumentException("Invalid DataUnion version: " + version)
 		}
-		return false
 	}
 
 	private void onApproveJoinRequest(DataUnionJoinRequest c) {
-		// Query DUS for join status
-		if (isMemberActive(c.contractAddress, c.memberAddress)) {
-			log.debug("onApproveJoinRequest: Member ${c.memberAddress} has already joined. Skip sending join message.")
-			return
-		}
-		log.debug("onApproveJoinRequest: approved JoinRequest for address ${c.memberAddress} to data union ${c.contractAddress}")
-		for (Stream s : findStreams(c)) {
-			if (permissionService.check(c.user, s, Permission.Operation.STREAM_PUBLISH)) {
-				log.debug(String.format("user %s already has write permission to %s (%s), skipping grant", c.user.username, s.name, s.id))
-			} else {
-				log.debug(String.format("granting write permission to %s (%s) for %s", s.name, s.id, c.user.username))
-				permissionService.systemGrant(c.user, s, Permission.Operation.STREAM_GET)
-				permissionService.systemGrant(c.user, s, Permission.Operation.STREAM_PUBLISH)
-			}
-		}
-		sendMessage(c, "join")
-
-		final int timeout = 10 * 1000 // ms
-		final int interval = 1000 // ms
-		int timeSpent
-		for (timeSpent = 0; timeSpent < timeout; timeSpent += interval) {
-			ThreadUtil.sleep(interval);
+		int version = getVersion(c.contractAddress)
+		if (version == 1) {
+			// Query DUS for join status
 			if (isMemberActive(c.contractAddress, c.memberAddress)) {
-				break
+				log.debug("onApproveJoinRequest: Member ${c.memberAddress} has already joined. Skip sending join message.")
+				return
 			}
+			log.debug("onApproveJoinRequest: approved JoinRequest for address ${c.memberAddress} to data union ${c.contractAddress}")
+			for (Stream s : findStreams(c)) {
+				if (permissionService.check(c.user, s, Permission.Operation.STREAM_PUBLISH)) {
+					log.debug(String.format("user %s already has write permission to %s (%s), skipping grant", c.user.username, s.name, s.id))
+				} else {
+					log.debug(String.format("granting write permission to %s (%s) for %s", s.name, s.id, c.user.username))
+					permissionService.systemGrant(c.user, s, Permission.Operation.STREAM_GET)
+					permissionService.systemGrant(c.user, s, Permission.Operation.STREAM_PUBLISH)
+				}
+			}
+			sendMessage(c, "join")
+			final int timeout = 10 * 1000 // ms
+			final int interval = 1000 // ms
+			int timeSpent
+			for (timeSpent = 0; timeSpent < timeout; timeSpent += interval) {
+				ThreadUtil.sleep(interval);
+				if (isMemberActive(c.contractAddress, c.memberAddress)) {
+					break
+				}
+			}
+			if (timeSpent >= timeout) {
+				throw new DataUnionJoinRequestException("DUS error on registering join request")
+			}
+			log.debug("exiting onApproveJoinRequest")
+		} else if (version == 2) {
+			log.info("Join request: contract=" + c.contractAddress + ", member=" + memberAddress)
+			DataUnion du = getClient().dataUnionFromMainnetAddress(c.contractAddress)
+			EthereumTransactionReceipt transactionReceipt = du.joinMembers(memberAddress)
+			log.info("Join request sent: transaction=" + transactionReceipt.txHash())
+		} else {
+			throw new IllegalArgumentException("Invalid DataUnion version: " + version)
 		}
-		if (timeSpent >= timeout) {
-			throw new DataUnionJoinRequestException("DUS error on registering join request")
-		}
-		log.debug("exiting onApproveJoinRequest")
 	}
 
 	protected Set<Stream> findStreams(DataUnionJoinRequest c) {
@@ -214,5 +236,17 @@ class DataUnionJoinRequestService {
 		}
 		sendMessage(c, "part")
 		c.delete()
+	}
+
+	DataUnionClient getClient() {
+		String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
+		Credentials agentCredentials = Credentials.create(nodePrivateKey)
+		return streamrClientService.getInstanceForThisEngineNode().dataUnionClient(agentCreds, agentCreds)
+	}
+
+	int getVersion(String contractAddress) {
+		ProductService productService = Holders.getApplicationContext().getBean(ProductService.class)
+		Product product = productService.findByBeneficiaryAddress(contractAddress)
+		return product.dataUnionVersion
 	}
 }
