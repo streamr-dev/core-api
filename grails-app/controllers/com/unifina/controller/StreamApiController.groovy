@@ -20,7 +20,7 @@ class StreamApiController {
 			listParams.publicAccess = params.boolean("public")
 		}
 		def results = apiService.list(Stream, listParams, (User) request.apiUser)
-		apiService.addLinkHintToHeader(listParams, results.size(), params, response)
+		PaginationUtils.setHint(response, listParams, results.size(), params)
 		if (params.noConfig) {
 			render(results*.toSummaryMap() as JSON)
 			return

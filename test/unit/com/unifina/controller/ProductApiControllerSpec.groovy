@@ -11,8 +11,6 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 import org.springframework.mock.web.MockMultipartFile
 import spock.lang.Specification
 
-import javax.servlet.http.HttpServletResponse
-
 @TestFor(ProductApiController)
 @Mock([RESTAPIFilters, User])
 class ProductApiControllerSpec extends Specification {
@@ -139,20 +137,6 @@ class ProductApiControllerSpec extends Specification {
 		}
 		then:
 		1 * productService.list(_ as ProductListParams, null) >> []
-	}
-
-	void "index() invokes apiService#addLinkHintToHeader"() {
-		def apiService = controller.apiService = Mock(ApiService)
-		controller.productService = Stub(ProductService) {
-			list(_, _) >> [product]
-		}
-
-		when:
-		withFilters(action: "index") {
-			controller.index()
-		}
-		then:
-		1 * apiService.addLinkHintToHeader(_ as ProductListParams, 1, _ as Map, _ as HttpServletResponse)
 	}
 
 	void "index() returns 200 and renders products"() {

@@ -1,6 +1,5 @@
 package com.unifina.controller
 
-
 import com.unifina.domain.Permission
 import com.unifina.domain.Product
 import com.unifina.domain.User
@@ -70,7 +69,7 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def index(ProductListParams listParams) {
 		def products = productService.list(listParams, loggedInUser())
-		apiService.addLinkHintToHeader(listParams, products.size(), params, response)
+		PaginationUtils.setHint(response, listParams, products.size(), params)
 		render(products*.toSummaryMap() as JSON)
 	}
 
