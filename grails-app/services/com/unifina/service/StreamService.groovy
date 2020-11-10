@@ -1,21 +1,18 @@
 package com.unifina.service
 
-
 import com.streamr.client.protocol.message_layer.StreamMessage
 import com.unifina.data.StreamPartitioner
 import com.unifina.domain.*
 import com.unifina.feed.DataRange
 import com.unifina.feed.FieldDetector
-import com.unifina.task.DelayedDeleteStreamTask
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.JSONUtil
-import org.springframework.dao.DataIntegrityViolationException
-import grails.converters.JSON
 import grails.validation.Validateable
 import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.validation.FieldError
 
 @Validateable
@@ -97,13 +94,6 @@ class StreamService {
 	void deleteStream(Stream stream) {
 		cassandraService.deleteAll(stream)
 		stream.delete(flush:true)
-	}
-
-	void deleteStreamsDelayed(List<Stream> streams, long delayMs=30*60*1000) {
-		Map config = DelayedDeleteStreamTask.getConfig(streams)
-		Task task = new Task(DelayedDeleteStreamTask.class.getName(), (config as JSON).toString(), "stream-delete", UUID.randomUUID().toString())
-		task.runAfter = new Date(System.currentTimeMillis() + delayMs)
-		task.save(flush: false, failOnError: true)
 	}
 
 	boolean autodetectFields(Stream stream, boolean flattenHierarchies, boolean saveFields) {
