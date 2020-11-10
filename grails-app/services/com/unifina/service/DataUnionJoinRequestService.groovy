@@ -9,6 +9,7 @@ import com.unifina.domain.*
 import com.unifina.utils.ThreadUtil
 import groovy.json.JsonSlurper
 import org.apache.log4j.Logger
+import com.unifina.utils.MapTraversal
 import grails.util.Holders
 
 class DataUnionJoinRequestService {
@@ -37,7 +38,7 @@ class DataUnionJoinRequestService {
 			}
 			return false
 		} else if (version == 2) {
-			DataUnion du = getClient().dataUnionFromMainnetAddress(c.contractAddress)
+			DataUnion du = getClient().dataUnionFromMainnetAddress(contractAddress)
 			return du.isMemberActive(memberAddress)
 		} else {
 			throw new IllegalArgumentException("Invalid DataUnion version: " + version)
@@ -77,10 +78,13 @@ class DataUnionJoinRequestService {
 			}
 			log.debug("exiting onApproveJoinRequest")
 		} else if (version == 2) {
-			log.info("Join request: contract=" + c.contractAddress + ", member=" + memberAddress)
-			DataUnion du = getClient().dataUnionFromMainnetAddress(c.contractAddress)
-			EthereumTransactionReceipt transactionReceipt = du.joinMembers(memberAddress)
+			log.info("Join request: contract=" + c.contractAddress + ", member=" + c.memberAddress)
+			DataUnionClient client = getClient()
+			DataUnion du = client.dataUnionFromMainnetAddress(c.contractAddress)
+			EthereumTransactionReceipt transactionReceipt = du.joinMembers(c.memberAddress)
 			log.info("Join request sent: transaction=" + transactionReceipt.txHash())
+			client.waitForSidechainTx(transactionReceipt.txHash(), 10000, 600000); // TODO odotetaanko vähemmän vai halutaanko että metodista poistutaan heti kun transaktio lähetetty
+			log.info('Join request completed: memberActive=' + isMemberActive(c.contractAddress, c.memberAddress))  // TODO tätä ei tarvitse ehkä logittaa
 		} else {
 			throw new IllegalArgumentException("Invalid DataUnion version: " + version)
 		}
@@ -241,7 +245,7 @@ class DataUnionJoinRequestService {
 	DataUnionClient getClient() {
 		String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
 		Credentials agentCredentials = Credentials.create(nodePrivateKey)
-		return streamrClientService.getInstanceForThisEngineNode().dataUnionClient(agentCreds, agentCreds)
+		return streamrClientService.getInstanceForThisEngineNode().dataUnionClient(agentCredentials, agentCredentials)
 	}
 
 	int getVersion(String contractAddress) {
