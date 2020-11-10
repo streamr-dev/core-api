@@ -1,9 +1,7 @@
 package com.unifina.service
 
-import com.google.common.collect.Lists
 import com.streamr.client.protocol.message_layer.StreamMessage
 import com.unifina.domain.*
-import com.unifina.utils.TestUtils
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification

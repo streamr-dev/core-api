@@ -15,7 +15,6 @@ class ProductService {
 	ApiService apiService
 	PermissionService permissionService
 	SubscriptionService subscriptionService
-	CassandraService cassandraService
 	DataUnionJoinRequestService dataUnionJoinRequestService
 	ProductStore store = new ProductStore()
 	Random random = ThreadLocalRandom.current()
@@ -60,7 +59,7 @@ class ProductService {
 				if (s.inactivityThresholdHours == 0) {
 					continue
 				}
-				final StreamMessage msg = cassandraService.getLatestFromAllPartitions(s)
+				final StreamMessage msg // = cassandraService.getLatestFromAllPartitions(s)
 				if (msg != null && s.isStale(now, msg.getTimestampAsDate())) {
 					stale.streams.add(new StreamWithLatestMessage(s, msg))
 				} else if (msg == null) {
