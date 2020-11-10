@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -e
 
 sudo /etc/init.d/mysql stop
 if [ ! -d streamr-docker-dev ]; then # Skip clone on subsequent attemps.
