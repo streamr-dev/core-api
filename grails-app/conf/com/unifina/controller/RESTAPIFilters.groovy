@@ -82,11 +82,7 @@ class RESTAPIFilters {
 						)
 						return false
 					} else {
-						if (result.secUser) {
-							request.apiUser = result.secUser
-						} else {
-							request.apiKey = result.key
-						}
+						request.apiUser = result.secUser
 						return true
 					}
 				} catch (Exception e) {

@@ -4,7 +4,7 @@
     "title": "Streamr API",
     "version": "1.0.0"
   },
-  "host": "www.streamr.com",
+  "host": "streamr.network",
   "schemes": [
     "https"
   ],
@@ -920,7 +920,7 @@
             "examples": {
               "application/json": {
                 "code": "FORBIDDEN",
-                "message": "me@streamr.com does not have permission to share Stream (id bqO9tp3wQVCPbKh6elAFLw)"
+                "message": "me@streamr.network does not have permission to share Stream (id bqO9tp3wQVCPbKh6elAFLw)"
               }
             }
           },
@@ -2338,157 +2338,6 @@
         }
       }
     },
-    "/streams/{id}/detectFields": {
-      "post": {
-        "summary": "Detect stream's field types.",
-        "description": "Automatically detects fields of given Stream by analyzing recent data. Save fields to stream details.",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "query",
-            "name": "flatten",
-            "description": "Flatten hierarchies.",
-            "required": false,
-            "default": false,
-            "type": "boolean"
-          }
-        ],
-        "tags": [
-          "streams"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success. Contains details of the stream."
-          },
-          "403": {
-            "description": "No permissions to stream"
-          },
-          "404": {
-            "description": "Stream not found"
-          },
-          "500": {
-            "description": "No fields found. If stream doesn't contain any data."
-          }
-        }
-      },
-      "get": {
-        "summary": "Detect stream's field types.",
-        "description": "Automatically detects fields of given Stream by analyzing recent data. Do not save fields to stream details.",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "ID of the stream",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "query",
-            "name": "flatten",
-            "description": "Flatten hierarchies.",
-            "required": false,
-            "default": false,
-            "type": "boolean"
-          }
-        ],
-        "tags": [
-          "streams"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success. Contains details of the stream."
-          },
-          "403": {
-            "description": "No permissions to stream"
-          },
-          "404": {
-            "description": "Stream not found"
-          },
-          "500": {
-            "description": "No fields found. If stream doesn't contain any data."
-          }
-        }
-      }
-    },
-    "/streams/{id}/data": {
-      "post": {
-        "summary": "Add new event to stream",
-        "description": "Add a new event to the stream identified by id. Requires a write permission on the stream.",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "query",
-            "name": "ttl",
-            "description": "Time-To-Live, in seconds. The event will be deleted after this time has passed. If not given, the event storage period will be the stream default.",
-            "required": false,
-            "type": "integer"
-          },
-          {
-            "in": "query",
-            "name": "pkey",
-            "description": "For partitioned streams, provides the key to partition by. Can be eg. a customer id to make all events for that customer to go to the same Canvas for processing. If not given, a random partition is selected.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "query",
-            "name": "signatureType",
-            "description": "Signature type of the signature query parameter. 1 for Ethereum signature, 0 for no signature. If not given, defaults to 0.",
-            "required": false,
-            "type": "integer"
-          },
-          {
-            "in": "query",
-            "name": "address",
-            "description": "Ethereum address of the publisher in case the signature type is 1. The parameter is not needed if the signature type is 0.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "query",
-            "name": "signature",
-            "description": "If the signature type is 1, this parameter is the hex string representation of the Ethereum signature produced by the Ethereum address provided in the 'address' query parameter. This parameter is not needed if the signature type is 0.",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "streams"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success (the response body is empty)"
-          },
-          "400": {
-            "description": "Invalid request"
-          },
-          "401": {
-            "description": "Permission denied"
-          },
-          "403": {
-            "description": "Authentication failed"
-          },
-          "404": {
-            "description": "Stream not found"
-          },
-          "500": {
-            "description": "Unexpected error"
-          }
-        }
-      }
-    },
     "/streams/{id}/data/partitions/{partition}/last": {
       "get": {
         "summary": "Get most recent events from a stream",
@@ -2890,6 +2739,9 @@
 				},
 				"500": {
 					"description": "Unexpected error"
+				},
+				"422": {
+					"description": "Validation error"
 				}
 			}
 		}
@@ -2952,14 +2804,14 @@
 				"400": {
 					"description": "Storage node already exists"
 				},
-				"422": {
-					"description": "Validation error"
-				},
 				"401": {
 					"description": "No authentication"
 				},
 				"403": {
 					"description": "Authentication failed"
+				},
+				"422": {
+					"description": "Validation error"
 				}
 			}
 		}
@@ -2995,6 +2847,9 @@
 				},
 				"403": {
 					"description": "Authentication failed"
+				},
+				"422": {
+					"description": "Validation error"
 				}
 			}
 		}
@@ -4655,6 +4510,7 @@
         "requireSignedData": {
           "type": "boolean",
           "description": "If true, all messages in this stream must be cryptographically signed. Client's should not accept unsigned messages.",
+
           "example": false
         },
         "requireEncryptedData": {

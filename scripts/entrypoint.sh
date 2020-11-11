@@ -8,8 +8,6 @@ CATALINA_OPTS="\
 	-Dstreamr.database.name=$DB_NAME \
 	-Dgrails.mail.host=$SMTP_HOST \
 	-Dgrails.mail.port=$SMTP_PORT \
-	-Dstreamr.cassandra.hosts=$CASSANDRA_HOST \
-	-Dstreamr.cassandra.keySpace=$CASSANDRA_KEYSPACE \
 	-Dstreamr.redis.hosts=$REDIS_HOSTS \
 	-Dstreamr.api.websocket.url=$WS_SERVER \
 	-Dstreamr.api.http.url=$HTTPS_API_SERVER \
@@ -27,6 +25,5 @@ CATALINA_OPTS="\
 "
 wait-for-it.sh "$DB_HOST:$DB_PORT" --timeout=300 \
 	&& while ! mysql --user="$DB_USER" --host="$DB_HOST" --password="$DB_PASS" "$DB_NAME" -e "SELECT 1;" 1>/dev/null; do echo "waiting for db"; sleep 1; done \
-	&& wait-for-it.sh "$CASSANDRA_HOST:$CASSANDRA_PORT" --timeout=300 && \
-	CATALINA_OPTS="$CATALINA_OPTS" catalina.sh run
+	&& CATALINA_OPTS="$CATALINA_OPTS" catalina.sh run
 

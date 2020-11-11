@@ -1,6 +1,5 @@
 package com.unifina.controller
 
-import com.unifina.domain.Key
 import com.unifina.domain.Role
 import com.unifina.domain.User
 import com.unifina.domain.UserRole
@@ -9,7 +8,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(RemoveUsersProductsController)
-@Mock([User, Key, Role, UserRole])
+@Mock([User, Role, UserRole])
 class RemoveUsersProductsControllerSpec extends ControllerSpecification {
 	ProductService productService
 	User me
@@ -17,9 +16,6 @@ class RemoveUsersProductsControllerSpec extends ControllerSpecification {
 	def setup() {
 		productService = controller.productService = Mock(ProductService)
 		me = new User(id: 1, username: "arnold").save(validate: false)
-		Key key = new Key(name: "key", user: me)
-		key.id = "myApiKey"
-		key.save(failOnError: true, validate: true)
 	}
 
 	def "should remove users troll products if user is admin"() {

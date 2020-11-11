@@ -1,6 +1,5 @@
 package com.unifina.controller
 
-
 import com.unifina.domain.Dashboard
 import com.unifina.domain.User
 import com.unifina.service.*
@@ -18,7 +17,7 @@ class DashboardApiController {
 			listParams.publicAccess = params.boolean("public")
 		}
 		def results = apiService.list(Dashboard, listParams, (User) request.apiUser)
-		apiService.addLinkHintToHeader(listParams, results.size(), params, response)
+		PaginationUtils.setHint(response, listParams, results.size(), params)
 		render(results*.toMap() as JSON)
 	}
 

@@ -1,6 +1,5 @@
 package com.unifina.controller;
 
-import com.unifina.domain.Key;
 import com.unifina.domain.User;
 import com.unifina.domain.Userish;
 import com.unifina.service.InvalidSessionTokenException;
@@ -8,7 +7,6 @@ import com.unifina.service.SessionService;
 import com.unifina.service.EthereumIntegrationKeyService;
 import com.unifina.security.ApiKeyConverter;
 import grails.util.Holders;
-import org.codehaus.groovy.runtime.InvokerHelper;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -48,10 +46,10 @@ public class TokenAuthenticator {
 		try {
 			header = getAuthorizationHeader(request);
 		} catch (AuthenticationMalformedException e) {
-			return new AuthenticationResult(false, true, true);
+			return new AuthenticationResult(true, true);
 		}
 		if (header == null) {
-			return new AuthenticationResult(true, false, false);
+			return new AuthenticationResult(false, false);
 		}
 		if (header.getHeaderType().equals(HeaderType.TOKEN)) {
 			AuthenticationResult res = getResultFromApiKey(header.getHeaderValue());
@@ -60,7 +58,7 @@ public class TokenAuthenticator {
 			AuthenticationResult res = getResultFromSessionToken(header.getHeaderValue());
 			return res;
 		}
-		return new AuthenticationResult(true, false, true);
+		return new AuthenticationResult(false, true);
 	}
 
 	public static AuthorizationHeader getAuthorizationHeader(HttpServletRequest request) {
@@ -99,25 +97,23 @@ public class TokenAuthenticator {
 
 	private AuthenticationResult getResultFromSessionToken(String token) {
 		if (token == null) {
-			return new AuthenticationResult(true, false, true);
+			return new AuthenticationResult(false, true);
 		}
 		try {
 			Userish userish = sessionService.getUserishFromToken(token);
 			if (userish instanceof User) {
 				return new AuthenticationResult((User) userish);
-			} else if (userish instanceof Key) {
-				return new AuthenticationResult((Key) userish);
 			} else {
 				throw new InvalidSessionTokenException("Invalid token: "+token);
 			}
 		} catch (InvalidSessionTokenException e) {
-			return new AuthenticationResult(false, false, true);
+			return new AuthenticationResult(false, true);
 		}
 	}
 
 	public AuthenticationResult getResultFromApiKey(String apiKey) {
 		if (apiKey == null) {
-			return new AuthenticationResult(true, false, true);
+			return new AuthenticationResult(false, true);
 		}
 		String privateKey = ApiKeyConverter.createEthereumPrivateKey(apiKey);
 		String address = "0x" + EthereumIntegrationKeyService.getAddress(privateKey);
@@ -125,7 +121,7 @@ public class TokenAuthenticator {
 		if (user != null) {
 			return new AuthenticationResult(user);
 		}
-		return new AuthenticationResult(false, false, true);
+		return new AuthenticationResult(false, true);
 	}
 
 	private static class AuthenticationMalformedException extends RuntimeException {

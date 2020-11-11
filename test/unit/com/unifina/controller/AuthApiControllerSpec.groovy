@@ -11,7 +11,7 @@ import org.springframework.context.MessageSource
 import spock.lang.Specification
 
 @TestFor(AuthApiController)
-@Mock([SignupInvite, SignupCodeService, RegistrationCode, User, Key, Role, UserRole, Permission, UserService])
+@Mock([SignupInvite, SignupCodeService, RegistrationCode, User, Role, UserRole, Permission, UserService])
 class AuthApiControllerSpec extends Specification {
 
 	String username = "user@invite.to"
@@ -240,7 +240,7 @@ class AuthApiControllerSpec extends Specification {
 		EmailCommand cmd = new EmailCommand()
 
 		when: "requested new password"
-		cmd.username = "test@streamr.com"
+		cmd.username = "test@streamr.network"
 		request.method = "POST"
 		controller.forgotPassword(cmd)
 		then:
@@ -251,11 +251,11 @@ class AuthApiControllerSpec extends Specification {
 	void "forgotPassword sends email and returns emailSent=true if the user exists"() {
 		EmailCommand cmd = new EmailCommand()
 		User me = new User()
-		me.username = "test@streamr.com"
+		me.username = "test@streamr.network"
 		me.save(validate: false)
 
 		when: "requested new password"
-		cmd.username = "test@streamr.com"
+		cmd.username = "test@streamr.network"
 		request.method = "POST"
 		controller.forgotPassword(cmd)
 		then:

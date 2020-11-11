@@ -51,7 +51,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 	}
 
 	def "response to challenge should pass"() {
-		String address = "address"
+		String address = "0x1234567890123456789012345678901234567890"
 		String signature = "signature"
 
 		Challenge challenge = new Challenge("id", "challenge", challengeService.TTL_SECONDS)
@@ -87,7 +87,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 	}
 
 	def "response to challenge should fail"() {
-		String address = "address"
+		String address = "0x1234567890123456789012345678901234567890"
 		String signature = "signature"
 
 		Challenge challenge = new Challenge("id", "challenge", challengeService.TTL_SECONDS)
@@ -110,7 +110,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 	}
 
 	def "response to challenge should fail if disabled user"() {
-		String address = "address"
+		String address = "0x1234567890123456789012345678901234567890"
 		String signature = "signature"
 
 		Challenge challenge = new Challenge("id", "challenge", challengeService.TTL_SECONDS)

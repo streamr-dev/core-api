@@ -1,7 +1,6 @@
 package com.unifina.controller
 
 import com.unifina.BeanMockingSpecification
-import com.unifina.domain.Key
 import com.unifina.domain.User
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.FiltersUnitTestMixin
@@ -27,14 +26,6 @@ class ControllerSpecification extends BeanMockingSpecification {
 		MockAPIFilters.setUser(user)
 		def result = withFilters(arguments, callable)
 		MockAPIFilters.setUser(null)
-		return result
-	}
-
-	def authenticatedAs(Key key, Map arguments = [:], Closure callable) {
-		checkFilter()
-		MockAPIFilters.setKey(key)
-		def result = withFilters(arguments, callable)
-		MockAPIFilters.setKey(null)
 		return result
 	}
 

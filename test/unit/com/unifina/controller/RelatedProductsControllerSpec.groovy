@@ -42,9 +42,6 @@ class RelatedProductsControllerSpec extends ControllerSpecification {
 			name: "Regular API user",
 			password: "xxx"
 		)
-		def key = new Key(name: "meKey", user: me)
-		key.id = "myApiKey"
-		key.save(failOnError: true, validate: true)
 
 		// u1 is the user who owns the product p1 used to search for related products
 		u1 = new User(

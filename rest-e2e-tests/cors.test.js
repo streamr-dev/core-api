@@ -2,7 +2,6 @@ const assert = require('chai').assert
 const fetch = require('node-fetch')
 
 const URL = 'http://localhost/api/v1'
-
 const TIMEOUT = 5000
 
 describe('CORS Requests', () => {
