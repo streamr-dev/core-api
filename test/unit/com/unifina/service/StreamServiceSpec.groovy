@@ -1,41 +1,16 @@
 package com.unifina.service
 
-
-import com.streamr.client.protocol.message_layer.StreamMessage
-import com.unifina.domain.ExampleType
-import com.unifina.domain.Dashboard
-import com.unifina.domain.DashboardItem
-import com.unifina.domain.Stream
-import com.unifina.domain.IntegrationKey
-import com.unifina.domain.Permission
-import com.unifina.domain.User
-import com.unifina.domain.Canvas
-import com.unifina.utils.TestUtils
+import com.unifina.domain.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
-import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
 @TestFor(StreamService)
-@Mock([Canvas, Dashboard, DashboardItem, Stream, User, IntegrationKey, Permission, PermissionService])
+@Mock([Stream, User, IntegrationKey, Permission, PermissionService])
 class StreamServiceSpec extends Specification {
-
-	DashboardService dashboardService = Mock(DashboardService)
-
 	User me = new User(username: "me")
 
 	def setup() {
-		// Setup application context
-		def applicationContext = Stub(ApplicationContext) {
-			getBean(DashboardService) >> dashboardService
-		}
-
-		// Setup grailsApplication
-		def grailsApplication = new DefaultGrailsApplication()
-		grailsApplication.setMainContext(applicationContext)
-
-		service.grailsApplication = grailsApplication
 		me.save(validate: false, failOnError: true)
 	}
 
@@ -230,105 +205,5 @@ class StreamServiceSpec extends Specification {
 		result1 && result1b
 		2 * service.permissionService.check(user2, stream, Permission.Operation.STREAM_SUBSCRIBE) >> false
 		!result2 && !result2b
-	}
-
-	void "status ok and has recent messages"() {
-		setup:
-		service.cassandraService = Mock(CassandraService)
-		Stream s = new Stream([name: "Stream 1", inactivityThresholdHours: 48])
-		s.id = "s1"
-
-		Date now = newDate(2019, 1, 15, 11, 12, 06)
-		Date timestamp = newDate(2019, 1, 14, 11, 12, 06)
-		long expected = timestamp.getTime()
-		StreamMessage msg = TestUtils.buildMsg("s1", 0, timestamp)
-
-		when:
-		StreamService.StreamStatus status = service.status(s, now)
-
-		then:
-		1 * service.cassandraService.getLatestFromAllPartitions(s) >> msg
-		status.ok == true
-		status.date.getTime() == expected
-	}
-
-	void "status not ok, no messages in stream"() {
-		setup:
-		service.cassandraService = Mock(CassandraService)
-		Stream s = new Stream([name: "Stream 1", inactivityThresholdHours: 48])
-		s.id = "s1"
-
-		when:
-		StreamService.StreamStatus status = service.status(s, new Date())
-
-		then:
-		1 * service.cassandraService.getLatestFromAllPartitions(s) >> null
-		status.ok == false
-		status.date == null
-	}
-
-	void "status stream has messages, but stream is stale"() {
-		setup:
-		service.cassandraService = Mock(CassandraService)
-		Stream s = new Stream([name: "Stream 1", inactivityThresholdHours: 48])
-		s.id = "s1"
-
-		Date timestamp = newDate(2019, 1, 10, 12, 12, 06)
-		long expected = timestamp.getTime()
-		StreamMessage msg = TestUtils.buildMsg("s1", 0, timestamp)
-		Date now = newDate(2019, 1, 15, 0, 0, 0)
-
-		when:
-		StreamService.StreamStatus status = service.status(s, now)
-
-		then:
-		1 * service.cassandraService.getLatestFromAllPartitions(s) >> msg
-		status.ok == false
-		status.date.getTime() == expected
-	}
-
-	void "status inactivity threshold hours is zero and stream has messages"() {
-		setup:
-		service.cassandraService = Mock(CassandraService)
-		Stream s = new Stream([name: "Stream 1", inactivityThresholdHours: 0])
-		s.id = "s1"
-
-		Date timestamp = new Date()
-		long expected = timestamp.getTime()
-		StreamMessage msg = TestUtils.buildMsg("s1", 0, timestamp)
-
-		when:
-		StreamService.StreamStatus status = service.status(s, new Date())
-
-		then:
-		1 * service.cassandraService.getLatestFromAllPartitions(s) >> msg
-		status.ok == true
-		status.date.getTime() == expected
-	}
-
-	void "status inactivity threshold hours is zero and stream has no messages"() {
-		setup:
-		service.cassandraService = Mock(CassandraService)
-		Stream s = new Stream([name: "Stream 1", inactivityThresholdHours: 0])
-		s.id = "s1"
-
-		when:
-		StreamService.StreamStatus status = service.status(s, new Date())
-
-		then:
-		1 * service.cassandraService.getLatestFromAllPartitions(s) >> null
-		status.ok == true
-		status.date == null
-	}
-
-	Date newDate(int year, int month, int date, int hour, int minute, int second) {
-		Calendar cal = Calendar.getInstance()
-		cal.set(Calendar.YEAR, year)
-		cal.set(Calendar.MONTH, month - 1)
-		cal.set(Calendar.DATE, date)
-		cal.set(Calendar.HOUR_OF_DAY, hour)
-		cal.set(Calendar.MINUTE, minute)
-		cal.set(Calendar.SECOND, second)
-		return cal.getTime()
 	}
 }

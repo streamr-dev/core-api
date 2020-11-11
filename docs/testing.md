@@ -21,14 +21,6 @@ Writing an integration test suite against a 3rd party API can be useful in encod
 of said API, and in the case of an error, localizing whether the error is caused by our internal logic or because of the
 3rd party API.
 
-### Functional tests (aka end-to-end tests)
-Exercises the application through the user interface and verifies that visible behavior occurs as expected. The behavior
-is typically verified by inspecting visual elements on a HTML page or by detecting page transitions. The application is
-fully initialized and run.
-
-Functional tests tend to be quite brittle, and figuring out why they break, can be challenging. Nevertheless, they are
-necessary in order to verify that the application really works from the viewpoint of the entire system and end-user.
-
 ## Testing in Grails with Spock
 
 ### Unit tests

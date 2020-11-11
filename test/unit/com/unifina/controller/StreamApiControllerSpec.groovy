@@ -1,30 +1,26 @@
 package com.unifina.controller
 
-import com.unifina.domain.*
+import com.unifina.domain.Permission
+import com.unifina.domain.Stream
+import com.unifina.domain.User
 import com.unifina.service.*
-import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(StreamApiController)
-@Mock([User, Stream, Permission, PermissionService, StreamService, DashboardService, IntegrationKey, RESTAPIFilters])
+@Mock([User, Stream, Permission, PermissionService, StreamService, RESTAPIFilters])
 class StreamApiControllerSpec extends ControllerSpecification {
-
-	User me
-
 	StreamService streamService
-	PermissionService permissionService
 	ApiService apiService
 
+	User me
 	Stream streamOne
 	def streamTwoId
 	def streamThreeId
 	def streamFourId
 
 	def setup() {
-		permissionService = mainContext.getBean(PermissionService)
-
-		controller.permissionService = permissionService
+		controller.permissionService = mainContext.getBean(PermissionService)
 		apiService = controller.apiService = Mock(ApiService)
 
 		me = new User(username: "me", password: "foo")
@@ -34,8 +30,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 
 		// First use real streamService to create the streams
 		streamService = mainContext.getBean(StreamService)
-		streamService.permissionService = permissionService
-		streamService.cassandraService = mockBean(CassandraService, Mock(CassandraService))
+		streamService.permissionService = controller.permissionService
 		streamOne = streamService.createStream(new CreateStreamCommand(name: "stream", description: "description"), me, null)
 		streamTwoId = streamService.createStream(new CreateStreamCommand(name: "ztream"), me, null).id
 		streamThreeId = streamService.createStream(new CreateStreamCommand(name: "atream"), me, null).id
@@ -306,7 +301,6 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.delete() }
 
 		then:
-		1 * streamService.cassandraService.deleteAll(streamOne)
 		response.status == 204
 	}
 
@@ -439,123 +433,5 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		then:
 		1 * streamService.isStreamEthereumSubscriber(streamOne, address) >> false
 		response.status == 404
-	}
-
-	void "streams status"() {
-		setup:
-		controller.streamService = Mock(StreamService)
-		Date timestamp = newDate(2019, 1, 19, 2, 0, 3)
-
-		when:
-		params.id = streamOne.id
-		request.method = "GET"
-		authenticatedAs(me) { controller.status() }
-
-		then:
-		1 * controller.streamService.status(_, _) >> new StreamService.StreamStatus(true, timestamp)
-		response.status == 200
-		response.json == [
-		    ok: true,
-			date: "2019-01-19T02:00:03Z",
-		]
-	}
-
-	void "streams status no message"() {
-		setup:
-		controller.streamService = Mock(StreamService)
-
-		when:
-		params.id = streamOne.id
-		request.method = "GET"
-		authenticatedAs(me) { controller.status() }
-
-		then:
-		1 * controller.streamService.status(_, _) >> new StreamService.StreamStatus(false, null)
-		response.status == 200
-		response.json == [
-			ok: false,
-		]
-	}
-
-	void "stream status not found"() {
-		setup:
-		controller.streamService = Mock(StreamService)
-
-		when:
-		params.id = "not-found"
-		request.method = "GET"
-		authenticatedAs(me) { controller.status() }
-
-		then:
-		0 * controller.streamService._
-		thrown NotFoundException
-		response.status == 404
-	}
-
-	Date newDate(int year, int month, int date, int hour, int minute, int second) {
-		Calendar cal = Calendar.getInstance()
-		cal.set(Calendar.YEAR, year)
-		cal.set(Calendar.MONTH, month - 1)
-		cal.set(Calendar.DATE, date)
-		cal.set(Calendar.HOUR_OF_DAY, hour)
-		cal.set(Calendar.MINUTE, minute)
-		cal.set(Calendar.SECOND, second)
-		return cal.getTime()
-	}
-
-	void "detectFields GET"() {
-		setup:
-		controller.streamService = Mock(StreamService)
-		streamOne.config = ([
-			fields: [
-				[name: "foo", type: "number"],
-				[name: "bar", type: "boolean"],
-			],
-		] as JSON)
-
-		when:
-		request.method = "GET"
-		params.id = streamOne.id
-		params.flatten = false
-		authenticatedAs(me) { controller.detectFields() }
-
-		then:
-		1 * controller.streamService.autodetectFields(streamOne, false, false) >> true
-		response.status == 200
-		response.json.id == streamOne.id
-		response.json.name == "stream"
-		response.json.description == "description"
-		response.json.config.fields[0].name == "foo"
-		response.json.config.fields[0].type == "number"
-		response.json.config.fields[1].name == "bar"
-		response.json.config.fields[1].type == "boolean"
-	}
-
-	void "detectFields POST"() {
-		setup:
-		controller.streamService = Mock(StreamService)
-		streamOne.config = ([
-			fields: [
-				[name: "foo", type: "number"],
-				[name: "bar", type: "boolean"],
-			],
-		] as JSON)
-
-		when:
-		request.method = "POST"
-		params.id = streamOne.id
-		params.flatten = false
-		authenticatedAs(me) { controller.detectFields() }
-
-		then:
-		1 * controller.streamService.autodetectFields(streamOne, false, true) >> true
-		response.status == 200
-		response.json.id == streamOne.id
-		response.json.name == "stream"
-		response.json.description == "description"
-		response.json.config.fields[0].name == "foo"
-		response.json.config.fields[0].type == "number"
-		response.json.config.fields[1].name == "bar"
-		response.json.config.fields[1].type == "boolean"
 	}
 }
