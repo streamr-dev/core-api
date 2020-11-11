@@ -28,16 +28,11 @@ class UrlMappings {
 		"/api/v1/streams/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
 		"/api/v1/streams/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Stream }
 		"/api/v1/streams/$id/fields"(method: "POST", controller: "streamApi", action: "setFields")
-		"/api/v1/streams/$id/detectFields"(method: "POST", controller: "streamApi", action: "detectFields")
-		"/api/v1/streams/$id/detectFields"(method: "GET", controller: "streamApi", action: "detectFields")
-		"/api/v1/streams/$id/range"(controller: "streamApi", action: "range")
-		"/api/v1/streams/$id/dataFiles"(controller: "streamApi", action: "dataFiles")
 		"/api/v1/streams/$id/validation"(method: "GET", controller: "streamApi", action: "validation")
 		"/api/v1/streams/$id/publishers"(controller: "streamApi", action: "publishers")
 		"/api/v1/streams/$id/publisher/$address"(controller: "streamApi", action: "publisher")
 		"/api/v1/streams/$id/subscribers"(controller: "streamApi", action: "subscribers")
 		"/api/v1/streams/$id/subscriber/$address"(controller: "streamApi", action: "subscriber")
-		"/api/v1/streams/$id/status"(controller: "streamApi", action: "status")
 
 		"/api/v1/storageNodes/$storageNodeAddress/streams"(method: "GET", controller: "storageNodeApi", action: "findStreamsByStorageNode")
 		"/api/v1/streams/$streamId/storageNodes"(method: "GET", controller: "storageNodeApi", action: "findStorageNodesByStream")
@@ -87,8 +82,6 @@ class UrlMappings {
 		"/api/v1/products/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Product }
 		"/api/v1/products/remove/$username"(method: "DELETE", controller: "removeUsersProducts", action: "index")
 		"/api/v1/products/$id/related"(method: "GET", controller: "productApi", action: "related")
-		"/api/v1/products/stale"(method: "GET", controller: "productApi", action: "staleProducts")
-		"/api/v1/products/staleEmail"(method: "GET", controller: "productApi", action: "emailStaleProductOwners")
 
 		"/api/v1/subscriptions"(resources: "subscriptionApi")
 

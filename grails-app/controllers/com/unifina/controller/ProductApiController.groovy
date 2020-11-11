@@ -21,42 +21,6 @@ class ProductApiController {
 	private static final Logger log = Logger.getLogger(ProductApiController)
 
 	@GrailsCompileStatic
-	@StreamrApi(allowRoles = AllowRole.ADMIN)
-	def staleProducts() {
-		List<Product> products = productService.list(new ProductListParams(publicAccess: true), loggedInUser())
-		List<ProductService.StaleProduct> results = productService.findStaleProducts(products, new Date())
-		return render(results as JSON)
-	}
-
-	@StreamrApi(allowRoles = AllowRole.ADMIN)
-	def emailStaleProductOwners() {
-		Boolean dryRun = params.boolean("dry_run") ?: false
-		Map<User, List<ProductService.StaleProduct>> staleProductsByOwner = productService.findStaleProductsByOwner(loggedInUser())
-		for (Map.Entry<User, List<ProductService.StaleProduct>> entry : staleProductsByOwner.entrySet()) {
-			User owner = entry.getKey()
-			List<ProductService.StaleProduct> ownersProducts = entry.getValue()
-			if (!owner.isEthereumUser()) {
-				if (dryRun) {
-					log.info(String.format("dry run: sending stale product email to %s", owner.username))
-				} else {
-					log.info(String.format("sending stale product email to %s", owner.username))
-					try {
-						mailService.sendMail {
-							from grailsApplication.config.unifina.email.sender
-							to owner.username
-							subject "Problem with your products on Streamr Marketplace"
-							html g.render(template: "/emails/email_stale_product_notification", model: [user: owner, staleProducts: ownersProducts])
-						}
-					} catch (Exception e) {
-						log.error(String.format("send stale product email to %s failed: ", owner.username), e)
-					}
-				}
-			}
-		}
-		return render(status: 204)
-	}
-
-	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def related() {
 		Product product = productService.findById((String) params.id, loggedInUser(), Permission.Operation.PRODUCT_GET)
