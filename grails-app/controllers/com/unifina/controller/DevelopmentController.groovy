@@ -19,9 +19,9 @@ class DevelopmentController {
 
 	// random users:
 	Credentials adminCreds = Credentials.create('0x7aa27733cfc64a44ae605bfd6ec4a2c73579d37a661ddb72fcbdb4f4a752f30d')
-	Credentials memberCreds = Credentials.create('0x31b5895362c37e7066b739bee7bcb3f327bbceb87d3a785a49217a8a539b985bp')
+	Credentials memberCreds = Credentials.create('0x31b5895362c37e7066b739bee7bcb3f327bbceb87d3a785a49217a8a539b985b')
 
-	String DU_NAME = 'du20201110b'  // 0x6b50c95957b9d2fef19a28ff302acbe465e2ba80
+	String DU_NAME = 'du20201111b'  // 0x6b50c95957b9d2fef19a28ff302acbe465e2ba80
 
 	StreamrClientService streamrClientService
 	ProductService productService
