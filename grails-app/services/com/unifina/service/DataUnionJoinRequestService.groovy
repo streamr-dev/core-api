@@ -4,7 +4,6 @@ import com.streamr.client.StreamrClient
 import com.streamr.client.dataunion.DataUnion
 import com.streamr.client.dataunion.DataUnionClient
 import com.streamr.client.dataunion.EthereumTransactionReceipt
-import org.web3j.crypto.Credentials
 import com.unifina.domain.*
 import com.unifina.utils.ThreadUtil
 import groovy.json.JsonSlurper
@@ -14,6 +13,8 @@ import grails.util.Holders
 
 class DataUnionJoinRequestService {
 
+	private static final int JOIN_REQUEST_TRANSACTION_POLL_INTERVAL = 5000
+	private static final int JOIN_REQUEST_TRANSACTION_TIMEOUT = 30000
 	private static final Logger log = Logger.getLogger(DataUnionJoinRequestService)
 
 	EthereumService ethereumService
@@ -78,13 +79,20 @@ class DataUnionJoinRequestService {
 			}
 			log.debug("exiting onApproveJoinRequest")
 		} else if (version == 2) {
-			log.info("Join request: contract=" + c.contractAddress + ", member=" + c.memberAddress)
-			DataUnionClient client = getClient()
-			DataUnion du = client.dataUnionFromMainnetAddress(c.contractAddress)
-			EthereumTransactionReceipt transactionReceipt = du.joinMembers(c.memberAddress)
-			log.info("Join request sent: transaction=" + transactionReceipt.txHash())
-			client.waitForSidechainTx(transactionReceipt.txHash(), 10000, 600000); // TODO odotetaanko vähemmän vai halutaanko että metodista poistutaan heti kun transaktio lähetetty
-			log.info('Join request completed: memberActive=' + isMemberActive(c.contractAddress, c.memberAddress))  // TODO tätä ei tarvitse ehkä logittaa
+			log.info("Join request approve: member=" + c.memberAddress + ", contract=" + c.contractAddress)
+			if (!isMemberActive(c.contractAddress, c.memberAddress)) {
+				DataUnionClient client = getClient()
+				DataUnion du = client.dataUnionFromMainnetAddress(c.contractAddress)
+				EthereumTransactionReceipt transactionReceipt = du.joinMembers(c.memberAddress)
+				log.debug("transaction=" + transactionReceipt.txHash())
+				client.waitForSidechainTx(transactionReceipt.txHash(), JOIN_REQUEST_TRANSACTION_POLL_INTERVAL, JOIN_REQUEST_TRANSACTION_TIMEOUT)
+				boolean active = isMemberActive(c.contractAddress, c.memberAddress)
+				if (!active) {
+					throw new DataUnionJoinRequestException("Error on registering join request")
+				}
+			} else {
+				log.info("Already approved");
+			}
 		} else {
 			throw new IllegalArgumentException("Invalid DataUnion version: " + version)
 		}
@@ -244,8 +252,7 @@ class DataUnionJoinRequestService {
 
 	DataUnionClient getClient() {
 		String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
-		Credentials agentCredentials = Credentials.create(nodePrivateKey)
-		return streamrClientService.getInstanceForThisEngineNode().dataUnionClient(agentCredentials, agentCredentials)
+		return streamrClientService.getInstanceForThisEngineNode().dataUnionClient(nodePrivateKey, nodePrivateKey)
 	}
 
 	int getVersion(String contractAddress) {
