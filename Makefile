@@ -8,16 +8,12 @@ ifeq ($(filter oneshell,$(.FEATURES)),)
 $(error error: Your version of make ($(shell make -v|head -1|cut -f 3 -d ' ')) cdoes not support .ONESHELL)
 endif
 
-LANG = en_US.UTF-8
-SHELL = /bin/bash
-.SHELLFLAGS := -e -o pipefail -c # run '/bin/bash ... -c /bin/cmd'
-.DELETE_ON_ERROR: # target is removed if its recipe fails
+LANG := en_US.UTF-8
+SHELL := bash
+.SHELLFLAGS := -eu -o pipefail -c # run '/bin/bash ... -c /bin/cmd'
+.ONESHELL:
+.DELETE_ON_ERROR:
 .DEFAULT_GOAL := all
-
-#.ONESHELL: recipe-name # recipes execute in same shell
-#.SILENT: recipe-name # no need for @
-#.NOTPARALLEL: recipe-name # wait for this target to finish
-#.EXPORT_ALL_VARIABLES: recipe-name # send all vars to shell
 
 grails := grails -plain-output
 
@@ -29,7 +25,7 @@ all: clean test-unit test-integration start-wait test-engine-start test-rest tes
 .PHONY: test
 test: test-unit test-integration test-rest ## Run unit, integration and REST API tests
 
-test_report_html := $(shell pwd)/target/test-reports/html/failed.html
+test_report_html = $$(pwd)/target/test-reports/html/failed.html
 .PHONY: test-unit
 test-unit: ## Run unit tests
 	$(grails) test-app -unit -echoOut -echoErr || (exit_code=$$?; open $(test_report_html); exit $$exit_code)
@@ -39,12 +35,11 @@ test-integration: ## Run integration tests
 	$(grails) test-app -integration -no-reports --stacktrace --verbose
 
 engine_status_check_url := http://localhost:8081/streamr-core/api/v1/users/me
-.ONESHELL: test-rest
 .PHONY: test-rest
 test-rest: ## Run REST API tests
 	export i=1
 	while true; do
-		http_code=$$(curl -s -m 1 -o /dev/null -w "%{http_code}" $(engine_status_check_url))
+		http_code=$$(curl -s -m 1 -o /dev/null -w "%{http_code}" $(engine_status_check_url)) || true
 		if [ "$$http_code" -eq 401 ]; then
 			echo "test-rest: $$(date -u) engine up and running"
 			break
@@ -130,7 +125,6 @@ update: ## Run streamr-docker-dev update
 	streamr-docker-dev update
 
 .SILENT: db-diff
-.ONESHELL: db-diff
 .PHONY: db-diff
 db-diff: ## Run Grails 'grails dbm-gorm-diff' with extras. WARNING! This command is destructive.
 	echo "please enter a description of the change (no spaces, separated by - char, for example: mv-secuser-to-profile)"
