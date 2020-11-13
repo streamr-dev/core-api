@@ -13,7 +13,7 @@ import grails.util.Holders
 
 class DataUnionJoinRequestService {
 
-	private static final int JOIN_REQUEST_TRANSACTION_POLL_INTERVAL = 5000
+	private static final int JOIN_REQUEST_TRANSACTION_POLL_INTERVAL = 1000
 	private static final int JOIN_REQUEST_TRANSACTION_TIMEOUT = 30000
 	private static final Logger log = Logger.getLogger(DataUnionJoinRequestService)
 
