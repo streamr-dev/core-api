@@ -121,6 +121,14 @@ stop: ## Run streamr-docker-dev stop
 pull: ## Run streamr-docker-dev pull
 	streamr-docker-dev pull
 
+.PHONY: ps
+ps: ## Run streamr-docker-dev ps
+	streamr-docker-dev ps
+
+.PHONY: update
+update: ## Run streamr-docker-dev update
+	streamr-docker-dev update
+
 .SILENT: db-diff
 .ONESHELL: db-diff
 .PHONY: db-diff
