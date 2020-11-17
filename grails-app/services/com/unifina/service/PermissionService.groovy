@@ -1,12 +1,10 @@
 package com.unifina.service
 
-
 import com.unifina.domain.*
 import com.unifina.domain.Permission.Operation
 import grails.compiler.GrailsCompileStatic
 import grails.gsp.PageRenderer
 import grails.plugin.mail.MailService
-import grails.transaction.Transactional
 import grails.util.Holders
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
@@ -49,8 +47,6 @@ class PermissionService {
 	/**
 	 * Check whether user is allowed to perform specified operation on a resource
 	 */
-	// TODO: enable annotation for performance, but breaks a lot of tests.
-	//@Transactional(readOnly = true)
 	boolean check(Userish userish, Object resource, Operation op) {
 		Object id = findID(resource)
 		return id != null && hasPermission(userish, resource, op)
@@ -63,8 +59,6 @@ class PermissionService {
 	/**
 	 * Throws an exception if user is not allowed to perform specified operation on a resource.
 	 */
-	// TODO: enable annotation for performance, but breaks a lot of tests.
-	//@Transactional(readOnly = true)
 	void verify(Userish userish, Object resource, Operation op) throws NotPermittedException {
 		if (!check(userish, resource, op)) {
 			String name
@@ -80,7 +74,6 @@ class PermissionService {
 	/**
 	 * List all Permissions granted on a resource
 	 */
-	@Transactional(readOnly = true)
 	List<Permission> getPermissionsTo(Object resource) {
 		return getPermissionsTo(resource, true, null)
 	}
@@ -93,7 +86,6 @@ class PermissionService {
 	 * @param op Operation to limit the query result set.
 	 * @return List of Permission objects.
 	 */
-	@Transactional(readOnly = true)
 	List<Permission> getPermissionsTo(Object resource, boolean subscriptions, Operation op) {
 		String resourceProp = getResourcePropertyName(resource)
 		return store.getPermissionsTo(resourceProp, resource, subscriptions, op)
@@ -102,7 +94,6 @@ class PermissionService {
 	/**
 	 * List all Permissions with some Operation right granted on a resource
 	 */
-	@Transactional(readOnly = true)
 	List<Permission> getPermissionsTo(Object resource, Operation op) {
 		return getPermissionsTo(resource, true, op)
 	}
@@ -110,8 +101,6 @@ class PermissionService {
 	/**
 	 * List all Permissions that have not expired yet with some Operation right granted on a resource
 	 */
-	// TODO: enable annotation for performance, but breaks a lot of tests.
-	//@Transactional(readOnly = true)
 	List<Permission> getNonExpiredPermissionsTo(Object resource, Operation op) {
 		// TODO: find a way to do this in a single query instead of filtering results
 		List<Permission> results = []
@@ -127,7 +116,6 @@ class PermissionService {
 	/**
 	 * List all Permissions granted on a resource to a Userish
 	 */
-	@Transactional(readOnly = true)
 	List<Permission> getPermissionsTo(Object resource, Userish userish) {
 		userish = userish?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)
@@ -202,13 +190,11 @@ class PermissionService {
 	}
 
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
-	@Transactional(readOnly = true)
 	public <T> List<T> get(Class<T> resourceClass, Userish userish, Operation op, Closure resourceFilter = {}) {
 		return get(resourceClass, userish, op, false, resourceFilter)
 	}
 
 	/** Convenience overload: get all including public, adding a flag for public resources may look cryptic */
-	@Transactional(readOnly = true)
 	public <T> List<T> getAll(Class<T> resourceClass, Userish userish, Operation op, Closure resourceFilter = {}) {
 		return get(resourceClass, userish, op, true, resourceFilter)
 	}
@@ -216,7 +202,6 @@ class PermissionService {
 	/**
 	 * Get all resources of given type that the user has specified permission for
 	 */
-	@Transactional(readOnly = true)
 	public <T> List<T> get(Class<T> resourceClass, Userish userish, Operation op, boolean includeAnonymous,
 						Closure resourceFilter = {}) {
 		return store.get(resourceClass, userish, op, includeAnonymous, resourceFilter)
@@ -637,27 +622,24 @@ class PermissionService {
 
 	Permission savePermissionForEthereumAccount(String username, User grantor, Operation operation, Resource res, SignupMethod signupMethod) {
 		EthereumIntegrationKeyService ethereumIntegrationKeyService = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService)
-		User user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(username, signupMethod)
+		User user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddressRequiresNew(username, signupMethod)
 		User userish = User.findByUsername(user.username)
 		Permission newPermission = savePermission(res, grantor, userish, operation)
 		return newPermission
 	}
 
-	@Transactional(readOnly = true)
 	List<Permission> getOwnPermissions(Resource resource, User apiUser) {
 		Object res = resource.load(apiUser, false)
 		List<Permission> results = getPermissionsTo(res, apiUser)
 		return results
 	}
 
-	@Transactional(readOnly = true)
 	List<Permission> findAllPermissions(Resource resource, User apiUser, boolean subscriptions) {
 		Object res = resource.load(apiUser, true)
 		List<Permission> permissions = getPermissionsTo(res, subscriptions, null)
 		return permissions
 	}
 
-	@Transactional(readOnly = true)
 	Permission findPermission(Long permissionId, Resource resource, User apiUser) {
 		Object res = resource.load(apiUser, true)
 		List<Permission> permissions = getPermissionsTo(res)

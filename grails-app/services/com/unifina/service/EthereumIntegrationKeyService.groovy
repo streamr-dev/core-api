@@ -1,14 +1,19 @@
 package com.unifina.service
 
-import com.unifina.domain.*
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.SignupMethod
+import com.unifina.domain.User
 import com.unifina.security.StringEncryptor
 import com.unifina.utils.AlphanumericStringGenerator
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
+import grails.transaction.NotTransactional
+import grails.transaction.Transactional
 import groovy.transform.CompileStatic
 import org.apache.commons.codec.DecoderException
 import org.apache.commons.codec.binary.Hex
 import org.ethereum.crypto.ECKey
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.util.Assert
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.Keys
@@ -16,6 +21,7 @@ import org.web3j.crypto.Keys
 import javax.annotation.PostConstruct
 import java.security.SignatureException
 
+@Transactional
 class EthereumIntegrationKeyService {
 
 	def grailsApplication
@@ -102,16 +108,18 @@ class EthereumIntegrationKeyService {
 		}
 	}
 
+	@NotTransactional
 	String decryptPrivateKey(IntegrationKey key) {
 		Map json = JSON.parse(key.json)
 		return encryptor.decrypt((String) json.privateKey, key.user.id.byteValue())
 	}
 
+	@NotTransactional
 	List<IntegrationKey> getAllPrivateKeysForUser(User user) {
 		IntegrationKey.findAllByServiceAndUser(IntegrationKey.Service.ETHEREUM, user)
 	}
 
-    User getEthereumUser(String address) {
+	private User getEthereumUserImpl(String address) {
 		if (address == null) {
 			return null
 		}
@@ -125,12 +133,34 @@ class EthereumIntegrationKeyService {
 		return key.user
 	}
 
-	User getOrCreateFromEthereumAddress(String address, SignupMethod signupMethod) {
-		User user = getEthereumUser(address)
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+    User getEthereumUserNotSupported(String address) {
+		return getEthereumUserImpl(address)
+	}
+
+	User getEthereumUser(String address) {
+		return getEthereumUserImpl(address)
+	}
+
+	private User getOrCreateFromEthereumAddressImpl(String address, SignupMethod signupMethod) {
+		User user = getEthereumUserNotSupported(address)
 		if (user == null) {
-			user = createEthereumUser(address, signupMethod)
+			try {
+				user = createEthereumUser(address, signupMethod)
+			} catch (Exception e) {
+				user = getEthereumUserNotSupported(address)
+			}
 		}
 		return user
+	}
+
+	User getOrCreateFromEthereumAddress(String address, SignupMethod signupMethod) {
+		return getOrCreateFromEthereumAddressImpl(address, signupMethod)
+	}
+
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	User getOrCreateFromEthereumAddressRequiresNew(String address, SignupMethod signupMethod) {
+		return getOrCreateFromEthereumAddressImpl(address, signupMethod)
 	}
 
 	User createEthereumUser(String address, SignupMethod signupMethod) {

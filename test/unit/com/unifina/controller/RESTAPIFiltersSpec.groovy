@@ -1,12 +1,11 @@
 package com.unifina.controller
 
 import com.unifina.BeanMockingSpecification
-import com.unifina.controller.NodeApiController
 import com.unifina.domain.Role
 import com.unifina.domain.User
 import com.unifina.domain.UserRole
-import com.unifina.service.SessionService
 import com.unifina.service.EthereumIntegrationKeyService
+import com.unifina.service.SessionService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin

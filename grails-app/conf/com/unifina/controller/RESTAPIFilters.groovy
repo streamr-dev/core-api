@@ -1,11 +1,12 @@
 package com.unifina.controller
 
-import com.unifina.controller.StreamrApi
-import com.unifina.controller.AuthenticationResult
-import com.unifina.controller.TokenAuthenticator
+import com.unifina.service.EthereumIntegrationKeyService
+import com.unifina.service.SessionService
 import grails.converters.JSON
+import grails.util.Holders
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.context.ApplicationContext
 
 import java.lang.reflect.Method
 
@@ -16,7 +17,6 @@ import java.lang.reflect.Method
  */
 class RESTAPIFilters {
 	GrailsApplication grailsApplication
-
 	private Map<String, StreamrApi> apiAnnotationCache = new HashMap<String, StreamrApi>()
 
 	@CompileStatic
@@ -49,7 +49,10 @@ class RESTAPIFilters {
 				StreamrApi annotation = getApiAnnotation(controllerName, actionName)
 
 				try {
-					TokenAuthenticator authenticator = new TokenAuthenticator()
+					ApplicationContext applicationContext = Holders.getApplicationContext()
+					SessionService sessionService = applicationContext.getBean(SessionService.class)
+					EthereumIntegrationKeyService ethereumIntegrationKeyService = applicationContext.getBean(EthereumIntegrationKeyService.class)
+					TokenAuthenticator authenticator = new TokenAuthenticator(sessionService, ethereumIntegrationKeyService)
 					AuthenticationResult result = authenticator.authenticate(request)
 
 					if (result.lastAuthenticationMalformed) {

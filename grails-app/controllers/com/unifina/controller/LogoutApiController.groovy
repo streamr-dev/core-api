@@ -1,6 +1,5 @@
 package com.unifina.controller
 
-
 import com.unifina.service.SessionService
 import grails.converters.JSON
 
@@ -9,7 +8,7 @@ class LogoutApiController {
 
 	@StreamrApi
     def logout() {
-		TokenAuthenticator authenticator = new TokenAuthenticator()
+		TokenAuthenticator authenticator = new TokenAuthenticator(null, null)
 		String sessionToken = authenticator.getSessionToken(request)
 		if (sessionToken != null) {
 			sessionService.invalidateSession(sessionToken)

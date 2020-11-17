@@ -328,7 +328,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		when:
 		service.savePermissionForEthereumAccount(ethUserUsername, apiUser, op, res, SignupMethod.UNKNOWN)
 		then:
-		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(ethUserUsername, SignupMethod.UNKNOWN) >> createdEthUser
+		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddressRequiresNew(ethUserUsername, SignupMethod.UNKNOWN) >> createdEthUser
 		0 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
 		0 * service.mailService.sendMail { _ }
 		service.check(createdEthUser, canvasOwned, op)

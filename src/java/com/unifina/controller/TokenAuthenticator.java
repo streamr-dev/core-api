@@ -6,23 +6,26 @@ import com.unifina.service.InvalidSessionTokenException;
 import com.unifina.service.SessionService;
 import com.unifina.service.EthereumIntegrationKeyService;
 import com.unifina.security.ApiKeyConverter;
-import grails.util.Holders;
 
 import javax.servlet.http.HttpServletRequest;
 
 public class TokenAuthenticator {
-	SessionService sessionService = Holders.getApplicationContext().getBean(SessionService.class);
-	EthereumIntegrationKeyService ethereumIntegrationKeyService = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService.class);
+	private final SessionService sessionService;
+	private final EthereumIntegrationKeyService ethereumIntegrationKeyService;
 
 	private enum HeaderType {
 		TOKEN,
 		BEARER
 	}
 
-	public static class AuthorizationHeader {
+	public TokenAuthenticator(SessionService sessionService, EthereumIntegrationKeyService ethereumIntegrationKeyService) {
+		this.sessionService = sessionService;
+		this.ethereumIntegrationKeyService = ethereumIntegrationKeyService;
+	}
 
-		private HeaderType headerType;
-		private String headerValue;
+	public static class AuthorizationHeader {
+		private final HeaderType headerType;
+		private final String headerValue;
 
 		public AuthorizationHeader(HeaderType headerType, String headerValue) {
 			this.headerType = headerType;
