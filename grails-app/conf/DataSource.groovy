@@ -11,12 +11,13 @@ dataSource {
 		maxAge = 10 * 60000
 		minEvictableIdleTimeMillis=60000 // 1800000
 		timeBetweenEvictionRunsMillis=60000 //1800000, default: 5000
+		numTestsPerEvictionRun=3
 		validationQuery = "SELECT 1"
 		validationQueryTimeout = 3
 		validationInterval = 15000
 		testOnBorrow = true
 		testWhileIdle = true
-		testOnReturn = false
+		testOnReturn = true
 		defaultTransactionIsolation = java.sql.Connection.TRANSACTION_REPEATABLE_READ
 	}
 }
