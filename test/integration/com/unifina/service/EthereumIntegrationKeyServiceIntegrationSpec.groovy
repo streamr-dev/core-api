@@ -2,9 +2,16 @@ package com.unifina.service
 
 import com.unifina.domain.IntegrationKey
 import com.unifina.domain.User
-import spock.lang.Specification
+import grails.test.spock.IntegrationSpec
+import grails.util.Holders
 
-class EthereumIntegrationKeyServiceIntegrationSpec extends Specification {
+class EthereumIntegrationKeyServiceIntegrationSpec extends IntegrationSpec {
+	EthereumIntegrationKeyService service
+
+	void setup() {
+		service = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService)
+	}
+
 	void "getEthereumUser query works with lowercase or uppercase input"() {
 		setup:
 		String ethAddr = "0xF24197f71fC9b2F4F4c24ecE461fB0Ff7C91FD23"
@@ -34,7 +41,6 @@ class EthereumIntegrationKeyServiceIntegrationSpec extends Specification {
 			idInService: "0xD14197f71fC9b2F4F4c24ecE461fB0Ff7C91FD266",
 		).save(failOnError: true, validate: true)
 
-		EthereumIntegrationKeyService service = new EthereumIntegrationKeyService()
 		when:
 		User result = service.getEthereumUser(ethAddr.toLowerCase())
 		then:
