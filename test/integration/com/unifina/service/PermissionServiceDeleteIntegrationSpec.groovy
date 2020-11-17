@@ -49,7 +49,7 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 		service.deletePermission(permission.id, res, user)
 
 		then:
-		Permission.get(permission.id) == null
+		Permission.findById(permission.id) == null
 	}
 
 	void "user without share permission to resource can't delete another user's permission to same resource"() {
@@ -74,7 +74,7 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 		service.deletePermission(permission.id, res, user)
 
 		then:
-		Permission.get(permission.id) == null
+		Permission.findById(permission.id) == null
 	}
 
 	void "user with share permission to resource can't delete another user's permission to another resource"() {
@@ -101,7 +101,7 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 		when:
 		service.deletePermission(p.id, res, apiUser)
 		then:
-		Permission.get(p.id) == null
+		Permission.findById(p.id) == null
 	}
 
 	void "deletePermission() throws NotFoundException when permission id not found"() {
