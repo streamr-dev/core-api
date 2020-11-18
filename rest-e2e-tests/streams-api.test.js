@@ -67,15 +67,6 @@ describe('Streams API', () => {
 			await assertStreamrClientResponseError(request, 422)
 		})
 
-		it('create with sandbox id', async function() {
-			const streamId = 'sandbox/foo/bar' + Date.now()
-			const properties = {
-				id: streamId
-			}
-			const response = await getStreamrClient(streamOwner).createStream(properties)
-			assert.equal(response.id, streamId)
-		})
-
 		it('create with owned domain id', async function() {
 			const streamId = 'testdomain1.eth/foo/bar' + Date.now()
 			const properties = {
@@ -107,7 +98,7 @@ describe('Streams API', () => {
 
     describe('GET /api/v1/streams/:id', () => {
         it('works with uri-encoded ids', async () => {
-            const id = 'sandbox/streams-api.test.js/stream-' + Date.now()
+            const id = streamOwner.address + '/streams-api.test.js/stream-' + Date.now()
             await getStreamrClient(streamOwner).createStream({
                 id
             })
