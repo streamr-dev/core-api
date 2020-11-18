@@ -67,7 +67,7 @@ describe('Streams API', () => {
 			await assertStreamrClientResponseError(request, 422)
 		})
 
-		it('create with sandbox domain id', async function() {
+		it('create with sandbox id', async function() {
 			const streamId = 'sandbox/foo/bar' + Date.now()
 			const properties = {
 				id: streamId
@@ -85,10 +85,19 @@ describe('Streams API', () => {
 			assert.equal(response.id, streamId)
 		})
 
-		it('create with invalid domain id', async function() {
-			const sandboxDomainId = 'foobar.eth/loremipsum'
+		it('create with integration key id', async function() {
+			const streamId = streamOwner.address + '/foo/bar' + Date.now()
 			const properties = {
-				id: sandboxDomainId
+				id: streamId
+			}
+			const response = await getStreamrClient(streamOwner).createStream(properties)
+			assert.equal(response.id, streamId)
+		})
+
+		it('create with invalid id', async function() {
+			const streamId = 'foobar.eth/loremipsum'
+			const properties = {
+				id: streamId
 			}
 			const request = getStreamrClient(streamOwner).createStream(properties)
 			await assertStreamrClientResponseError(request, 422)
