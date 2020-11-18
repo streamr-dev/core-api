@@ -84,8 +84,8 @@ class DataUnionJoinRequestService {
 				DataUnionClient client = getClient()
 				DataUnion du = client.dataUnionFromMainnetAddress(c.contractAddress)
 				EthereumTransactionReceipt transactionReceipt = du.joinMembers(c.memberAddress)
-				log.debug("transaction=" + transactionReceipt.txHash())
-				client.waitForSidechainTx(transactionReceipt.txHash(), JOIN_REQUEST_TRANSACTION_POLL_INTERVAL, JOIN_REQUEST_TRANSACTION_TIMEOUT)
+				log.debug("transaction=" + transactionReceipt.getTransactionHash())
+				client.waitForSidechainTx(transactionReceipt.getTransactionHash(), JOIN_REQUEST_TRANSACTION_POLL_INTERVAL, JOIN_REQUEST_TRANSACTION_TIMEOUT)
 				boolean active = isMemberActive(c.contractAddress, c.memberAddress)
 				if (!active) {
 					throw new DataUnionJoinRequestException("Error on registering join request")
