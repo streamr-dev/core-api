@@ -5,7 +5,7 @@
 
 # This Makefile uses .ONESHELL option supported by Make 3.82
 ifeq ($(filter oneshell,$(.FEATURES)),)
-$(error error: Your version of make ($(shell make -v|head -1|cut -f 3 -d ' ')) cdoes not support .ONESHELL)
+$(error error: Your version of make ($(shell make -v|head -1|cut -f 3 -d ' ')) does not support .ONESHELL)
 endif
 
 LANG := en_US.UTF-8
