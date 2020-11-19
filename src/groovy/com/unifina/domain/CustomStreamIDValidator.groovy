@@ -11,7 +11,6 @@ class CustomStreamIDValidator {
 		boolean isOwnedBy(String domain, User owner)
 	}
 
-	public static final String SANDBOX_HOST = "sandbox"
 	// path rules:
 	// - must start by slash
 	// - can contain chars a-z, A-Z, 0-9 and -_.
@@ -31,19 +30,11 @@ class CustomStreamIDValidator {
 		} else {
 			Matcher matcher = REGEX.matcher(id)
 			if (matcher.matches()) {
-				String host = matcher.group(1)
-				return isValidHost(host, creator)
+				String domain = matcher.group(1)
+				return domainValidator.isOwnedBy(domain, creator)
 			} else {
 				return false;
 			}
-		}
-	}
-
-	boolean isValidHost(String host, User creator) {
-		if (host.equals(SANDBOX_HOST)) {
-			return true
-		} else {
-			return domainValidator.isOwnedBy(host, creator)
 		}
 	}
 }

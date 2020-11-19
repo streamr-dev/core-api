@@ -40,19 +40,19 @@ class StreamServiceSpec extends Specification {
 
 	void "createStream replaces empty name with stream id"() {
 		when:
-		Stream s = service.createStream(new CreateStreamCommand(id: "sandbox/foobar"), me, null)
+		Stream s = service.createStream(new CreateStreamCommand(id: "foobar"), me, null)
 
 		then:
-		s.name == "sandbox/foobar"
+		s.name == "foobar"
 	}
 
 	void "createStream results in persisted Stream"() {
 		when:
-		service.createStream(new CreateStreamCommand(id: "sandbox/foobar"), me, null)
+		service.createStream(new CreateStreamCommand(id: "foobar"), me, null)
 
 		then:
 		Stream.count() == 1
-		Stream.list().first().id == "sandbox/foobar"
+		Stream.list().first().id == "foobar"
 	}
 
 	void "createStream results in all permissions for Stream"() {
