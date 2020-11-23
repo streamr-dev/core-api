@@ -6,7 +6,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(SubscriptionService)
-@Mock([FreeSubscription, IntegrationKey, PaidSubscription, Permission, Product, Stream, Subscription])
+@Mock([SubscriptionFree, IntegrationKey, PaidSubscription, Permission, Product, Stream, Subscription])
 class SubscriptionServiceSpec extends BeanMockingSpecification {
 
 	User user, user2
@@ -84,13 +84,13 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 
 	void "getSubscriptionsOfUser() returns free subscriptions as well"() {
 		def product2 = new Product().save(failOnError: true, validate: false)
-		def s1 = new FreeSubscription(product: product, user: user, endsAt: new Date(2018, 4, 13, 13, 6))
+		def s1 = new SubscriptionFree(product: product, user: user, endsAt: new Date(2018, 4, 13, 13, 6))
 			.save(failOnError: true)
-		def s2 = new FreeSubscription(product: product2, user: user, endsAt: new Date(2018, 10, 20, 14, 0))
+		def s2 = new SubscriptionFree(product: product2, user: user, endsAt: new Date(2018, 10, 20, 14, 0))
 			.save(failOnError: true)
-		def s3 = new FreeSubscription(product: product2, user: user2, endsAt: new Date(2018, 10, 20, 14, 0))
+		def s3 = new SubscriptionFree(product: product2, user: user2, endsAt: new Date(2018, 10, 20, 14, 0))
 			.save(failOnError: true)
-		def s4 = new FreeSubscription(product: product, user: user2, endsAt: new Date(2018, 10, 20, 14, 0))
+		def s4 = new SubscriptionFree(product: product, user: user2, endsAt: new Date(2018, 10, 20, 14, 0))
 			.save(failOnError: true)
 
 		expect:
@@ -229,7 +229,7 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 	void "subscribeToFreeProduct() creates new FreeSubscription if product-user pair does not exist"() {
 		product.pricePerSecond = 0
 
-		assert FreeSubscription.count() == 0
+		assert SubscriptionFree.count() == 0
 		Permission p1 = new Permission(operation: Permission.Operation.STREAM_SUBSCRIBE, user: user, stream: s1)
 		Permission p2 = new Permission(operation: Permission.Operation.STREAM_SUBSCRIBE, user: user, stream: s2)
 
@@ -240,13 +240,13 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		1 * permissionService.systemGrant(user, s1, Permission.Operation.STREAM_SUBSCRIBE, _, _) >> p1
 		1 * permissionService.systemGrant(user, s2, Permission.Operation.STREAM_SUBSCRIBE, _, _) >> p2
 		s.id != null
-		FreeSubscription.findAll() == [s]
+		SubscriptionFree.findAll() == [s]
 	}
 
 	void "subscribeToFreeProduct() updates existing Subscription if product-user exists"() {
 		product.pricePerSecond = 0
 
-		Subscription sub1 = new FreeSubscription(product: product, user: user, endsAt: new Date()).save(failOnError: true, validate: false)
+		Subscription sub1 = new SubscriptionFree(product: product, user: user, endsAt: new Date()).save(failOnError: true, validate: false)
 		Permission p1 = new Permission(operation: Permission.Operation.STREAM_SUBSCRIBE, user: user, stream: s1)
 		Permission p2 = new Permission(operation: Permission.Operation.STREAM_SUBSCRIBE, user: user, stream: s2)
 
@@ -282,7 +282,7 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 	void "subscribeToFreeProduct() removes existing subscription-linked permissions"() {
 		product.pricePerSecond = 0
 
-		Subscription s = new FreeSubscription(product: product, user: user2, endsAt: new Date(0))
+		Subscription s = new SubscriptionFree(product: product, user: user2, endsAt: new Date(0))
 			.save(failOnError: true, validate: false)
 		Permission p1 = new Permission(user: user, stream: s1, operation: Permission.Operation.STREAM_SUBSCRIBE)
 		Permission p2 = new Permission(user: user, stream: s2, operation: Permission.Operation.STREAM_SUBSCRIBE)

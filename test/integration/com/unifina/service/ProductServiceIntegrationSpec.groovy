@@ -1,15 +1,6 @@
 package com.unifina.service
 
-
-import com.unifina.domain.Stream
-import com.unifina.domain.Category
-import com.unifina.domain.FreeSubscription
-import com.unifina.domain.Product
-import com.unifina.domain.Subscription
-import com.unifina.domain.IntegrationKey
-import com.unifina.domain.User
-import com.unifina.domain.Module
-import com.unifina.domain.ModuleCategory
+import com.unifina.domain.*
 import grails.test.spock.IntegrationSpec
 
 class ProductServiceIntegrationSpec extends IntegrationSpec {
@@ -91,9 +82,9 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 			json: "{}"
 		).save(failOnError: true, validate: false)
 
-		fs1 = new FreeSubscription(product: p1, user: troll, address: "0x0000000000000000000000000000000000000005", endsAt: new Date())
+		fs1 = new SubscriptionFree(product: p1, user: troll, address: "0x0000000000000000000000000000000000000005", endsAt: new Date())
 		fs1.save(failOnError: true, validate: true)
-		fs2 = new FreeSubscription(product: p1, user: user, address: "0x0000000000000000000000000000000000000005", endsAt: new Date())
+		fs2 = new SubscriptionFree(product: p1, user: user, address: "0x0000000000000000000000000000000000000005", endsAt: new Date())
 		fs2.save(failOnError: true, validate: true)
 	}
 
@@ -111,8 +102,8 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 		then:
 		Product.get(p1.id) == null
 		Product.get(p2.id) == null
-		FreeSubscription.get(fs1.id) == null
-		FreeSubscription.get(fs2.id) == null
+		SubscriptionFree.get(fs1.id) == null
+		SubscriptionFree.get(fs2.id) == null
 
 		Stream.get(s1.id) != null
 		Stream.get(s2.id) != null

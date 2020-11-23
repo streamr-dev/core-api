@@ -19,7 +19,7 @@ class SubscriptionService {
 		def addresses = integrationKeys*.idInService
 		List<Subscription> subscriptions = new ArrayList<>()
 		subscriptions.addAll(PaidSubscription.findAllByAddressInList(addresses))
-		subscriptions.addAll(FreeSubscription.findAllByUser(user))
+		subscriptions.addAll(SubscriptionFree.findAllByUser(user))
 		return subscriptions
 	}
 
@@ -39,9 +39,9 @@ class SubscriptionService {
 	 */
 	Subscription subscribeToFreeProduct(Product product, User user, Date endsAt) {
 		FreeProductService.verifyThatProductIsFree(product)
-		Subscription subscription = FreeSubscription.findByProductAndUser(product, user)
+		Subscription subscription = SubscriptionFree.findByProductAndUser(product, user)
 		if (subscription == null) {
-			subscription = new FreeSubscription(product: product, user: user)
+			subscription = new SubscriptionFree(product: product, user: user)
 		}
 		return updateSubscriptionAndLinkedPermissions(subscription, endsAt)
 	}

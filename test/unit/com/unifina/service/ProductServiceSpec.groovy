@@ -7,7 +7,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 @TestFor(ProductService)
-@Mock([Category, Product, FreeSubscription, PaidSubscription])
+@Mock([Category, Product, SubscriptionFree, PaidSubscription])
 class ProductServiceSpec extends Specification {
 	Stream s1, s2, s3, s4
 	Category category

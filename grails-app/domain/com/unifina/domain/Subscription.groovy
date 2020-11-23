@@ -1,6 +1,5 @@
 package com.unifina.domain
 
-
 import grails.compiler.GrailsCompileStatic
 import grails.persistence.Entity
 
