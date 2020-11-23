@@ -38,7 +38,7 @@ class SubscriptionService {
 	 * Subscribe to user to (free) Product
 	 */
 	Subscription subscribeToFreeProduct(Product product, User user, Date endsAt) {
-		FreeProductService.verifyThatProductIsFree(product)
+		ProductFreeService.verifyThatProductIsFree(product)
 		Subscription subscription = FreeSubscription.findByProductAndUser(product, user)
 		if (subscription == null) {
 			subscription = new FreeSubscription(product: product, user: user)

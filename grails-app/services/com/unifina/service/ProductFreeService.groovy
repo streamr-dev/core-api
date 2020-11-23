@@ -1,15 +1,14 @@
 package com.unifina.service
 
-
 import com.unifina.domain.Permission
 import com.unifina.domain.Product
 import grails.compiler.GrailsCompileStatic
 
 /**
- * TODO: merge ProductService and FreeProductService
+ * TODO: merge ProductService and ProductFreeService
  */
 @GrailsCompileStatic
-class FreeProductService {
+class ProductFreeService {
 	PermissionService permissionService
 
 	void deployFreeProduct(Product product) {
