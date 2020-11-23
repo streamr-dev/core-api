@@ -160,4 +160,5 @@ databaseChangeLog = {
 	include file: 'core/2020-10-12-fix-subscription-column-class.groovy'
 	include file: 'core/2020-10-23-remove-API-key-permission.groovy'
 	include file: 'core/2020-11-05-remove-API-key.groovy'
+	include file: 'core/2020-11-23-rename-subscription-classes.groovy'
 }
