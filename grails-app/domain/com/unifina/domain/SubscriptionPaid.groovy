@@ -7,7 +7,7 @@ import grails.util.Holders
 
 @GrailsCompileStatic
 @Entity
-class PaidSubscription extends Subscription {
+class SubscriptionPaid extends Subscription {
 
 	String address
 

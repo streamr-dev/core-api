@@ -6,7 +6,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(SubscriptionService)
-@Mock([SubscriptionFree, IntegrationKey, PaidSubscription, Permission, Product, Stream, Subscription])
+@Mock([SubscriptionFree, IntegrationKey, SubscriptionPaid, Permission, Product, Stream, Subscription])
 class SubscriptionServiceSpec extends BeanMockingSpecification {
 
 	User user, user2
@@ -68,13 +68,13 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 			idInService: "0x000000000000000000000000000000000000000C"
 		).save(failOnError: true, validate: false)
 
-		def s1 = new PaidSubscription(address: "0x0000000000000000000000000000000000000000")
+		def s1 = new SubscriptionPaid(address: "0x0000000000000000000000000000000000000000")
 			.save(failOnError: true, validate: false)
-		def s2 = new PaidSubscription(address: "0x0000000000000000000000000000000000000005")
+		def s2 = new SubscriptionPaid(address: "0x0000000000000000000000000000000000000005")
 			.save(failOnError: true, validate: false)
-		def s3 = new PaidSubscription(address: "0x000000000000000000000000000000000000000C")
+		def s3 = new SubscriptionPaid(address: "0x000000000000000000000000000000000000000C")
 			.save(failOnError: true, validate: false)
-		def s4 = new PaidSubscription(address: "0x000000000000000000000000000000000000000C")
+		def s4 = new SubscriptionPaid(address: "0x000000000000000000000000000000000000000C")
 			.save(failOnError: true, validate: false)
 
 
@@ -105,7 +105,7 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 
 		then:
 		s.id != null
-		PaidSubscription.findAll() == [s]
+		SubscriptionPaid.findAll() == [s]
 	}
 
 	void "onSubscribed() updates existing Subscription if product-address exists"() {
@@ -181,7 +181,7 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 
 	void "onSubscribed() removes existing subscription-linked permissions if user found for address"() {
 		String address = "0x0000000000000000000000000000000000000000"
-		Subscription s = new PaidSubscription(product: product, address: address, endsAt: new Date(0))
+		Subscription s = new SubscriptionPaid(product: product, address: address, endsAt: new Date(0))
 			.save(failOnError: true, validate: false)
 
 		Permission p1 = new Permission(user: user, stream: s1, operation: Permission.Operation.STREAM_SUBSCRIBE)
@@ -328,18 +328,18 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		def product2 = new Product(streams: [s3]).save(failOnError: true, validate: false)
 
 		setup: "create permissions"
-		Subscription sub1 = new PaidSubscription(product: product, address: address1).save(failOnError: true, validate: false)
+		Subscription sub1 = new SubscriptionPaid(product: product, address: address1).save(failOnError: true, validate: false)
 		Permission p1 = new Permission(stream: s1, subscription: sub1, endsAt: new Date()).save(failOnError: true, validate: false)
 		Permission p2 = new Permission(stream: s2, subscription: sub1, endsAt: new Date()).save(failOnError: true, validate: false)
 
-		Subscription sub2 = new PaidSubscription(product: product2, address: address1).save(failOnError: true, validate: false)
+		Subscription sub2 = new SubscriptionPaid(product: product2, address: address1).save(failOnError: true, validate: false)
 		Permission p3 = new Permission(stream: s3, subscription: sub2, endsAt: new Date()).save(failOnError: true, validate: false)
 
-		Subscription sub3 = new PaidSubscription(product: product, address: address2).save(failOnError: true, validate: false)
+		Subscription sub3 = new SubscriptionPaid(product: product, address: address2).save(failOnError: true, validate: false)
 		new Permission(stream: s1, subscription: sub3, endsAt: new Date()).save(failOnError: true, validate: false)
 		new Permission(stream: s2, subscription: sub3, endsAt: new Date()).save(failOnError: true, validate: false)
 
-		Subscription sub4 = new PaidSubscription(product: product2, address: address2).save(failOnError: true, validate: false)
+		Subscription sub4 = new SubscriptionPaid(product: product2, address: address2).save(failOnError: true, validate: false)
 		new Permission(stream: s3, subscription: sub4, endsAt: new Date()).save(failOnError: true, validate: false)
 
 		new Permission(user: user, stream: s1, operation: Permission.Operation.STREAM_SUBSCRIBE).save(failOnError: true, validate: false)
@@ -358,12 +358,12 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		def date = new Date()
 		def product2 = new Product(streams: [s3]).save(failOnError: true, validate: false)
 		String address = "0x0000000000000000000000000000000000000000"
-		new PaidSubscription(
+		new SubscriptionPaid(
 			address: address,
 			product: product,
 			endsAt: date
 		).save(failOnError: true, validate: true)
-		new PaidSubscription(
+		new SubscriptionPaid(
 			address: address,
 			product: product2,
 			endsAt: date
@@ -411,14 +411,14 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 
 		setup: "create permissions"
 		def date = new Date()
-		sub1 = new PaidSubscription(product: product, address: address1).save(failOnError: true, validate: false)
+		sub1 = new SubscriptionPaid(product: product, address: address1).save(failOnError: true, validate: false)
 		p1 = new Permission(user: user, stream: s1, operation: Permission.Operation.STREAM_SUBSCRIBE, subscription: sub1, endsAt: date).save(failOnError: true, validate: false)
 		p2 = new Permission(user: user, stream: s2, operation: Permission.Operation.STREAM_SUBSCRIBE, subscription: sub1, endsAt: date).save(failOnError: true, validate: false)
 
 		product.streams = [s1]
 		product.save(failOnError: true, validate: false)
 
-		sub2 = new PaidSubscription(product: product, address: address2).save(failOnError: true, validate: false)
+		sub2 = new SubscriptionPaid(product: product, address: address2).save(failOnError: true, validate: false)
 		p3 = new Permission(user: user2, stream: s3, operation: Permission.Operation.STREAM_SUBSCRIBE, subscription: sub2, endsAt: date).save(failOnError: true, validate: false)
 
 		assert Permission.findAll()*.toInternalMap() as Set == [p1.toInternalMap(), p2.toInternalMap(), p3.toInternalMap()] as Set

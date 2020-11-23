@@ -3,7 +3,7 @@ package com.unifina.domain
 import grails.test.spock.IntegrationSpec
 import grails.validation.ValidationException
 
-class PaidSubscriptionIntegrationSpec extends IntegrationSpec {
+class SubscriptionPaidIntegrationSpec extends IntegrationSpec {
 
 	Product product
 
@@ -44,7 +44,7 @@ class PaidSubscriptionIntegrationSpec extends IntegrationSpec {
 			idInService: "0xffffffffffFFFFFFFFFFaaaaaaaaaaBBBBBBBBBB"
 		).save(failOnError: true)
 
-		def subscription = new PaidSubscription(
+		def subscription = new SubscriptionPaid(
 			product: product,
 			endsAt: new Date(0),
 			address: "0xffffffffffffffffffffaaaaaaaaaabbbbbbbbbb"
@@ -56,26 +56,26 @@ class PaidSubscriptionIntegrationSpec extends IntegrationSpec {
 
 	void "fetching by address is case-insensitive w.r.t. ethereum addresses [database property]"() {
 		setup:
-		def subscription = new PaidSubscription(
+		def subscription = new SubscriptionPaid(
 			product: product,
 			endsAt: new Date(0),
 			address: "0xffffffffffffffffffffaaaaaaaaaabbbbbbbbbb"
 		).save(failOnError: true)
 
 		expect:
-		PaidSubscription.findByProductAndAddress(product, "0xFFFFFFFFFFFFFFFFFFFFAAAAAAAAAAbbbbbbbbbb") == subscription
+		SubscriptionPaid.findByProductAndAddress(product, "0xFFFFFFFFFFFFFFFFFFFFAAAAAAAAAAbbbbbbbbbb") == subscription
 	}
 
 	void "address-product uniqueness constraint is case-insensitive w.r.t. ethereum addresses [database property]"() {
 		setup:
-		new PaidSubscription(
+		new SubscriptionPaid(
 			product: product,
 			endsAt: new Date(0),
 			address: "0xffffffffffffffffffffaaaaaaaaaabbbbbbbbbb"
 		).save(failOnError: true)
 
 		when:
-		new PaidSubscription(
+		new SubscriptionPaid(
 			product: product,
 			endsAt: new Date(0),
 			address: "0xFFFFFFFFFFFFFFFFFFFFaaaaaaaaaaBBBBBBBBBB"
