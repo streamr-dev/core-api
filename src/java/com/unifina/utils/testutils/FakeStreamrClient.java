@@ -29,7 +29,7 @@ public class FakeStreamrClient extends StreamrClient {
 		if (!sentMessagesByChannel.containsKey(stream.getId())) {
 			sentMessagesByChannel.put(stream.getId(), new ArrayList<>());
 		}
-		sentMessagesByChannel.get(stream.getId()).add(new SentMessage(payload, timestamp, partitionKey));
+		sentMessagesByChannel.get(stream.getId()).add(new SentMessage(payload, timestamp, partitionKey, groupKey));
 	}
 
 	@Override
@@ -54,11 +54,13 @@ public class FakeStreamrClient extends StreamrClient {
 		public Map<String, Object> payload;
 		public Date timestamp;
 		public String partitionKey;
+		public GroupKey groupKey;
 
-		public SentMessage(Map<String, Object> payload, Date timestamp, String partitionKey) {
+		public SentMessage(Map<String, Object> payload, Date timestamp, String partitionKey, GroupKey groupKey) {
 			this.payload = payload;
 			this.timestamp = timestamp;
 			this.partitionKey = partitionKey;
+			this.groupKey = groupKey;
 		}
 	}
 }

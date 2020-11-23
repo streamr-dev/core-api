@@ -87,6 +87,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 					[strIn:"c", numIn:3.0],
 					[strIn:"d", numIn:4.0]
 				]
+				assert sentMessagesByStream[stream.id]*.groupKey.unique() == [null]
 			}.test()
 	}
 
@@ -208,6 +209,28 @@ class SendToStreamSpec extends BeanMockingSpecification {
 					[strIn: "f", numIn: 6.0]
 				]
 		}.test()
+	}
+
+	void "SendToStream can be configured to encrypt data"() {
+		permissionService.check(_, _, Permission.Operation.STREAM_PUBLISH) >> true
+		createModule([encrypt: [value: true]])
+
+		when:
+		Map inputValues = [
+			strIn: ["a"],
+			numIn: [1.0]
+		]
+		Map outputValues = [:]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+			.overrideGlobals { globals }
+			.afterEachTestCase {
+				def sentMessagesByStream = streamrClient.getAndClearSentMessages()
+				assert sentMessagesByStream.keySet().asList() == [stream.id]
+				assert sentMessagesByStream[stream.id].size() == 1
+				assert sentMessagesByStream[stream.id][0].groupKey != null
+			}.test()
 	}
 
 	void "SendToStream exposes a partitionKey input when the stream has multiple partitions"() {

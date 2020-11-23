@@ -1,6 +1,7 @@
 package com.unifina.signalpath.kafka;
 
 import com.streamr.client.StreamrClient;
+import com.streamr.client.utils.GroupKey;
 import com.unifina.domain.Stream;
 import com.unifina.domain.Permission;
 import com.unifina.domain.User;
@@ -28,8 +29,10 @@ public class SendToStream extends ModuleWithSideEffects {
 
 	transient private StreamrClient streamrClient = null;
 	transient private com.streamr.client.rest.Stream cachedStream = null;
+	transient private GroupKey encryptionKey = null;
 
 	private boolean sendOnlyNewValues = false;
+	private boolean encrypt = false;
 
 	private List<Input> fieldInputs = new ArrayList<>();
 	private Input<Object> partitionKey = null; // Only set if the Stream has multiple partitions
@@ -64,7 +67,8 @@ public class SendToStream extends ModuleWithSideEffects {
 				s,
 				inputValuesToMap(),
 				getGlobals().getTime(),
-				partitionKey != null && partitionKey.getValue() != null ? partitionKey.getValue().toString() : null
+				partitionKey != null && partitionKey.getValue() != null ? partitionKey.getValue().toString() : null,
+				encrypt ? this.getEncryptionKey() : null
 			);
 		} catch (Exception e) {
 			log.error("Failed to publish: ", e);
@@ -98,6 +102,7 @@ public class SendToStream extends ModuleWithSideEffects {
 		Map<String, Object> config = super.getConfiguration();
 		ModuleOptions options = ModuleOptions.get(config);
 		options.addIfMissing(ModuleOption.createBoolean("sendOnlyNewValues", sendOnlyNewValues));
+		options.addIfMissing(ModuleOption.createBoolean("encrypt", encrypt));
 		return config;
 	}
 
@@ -111,6 +116,11 @@ public class SendToStream extends ModuleWithSideEffects {
 		ModuleOption sendOnlyNewValuesOption = options.getOption("sendOnlyNewValues");
 		if (sendOnlyNewValuesOption != null) {
 			sendOnlyNewValues = sendOnlyNewValuesOption.getBoolean();
+		}
+
+		ModuleOption encryptOption = options.getOption("encrypt");
+		if (encryptOption != null) {
+			encrypt = encryptOption.getBoolean();
 		}
 
 		if (stream==null)
@@ -184,4 +194,10 @@ public class SendToStream extends ModuleWithSideEffects {
 		}
 	}
 
+	private GroupKey getEncryptionKey() {
+		if (encryptionKey == null) {
+			encryptionKey = GroupKey.generate();
+		}
+		return encryptionKey;
+	}
 }
