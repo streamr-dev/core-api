@@ -109,7 +109,7 @@ class ProductApiControllerSpec extends Specification {
 			controller.save()
 		}
 		then:
-		1 * productService.create(_ as CreateProductCommand, user) >> product
+		1 * productService.create(_ as ProductCreateCommand, user) >> product
 	}
 
 	void "save() returns 200 and renders a product"() {

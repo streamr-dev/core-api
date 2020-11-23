@@ -47,7 +47,7 @@ class ProductApiController {
 
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def save(CreateProductCommand command) {
+	def save(ProductCreateCommand command) {
 		Product product = productService.create(command, loggedInUser())
 		render(product.toMap() as JSON)
 	}

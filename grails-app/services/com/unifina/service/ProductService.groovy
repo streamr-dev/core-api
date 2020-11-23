@@ -63,7 +63,7 @@ class ProductService {
 		apiService.authorizedGetById(Product, id, currentUser, op)
 	}
 
-	Product create(CreateProductCommand command, User currentUser)
+	Product create(ProductCreateCommand command, User currentUser)
 			throws ValidationException, NotPermittedException {
 		if (command.name == null || command.name.trim() == "") {
 			command.name = Product.DEFAULT_NAME

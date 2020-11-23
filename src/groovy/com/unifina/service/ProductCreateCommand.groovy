@@ -4,7 +4,7 @@ import com.unifina.domain.*
 import grails.validation.Validateable
 
 @Validateable
-class CreateProductCommand {
+class ProductCreateCommand {
 	Product.Type type = Product.Type.NORMAL
 
 	String name = Product.DEFAULT_NAME

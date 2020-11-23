@@ -106,7 +106,7 @@ class ProductServiceSpec extends Specification {
 
 	void "create() throws ValidationException if command object does not pass validation"() {
 		when:
-		service.create(new CreateProductCommand(pricePerSecond: -1), new User())
+		service.create(new ProductCreateCommand(pricePerSecond: -1), new User())
 		then:
 		thrown(ValidationException)
 	}
@@ -119,7 +119,7 @@ class ProductServiceSpec extends Specification {
 		contact.url = "https://www.fi"
 		TermsOfUse termsOfUse = new TermsOfUse()
 		termsOfUse.termsName = "terms link name"
-		def validCommand = new CreateProductCommand(
+		def validCommand = new ProductCreateCommand(
 			name: "Product",
 			description: "Description of Product.",
 			category: category,
@@ -172,7 +172,7 @@ class ProductServiceSpec extends Specification {
 		setupStreams()
 		def permissionService = service.permissionService = Mock(PermissionService)
 
-		def validCommand = new CreateProductCommand(
+		def validCommand = new ProductCreateCommand(
 			name: "Product",
 			description: "Description of Product.",
 			category: category,
@@ -194,7 +194,7 @@ class ProductServiceSpec extends Specification {
 		setupStreams()
 		def permissionService = service.permissionService = Mock(PermissionService)
 
-		def validCommand = new CreateProductCommand(
+		def validCommand = new ProductCreateCommand(
 			name: "Product",
 			description: "Description of Product.",
 			category: category,
@@ -218,7 +218,7 @@ class ProductServiceSpec extends Specification {
 		setupStreams()
 		def permissionService = service.permissionService = Mock(PermissionService)
 
-		def validCommand = new CreateProductCommand(
+		def validCommand = new ProductCreateCommand(
 			name: "Product",
 			description: "Description of Product.",
 			category: category,
@@ -245,7 +245,7 @@ class ProductServiceSpec extends Specification {
 		setupStreams()
 		service.permissionService = new PermissionService()
 
-		def validCommand = new CreateProductCommand(
+		def validCommand = new ProductCreateCommand(
 			name: "Product",
 			description: "Description of Product.",
 			category: category,
@@ -269,7 +269,7 @@ class ProductServiceSpec extends Specification {
 		setupStreams()
 		service.permissionService = Stub(PermissionService)
 
-		def validCommand = new CreateProductCommand()
+		def validCommand = new ProductCreateCommand()
 		def user = new User()
 		user.name = "Arnold Schwarzenegger"
 
@@ -323,7 +323,7 @@ class ProductServiceSpec extends Specification {
 		setupStreams()
 		service.permissionService = Stub(PermissionService)
 
-		def validCommand = new CreateProductCommand(type: "DATAUNION")
+		def validCommand = new ProductCreateCommand(type: "DATAUNION")
 		def user = new User()
 		user.name = "Arnold Schwarzenegger"
 
