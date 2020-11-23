@@ -54,7 +54,7 @@ class ProductApiController {
 
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def update(String id, UpdateProductCommand command) {
+	def update(String id, ProductUpdateCommand command) {
 		Product product = productService.update(id, command, loggedInUser())
 		boolean isProductOwner = permissionService.check(loggedInUser(), product, Permission.Operation.PRODUCT_SHARE)
 		render(product.toMap(isProductOwner) as JSON)

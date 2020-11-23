@@ -339,7 +339,7 @@ class ProductServiceSpec extends Specification {
 
 	void "update() throws ValidationException if command object does not pass validation"() {
 		when:
-		service.update("product-id", new UpdateProductCommand(), new User())
+		service.update("product-id", new ProductUpdateCommand(), new User())
 		then:
 		thrown(ValidationException)
 	}
@@ -354,7 +354,7 @@ class ProductServiceSpec extends Specification {
 		}
 		def permissionService = service.permissionService = Mock(PermissionService)
 
-		def validCommand = new UpdateProductCommand(
+		def validCommand = new ProductUpdateCommand(
 				name: "updated name",
 				description: "updated description",
 				category: category,
@@ -387,7 +387,7 @@ class ProductServiceSpec extends Specification {
 			findProductsByStream(_) >> []
 		}
 
-		def validCommand = new UpdateProductCommand(
+		def validCommand = new ProductUpdateCommand(
 			name: "updated name",
 			description: "updated description",
 			category: category,
@@ -434,7 +434,7 @@ class ProductServiceSpec extends Specification {
 			findProductsByStream(_) >> []
 		}
 
-		def validCommand = new UpdateProductCommand(
+		def validCommand = new ProductUpdateCommand(
 			name: "updated name",
 			description: "updated description",
 			category: category,
@@ -483,7 +483,7 @@ class ProductServiceSpec extends Specification {
 			}
 		}
 
-		def validCommand = new UpdateProductCommand(
+		def validCommand = new ProductUpdateCommand(
 			name: "updated name",
 			description: "updated description",
 			category: category,
@@ -511,7 +511,7 @@ class ProductServiceSpec extends Specification {
 		setupProduct()
 		service.permissionService = new PermissionService()
 
-		def validCommand = new UpdateProductCommand(
+		def validCommand = new ProductUpdateCommand(
 				name: "updated name",
 				description: "updated description",
 				category: category,
@@ -532,7 +532,7 @@ class ProductServiceSpec extends Specification {
 		service.subscriptionService = Stub(SubscriptionService)
 		def apiService = service.apiService = Mock(ApiService)
 
-		def validCommand = new UpdateProductCommand(
+		def validCommand = new ProductUpdateCommand(
 				name: "updated name",
 				description: "updated description",
 				category: category,
@@ -562,7 +562,7 @@ class ProductServiceSpec extends Specification {
 		}
 		service.permissionService = Stub(PermissionService)
 
-		def validCommand = new UpdateProductCommand(
+		def validCommand = new ProductUpdateCommand(
 			name: "updated name",
 			description: "updated description",
 			category: category,
@@ -611,7 +611,7 @@ class ProductServiceSpec extends Specification {
 		terms.termsUrl = "https://www.site.org"
 		terms.termsName = "legal terms for site.org"
 
-		def validCommand = new UpdateProductCommand(
+		def validCommand = new ProductUpdateCommand(
 				name: "updated name",
 				description: "updated description",
 				category: category2,

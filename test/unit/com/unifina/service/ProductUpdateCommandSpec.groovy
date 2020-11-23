@@ -1,13 +1,12 @@
 package com.unifina.service
 
-
 import com.unifina.domain.*
 import spock.lang.Specification
 
-class UpdateProductCommandSpec extends Specification {
+class ProductUpdateCommandSpec extends Specification {
 
 	Product product
-    UpdateProductCommand command
+    ProductUpdateCommand command
 	PermissionService permissionService
 
 	void setup() {
@@ -40,14 +39,14 @@ class UpdateProductCommandSpec extends Specification {
 		product.id = "product-id"
 
 
-		// Set up UpdateProductCommand
+		// Set up ProductUpdateCommand
 		Category newCategory = new Category(name: "new-category")
 		newCategory.id = "new-category-id"
 
 		Stream newStream = new Stream(name: "new-stream")
 		newStream.id = "new-stream-id"
 
-		command = new UpdateProductCommand(
+		command = new ProductUpdateCommand(
 			name: "new name",
 			description: "new description",
 			streams: [newStream],
@@ -78,7 +77,7 @@ class UpdateProductCommandSpec extends Specification {
 		product.pricePerSecond = 5
 
 		// Don't provide any of the on-chain fields
-		UpdateProductCommand.onChainFields.each {
+		ProductUpdateCommand.onChainFields.each {
 			command[it] = null
 		}
 
@@ -186,7 +185,7 @@ class UpdateProductCommandSpec extends Specification {
 
 	void "updateProduct() throws when pendingChanges field is given and user doesn't have share permission"() {
 		setup:
-		command = new UpdateProductCommand(
+		command = new ProductUpdateCommand(
 			name: "new name",
 			description: "new description",
 			pendingChanges: [name:"new name",description:"new description"]
@@ -202,7 +201,7 @@ class UpdateProductCommandSpec extends Specification {
 
 	void "updateProduct() updates pendingChanges if it is given and user has share permission"() {
 		setup:
-		command = new UpdateProductCommand(
+		command = new ProductUpdateCommand(
 			name: "new name",
 			description: "new description",
 			pendingChanges: [name:"new name",description:"new description"]
@@ -218,7 +217,7 @@ class UpdateProductCommandSpec extends Specification {
 
 	void "updateProduct() doesn't check sharing permission when pendingChanges is not given"() {
 		setup:
-		command = new UpdateProductCommand(
+		command = new ProductUpdateCommand(
 			name: "new name",
 			description: "new description",
 		)

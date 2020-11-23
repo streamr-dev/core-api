@@ -142,7 +142,7 @@ class ProductApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
-		1 * productService.update("product-id", _ as UpdateProductCommand, user) >> product
+		1 * productService.update("product-id", _ as ProductUpdateCommand, user) >> product
 		1 * controller.permissionService.check(_, _, Permission.Operation.PRODUCT_SHARE) >> false
 	}
 

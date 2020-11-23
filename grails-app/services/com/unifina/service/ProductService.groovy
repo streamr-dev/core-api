@@ -93,7 +93,7 @@ class ProductService {
 		return product
 	}
 
-	Product update(String id, UpdateProductCommand command, User currentUser) {
+	Product update(String id, ProductUpdateCommand command, User currentUser) {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
