@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.unifina.domain.*
 import com.unifina.security.PasswordEncoder
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -8,6 +7,7 @@ import org.springframework.context.MessageSource
 import org.springframework.validation.FieldError
 
 class UserService {
+	static transactional = false
 
 	MessageSource messageSource
 

@@ -1,9 +1,7 @@
 package com.unifina.controller
 
-
 import com.unifina.domain.SignupMethod
 import com.unifina.domain.User
-import com.unifina.domain.Userish
 import com.unifina.security.ApiKeyConverter
 import com.unifina.service.*
 import grails.converters.JSON

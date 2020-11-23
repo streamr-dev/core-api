@@ -2,10 +2,13 @@ package com.unifina.service
 
 import com.unifina.domain.User
 import com.unifina.domain.Userish
+import grails.compiler.GrailsCompileStatic
 import org.apache.log4j.Logger
 import org.joda.time.DateTime
 
+@GrailsCompileStatic
 class SessionService {
+	static transactional = false
 	static final int TOKEN_LENGTH = 64
 	static final int TTL_HOURS = 3
 

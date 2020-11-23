@@ -4,11 +4,13 @@ import com.lambdaworks.redis.RedisAsyncConnection
 import com.lambdaworks.redis.RedisClient
 import com.lambdaworks.redis.RedisURI
 import com.unifina.utils.MapTraversal
+import grails.compiler.GrailsCompileStatic
 import grails.util.Holders
 import org.springframework.util.Assert
 
+@GrailsCompileStatic
 class KeyValueStoreService {
-
+	static transactional = false
 	private RedisClient redisClient
 	private RedisAsyncConnection<String, String> connection
 

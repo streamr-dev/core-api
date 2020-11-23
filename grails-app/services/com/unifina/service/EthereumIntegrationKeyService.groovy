@@ -138,6 +138,7 @@ class EthereumIntegrationKeyService {
 		return getEthereumUserImpl(address)
 	}
 
+	@Transactional(propagation = Propagation.SUPPORTS)
 	User getEthereumUser(String address) {
 		return getEthereumUserImpl(address)
 	}
