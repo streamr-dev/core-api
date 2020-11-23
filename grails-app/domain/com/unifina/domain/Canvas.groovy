@@ -70,7 +70,7 @@ class Canvas {
 		adhoc defaultValue: false
 		runner index: 'runner_idx'
 		dashboardItems cascade: 'all-delete-orphan'
-		exampleType enumType: "identity", defaultValue: ExampleType.NOT_SET, index: 'example_type_idx'
+		exampleType enumType: "ordinal", index: "example_type_idx"
 	}
 
 	@CompileStatic

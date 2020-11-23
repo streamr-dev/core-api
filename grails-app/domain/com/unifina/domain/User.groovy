@@ -40,7 +40,7 @@ class User implements Userish {
 		lastLogin nullable: true
 		imageUrlSmall nullable: true
 		imageUrlLarge nullable: true
-		signupMethod nullable: false
+		signupMethod enumType: "string", nullable: false
 	}
 
 	static mapping = {

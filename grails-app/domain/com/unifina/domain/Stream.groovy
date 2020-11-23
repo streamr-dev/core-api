@@ -70,7 +70,7 @@ class Stream implements Comparable {
 		requireEncryptedData defaultValue: "false"
 		autoConfigure defaultValue: "true"
 		storageDays defaultValue: DEFAULT_STORAGE_DAYS
-		exampleType enumType: "identity", defaultValue: ExampleType.NOT_SET, index: 'example_type_idx'
+		exampleType enumType: "ordinal", index: "example_type_idx"
 	}
 
 	@Override

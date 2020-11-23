@@ -44,7 +44,7 @@ class DataUnionJoinRequest {
     }
 	static mapping = {
 		id generator: IdGenerator.name
-		state enumType: "identity", defaultValue: State.PENDING, index: 'state_idx'
+		state enumType: "ordinal", index: 'state_idx'
 	}
 
 	@GrailsCompileStatic

@@ -76,13 +76,15 @@ class Product {
 		imageUrl(nullable: true)
 		thumbnailUrl(nullable: true)
 		category(nullable: true)
-		type(nullable: false)
+		state(enumType: "string")
+		type(nullable: false, enumType: "ordinal")
 		previewStream(nullable: true, validator: { Stream s, p -> s == null || s in p.streams })
 		previewConfigJson(nullable: true)
 		pendingChanges(nullable: true)
 		ownerAddress(nullable: true, validator: isEthereumAddressOrIsNull)
 		beneficiaryAddress(nullable: true, validator: isEthereumAddressOrIsNull)
 		pricePerSecond(min: 0L)
+		priceCurrency(enumType: "string")
 		minimumSubscriptionInSeconds(min: 0L)
 		blockNumber(min: 0L)
 		blockIndex(min: 0L)
@@ -95,7 +97,7 @@ class Product {
 	static mapping = {
 		id generator: HexIdGenerator.name // Note: doesn't apply in unit tests
 		description type: 'text'
-		type enumType: "identity", defaultValue: Type.NORMAL, index: 'type_idx'
+		type enumType: "ordinal", index: 'type_idx'
 		previewConfigJson type: 'text'
 		pendingChanges type: 'text'
 		imageUrl length: 2048

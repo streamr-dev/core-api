@@ -18,10 +18,6 @@ class Module implements Comparable {
 	static belongsTo = [category: ModuleCategory]
 
     static constraints = {
-		name()
-		implementingClass()
-		jsModule()
-		type()
 		hide(nullable:true)
 		jsonHelp(nullable:true)
 		alternativeNames(nullable:true)
