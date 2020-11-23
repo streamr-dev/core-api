@@ -2,8 +2,6 @@ const assert = require('chai').assert
 const _ = require('lodash');
 const StreamrClient = require('streamr-client')
 
-const REST_URL = 'http://localhost/api/v1'
-
 async function assertResponseIsError(response, statusCode, programmaticCode, includeInMessage) {
     const json = await response.json()
     assert.equal(response.status, statusCode)
@@ -30,7 +28,8 @@ const assertEqualEthereumAddresses = (actual, expected) => {
 
 const getStreamrClient = (user) => {
 	return new StreamrClient({
-		restUrl: REST_URL,
+		url: 'ws://localhost/api/v1/ws',
+		restUrl: 'http://localhost/api/v1',
 		auth: {
 			privateKey: user.privateKey
 		}

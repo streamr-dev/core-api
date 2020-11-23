@@ -1,0 +1,196 @@
+{
+	"name": "CANVAS_NAME",
+	"modules": [
+	  {
+		"params": [
+		  {
+			"id": "1da6f46d-942e-4363-ac19-076ba3ec1f61",
+			"name": "stream",
+			"longName": "Stream.stream",
+			"type": "Stream",
+			"connected": false,
+			"canConnect": false,
+			"export": false,
+			"value": "INPUT_STREAM_ID",
+			"drivingInput": false,
+			"canToggleDrivingInput": false,
+			"acceptedTypes": [
+			  "Stream",
+			  "String"
+			],
+			"requiresConnection": false,
+			"defaultValue": null,
+			"updateOnChange": true,
+			"streamName": "INPUT_STREAM_NAME"
+		  }
+		],
+		"inputs": [],
+		"outputs": [
+		  {
+			"id": "ep_ZQu-Xuc3S0-3Cq8IiP8Fzg",
+			"name": "streamField",
+			"longName": "Stream.streamField",
+			"type": "String",
+			"connected": true,
+			"canConnect": true,
+			"export": false,
+			"noRepeat": false,
+			"canBeNoRepeat": true
+		  }
+		],
+		"id": 147,
+		"jsModule": "StreamModule",
+		"type": "module",
+		"name": "Stream",
+		"canClearState": true,
+		"canRefresh": false,
+		"hash": 612451219,
+		"displayName": "Stream",
+		"layout": {
+		  "width": "253px",
+		  "position": {
+			"top": "163px",
+			"left": "266px"
+		  },
+		  "height": "150px"
+		},
+		"partitions": [
+		  0
+		]
+	  },
+	  {
+		"params": [],
+		"inputs": [
+		  {
+			"id": "b97b85ba-cbb7-49ca-88d1-c244e18e0acf",
+			"name": "text",
+			"longName": "ToUpperCase.text",
+			"type": "String",
+			"connected": true,
+			"canConnect": true,
+			"export": false,
+			"drivingInput": true,
+			"canToggleDrivingInput": true,
+			"acceptedTypes": [
+			  "String"
+			],
+			"requiresConnection": true,
+			"sourceId": "ep_ZQu-Xuc3S0-3Cq8IiP8Fzg",
+			"canHaveInitialValue": true,
+			"initialValue": null
+		  }
+		],
+		"outputs": [
+		  {
+			"id": "98ebddd7-677e-4544-96b4-4bed4a3ae357",
+			"name": "upperCaseText",
+			"longName": "ToUpperCase.upperCaseText",
+			"type": "String",
+			"connected": true,
+			"canConnect": true,
+			"export": false,
+			"noRepeat": false,
+			"canBeNoRepeat": true
+		  }
+		],
+		"id": 207,
+		"jsModule": "GenericModule",
+		"type": "module",
+		"name": "ToUpperCase",
+		"canClearState": true,
+		"canRefresh": false,
+		"hash": 1478438093,
+		"displayName": "ToUpperCase",
+		"layout": {
+		  "width": "296px",
+		  "position": {
+			"top": "164px",
+			"left": "542px"
+		  },
+		  "height": "150px"
+		}
+	  },
+	  {
+		"params": [
+		  {
+			"id": "4b00a549-a68e-4d14-9ebf-3d88daaba197",
+			"name": "stream",
+			"longName": "SendToStream.stream",
+			"type": "Stream",
+			"connected": false,
+			"canConnect": true,
+			"export": false,
+			"value": "OUTPUT_STREAM_ID",
+			"drivingInput": false,
+			"canToggleDrivingInput": false,
+			"acceptedTypes": [
+			  "Stream",
+			  "String"
+			],
+			"requiresConnection": false,
+			"defaultValue": null,
+			"updateOnChange": true,
+			"streamName": "OUTPUT_STREAM_NAME"
+		  }
+		],
+		"inputs": [
+		  {
+			"id": "ep_6tGerK0tQtuiYPRDRf06YA",
+			"name": "streamField",
+			"longName": "SendToStream.streamField",
+			"type": "String",
+			"connected": true,
+			"canConnect": true,
+			"export": false,
+			"drivingInput": true,
+			"canToggleDrivingInput": false,
+			"acceptedTypes": [
+			  "String"
+			],
+			"requiresConnection": false,
+			"sourceId": "98ebddd7-677e-4544-96b4-4bed4a3ae357",
+			"canHaveInitialValue": true,
+			"initialValue": null
+		  }
+		],
+		"outputs": [],
+		"id": 197,
+		"jsModule": "GenericModule",
+		"type": "module",
+		"name": "SendToStream",
+		"canClearState": true,
+		"canRefresh": false,
+		"hash": -1729475304,
+		"displayName": "SendToStream",
+		"layout": {
+		  "width": "271px",
+		  "position": {
+			"top": "163px",
+			"left": "857px"
+		  },
+		  "height": "150px"
+		},
+		"options": {
+		  "sendOnlyNewValues": {
+			"value": false,
+			"type": "boolean"
+		  },
+		  "encrypt": {
+			"value": false,
+			"type": "boolean"
+		  }
+		}
+	  }
+	],
+	"settings": {
+	  "editorState": {
+		"runTab": "#tab-realtime"
+	  }
+	},
+	"hasExports": false,
+	"uiChannel": {
+	  "webcomponent": null,
+	  "name": "Notifications",
+	  "id": "F6qxyxlTQy2PtozqKAx-HA"
+	}
+  }
