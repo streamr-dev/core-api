@@ -1,6 +1,5 @@
 const assert = require('chai').assert
 const fs = require('fs')
-const sleep = require('sleep-promise')
 const Streamr = require('./streamr-api-clients')
 const StreamrClient = require('streamr-client')
 const getStreamrClient = require('./test-utilities.js').getStreamrClient
@@ -29,6 +28,20 @@ describe('Canvas API', function() {
 			return response.id
 		};
 
+		const startCanvas = async (id) => {
+			await Streamr.api.v1.canvases
+				.start(id)
+				.withAuthenticatedUser(user)
+				.call();
+			let state = undefined;
+			while (state !== 'RUNNING') {
+				state = (await Streamr.api.v1.canvases
+					.get(id)
+					.withAuthenticatedUser(user)
+					.execute()).state;
+			}
+		}
+
 		before(async () => {
 			const inputStreamName = 'inputStream-' + Date.now();
 			const outputStreamName = 'outputStream-' + Date.now();
@@ -43,12 +56,8 @@ describe('Canvas API', function() {
 			canvasId = (await Streamr.api.v1.canvases
 				.create(JSON.parse(canvasJson))
 				.withAuthenticatedUser(user)
-				.execute()).id
-			await Streamr.api.v1.canvases
-				.start(canvasId)
-				.withAuthenticatedUser(user)
-				.call();
-			await sleep(5000);  // some time that allow canvas to start
+				.execute()).id;
+			await startCanvas(canvasId);
 		});
 
 		const sendMessageToInputStream = async () => {
