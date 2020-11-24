@@ -1,8 +1,10 @@
 const assert = require('chai').assert
 const fs = require('fs')
+const util = require('util');
 const Streamr = require('./streamr-api-clients')
-const StreamrClient = require('streamr-client')
+const StreamrClient = require('streamr-client');
 const getStreamrClient = require('./test-utilities.js').getStreamrClient
+const pollCondition = require('./test-utilities.js').pollCondition
 
 describe('Canvas API', function() {
 
@@ -33,13 +35,13 @@ describe('Canvas API', function() {
 				.start(id)
 				.withAuthenticatedUser(user)
 				.call();
-			let state = undefined;
-			while (state !== 'RUNNING') {
-				state = (await Streamr.api.v1.canvases
+			await pollCondition(async () => {
+				const response = await Streamr.api.v1.canvases
 					.get(id)
 					.withAuthenticatedUser(user)
-					.execute()).state;
-			}
+					.execute();
+				return (response.state === 'RUNNING');
+			});
 		}
 
 		before(async () => {
@@ -60,27 +62,25 @@ describe('Canvas API', function() {
 			await startCanvas(canvasId);
 		});
 
-		const sendMessageToInputStream = async () => {
+		const subscribe = (onMessage, onReady) => {
+			const client = getStreamrClient(user, { autoConnect: true });
+			const subscription = client.subscribe({ stream: outputStreamId }, (message) => onMessage(message));
+			subscription.once('subscribed', () => onReady())
+		};
+
+		const publish = () => {
 			const msg = {
 				streamField: 'mock-content'
 			}
-			const client = getStreamrClient(user);
-			await client.connect();
+			const client = getStreamrClient(user, { autoConnect: true });
 			client.publish(inputStreamId, msg);
 		};
 
-		const waitForMessage = async (done) => {
-			const client = getStreamrClient(user);
-			await client.connect();
-			client.subscribe({ stream: outputStreamId }, (message) => {
-				assert.equal(message.streamField, 'MOCK-CONTENT');
-				done();
-			});
-		};
-
 		it('send through canvas', (done) => {
-			waitForMessage(done)
-			sendMessageToInputStream();
+			subscribe(message => {
+				assert.equal(message.streamField, 'MOCK-CONTENT');
+				done()
+			}, () => publish());
 		});
 
 		after(async () => {

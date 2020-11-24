@@ -1,6 +1,7 @@
 const assert = require('chai').assert
 const _ = require('lodash');
 const StreamrClient = require('streamr-client')
+const sleep = require('sleep-promise')
 
 async function assertResponseIsError(response, statusCode, programmaticCode, includeInMessage) {
     const json = await response.json()
@@ -26,8 +27,8 @@ const assertEqualEthereumAddresses = (actual, expected) => {
 	assert.equal(normalized(actual), normalized(expected))
 }
 
-const getStreamrClient = (user) => {
-	return new StreamrClient({
+const getStreamrClient = (user, options = {}) => {
+	return new StreamrClient(Object.assign({
 		auth: {
 			privateKey: user.privateKey
 		},
@@ -44,7 +45,7 @@ const getStreamrClient = (user) => {
 		},
 		autoConnect: false,
 		autoDisconnect: false
-	})
+	}, options));
 }
 
 const cachedSessionTokens = {}
@@ -61,6 +62,17 @@ async function getSessionToken(user) {
 	}
 }
 
+const pollCondition = async (condition, timeout = 60000, interval = 100) => {
+	let timeElapsed = 0
+	let result
+	while (!result && timeElapsed < timeout) {
+		await sleep(interval)
+		timeElapsed += interval
+		result = await condition()
+	}
+	return result
+}
+
 const testUsers = _.mapValues({
 	devOpsUser: '0x628acb12df34bb30a0b2f95ec2e6a743b386c5d4f63aa9f338bec6f613160e78',     // user_id=6 in the test DB, has ROLE_DEV_OPS authority
 	tokenHolder: '0x5e98cce00cff5dea6b454889f359a4ec06b9fa6b88e9d69b86de8e1c81887da0',    // owns tokens in dev mainchain and sidechain
@@ -72,6 +84,7 @@ module.exports = {
 	assertStreamrClientResponseError,
 	assertEqualEthereumAddresses,
 	getSessionToken,
+	pollCondition,
 	testUsers,
 	getStreamrClient
 }

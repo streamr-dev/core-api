@@ -4,23 +4,13 @@ const assert = require('chai').assert
 const fs = require('fs')
 const Emitter = require('events')
 const Streamr = require('./streamr-api-clients')
+const pollCondition = require('./test-utilities.js').pollCondition
 
 const REST_URL = 'http://localhost/api/v1'
 const WS_URL = 'ws://localhost/api/v1/ws'
 const TIMEOUT = 130 * 1000
 const NUM_MESSAGES = 50
 const WAIT_TIME = 15000
-
-const pollCondition = async (condition, timeout = TIMEOUT, interval = 100) => {
-    let timeElapsed = 0
-    let result
-    while (!result && timeElapsed < timeout) {
-        await sleep(interval)
-        timeElapsed += interval
-        result = await condition()
-    }
-    return result
-}
 
 async function createStreamrClient(user) {
     const client = new StreamrClient({
@@ -155,7 +145,7 @@ describe('Canvas API', function() {
 
                     json = await response.json()
                     return json.json.outputs[0].value === NUM_MESSAGES
-                })
+                }, TIMEOUT)
 
                 assert.equal(response.status, 200, JSON.stringify(json))
                 assert.equal(json.json.name, 'Stream', 'Unexpected name on module!')
@@ -175,7 +165,7 @@ describe('Canvas API', function() {
 
                     json = await response.json()
                     return json.json.inputs[0].value === NUM_MESSAGES * 2
-                })
+                }, TIMEOUT)
 
                 assert.equal(response.status, 200, JSON.stringify(json))
                 assert.equal(json.json.name, 'Sum', 'Unexpected name on module!')
