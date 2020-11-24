@@ -8,7 +8,7 @@ describe('Canvas API', function() {
 
 	describe('read from stream, write to another stream', function() {
 
-		this.timeout(30000);
+		this.timeout(60000);
 
 		const user = StreamrClient.generateEthereumAccount();
 		let inputStreamId;
