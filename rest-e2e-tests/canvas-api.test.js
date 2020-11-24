@@ -55,16 +55,22 @@ describe('Canvas API', function() {
 			const msg = {
 				streamField: 'mock-content'
 			}
-			const inputClient = getStreamrClient(user);
-			inputClient.publish(inputStreamId, msg);
+			const client = getStreamrClient(user);
+			await client.connect();
+			client.publish(inputStreamId, msg);
 		};
 
-		it('send through canvas', (done) => {
-			const outputClient = getStreamrClient(user);
-			outputClient.subscribe({ stream: outputStreamId }, (message) => {
+		const waitForMessage = async (done) => {
+			const client = getStreamrClient(user);
+			await client.connect();
+			client.subscribe({ stream: outputStreamId }, (message) => {
 				assert.equal(message.streamField, 'MOCK-CONTENT');
 				done();
 			});
+		};
+
+		it('send through canvas', (done) => {
+			waitForMessage(done)
 			sendMessageToInputStream();
 		});
 
