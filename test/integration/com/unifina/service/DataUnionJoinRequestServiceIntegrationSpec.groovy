@@ -40,6 +40,13 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		streamrClientMock.getOptions() >> Mock(StreamrClientOptions)
 		service.streamrClientService.getInstanceForThisEngineNode() >> streamrClientMock
 
+		Product product = new Product(
+			beneficiaryAddress: contractAddress,
+			dataUnionVersion: 1,
+			owner: me
+		)
+		product.save(failOnError: true, validate: false)
+
 		service.ethereumService = Mock(EthereumService)
 		service.permissionService = Mock(PermissionService)
 		service.dataUnionService = Mock(DataUnionService)
