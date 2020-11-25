@@ -36,12 +36,16 @@ public class IterableMessageHandler implements MessageHandler, Iterator<StreamMe
 
 	@Override
 	public void onMessage(Subscription subscription, StreamMessage streamMessage) {
+		System.out.println("DEBUG IterableMessageHandler onMessage.1: subscription=" + subscription + ", message=" + streamMessage);
 		try {
+			System.out.println("DEBUG IterableMessageHandler onMessage.2");
 			boolean success = queue.offer(streamMessage, queueOfferTimeoutSeconds, TimeUnit.SECONDS);
+			System.out.println("DEBUG IterableMessageHandler onMessage.3");
 			if (!success) {
 				log.error(String.format("onMessage: the queue for Subscription('%s', %d) is full and no space was made within %d sec. The message will be dropped.", subscription.getStreamId(), subscription.getPartition(), queueOfferTimeoutSeconds));
 			}
 		} catch (InterruptedException e) {
+			System.out.println("DEBUG IterableMessageHandler onMessage.4");
 			log.error("Sleep interrupted while offering!", e);
 		}
 	}

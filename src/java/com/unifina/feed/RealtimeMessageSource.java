@@ -18,21 +18,25 @@ public class RealtimeMessageSource extends StreamMessageSource {
 	public RealtimeMessageSource(Globals globals, StreamMessageConsumer consumer, Collection<StreamPartition> streamPartitions) {
 		super(globals, consumer, streamPartitions);
 
+		System.out.println("DEBUG RealtimeMessageSource.1");
 		for (StreamPartition sp : streamPartitions) {
 			log.info("Subscribing to stream " + sp.getStreamId() + " partition " + sp.getPartition());
-
+			System.out.println("DEBUG RealtimeMessageSource.2");
 			subscriptions.add(streamrClient.subscribe(
 				streamsByStreamId.get(sp.getStreamId()),
 				sp.getPartition(),
 				(subscription, streamMessage) -> consumer.accept(streamMessage),
 				null // no resend
 			));
+			System.out.println("DEBUG RealtimeMessageSource.3");
 		}
 	}
 
 	@Override
 	public void close() {
+		System.out.println("DEBUG RealtimeMessageSource close.1");
 		for (Subscription sub : subscriptions) {
+			System.out.println("DEBUG RealtimeMessageSource close.2");
 			streamrClient.unsubscribe(sub);
 		}
 	}

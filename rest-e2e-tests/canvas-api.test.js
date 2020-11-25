@@ -54,6 +54,7 @@ describe('Canvas API', function() {
 		};
 
 		before(async () => {
+			console.log('DEBUG canvas-api.test before.1');
 			const inputStreamName = 'inputStream-' + Date.now();
 			const outputStreamName = 'outputStream-' + Date.now();
 			inputStreamId = await createStream(inputStreamName);
@@ -69,29 +70,38 @@ describe('Canvas API', function() {
 				.withAuthenticatedUser(user)
 				.execute()).id;
 			await startCanvas(canvasId);
+			console.log('DEBUG canvas-api.test before.2');
 		});
 
 		const subscribe = (onMessage, onReady) => {
+			console.log('DEBUG canvas-api.test subscribe.1');
 			const subscription = subscriberClient.subscribe({ stream: outputStreamId }, (message) => onMessage(message));
 			subscription.once('subscribed', () => onReady())
+			console.log('DEBUG canvas-api.test subscribe.2');
 		};
 
 		const publish = () => {
+			console.log('DEBUG canvas-api.test publish.1');
 			const msg = {
 				streamField: 'mock-content'
 			}
 			publisherClient.publish(inputStreamId, msg);
+			console.log('DEBUG canvas-api.test publish.2');
 		};
 
 		it('send through canvas', (done) => {
 			subscribe(message => {
+				console.log('DEBUG canvas-api.test message.1');
 				assert.equal(message.streamField, 'MOCK-CONTENT');
+				console.log('DEBUG canvas-api.test message.2');
 				done()
 			}, () => publish());
 		});
 
 		after(async () => {
+			console.log('DEBUG canvas-api.test after.1');
 			await Promise.all([stopCanvas(), publisherClient.disconnect(), subscriberClient.disconnect()]);
+			console.log('DEBUG canvas-api.test after.2');
 		});
 
 	});
