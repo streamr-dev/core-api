@@ -25,6 +25,7 @@ beans = {
 		password = grailsApplication.config.dataSource.password
 		driverClass = grailsApplication.config.dataSource.driverClassName
 		jdbcUrl = grailsApplication.config.dataSource.url
+		// Options below can be tweaked for performance
 		maxPoolSize = 100
 		testConnectionOnCheckin = true
 		testConnectionOnCheckout = false
