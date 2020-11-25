@@ -1,6 +1,6 @@
 const assert = require('chai').assert
 const fs = require('fs')
-const util = require('util');
+const sleep = require('sleep-promise')
 const Streamr = require('./streamr-api-clients')
 const StreamrClient = require('streamr-client');
 const getStreamrClient = require('./test-utilities.js').getStreamrClient
@@ -59,6 +59,7 @@ describe('Canvas API', function() {
 			const outputStreamName = 'outputStream-' + Date.now();
 			inputStreamId = await createStream(inputStreamName);
 			outputStreamId = await createStream(outputStreamName);
+			console.log('DEBUG streams: ' + inputStreamId + ' -> ' + outputStreamId)
 			const canvasJson = fs.readFileSync('./test-data/canvas-api.test.js-canvas-encrypted-data.json', "utf8")
 				.replace('CANVAS_NAME', `canvas-api.test.js-${Date.now()}`)
 				.replace('INPUT_STREAM_ID', inputStreamId)
@@ -70,6 +71,8 @@ describe('Canvas API', function() {
 				.withAuthenticatedUser(user)
 				.execute()).id;
 			await startCanvas(canvasId);
+			console.log('DEBUG canvas-api.test wait')
+			await sleep(10000);
 			console.log('DEBUG canvas-api.test before.2');
 		});
 
