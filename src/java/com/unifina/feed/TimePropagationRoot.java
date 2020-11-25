@@ -14,6 +14,7 @@ public class TimePropagationRoot extends AbstractPropagationRoot<ITimeListener, 
 
 	@Override
 	protected void sendOutputFromModules(ITimestamped event) {
+		System.out.println("DEBUG TimePropagationRoot sendOutputFromModules.1");
 		Date date = event.getTimestampAsDate();
 		long epochSec = date.getTime() / 1000;
 
@@ -24,6 +25,7 @@ public class TimePropagationRoot extends AbstractPropagationRoot<ITimeListener, 
 				module.setTime(date);
 			}
 		}
+		System.out.println("DEBUG TimePropagationRoot sendOutputFromModules.2");
 	}
 
 	public static boolean isTimeToTick(long epochSec, int tickRateInSec) {

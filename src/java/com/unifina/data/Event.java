@@ -42,10 +42,12 @@ public class Event<ContentClass> implements Comparable<Event<ContentClass>> {
 	}
 
 	public void dispatch() {
+		System.out.println("DEBUG Event dispatch.1 content=" + this.getContent());
 		// In special cases (such as when ticking the clock) the consumer may be null, so check
 		if (consumer != null) {
 			consumer.accept(this.getContent());
 		}
+		System.out.println("DEBUG Event dispatch.2");
 	}
 
 	public Date getTimestamp() {

@@ -198,6 +198,7 @@ public class DataSourceEventQueue {
 	}
 
 	private void tickClockIfNecessary(long eventTime) {
+		System.out.println("DataSourceEventQueue tickClockIfNecessary.1");
 		while (lastReportedClockTick + CLOCK_TICK_INTERVAL_MILLIS <= eventTime) {
 			lastReportedClockTick += CLOCK_TICK_INTERVAL_MILLIS;
 			Date d = new Date(lastReportedClockTick);
@@ -205,6 +206,7 @@ public class DataSourceEventQueue {
 
 			// Handle possible day turn
 			if (lastReportedClockTick > nextDay.getMillis()) {
+				System.out.println("DataSourceEventQueue tickClockIfNecessary.2");
 				int dlCount = dayListeners.size();
 
 				// Report the new day
@@ -216,7 +218,9 @@ public class DataSourceEventQueue {
 			}
 
 			final ClockTick tick = new ClockTick(d);
+			System.out.println("DataSourceEventQueue tickClockIfNecessary.3");
 			masterClock.accept(tick);
+			System.out.println("DataSourceEventQueue tickClockIfNecessary.4");
 		}
 	}
 
