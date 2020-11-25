@@ -78,6 +78,11 @@ describe('Canvas API', function() {
 			const subscription = subscriberClient.subscribe({ stream: outputStreamId }, (message) => onMessage(message));
 			subscription.once('subscribed', () => onReady())
 			console.log('DEBUG canvas-api.test subscribe.2');
+			console.log(subscription);
+			subscription.on('error', (error) => {
+				console.log('DEBUG canvas-api.test subscribe.ERROR')
+				throw error
+			})
 		};
 
 		const publish = () => {
