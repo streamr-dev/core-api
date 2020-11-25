@@ -5,31 +5,27 @@
 
 # This Makefile uses .ONESHELL option supported by Make 3.82
 ifeq ($(filter oneshell,$(.FEATURES)),)
-$(error error: Your version of make ($(shell make -v|head -1|cut -f 3 -d ' ')) cdoes not support .ONESHELL)
+$(error error: Your version of make ($(shell make -v|head -1|cut -f 3 -d ' ')) does not support .ONESHELL)
 endif
 
-LANG = en_US.UTF-8
-SHELL = /bin/bash
-.SHELLFLAGS := -e -o pipefail -c # run '/bin/bash ... -c /bin/cmd'
-.DELETE_ON_ERROR: # target is removed if its recipe fails
+LANG := en_US.UTF-8
+SHELL := bash
+.SHELLFLAGS := -eu -o pipefail -c # run '/bin/bash ... -c /bin/cmd'
+.ONESHELL:
+.DELETE_ON_ERROR:
 .DEFAULT_GOAL := all
-
-#.ONESHELL: recipe-name # recipes execute in same shell
-#.SILENT: recipe-name # no need for @
-#.NOTPARALLEL: recipe-name # wait for this target to finish
-#.EXPORT_ALL_VARIABLES: recipe-name # send all vars to shell
 
 grails := grails -plain-output
 
 # Testing recipes
 
 .PHONY: all
-all: clean test-unit test-integration start-wait test-engine-start test-rest test-engine-stop
+all: clean test-unit test-integration start-wait test-engine-start test-e2e test-engine-stop
 
 .PHONY: test
-test: test-unit test-integration test-rest ## Run unit, integration and REST API tests
+test: test-unit test-integration test-e2e ## Run unit, integration and end to end tests
 
-test_report_html := $(shell pwd)/target/test-reports/html/failed.html
+test_report_html = $$(pwd)/target/test-reports/html/failed.html
 .PHONY: test-unit
 test-unit: ## Run unit tests
 	$(grails) test-app -unit -echoOut -echoErr || (exit_code=$$?; open $(test_report_html); exit $$exit_code)
@@ -38,34 +34,12 @@ test-unit: ## Run unit tests
 test-integration: ## Run integration tests
 	$(grails) test-app -integration -no-reports --stacktrace --verbose
 
-engine_status_check_url := http://localhost:8081/streamr-core/api/v1/users/me
-.ONESHELL: test-rest
-.PHONY: test-rest
-test-rest: ## Run REST API tests
-	export i=1
-	while true; do
-		http_code=$$(curl -s -m 1 -o /dev/null -w "%{http_code}" $(engine_status_check_url))
-		if [ "$$http_code" -eq 401 ]; then
-			echo "test-rest: $$(date -u) engine up and running"
-			break
-		else
-			echo "test-rest: $$(date -u) engine responding with HTTP status code $$http_code at $(engine_status_check_url)"
-			if [ "$$http_code" -eq 000 ]; then
-				sleep_timeout=$$(echo "(60 / ($$i / l(5))) / 2" | bc -l)
-				sleep_timeout_int=$$(echo "($$sleep_timeout + 0.5) / 1" | bc)
-				if [ "$$sleep_timeout_int" -le 5 ]; then
-					sleep_timeout_int=5
-				fi
-				sleep $$sleep_timeout_int
-			fi
-		fi
-		i=$$(expr $$i + 1)
-		if [ $$i -eq 50 ]; then
-			echo "test-rest: timeout while waiting for engine to come online"
-			exit 1
-		fi
-	done
-	cd rest-e2e-tests && . /usr/local/opt/nvm/nvm.sh && nvm use && npm test
+test-rest:
+	$(error error: recipe has been renamed. Run 'make test-e2e')
+
+.PHONY: test-e2e
+test-e2e:
+	$(MAKE) -C rest-e2e-tests test
 
 rest_srv_test_log := rest-srv-test.log
 rest_srv_test_pid := rest-srv-test.pid
@@ -121,8 +95,19 @@ stop: ## Run streamr-docker-dev stop
 pull: ## Run streamr-docker-dev pull
 	streamr-docker-dev pull
 
+.PHONY: ps
+ps: ## Run streamr-docker-dev ps
+	streamr-docker-dev ps
+
+.PHONY: update
+update: ## Run streamr-docker-dev update
+	streamr-docker-dev update
+
+.PHONY: shell
+shell-%: ## Run docker shell. Example: 'make shell-redis'
+	streamr-docker-dev  shell $*
+
 .SILENT: db-diff
-.ONESHELL: db-diff
 .PHONY: db-diff
 db-diff: ## Run Grails 'grails dbm-gorm-diff' with extras. WARNING! This command is destructive.
 	echo "please enter a description of the change (no spaces, separated by - char, for example: mv-secuser-to-profile)"
@@ -192,6 +177,7 @@ docker-login: ## Login with Docker
 
 .PHONY: clean
 clean: ## Remove all files created by this Makefile
+	$(MAKE) -C rest-e2e-tests clean
 	rm -rf tomcat.8081/work
 	rm -rf target
 	rm -rf .slcache

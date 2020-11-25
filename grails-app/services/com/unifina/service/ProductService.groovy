@@ -256,6 +256,12 @@ class ProductService {
 		return true
 	}
 
+	Product findByBeneficiaryAddress(String beneficiaryAddress) {
+		return (Product) Product.createCriteria().get {
+			ilike("beneficiaryAddress", beneficiaryAddress)	// ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
+		}
+	}
+
 	private static void verifyDevops(User currentUser) {
 		if (!currentUser.isDevOps()) {
 			throw new NotPermittedException("DevOps role required")
