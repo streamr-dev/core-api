@@ -27,7 +27,7 @@ public class RealtimeDataSource extends DataSource {
 		// Schedule some timed events on start
 		addStartListener(() -> {
 			final Date now = new Date();
-			secTimer.scheduleAtFixedRate(new TimerTask() {
+			/*secTimer.scheduleAtFixedRate(new TimerTask() {
 											 @Override
 											 public void run() {
 												 final ClockTick tick = new ClockTick(new Date());
@@ -35,7 +35,7 @@ public class RealtimeDataSource extends DataSource {
 											 }
 										 },
 				new Date(now.getTime() + (1000 - (now.getTime() % 1000))), // First run on next even second
-				1000);   // Repeat every second
+				1000);   // Repeat every second*/
 
 			// Schedule serialization events
 			SerializationService serializationService = Holders.getApplicationContext().getBean(SerializationService.class);
