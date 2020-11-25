@@ -13,6 +13,8 @@ describe('Canvas API', function() {
 		this.timeout(60000);
 
 		const user = StreamrClient.generateEthereumAccount();
+		const subscriberClient = getStreamrClient(user, { autoConnect: true });
+		const publisherClient = getStreamrClient(user, { autoConnect: true });
 		let inputStreamId;
 		let outputStreamId;
 		let canvasId;
@@ -42,7 +44,14 @@ describe('Canvas API', function() {
 					.execute();
 				return (response.state === 'RUNNING');
 			});
-		}
+		};
+
+		const stopCanvas = async () => {
+			await Streamr.api.v1.canvases
+				.stop(canvasId)
+				.withAuthenticatedUser(user)
+				.call();
+		};
 
 		before(async () => {
 			const inputStreamName = 'inputStream-' + Date.now();
@@ -63,8 +72,7 @@ describe('Canvas API', function() {
 		});
 
 		const subscribe = (onMessage, onReady) => {
-			const client = getStreamrClient(user, { autoConnect: true });
-			const subscription = client.subscribe({ stream: outputStreamId }, (message) => onMessage(message));
+			const subscription = subscriberClient.subscribe({ stream: outputStreamId }, (message) => onMessage(message));
 			subscription.once('subscribed', () => onReady())
 		};
 
@@ -72,8 +80,7 @@ describe('Canvas API', function() {
 			const msg = {
 				streamField: 'mock-content'
 			}
-			const client = getStreamrClient(user, { autoConnect: true });
-			client.publish(inputStreamId, msg);
+			publisherClient.publish(inputStreamId, msg);
 		};
 
 		it('send through canvas', (done) => {
@@ -84,10 +91,7 @@ describe('Canvas API', function() {
 		});
 
 		after(async () => {
-			await Streamr.api.v1.canvases
-				.stop(canvasId)
-				.withAuthenticatedUser(user)
-				.call();
+			await Promise.all([stopCanvas(), publisherClient.disconnect(), subscriberClient.disconnect()]);
 		});
 
 	});
