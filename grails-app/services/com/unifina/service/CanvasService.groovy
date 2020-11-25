@@ -130,19 +130,24 @@ class CanvasService {
 	}
 
 	void start(Canvas canvas, boolean clearSerialization, User asUser) {
+		System.out.println("DEBUG CanvasService start.1");
 		log.info("Start canvas: id=" + canvas.id)
 		if (canvas.state == Canvas.State.RUNNING) {
 			throw new InvalidStateException("Cannot run canvas $canvas.id because it's already running. Stop it first.")
 		}
+		System.out.println("DEBUG CanvasService start.2");
 
 		if (clearSerialization) {
 			signalPathService.clearState(canvas)
 		}
 
+		System.out.println("DEBUG CanvasService start.3");
 		Map signalPathContext = canvas.toMap().settings
 
 		try {
+			System.out.println("DEBUG CanvasService start.4");
 			signalPathService.startLocal(canvas, signalPathContext, asUser)
+			System.out.println("DEBUG CanvasService start.5");
 		} catch (SerializationException ex) {
 			log.error("De-serialization failure caused by (BELOW)", ex.cause)
 			String msg = "Could not load (deserialize) previous state of canvas $canvas.id."
@@ -150,6 +155,7 @@ class CanvasService {
 		} catch (InvalidStreamConfigException e) {
 			throw new BadRequestException(e.getMessage())
 		}
+		System.out.println("DEBUG CanvasService start.6");
 	}
 
 	void startRemote(Canvas canvas, User user, boolean forceReset=false, boolean resetOnError=true) {

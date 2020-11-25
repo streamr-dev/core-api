@@ -79,25 +79,32 @@ public class SignalPathRunner extends Thread {
 
 	@Override
 	public void run() {
+		System.out.println("DEBUG SignalPathRunner run.1");
 		try {
+			System.out.println("DEBUG SignalPathRunner run.2");
 			signalPath.connectionsReady();
+			System.out.println("DEBUG SignalPathRunner run.3");
 			addStartListener(() -> setRunning(true));
 
 			// Start feed, blocks until event loop exists
 			globals.getDataSource().start();
+			System.out.println("DEBUG SignalPathRunner run.4");
 		} catch (Throwable e) {
 			final Throwable sanitized = GrailsUtil.deepSanitize(e);
 			thrownOnStartUp = sanitized;
 			log.error("Error while running SignalPaths", e);
 			safeRun(() -> pushErrorToUiChannels(sanitized, signalPath));
 		}
+		System.out.println("DEBUG SignalPathRunner run.5");
 
 		safeRun(() -> signalPath.pushToUiChannel(new DoneMessage()));
 
+		System.out.println("DEBUG SignalPathRunner run.6");
 		if (getGlobals().isAdhoc()) {
 			safeRun(() -> signalPath.pushToUiChannel(new ByeMessage()));
 		}
 
+		System.out.println("DEBUG SignalPathRunner run.7");
 		// Cleanup
 		try {
 			destroyMe();
@@ -108,6 +115,7 @@ public class SignalPathRunner extends Thread {
 
 		log.info("SignalPathRunner is done.");
 		setRunning(false);
+		System.out.println("DEBUG SignalPathRunner run.8");
 	}
 
 	public void abort() {
