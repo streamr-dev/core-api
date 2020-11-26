@@ -11,6 +11,10 @@
   },
   "author": "Streamr developers",
   "license": "AGPL-3.0-only",
+  "engines": {
+    "node": ">=14",
+    "npm": ">=6.14"
+  },
   "dependencies": {
     "ajv": "6.12.4",
     "async-wait-until": "1.2.6",
