@@ -4487,7 +4487,7 @@
         "id": {
           "type": "string",
           "description": "ID of this stream.",
-          "example": "sandbox/foo/bar"
+          "example": "foobar.eth/foo/bar"
         },
         "name": {
           "type": "string",

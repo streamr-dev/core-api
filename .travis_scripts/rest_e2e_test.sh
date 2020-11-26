@@ -1,7 +1,7 @@
 #!/bin/bash
 
 sudo /etc/init.d/mysql stop
-echo "node version: " $(node --version)
+echo "node version: $(node --version)"
 (cd rest-e2e-tests && npm ci)
 
 git clone https://github.com/streamr-dev/streamr-docker-dev.git
@@ -10,7 +10,7 @@ git clone https://github.com/streamr-dev/streamr-docker-dev.git
 sudo ifconfig docker0 10.200.10.1/24
 
 # Start everything except engine-and-editor
-"$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" start --except engine-and-editor
+"$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" start mysql redis cassandra parity-node0 parity-sidechain-node0 bridge data-union-server broker-node-storage-1 nginx smtp
 
 # Print app output to console
 "$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" log -f engine-and-editor &

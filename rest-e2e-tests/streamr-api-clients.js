@@ -369,6 +369,13 @@ class DataUnions {
             .method('GET')
             .endpoint('dataunions')
     }
+
+    approveJoinRequest(id, contractAddress) {
+        return new StreamrApiRequest(this.options)
+            .method('PUT')
+            .endpoint('dataunions', contractAddress, 'joinRequests', id)
+            .withBody({ state: 'ACCEPTED'})
+    }
 }
 
 class StorageNodes {

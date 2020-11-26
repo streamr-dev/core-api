@@ -10,6 +10,7 @@ class StreamApiController {
 	PermissionService permissionService
 	ApiService apiService
 	EnsService ensService
+	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def index(StreamListParams listParams) {
@@ -27,9 +28,18 @@ class StreamApiController {
 
 	@StreamrApi
 	def save(CreateStreamCommand cmd) {
-		CustomStreamIDValidator streamIdValidator = new CustomStreamIDValidator({domain, creator -> ensService.isENSOwnedBy(domain, creator)})
+		CustomStreamIDValidator streamIdValidator = new CustomStreamIDValidator(this.&isValidCustomStreamIDDomain)
 		Stream stream = streamService.createStream(cmd, request.apiUser, streamIdValidator)
 		render(stream.toMap() as JSON)
+	}
+
+	private boolean isValidCustomStreamIDDomain(String domain, User creator) {
+		boolean isEthereumAddress = EthereumAddressValidator.validate(domain)
+		if (isEthereumAddress) {
+			return creator.equals(ethereumIntegrationKeyService.getEthereumUser(domain))
+		} else {
+			return ensService.isENSOwnedBy(domain, creator)
+		}
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)

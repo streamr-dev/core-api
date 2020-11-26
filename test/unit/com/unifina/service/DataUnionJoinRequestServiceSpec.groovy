@@ -33,6 +33,11 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		streamrClientMock.getOptions() >> Mock(StreamrClientOptions)
 		service.streamrClientService.getInstanceForThisEngineNode() >> streamrClientMock
 
+		Product mockProduct = new Product()
+		mockProduct.dataUnionVersion = 1
+		ProductService productService = mockBean(ProductService)
+		productService.findByBeneficiaryAddress(_) >> mockProduct
+
 		me = new User(
 			name: "First Lastname",
 			username: "first@last.com",

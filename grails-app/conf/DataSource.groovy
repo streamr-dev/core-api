@@ -2,24 +2,6 @@ dataSource {
 	pooled = true
 	driverClassName = "com.mysql.jdbc.Driver"
 	dialect = 'org.hibernate.dialect.MySQL5InnoDBDialect'
-	properties {
-		initialSize = 2
-		maxActive = 50 // -1
-		minIdle = 2
-		maxIdle = 25
-		maxWait = 30000
-		maxAge = 10 * 60000
-		minEvictableIdleTimeMillis=60000 // 1800000
-		timeBetweenEvictionRunsMillis=60000 //1800000, default: 5000
-		numTestsPerEvictionRun=3
-		validationQuery = "SELECT 1"
-		validationQueryTimeout = 3
-		validationInterval = 15000
-		testOnBorrow = true
-		testWhileIdle = true
-		testOnReturn = true
-		defaultTransactionIsolation = java.sql.Connection.TRANSACTION_REPEATABLE_READ
-	}
 }
 hibernate {
 	cache.use_second_level_cache = true
