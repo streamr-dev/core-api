@@ -61,11 +61,11 @@ test/server/wait: ## Wait for server to come online
 test: vendor test/e2e test/stress ## Run tests
 
 .PHONY: test/e2e
-test/e2e: ## Run tests
+test/e2e: ## Run end to end tests
 	$(call npm, run test:e2e)
 
 .PHONY: test/stress
-test/stress: ## Run tests
+test/stress: ## Run stress tests
 	$(call npm, run test:stress)
 
 .PHONY: clean
