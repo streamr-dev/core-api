@@ -103,7 +103,6 @@ ps: ## Run streamr-docker-dev ps
 update: ## Run streamr-docker-dev update
 	streamr-docker-dev update
 
-.PHONY: shell
 shell-%: ## Run docker shell. Example: 'make shell-redis'
 	streamr-docker-dev  shell $*
 
