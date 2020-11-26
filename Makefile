@@ -176,13 +176,16 @@ docker-login: ## Login with Docker
 
 .PHONY: clean
 clean: ## Remove all files created by this Makefile
-	$(MAKE) -C rest-e2e-tests clean
 	rm -rf tomcat.8081/work
 	rm -rf target
 	rm -rf .slcache
 	rm -rf "$$HOME/.grails"
 	rm -rf $(rest_srv_test_log)
 	$(grails) clean-all
+
+.PHONY: clean-all
+clean-all: clean
+	$(MAKE) -C rest-e2e-tests clean
 
 .PHONY: help
 help: ## Show Help
