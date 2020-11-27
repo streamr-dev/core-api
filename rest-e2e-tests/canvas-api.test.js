@@ -93,7 +93,7 @@ describe('Canvas API', function() {
 			subscribe(onMessage, () => {
 				// Canvas in not able to receive messages immediately after it starts.
 				// Usually it takes few seconds to subscribe to streams in RealTimeDataSource,
-				// but canvas is set to 'running' state before these initializations complete.
+				// but canvas is set to 'RUNNING' state before these initializations complete.
 				// To circumvent the problem, we send multiple events to the stream,
 				// and stop sending once this test receives one of the messages. Alternatively
 				// we could wait e.g. 5-10 seconds.
