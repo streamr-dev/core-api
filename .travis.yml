@@ -32,16 +32,13 @@ jobs:
   include:
   - stage: Tests
     name: Unit tests
-    #script: grails test-app -unit
-    script: echo ignored
+    script: grails test-app -unit
   - stage: Tests
     name: Validate Swagger
-    #script: .travis_scripts/validate_swagger.sh
-    script: echo ignored
+    script: .travis_scripts/validate_swagger.sh
   - stage: Tests
     name: Integration tests
-    #script: .travis_scripts/integration_test.sh
-    script: echo ignored
+    script: .travis_scripts/integration_test.sh
   - stage: Tests
     name: REST API tests
     script: .travis_scripts/rest_e2e_test.sh
@@ -49,11 +46,10 @@ jobs:
     name: streamr-client tests
     env:
     - CAN_FAIL=True
-    script: echo ignored
-    #script:
-    #- grails test war
-    #- docker build -t $OWNER/$IMAGE_NAME:local .
-    #- .travis_scripts/streamr-client-test.sh
+    script:
+    - grails test war
+    - docker build -t $OWNER/$IMAGE_NAME:local .
+    - .travis_scripts/streamr-client-test.sh
   - stage: Build war Staging
     if: NOT type IN (pull_request)
     script: .travis_scripts/build_war.sh

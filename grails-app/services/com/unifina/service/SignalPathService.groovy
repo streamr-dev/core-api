@@ -86,7 +86,6 @@ class SignalPathService {
 	 * @throws SerializationException if de-serialization fails when resuming from existing state
      */
 	void startLocal(Canvas canvas, Map signalPathContext, User asUser) throws SerializationException {
-		System.out.println("DEBUG SignalPathService start.1");
 		Globals globals = new Globals(
 			signalPathContext,
 			asUser,
@@ -94,41 +93,32 @@ class SignalPathService {
 		)
 		SignalPath sp
 
-		System.out.println("DEBUG SignalPathService start.2");
 		// Instantiate the SignalPath
 		if (canvas.serialization == null || canvas.adhoc) {
-			System.out.println("DEBUG SignalPathService start.3");
 			log.info("Creating new signalPath connections (canvasId=$canvas.id)")
-			System.out.println("DEBUG SignalPathService start.4");
 			sp = mapToSignalPath(canvas.toSignalPathConfig(), false, globals, new SignalPath(true))
 		} else {
-			System.out.println("DEBUG SignalPathService start.5");
 			log.info("De-serializing existing signalPath (canvasId=$canvas.id)")
-			System.out.println("DEBUG SignalPathService start.6");
 			sp = (SignalPath) serializationService.deserialize(canvas.serialization.bytes)
 		}
 
 		// require read access to all streams when starting
 		// can be problematic when collaborating on shared canvas; though even then it makes sense to force
 		//   explicit read rights sharing to streams on that canvas
-		System.out.println("DEBUG SignalPathService start.7");
 		for (Stream s in sp.getStreams()) {
 			if (!permissionService.check(asUser, s, Permission.Operation.STREAM_SUBSCRIBE)) {
 				throw new UnauthorizedStreamException(canvas, s, asUser)
 			}
 		}
 
-		System.out.println("DEBUG SignalPathService start.8");
 		sp.canvas = canvas
 
 		// Create the runner thread
 		SignalPathRunner runner = new SignalPathRunner(sp, globals)
 
-		System.out.println("DEBUG SignalPathService start.9");
 		runner.addStartListener(new IStartListener() {
 			@Override
 			void onStart() {
-				System.out.println("DEBUG SignalPathService start.onStart");
 				addRunner(runner)
 			}
 		})
@@ -150,17 +140,14 @@ class SignalPathService {
 		// Form an internal url that Streamr nodes will use to directly address this machine and the canvas that runs on it
 		canvas.requestUrl = protocol + "://" + canvas.server + ":" + port + grailsLinkGenerator.link(uri: "/api/v1/canvases/$canvas.id", absolute: false)
 		canvas.state = Canvas.State.RUNNING
-		System.out.println("DEBUG SignalPathService start.10 canvasUrl=" + canvas.requestUrl);
 
 		canvas.startedBy = asUser
 
 		canvas.save(flush: false)
 
-		System.out.println("DEBUG SignalPathService start.11");
 		// Start the runner thread
 		runner.start()
 
-		System.out.println("DEBUG SignalPathService start.12");
 		// Wait for runner to be in running state
 		runner.waitRunning(true)
 		if (!runner.getRunning()) {
@@ -172,7 +159,6 @@ class SignalPathService {
 				throw new CanvasCommunicationException(msg)
 			}
 		}
-		System.out.println("DEBUG SignalPathService start.13");
 	}
 
 	/**

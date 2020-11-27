@@ -209,26 +209,19 @@ public abstract class DataSource {
 		Collection<StreamPartition> streamPartitions = module.getStreamPartitions();
 		log.debug("Registering ConfigurableStreamModule with streamPartitions: " + streamPartitions);
 
-		System.out.println("DEBUG DataSource subscribe.1");
 		for (StreamPartition sp : streamPartitions) {
 
-			System.out.println("DEBUG DataSource subscribe.2");
 			// Create and register the propagation root for this StreamPartition if it doesn't already exist
 			StreamPropagationRoot root = propagationRootByStreamPartition.get(sp);
 			if (root == null) {
-				System.out.println("DEBUG DataSource subscribe.3");
 				root = new StreamPropagationRoot(this);
 				propagationRootByStreamPartition.put(sp, root);
-				System.out.println("DEBUG DataSource subscribe.4");
 				router.subscribe(root, sp);
 				log.debug("Created new propagation root for: " + sp);
 			}
-			System.out.println("DEBUG DataSource subscribe.5");
 
 			root.register(module);
-			System.out.println("DEBUG DataSource subscribe.6");
 		}
-		System.out.println("DEBUG DataSource subscribe.7");
 	}
 
 }

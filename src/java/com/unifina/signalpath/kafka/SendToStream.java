@@ -60,26 +60,19 @@ public class SendToStream extends ModuleWithSideEffects {
 
 	@Override
 	public void activateWithSideEffects(){
-		System.out.println("DEBUG SendToStream.1");
 		Stream stream = streamParameter.getValue();
-		System.out.println("DEBUG SendToStream.2");
 		try {
-			System.out.println("DEBUG SendToStream.3");
 			com.streamr.client.rest.Stream s = cacheStream(stream);
-			Map<String,Object> msg = inputValuesToMap();
-			System.out.println("DEBUG SendToStream.4 msg=" + msg);
 			streamrClient.publish(
 				s,
-				msg,
+				inputValuesToMap(),
 				getGlobals().getTime(),
 				partitionKey != null && partitionKey.getValue() != null ? partitionKey.getValue().toString() : null,
 				encrypt ? this.getEncryptionKey() : null
 			);
-			System.out.println("DEBUG SendToStream.5");
 		} catch (Exception e) {
 			log.error("Failed to publish: ", e);
 		}
-		System.out.println("DEBUG SendToStream.6");
 
 	}
 

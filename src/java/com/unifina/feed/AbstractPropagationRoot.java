@@ -27,7 +27,6 @@ public abstract class AbstractPropagationRoot<ModuleClass, MessageClass extends 
 	private final Class<?> moduleClass;
 
 	AbstractPropagationRoot(DataSource dataSource) {
-		System.out.println("DEBUG AbstractPropagationRoot constructor.1");
 		if (dataSource != null) {
 			dataSource.addStartListener(this);
 		}
@@ -47,7 +46,6 @@ public abstract class AbstractPropagationRoot<ModuleClass, MessageClass extends 
 	}
 
 	public void register(ModuleClass module) {
-		System.out.println("DEBUG AbstractPropagationRoot register.1");
 		if (!moduleClass.isAssignableFrom(module.getClass())) {
 			throw new IllegalArgumentException("Can not register module of type: " + module.getClass() +
 				", required type: " + moduleClass + ". Module: " + module);
@@ -58,16 +56,12 @@ public abstract class AbstractPropagationRoot<ModuleClass, MessageClass extends 
 				propagator.addModule(m);
 			}
 		}
-		System.out.println("DEBUG AbstractPropagationRoot register.2");
 	}
 
 	@Override
 	public void accept(MessageClass message) {
-		System.out.println("DEBUG AbstractPropagationRoot accept.1");
 		sendOutputFromModules(message);
-		System.out.println("DEBUG AbstractPropagationRoot accept.2");
 		propagator.propagate();
-		System.out.println("DEBUG AbstractPropagationRoot accept.3");
 	}
 
 	protected List<ModuleClass> getModules() {

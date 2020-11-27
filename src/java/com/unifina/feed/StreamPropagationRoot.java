@@ -30,21 +30,17 @@ public class StreamPropagationRoot extends AbstractPropagationRoot<ConfigurableS
 
 	@Override
 	protected void sendOutputFromModules(StreamMessage streamMessage) {
-		System.out.println("DEBUG StreamPropagationRoot sendOutputFromModules.1 message=" + streamMessage);
 		if (outputsByName == null) {
 			initCacheMap();
 		}
 
-		System.out.println("DEBUG StreamPropagationRoot sendOutputFromModules.2");
 		Map msg = streamMessage.getParsedContent();
 
 		for (Map.Entry<String, List<Output>> entry : outputsByName.entrySet()) {
-			System.out.println("DEBUG StreamPropagationRoot sendOutputFromModules.3");
 			String fieldName = entry.getKey();
 			List<Output> outputs = entry.getValue();
 
 			if (msg.containsKey(fieldName)) {
-				System.out.println("DEBUG StreamPropagationRoot sendOutputFromModules.4");
 				Object fieldValue = msg.get(fieldName);
 
 				// Null values are just not sent
@@ -52,27 +48,21 @@ public class StreamPropagationRoot extends AbstractPropagationRoot<ConfigurableS
 					continue;
 				}
 
-				System.out.println("DEBUG StreamPropagationRoot sendOutputFromModules.5");
 				for (Output o : outputs) {
 					// Convert all numbers to doubles
-					System.out.println("DEBUG StreamPropagationRoot sendOutputFromModules.6");
 					if (o instanceof TimeSeriesOutput) {
 						try {
-							System.out.println("DEBUG StreamPropagationRoot sendOutputFromModules.7");
 							o.send(((Number) fieldValue).doubleValue());
 						} catch (ClassCastException e) {
-							System.out.println("DEBUG StreamPropagationRoot sendOutputFromModules.8");
 							final String s = String.format("Stream field configuration has changed: cannot convert value '%s' to number", fieldValue);
 							throw new StreamFieldChangedException(s);
 						}
 					} else {
-						System.out.println("DEBUG StreamPropagationRoot sendOutputFromModules.9");
 						o.send(fieldValue);
 					}
 				}
 			}
 		}
-		System.out.println("DEBUG StreamPropagationRoot sendOutputFromModules.10");
 	}
 
 	private void initCacheMap() {

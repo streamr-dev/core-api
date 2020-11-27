@@ -1,6 +1,6 @@
 const assert = require('chai').assert
 const fs = require('fs')
-const sleep = require('sleep-promise')
+const util = require('util');
 const Streamr = require('./streamr-api-clients')
 const StreamrClient = require('streamr-client');
 const getStreamrClient = require('./test-utilities.js').getStreamrClient
@@ -54,12 +54,10 @@ describe('Canvas API', function() {
 		};
 
 		before(async () => {
-			console.log('DEBUG canvas-api.test before.1');
 			const inputStreamName = 'inputStream-' + Date.now();
 			const outputStreamName = 'outputStream-' + Date.now();
 			inputStreamId = await createStream(inputStreamName);
 			outputStreamId = await createStream(outputStreamName);
-			console.log('DEBUG streams: ' + inputStreamId + ' -> ' + outputStreamId)
 			const canvasJson = fs.readFileSync('./test-data/canvas-api.test.js-canvas-encrypted-data.json', "utf8")
 				.replace('CANVAS_NAME', `canvas-api.test.js-${Date.now()}`)
 				.replace('INPUT_STREAM_ID', inputStreamId)
@@ -71,45 +69,29 @@ describe('Canvas API', function() {
 				.withAuthenticatedUser(user)
 				.execute()).id;
 			await startCanvas(canvasId);
-			console.log('DEBUG canvas-api.test wait')
-			await sleep(10000);
-			console.log('DEBUG canvas-api.test before.2');
 		});
 
 		const subscribe = (onMessage, onReady) => {
-			console.log('DEBUG canvas-api.test subscribe.1');
 			const subscription = subscriberClient.subscribe({ stream: outputStreamId }, (message) => onMessage(message));
 			subscription.once('subscribed', () => onReady())
-			console.log('DEBUG canvas-api.test subscribe.2');
-			console.log(subscription);
-			subscription.on('error', (error) => {
-				console.log('DEBUG canvas-api.test subscribe.ERROR')
-				throw error
-			})
 		};
 
 		const publish = () => {
-			console.log('DEBUG canvas-api.test publish.1');
 			const msg = {
 				streamField: 'mock-content'
 			}
 			publisherClient.publish(inputStreamId, msg);
-			console.log('DEBUG canvas-api.test publish.2');
 		};
 
 		it('send through canvas', (done) => {
 			subscribe(message => {
-				console.log('DEBUG canvas-api.test message.1');
 				assert.equal(message.streamField, 'MOCK-CONTENT');
-				console.log('DEBUG canvas-api.test message.2');
 				done()
 			}, () => publish());
 		});
 
 		after(async () => {
-			console.log('DEBUG canvas-api.test after.1');
 			await Promise.all([stopCanvas(), publisherClient.disconnect(), subscriberClient.disconnect()]);
-			console.log('DEBUG canvas-api.test after.2');
 		});
 
 	});
