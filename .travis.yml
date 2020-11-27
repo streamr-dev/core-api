@@ -81,8 +81,7 @@ jobs:
     if: branch = master AND type != pull_request
     install: true
     script:
-    - grails test war
-    - docker build -t $OWNER/$IMAGE_NAME:local .
+    - docker build --build-arg GRAILS_WAR_ENV=test -t $OWNER/$IMAGE_NAME:local .
     - .travis_scripts/smoke_test.sh
     deploy:
     - provider: script
