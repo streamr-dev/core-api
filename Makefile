@@ -158,8 +158,9 @@ db-rollback-1:
 
 .PHONY: docker-build-dev
 docker-build-dev: ## Build Docker dev container
-	grails war
-	docker build -t streamr/engine-and-editor:dev .
+	docker build \
+		--build-arg GRAILS_WAR_ENV=test \
+		--tag streamr/engine-and-editor:dev .
 
 .PHONY: docker-push-dev
 docker-push-dev: docker-build-dev ## Push Docker dev container to registry
