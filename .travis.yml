@@ -1,6 +1,6 @@
 language: groovy
 os: linux
-dist: xenial
+dist: focal
 jdk:
 - openjdk8
 services:
