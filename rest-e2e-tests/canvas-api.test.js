@@ -83,7 +83,7 @@ describe('Canvas API', function() {
 			publisherClient.publish(inputStreamId, msg);
 		};
 
-		it('send through canvas', (done) => {
+		it('happy path', (done) => {
 			let publishTimer;
 			const onMessage = _.once(message => {
 				clearInterval(publishTimer);
