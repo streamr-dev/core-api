@@ -1,6 +1,6 @@
 const assert = require('chai').assert
 const fs = require('fs')
-const util = require('util');
+const _ = require('lodash');
 const Streamr = require('./streamr-api-clients')
 const StreamrClient = require('streamr-client');
 const getStreamrClient = require('./test-utilities.js').getStreamrClient
@@ -84,10 +84,21 @@ describe('Canvas API', function() {
 		};
 
 		it('send through canvas', (done) => {
-			subscribe(message => {
+			let publishTimer;
+			const onMessage = _.once(message => {
+				clearInterval(publishTimer);
 				assert.equal(message.streamField, 'MOCK-CONTENT');
-				done()
-			}, () => publish());
+				done();
+			});
+			subscribe(onMessage, () => {
+				// Canvas in not able to receive messages immediately after it starts.
+				// Usually it takes few seconds to subscribe to streams in RealTimeDataSource,
+				// but canvas is set to 'running' state before these initializations complete.
+				// To circumvent the problem, we send multiple events to the stream,
+				// and stop sending once this test receives one of the messages. Alternatively
+				// we could wait e.g. 5-10 seconds.
+				publishTimer = setInterval(() => publish(), 500);
+			});
 		});
 
 		after(async () => {
