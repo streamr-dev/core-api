@@ -34,12 +34,17 @@ test-unit: ## Run unit tests
 test-integration: ## Run integration tests
 	$(grails) test-app -integration -no-reports --stacktrace --verbose
 
+.PHONY: test-rest
 test-rest:
-	$(error error: recipe has been renamed. Run 'make test-e2e')
+	$(MAKE) -C rest-e2e-tests test
 
 .PHONY: test-e2e
 test-e2e:
-	$(MAKE) -C rest-e2e-tests test
+	$(MAKE) -C rest-e2e-tests test/e2e
+
+.PHONY: test-stress
+test-stress:
+	$(MAKE) -C rest-e2e-tests test/stress
 
 rest_srv_test_log := rest-srv-test.log
 rest_srv_test_pid := rest-srv-test.pid
