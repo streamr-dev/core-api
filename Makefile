@@ -83,14 +83,15 @@ factory-reset: ## Run streamr-docker-dev factory-reset
 wipe: ## Run streamr-docker-dev stop and wipe
 	streamr-docker-dev wipe
 
+services := mysql redis cassandra parity-node0 parity-sidechain-node0 bridge data-union-server broker-node-storage-1 nginx smtp
 .PHONY: start
-start: ## Run streamr-docker-dev start
-	streamr-docker-dev start --except engine-and-editor
+start: ## Run streamr-docker-dev start ...
+	streamr-docker-dev start $(services)
 
 .NOTPARALLEL: start-wait
 .PHONY: start-wait
-start-wait: ## Run streamr-docker-dev start --wait
-	streamr-docker-dev start --wait --except engine-and-editor
+start-wait: ## Run streamr-docker-dev start ... --wait
+	streamr-docker-dev start $(services) --wait
 
 .PHONY: stop
 stop: ## Run streamr-docker-dev stop
