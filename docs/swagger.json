@@ -3213,7 +3213,7 @@
     "/canvases/{id}/start": {
       "post": {
         "summary": "Starts a canvas",
-        "description": "Starts a canvas changing its state to 'running', or in the case of adhoc=true, creates a copy of the Canvas with state 'running'.",
+        "description": "Starts a canvas changing its state to 'RUNNING', or in the case of adhoc=true, creates a copy of the Canvas with state 'RUNNING'.",
         "tags": [
           "canvases"
         ],
@@ -4699,8 +4699,8 @@
     "CanvasState": {
       "type": "string",
       "enum": [
-        "running",
-        "stopped"
+        "RUNNING",
+        "STOPPED"
       ]
     },
     "CanvasSettings": {
