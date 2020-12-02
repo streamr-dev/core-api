@@ -23,6 +23,8 @@ import org.codehaus.groovy.runtime.InvokerHelper
 import org.codehaus.groovy.runtime.InvokerInvocationException
 
 class CanvasService {
+	static transactional = false
+
 	private final static Gson gson = new GsonBuilder()
 		.serializeNulls()
 		.setPrettyPrinting()

@@ -21,6 +21,7 @@ import java.util.concurrent.TimeoutException
 import java.util.concurrent.locks.ReentrantLock
 
 class StreamrClientService {
+	static transactional = false
 
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 	SessionService sessionService

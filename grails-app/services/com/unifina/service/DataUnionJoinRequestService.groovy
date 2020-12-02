@@ -5,13 +5,14 @@ import com.streamr.client.dataunion.DataUnion
 import com.streamr.client.dataunion.DataUnionClient
 import com.streamr.client.dataunion.EthereumTransactionReceipt
 import com.unifina.domain.*
+import com.unifina.utils.MapTraversal
 import com.unifina.utils.ThreadUtil
+import grails.util.Holders
 import groovy.json.JsonSlurper
 import org.apache.log4j.Logger
-import com.unifina.utils.MapTraversal
-import grails.util.Holders
 
 class DataUnionJoinRequestService {
+	static transactional = false
 
 	private static final int JOIN_REQUEST_TRANSACTION_POLL_INTERVAL = 1000
 	private static final int JOIN_REQUEST_TRANSACTION_TIMEOUT = 30000

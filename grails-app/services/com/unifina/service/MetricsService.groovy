@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.unifina.data.EventQueueMetrics
 import grails.compiler.GrailsCompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -9,6 +8,8 @@ import javax.management.ObjectName
 import java.lang.management.ManagementFactory
 
 class MetricsService {
+	static transactional = false
+
 	GrailsApplication grailsApplication
 	SignalPathService signalPathService
 

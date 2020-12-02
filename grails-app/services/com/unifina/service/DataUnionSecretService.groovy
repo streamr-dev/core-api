@@ -1,10 +1,10 @@
 package com.unifina.service
 
-
 import com.unifina.domain.DataUnionSecret
 import com.unifina.utils.IdGenerator
 
 class DataUnionSecretService {
+	static transactional = false
 	IdGenerator generator = new IdGenerator()
 
 	List<DataUnionSecret> findAll(String contractAddress) {

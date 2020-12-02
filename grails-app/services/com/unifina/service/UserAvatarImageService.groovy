@@ -1,15 +1,14 @@
 package com.unifina.service
 
-
 import com.unifina.domain.User
 import com.unifina.provider.FileUploadProvider
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.ImageResizer
 import com.unifina.utils.ImageVerifier
-import grails.transaction.Transactional
 
-@Transactional
 class UserAvatarImageService {
+	static transactional = false
+
 	private final long maxSize = 1024*1024*5
 	FileUploadProvider fileUploadProvider
 	ImageVerifier imageVerifier = new ImageVerifier(maxSize)

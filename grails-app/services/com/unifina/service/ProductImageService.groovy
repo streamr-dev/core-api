@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.unifina.domain.Product
 import com.unifina.provider.FileUploadProvider
 import com.unifina.utils.IdGenerator
@@ -8,6 +7,8 @@ import com.unifina.utils.ImageResizer
 import com.unifina.utils.ImageVerifier
 
 class ProductImageService {
+	static transactional = false
+
 	FileUploadProvider fileUploadProvider
 	private final long maxSize = 1024*1024*5
 	ImageVerifier imageVerifier = new ImageVerifier(maxSize)

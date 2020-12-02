@@ -5,6 +5,8 @@ import grails.compiler.GrailsCompileStatic
 
 @GrailsCompileStatic
 class SignupCodeService {
+	static transactional = false
+
 	private String generateSignupCode() {
 		UUID uuid = UUID.randomUUID()
 		String s = uuid.toString()

@@ -1,12 +1,13 @@
 package com.unifina.service
 
+import com.unifina.domain.EthereumAddress
 import com.unifina.domain.Stream
 import com.unifina.domain.StreamStorageNode
-import com.unifina.domain.EthereumAddress
 import grails.compiler.GrailsCompileStatic
 
 @GrailsCompileStatic
 class StorageNodeService {
+	static transactional = false
 
 	List<Stream> findStreamsByStorageNode(EthereumAddress storageNodeAddress) {
 		List<StreamStorageNode> items = StreamStorageNode.findAllByStorageNodeAddress(storageNodeAddress.toString())

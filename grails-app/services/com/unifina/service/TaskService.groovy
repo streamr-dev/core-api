@@ -7,10 +7,13 @@ import com.unifina.task.TaskWorker
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.ThreadUtil
 import grails.converters.JSON
+import grails.transaction.Transactional
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.transaction.annotation.Propagation
 
 class TaskService {
+	static transactional = false
 
 	private static final Logger log = Logger.getLogger(TaskService)
 
@@ -22,6 +25,7 @@ class TaskService {
 		return UUID.randomUUID().toString()
 	}
 
+	@Transactional(propagation = Propagation.SUPPORTS)
 	Task createTask(Class<? extends AbstractTask> taskClass, Map config, String category, User user = null, Long delayMs = 0, String groupId = IdGenerator.get()) {
 		Task task = new Task(taskClass.name, (config as JSON).toString(), category, groupId, 0, user, new Date(System.currentTimeMillis() + delayMs))
 		task.save(failOnError:true)

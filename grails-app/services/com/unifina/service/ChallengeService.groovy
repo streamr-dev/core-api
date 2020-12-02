@@ -1,11 +1,12 @@
 package com.unifina.service
 
-
 import com.unifina.crypto.ECRecover
 import grails.compiler.GrailsCompileStatic
 
 @GrailsCompileStatic
 class ChallengeService {
+	static transactional = false
+
 	static final int TTL_SECONDS = 300
 	static final int CHALLENGE_LENGTH = 30
 	private static final String textPart1 = "This is a challenge created by Streamr for address "

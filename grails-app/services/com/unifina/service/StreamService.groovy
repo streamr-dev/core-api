@@ -6,11 +6,13 @@ import com.unifina.task.DelayedDeleteStreamTask
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.JSONUtil
 import grails.converters.JSON
+import grails.transaction.Transactional
 import grails.validation.Validateable
 import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.validation.FieldError
 
 @Validateable
@@ -31,6 +33,8 @@ class CreateStreamCommand {
 }
 
 class StreamService {
+	static transactional = false
+
 	PermissionService permissionService
 	private final StreamPartitioner partitioner = new StreamPartitioner()
 
@@ -84,6 +88,7 @@ class StreamService {
 		return stream
 	}
 
+	@Transactional(propagation = Propagation.SUPPORTS)
 	void deleteStream(Stream stream) {
 		stream.delete(flush: true)
 	}

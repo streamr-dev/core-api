@@ -10,6 +10,8 @@ import org.web3j.abi.datatypes.Utf8String
 import org.web3j.protocol.Web3j
 
 class EthereumService {
+	static transactional = false
+
 	private static final Logger log = LogManager.getLogger(EthereumService.class)
 
 	String fetchJoinPartStreamID(String contractAddress) {

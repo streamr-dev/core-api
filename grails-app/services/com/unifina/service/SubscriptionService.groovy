@@ -5,6 +5,8 @@ import grails.compiler.GrailsCompileStatic
 
 @GrailsCompileStatic
 class SubscriptionService {
+	static transactional = false
+
 	PermissionService permissionService
 
 	void deleteProduct(Product product) {

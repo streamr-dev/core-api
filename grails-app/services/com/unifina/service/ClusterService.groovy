@@ -8,6 +8,8 @@ import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 class ClusterService {
+	static transactional = false
+
 	CanvasService canvasService
 	StreamrClient streamrClient
 	GrailsApplication grailsApplication

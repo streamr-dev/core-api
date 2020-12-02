@@ -10,6 +10,8 @@ import java.util.concurrent.ThreadLocalRandom
 
 @GrailsCompileStatic
 class ProductService {
+	static transactional = false
+
 	ApiService apiService
 	PermissionService permissionService
 	SubscriptionService subscriptionService

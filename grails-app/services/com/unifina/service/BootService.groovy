@@ -17,6 +17,7 @@ import java.security.Policy
  * @author Henri
  */
 class BootService {
+	static transactional = false
 
 	def grailsApplication
 	def taskService

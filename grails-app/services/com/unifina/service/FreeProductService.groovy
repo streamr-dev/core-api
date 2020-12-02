@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.unifina.domain.Permission
 import com.unifina.domain.Product
 import grails.compiler.GrailsCompileStatic
@@ -10,6 +9,8 @@ import grails.compiler.GrailsCompileStatic
  */
 @GrailsCompileStatic
 class FreeProductService {
+	static transactional = false
+
 	PermissionService permissionService
 
 	void deployFreeProduct(Product product) {

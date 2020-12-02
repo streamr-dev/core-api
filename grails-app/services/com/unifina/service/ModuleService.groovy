@@ -7,6 +7,7 @@ import com.unifina.utils.Globals
 import groovy.transform.CompileStatic
 
 class ModuleService {
+	static transactional = false
 
 	@CompileStatic
 	AbstractSignalPathModule getModuleInstance(Module mod, Map config, SignalPath parent, Globals globals) {

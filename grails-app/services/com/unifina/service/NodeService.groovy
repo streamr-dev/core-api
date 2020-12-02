@@ -5,6 +5,7 @@ import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 class NodeService {
+	static transactional = false
 
 	public static final Logger log = Logger.getLogger(NodeService)
 

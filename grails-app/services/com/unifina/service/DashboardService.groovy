@@ -8,6 +8,7 @@ import com.unifina.utils.IdGenerator
 import groovy.transform.CompileStatic
 
 class DashboardService {
+	static transactional = false
 
 	PermissionService permissionService
 	SignalPathService signalPathService

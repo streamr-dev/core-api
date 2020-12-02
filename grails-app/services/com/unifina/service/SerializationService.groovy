@@ -11,6 +11,7 @@ import org.springframework.util.Assert
 
 @CompileStatic
 class SerializationService {
+	static transactional = false
 
 	final static String INTERVAL_CONFIG_KEY = "streamr.serialization.intervalInMillis"
 	final static String MAX_BYTES_CONFIG_KEY = "streamr.serialization.maxBytes"

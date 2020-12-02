@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
 import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
@@ -9,7 +8,6 @@ import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.*
 import com.unifina.utils.Globals
 import grails.compiler.GrailsCompileStatic
-import grails.transaction.NotTransactional
 import grails.transaction.Transactional
 import grails.util.Holders
 import groovy.transform.CompileStatic
@@ -23,7 +21,6 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
 class SignalPathService {
-
     static transactional = false
 
 	LinkGenerator grailsLinkGenerator
@@ -216,7 +213,6 @@ class SignalPathService {
 		return stopLocalRunner(canvas.runner)
 	}
 
-	@NotTransactional
 	@CompileStatic
 	Map stopRemote(Canvas canvas, User user, AuthorizationHeader authorizationHeader) {
 		return runtimeRequest(buildRuntimeRequest([type:"stopRequest"], "canvases/$canvas.id", user, authorizationHeader))
