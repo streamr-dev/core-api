@@ -1,8 +1,10 @@
 language: groovy
 os: linux
-dist: xenial
+dist: focal
 jdk:
-- openjdk8
+  - openjdk8
+  - openjdk10
+  - openjdk11
 services:
 - docker
 
