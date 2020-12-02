@@ -32,19 +32,19 @@ jobs:
   allow_failures:
       - env: CAN_FAIL=True
   include:
-  - stage: Tests
+  - stage: test
     name: Unit tests
     script: grails test-app -unit
-  - stage: Tests
+  - stage: test
     name: Validate Swagger
     script: .travis_scripts/validate_swagger.sh
-  - stage: Tests
+  - stage: test
     name: Integration tests
     script: .travis_scripts/integration_test.sh
-  - stage: Tests
+  - stage: test
     name: REST API tests
     script: .travis_scripts/rest_e2e_test.sh
-  - stage: Tests
+  - stage: test
     name: streamr-client tests
     env:
     - CAN_FAIL=True
