@@ -1,4 +1,4 @@
-language: groovy
+language: java
 os: linux
 dist: focal
 jdk:
