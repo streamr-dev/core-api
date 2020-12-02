@@ -3,6 +3,7 @@ os: linux
 dist: focal
 jdk:
   - openjdk8
+  - oraclejdk8
   - openjdk10
   - openjdk11
 services:
