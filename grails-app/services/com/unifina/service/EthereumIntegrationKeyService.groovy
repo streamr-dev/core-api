@@ -38,6 +38,7 @@ class EthereumIntegrationKeyService {
 		encryptor = new StringEncryptor(password)
 	}
 
+	@Transactional(propagation = Propagation.SUPPORTS)
 	IntegrationKey createEthereumAccount(User user, String name, String privateKey) {
 		privateKey = trimPrivateKey(privateKey)
 		validatePrivateKey(privateKey)
@@ -164,6 +165,7 @@ class EthereumIntegrationKeyService {
 		return getOrCreateFromEthereumAddressImpl(address, signupMethod)
 	}
 
+	@Transactional(propagation = Propagation.SUPPORTS)
 	User createEthereumUser(String address, SignupMethod signupMethod) {
 		User user = userService.createUser([
 			username       : address,
