@@ -134,8 +134,8 @@ class StreamrClientService {
 			websocketUrl,
 			restUrl
 		)
-		options.setMainnetRpcUrl(MapTraversal.getString(Holders.getConfig(), "streamr.dataunion.mainnet.rpc.url"))
-		options.setSidechainRpcUrl(MapTraversal.getString(Holders.getConfig(), "streamr.dataunion.sidechain.rpc.url"))
+		options.setMainnetRpcUrl(MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.networks.local"))
+		options.setSidechainRpcUrl(MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.networks.sidechain"))
 		options.setDataUnionMainnetFactoryAddress(MapTraversal.getString(Holders.getConfig(), "streamr.dataunion.mainnet.factory.address"))
 		options.setDataUnionSidechainFactoryAddress(MapTraversal.getString(Holders.getConfig(), "streamr.dataunion.sidechain.factory.address"))
 		return clientConstructor.newInstance(options)
