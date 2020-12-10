@@ -25,10 +25,6 @@ CATALINA_OPTS="\
 	-Dstreamr.ethereum.nodePrivateKey=$ETHEREUM_NODE_PRIVATE_KEY \
 	-Dstreamr.ethereum.ensRegistryContractAddress=$ETHEREUM_ENS_REGISTRY_CONTRACT_ADDRESS \
 	-Dstreamr.encryption.password=$STREAMR_ENCRYPTION_PASSWORD \
-	-Dstreamr.dataunion.mainnet.rpc.url=$DATAUNION_MAINNET_RPC_URL \
-	-Dstreamr.dataunion.sidechain.rpc.url=$DATAUNION_SIDECHAIN_RPC_URL \
-	-Dstreamr.dataunion.mainnet.factory.address=$DATAUNION_MAINNET_FACTORY_ADDRESS \
-	-Dstreamr.dataunion.sidechain.factory.address=$DATAUNION_SIDECHAIN_FACTORY_ADDRESS \
 "
 wait-for-it.sh "$DB_HOST:$DB_PORT" --timeout=300 \
 	&& while ! mysql --user="$DB_USER" --host="$DB_HOST" --password="$DB_PASS" "$DB_NAME" -e "SELECT 1;" 1>/dev/null; do echo "waiting for db"; sleep 1; done \
