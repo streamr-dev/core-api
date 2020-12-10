@@ -69,11 +69,11 @@ class ErrorController {
 
 		// Log internal errors
 		if (apiError.statusCode >= 500 && apiError.statusCode < 600) {
-			String url = request.getHeader("X-Request-URI")
-			if (!url) {
-				url = request.getMethod() + " " + request.getRequestURL() + " " + request.getProtocol()
+			String uri = request.getHeader("X-Request-URI")
+			if (!uri) {
+				uri =  request.getRequestURL().toString()
 			}
-			log.error(url, exception)
+			log.error("Unexpected error occurred on request to ${request.getMethod()} ${uri}, returning status code 500", exception)
 		}
 
 		def extraHeaders = apiError.getHeaders()
