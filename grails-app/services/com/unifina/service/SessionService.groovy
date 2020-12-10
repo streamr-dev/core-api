@@ -9,24 +9,20 @@ import org.joda.time.DateTime
 @GrailsCompileStatic
 class SessionService {
 	static transactional = false
+
 	static final int TOKEN_LENGTH = 64
 	static final int TTL_HOURS = 3
 
 	KeyValueStoreService keyValueStoreService
+	UserService userService
 
 	private static final Logger log = Logger.getLogger(SessionService)
-
-	void updateUsersLoginDate(User user, Date date) {
-		// Using update query to avoid StaleObjectStateException in case of concurrent logins.
-		// Not unit testable, but there's coverage in end-to-end tests.
-		User.executeUpdate("update User u set u.lastLogin = ? where u.id = ?", [date, user.id])
-	}
 
 	SessionToken generateToken(Userish userish) {
 		SessionToken sk = new SessionToken(TOKEN_LENGTH, userish, TTL_HOURS)
 		keyValueStoreService.setWithExpiration(sk.getToken(), userishToString(userish), TTL_HOURS * 3600)
 		if (userish instanceof User) {
-			updateUsersLoginDate((User) userish, new Date())
+			userService.updateUsersLoginDate((User) userish, new Date())
 		}
 		return sk
 	}

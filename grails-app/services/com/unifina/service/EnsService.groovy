@@ -10,7 +10,7 @@ class EnsService {
 	boolean isENSOwnedBy(String domain, User expectedOwner) {
 		if (expectedOwner.isEthereumUser()) {
 			String actualOwnerAddress = Web3jHelper.getENSDomainOwner(domain)
-			User actualOwner = ethereumIntegrationKeyService.getEthereumUserNotSupported(actualOwnerAddress)
+			User actualOwner = ethereumIntegrationKeyService.getEthereumUser(actualOwnerAddress)
 			return (actualOwner != null) && (actualOwner.id == expectedOwner.id)
 		} else {
 			return false;

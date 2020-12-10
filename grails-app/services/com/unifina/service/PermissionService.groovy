@@ -11,7 +11,6 @@ import groovy.transform.TypeCheckingMode
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.security.AccessControlException
-
 /**
  * Check, get, grant, and revoke permissions. Maintains Access Control Lists (ACLs) to resources.
  *

@@ -3,14 +3,18 @@ package com.unifina.service
 import com.unifina.domain.*
 import com.unifina.security.PasswordEncoder
 import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.hibernate.HibernateException
+import org.hibernate.LockMode
+import org.hibernate.Session
+import org.hibernate.StaleObjectStateException
 import org.springframework.context.MessageSource
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.validation.FieldError
 
 class UserService {
 	static transactional = false
 
 	MessageSource messageSource
-
 	GrailsApplication grailsApplication
 	PasswordEncoder passwordEncoder
 	PermissionService permissionService
@@ -42,7 +46,29 @@ class UserService {
 			throw new UserCreationFailedException("Registration failed:\n" + errorStrings.join(",\n"))
 		}
 
-		if (!user.save(flush: false)) {
+		boolean result
+		try {
+			result = user.save(flush: false)
+		} catch (DataIntegrityViolationException | StaleObjectStateException e) {
+			// user account is already created
+			//e.printStackTrace()
+			return null
+			/*
+			User.withSession { Session session ->
+				User u
+				try {
+					u = session.merge(user) as User
+				} catch (HibernateException ee) {
+					log.debug("error handled when merging hibernate session while creating a new user.", ee)
+					session.evict(u)
+				}
+				session.close()
+			}
+			return u
+			*/
+		}
+		// com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException
+		if (!result) {
 			log.warn("Failed to save user data: " + checkErrors(user.errors.getAllErrors()))
 			throw new UserCreationFailedException()
 		} else {
@@ -78,7 +104,7 @@ class UserService {
 
 	def addRoles(User user, List<Role> roles = null) {
 		roles?.each { Role role ->
-			new UserRole().create(user, role)
+			UserRole.create(user, role)
 		}
 	}
 
@@ -157,6 +183,30 @@ class UserService {
 			return user
 		} else {
 			throw new InvalidUsernameAndPasswordException("Invalid username or password")
+		}
+	}
+
+	void updateUsersLoginDate(User u, Date date) {
+		User.withSession { Session session ->
+			User user
+			try {
+				user = session.merge(u) as User
+				session.lock(user, LockMode.OPTIMISTIC/*PESSIMISTIC_WRITE*/)
+			} catch (HibernateException e) {
+				log.debug("error handled while merging hibernate session while updating users last login date.", e)
+				session.evict(user)
+				session.close()
+				return
+			}
+			user.lastLogin = date
+			try {
+				user.save(failOnError: true)
+			} catch (Throwable t) {
+				log.error("error while updating users last login date: " + t.getClass(), t)
+				session.evict(user)
+			} finally {
+				session.close()
+			}
 		}
 	}
 }

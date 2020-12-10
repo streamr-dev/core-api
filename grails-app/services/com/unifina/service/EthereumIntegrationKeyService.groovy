@@ -7,7 +7,6 @@ import com.unifina.security.StringEncryptor
 import com.unifina.utils.AlphanumericStringGenerator
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
-import grails.transaction.NotTransactional
 import grails.transaction.Transactional
 import groovy.transform.CompileStatic
 import org.apache.commons.codec.DecoderException
@@ -21,8 +20,8 @@ import org.web3j.crypto.Keys
 import javax.annotation.PostConstruct
 import java.security.SignatureException
 
-@Transactional
 class EthereumIntegrationKeyService {
+	static transactional = false
 
 	def grailsApplication
 	StringEncryptor encryptor
@@ -109,18 +108,17 @@ class EthereumIntegrationKeyService {
 		}
 	}
 
-	@NotTransactional
 	String decryptPrivateKey(IntegrationKey key) {
 		Map json = JSON.parse(key.json)
 		return encryptor.decrypt((String) json.privateKey, key.user.id.byteValue())
 	}
 
-	@NotTransactional
 	List<IntegrationKey> getAllPrivateKeysForUser(User user) {
 		IntegrationKey.findAllByServiceAndUser(IntegrationKey.Service.ETHEREUM, user)
 	}
 
-	private User getEthereumUserImpl(String address) {
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+    User getEthereumUserNotSupported(String address) {
 		if (address == null) {
 			return null
 		}
@@ -134,14 +132,18 @@ class EthereumIntegrationKeyService {
 		return key.user
 	}
 
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-    User getEthereumUserNotSupported(String address) {
-		return getEthereumUserImpl(address)
-	}
-
-	@Transactional(propagation = Propagation.SUPPORTS)
 	User getEthereumUser(String address) {
-		return getEthereumUserImpl(address)
+		if (address == null) {
+			return null
+		}
+		IntegrationKey key = IntegrationKey.createCriteria().get {
+			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
+			ilike("idInService", address) // ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
+		}
+		if (key == null) {
+			return null
+		}
+		return key.user
 	}
 
 	private User getOrCreateFromEthereumAddressImpl(String address, SignupMethod signupMethod) {
@@ -156,16 +158,35 @@ class EthereumIntegrationKeyService {
 		return user
 	}
 
+	@Transactional(propagation = Propagation.REQUIRED)
 	User getOrCreateFromEthereumAddress(String address, SignupMethod signupMethod) {
-		return getOrCreateFromEthereumAddressImpl(address, signupMethod)
+		User user = getEthereumUserNotSupported(address)
+		if (user == null) {
+			try {
+				user = createEthereumUser(address, signupMethod)
+				println("CREATE NEW")
+			} catch (Exception e) {
+				println("EXCEPTION")
+				user = getEthereumUserNotSupported(address)
+			}
+		}
+		return user
 	}
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	User getOrCreateFromEthereumAddressRequiresNew(String address, SignupMethod signupMethod) {
-		return getOrCreateFromEthereumAddressImpl(address, signupMethod)
+		User user = getEthereumUserNotSupported(address)
+		if (user == null) {
+			try {
+				user = createEthereumUser(address, signupMethod)
+			} catch (Exception e) {
+				user = getEthereumUserNotSupported(address)
+			}
+		}
+		return user
 	}
 
-	@Transactional(propagation = Propagation.SUPPORTS)
+	@Transactional(propagation = Propagation.REQUIRED)
 	User createEthereumUser(String address, SignupMethod signupMethod) {
 		User user = userService.createUser([
 			username       : address,
@@ -176,15 +197,19 @@ class EthereumIntegrationKeyService {
 			passwordExpired: false,
 			signupMethod   : signupMethod
 		])
-		new IntegrationKey(
-			name: address,
-			user: user,
-			service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: address,
-			json: ([
-				address: address
-			] as JSON).toString()
-		).save(failOnError: true, flush: false)
+		try {
+			new IntegrationKey(
+				name: address,
+				user: user,
+				service: IntegrationKey.Service.ETHEREUM_ID,
+				idInService: address,
+				json: ([
+					address: address
+				] as JSON).toString()
+			).save(failOnError: true, flush: false)
+		} catch (Throwable t) {
+			log.error("error saving ethereum user.", t)
+		}
 		return user
 	}
 

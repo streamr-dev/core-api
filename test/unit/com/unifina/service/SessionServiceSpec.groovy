@@ -11,17 +11,10 @@ import spock.lang.Specification
 @TestFor(SessionService)
 @Mock([User])
 class SessionServiceSpec extends Specification {
-	KeyValueStoreService keyValueStoreService
 
 	void setup() {
-		keyValueStoreService = service.keyValueStoreService = Mock(KeyValueStoreService)
-
-		// Must mock executeUpdate(String,List) because HQL is not supported in unit test GORM
-		// Used in SessionService#updateUsersLoginDate()
-		def secUserMock = mockFor(User)
-		secUserMock.demand.static.executeUpdate(1) {String s, List p->
-			User.get(p[1]).lastLogin = p[0]
-		}
+		service.keyValueStoreService = Mock(KeyValueStoreService)
+		service.userService = Mock(UserService)
 	}
 
 	void "generateToken() should generate session token from user"() {
@@ -29,7 +22,7 @@ class SessionServiceSpec extends Specification {
 		when:
 		SessionToken token = service.generateToken(user)
 		then:
-		1 * keyValueStoreService.setWithExpiration(_, _, _)
+		1 * service.keyValueStoreService.setWithExpiration(_, _, _)
 		token.getToken().length() == SessionService.TOKEN_LENGTH
 	}
 
@@ -47,7 +40,7 @@ class SessionServiceSpec extends Specification {
 		when:
 		User retrieved = (User) service.getUserishFromToken(token)
 		then:
-		1 * keyValueStoreService.get(token) >> "User"+user.id.toString()
+		1 * service.keyValueStoreService.get(token) >> "User"+user.id.toString()
 		retrieved.id == user.id
 	}
 }
