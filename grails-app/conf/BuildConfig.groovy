@@ -52,17 +52,17 @@ grails.project.dependency.resolution = {
 		mavenLocal()
 
 		// Maven central
-		mavenRepo "https://repo1.maven.org/maven2/"
+		mavenRepo "https://151.101.84.209/maven2/"
 
 		// Ethereum Repository
-		mavenRepo "https://dl.bintray.com/ethereum/maven/"
+		mavenRepo "https://35.156.188.245/ethereum/maven/"
 
 		// Remote Grails repos
 		grailsPlugins()
 		grailsCentral()
 
 		// New Grails repo
-		mavenRepo "https://repo.grails.org/grails/plugins"
+		mavenRepo "https://35.186.234.57/grails/plugins"
 	}
 
 	dependencies {
