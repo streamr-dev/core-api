@@ -34,12 +34,17 @@ test-unit: ## Run unit tests
 test-integration: ## Run integration tests
 	$(grails) test-app -integration -no-reports --stacktrace --verbose
 
+.PHONY: test-rest
 test-rest:
-	$(error error: recipe has been renamed. Run 'make test-e2e')
+	$(MAKE) -C rest-e2e-tests test
 
 .PHONY: test-e2e
 test-e2e:
-	$(MAKE) -C rest-e2e-tests test
+	$(MAKE) -C rest-e2e-tests test/e2e
+
+.PHONY: test-stress
+test-stress:
+	$(MAKE) -C rest-e2e-tests test/stress
 
 rest_srv_test_log := rest-srv-test.log
 rest_srv_test_pid := rest-srv-test.pid
@@ -78,14 +83,15 @@ factory-reset: ## Run streamr-docker-dev factory-reset
 wipe: ## Run streamr-docker-dev stop and wipe
 	streamr-docker-dev wipe
 
+services := mysql redis cassandra parity-node0 parity-sidechain-node0 bridge data-union-server broker-node-storage-1 nginx smtp platform
 .PHONY: start
-start: ## Run streamr-docker-dev start
-	streamr-docker-dev start --except engine-and-editor
+start: ## Run streamr-docker-dev start ...
+	streamr-docker-dev start $(services)
 
 .NOTPARALLEL: start-wait
 .PHONY: start-wait
-start-wait: ## Run streamr-docker-dev start --wait
-	streamr-docker-dev start --wait --except engine-and-editor
+start-wait: ## Run streamr-docker-dev start ... --wait
+	streamr-docker-dev start $(services) --wait
 
 .PHONY: stop
 stop: ## Run streamr-docker-dev stop
@@ -103,7 +109,6 @@ ps: ## Run streamr-docker-dev ps
 update: ## Run streamr-docker-dev update
 	streamr-docker-dev update
 
-.PHONY: shell
 shell-%: ## Run docker shell. Example: 'make shell-redis'
 	streamr-docker-dev  shell $*
 
@@ -178,7 +183,6 @@ docker-login: ## Login with Docker
 
 .PHONY: clean
 clean: ## Remove all files created by this Makefile
-	$(MAKE) -C rest-e2e-tests clean
 	rm -rf tomcat.8081/work
 	rm -rf target
 	rm -rf .slcache
@@ -186,6 +190,10 @@ clean: ## Remove all files created by this Makefile
 	rm -rf $(rest_srv_test_log)
 	$(grails) clean-all
 
+.PHONY: clean-all
+clean-all: clean
+	$(MAKE) -C rest-e2e-tests clean
+
 .PHONY: help
 help: ## Show Help
-	@grep -E '^[a-zA-Z_-]+%?:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "%-20s %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+%?:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "%-20s %s\n", $$1, $$2}'|sort
