@@ -1,18 +1,18 @@
 package com.unifina.controller
 
-import com.unifina.domain.*
-import com.unifina.security.PasswordEncoder
+import com.unifina.domain.EmailValidator
+import com.unifina.domain.SignupInvite
+import com.unifina.domain.SignupMethod
+import com.unifina.domain.User
 import com.unifina.service.SignupCodeService
 import com.unifina.service.UserCreationFailedException
 import com.unifina.service.UserService
 import grails.converters.JSON
 
 class AuthApiController {
-
 	def mailService
 	UserService userService
 	SignupCodeService signupCodeService
-	PasswordEncoder passwordEncoder
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def signup(EmailCommand cmd) {
@@ -113,73 +113,6 @@ class AuthApiController {
 
 		render(user.toMap() as JSON)
 	}
-
-	@StreamrApi(authenticationLevel = AuthLevel.NONE)
-	def forgotPassword(EmailCommand cmd) {
-		if (cmd.hasErrors()) {
-			response.status = 400
-			return render([success: false, error: userService.beautifyErrors(cmd.errors.getAllErrors())] as JSON)
-		}
-
-		User user = User.findWhere(username: cmd.username)
-		if (!user) {
-			return render([emailSent: true] as JSON) // don't reveal users
-		}
-
-		def registrationCode = new RegistrationCode(email: user.username)
-		registrationCode.save(flush: false)
-
-		Boolean emailSent = false
-		try {
-			String email = user.email
-			if (email) {
-				mailService.sendMail {
-					from grailsApplication.config.unifina.email.sender
-					to email
-					subject grailsApplication.config.unifina.email.forgotPassword.subject
-					html g.render(template: "/emails/email_forgot_password", model: [token: registrationCode.token])
-				}
-				emailSent = true
-			}
-		} catch (Exception error) {
-			log.warn("Sending email failed, userId: ${user.id}, error: ${error.getMessage()}")
-			response.status = 500
-			return render([success: false, error: "Sending email failed"] as JSON)
-		}
-
-		return render([emailSent: emailSent] as JSON)
-	}
-
-	@StreamrApi(authenticationLevel = AuthLevel.NONE)
-	def resetPassword(ResetPasswordCommand command) {
-
-		String token = command.t
-		def registrationCode = token ? RegistrationCode.findByToken(token) : null
-
-		if (!registrationCode) {
-			response.status = 422
-			return render([success: false, error: message(code: 'spring.security.ui.resetPassword.badCode')] as JSON)
-		}
-
-		def user = User.findByUsername(registrationCode.email)
-		if (!user)
-			throw new RuntimeException("User belonging to the registration code was not found: $registrationCode.email")
-
-		command.username = registrationCode.email
-		command.validate()
-
-		if (command.hasErrors()) {
-			return render([success: false, error: userService.beautifyErrors(command.errors.getAllErrors())] as JSON)
-		}
-
-		RegistrationCode.withTransaction { status ->
-			user.password = passwordEncoder.encodePassword(command.password)
-			user.save()
-			registrationCode.delete()
-		}
-
-		return render(user.toMap() as JSON)
-	}
 }
 
 class EmailCommand {
@@ -192,8 +125,6 @@ class EmailCommand {
 class RegisterCommand {
 	String invite
 	String name
-	String password
-	String password2
 	String tosConfirmed
 
 	UserService userService
@@ -202,30 +133,5 @@ class RegisterCommand {
 		invite blank: false
 		tosConfirmed blank: false, validator: { val -> new Boolean(val) }
 		name blank: false
-		password validator: { String password, RegisterCommand command ->
-			return command.userService.passwordValidator(password, command)
-		}
-		password2 validator: { String password2, RegisterCommand command ->
-			return command.userService.password2Validator(password2, command)
-		}
-	}
-}
-
-class ResetPasswordCommand {
-	String username
-	String password
-	String password2
-	String t
-
-	UserService userService
-
-	static constraints = {
-		username blank: false
-		password validator: { String password, ResetPasswordCommand command ->
-			return command.userService.passwordValidator(password, command)
-		}
-		password2 validator: { value, ResetPasswordCommand command ->
-			return command.userService.password2Validator(value, command)
-		}
 	}
 }

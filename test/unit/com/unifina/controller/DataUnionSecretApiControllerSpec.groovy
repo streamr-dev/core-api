@@ -15,7 +15,7 @@ class DataUnionSecretApiControllerSpec extends Specification {
 	final String validID = "L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g"
 
 	void setup() {
-		me = new User(id: 1, name: "firstname lastname", username: "firstname.lastname@address.com", password: "salasana")
+		me = new User(id: 1, name: "firstname lastname", username: "firstname.lastname@address.com")
 		me.save(validate: true, failOnError: true)
 		DataUnionSecret secret = new DataUnionSecret(
 			name: "name of the secret",

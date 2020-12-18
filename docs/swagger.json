@@ -618,46 +618,6 @@
         }
       }
     },
-    "/login/password": {
-      "post": {
-        "summary": "Log in with password verification",
-        "description": "Verifies a username/password combination. If correct, generates a session token for the user.",
-        "tags": [
-          "login"
-        ],
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "description": "Username and password combination",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/UsernamePassword"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A session token and its expiration",
-            "schema": {
-              "$ref": "#/definitions/SessionToken"
-            }
-          },
-          "400": {
-            "description": "Password-based login failed",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "INVALID_USERNAME_OR_PASSWORD",
-                "message": "Password-based login failed"
-              }
-            }
-          }
-        }
-      }
-    },
     "/login/apikey": {
       "post": {
         "summary": "Log in with API key verification",
@@ -5543,25 +5503,6 @@
           "type": "string",
           "description": "The Ethereum address corresponding to the public key",
           "example": "0xa50E97f6a98dD992D9eCb8207c2Aa58F54970729"
-        }
-      }
-    },
-    "UsernamePassword": {
-      "type": "object",
-      "required": [
-        "username",
-        "password"
-      ],
-      "properties": {
-        "username": {
-          "type": "string",
-          "description": "User's username",
-          "example": "john123"
-        },
-        "password": {
-          "type": "string",
-          "description": "User's password",
-          "example": "fjkn56fdjk23"
         }
       }
     },

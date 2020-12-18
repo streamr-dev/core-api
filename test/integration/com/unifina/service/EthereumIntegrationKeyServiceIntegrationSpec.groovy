@@ -11,7 +11,6 @@ class EthereumIntegrationKeyServiceIntegrationSpec extends Specification {
 		User me = new User(
 			username: "ethereum-ik-spec-1@streamr.network",
 			name: "me",
-			password: "foo",
 		).save(failOnError: true, validate: true)
 		IntegrationKey key1 = new IntegrationKey(
 			user: me,
@@ -24,7 +23,6 @@ class EthereumIntegrationKeyServiceIntegrationSpec extends Specification {
 		User other = new User(
 			username: "ethereum-ik-spec-2@streamr.network",
 			name: "other",
-			password: "bar",
 		).save(failOnError: true, validate: true)
 		IntegrationKey key2 = new IntegrationKey(
 			user: other,

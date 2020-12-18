@@ -121,6 +121,7 @@ db-diff: ## Run Grails 'grails dbm-gorm-diff' with extras. WARNING! This command
 		echo "db-diff: description is required" 1>&2
 		exit 1
 	fi
+	mkdir -p grails-app/migrations/core
 	export migration_file="$$(date +%Y-%m-%d)-$$description.groovy"
 	export migration_path="grails-app/migrations/core/$$migration_file"
 	export changelog_path="grails-app/migrations/changelog.groovy"

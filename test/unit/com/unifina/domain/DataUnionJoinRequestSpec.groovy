@@ -12,7 +12,6 @@ class DataUnionJoinRequestSpec extends Specification {
 		me = new User(
 			id: "1",
 			username: "email@address.com",
-			password: "123",
 			name: "Streamr User",
 		)
 		req = new DataUnionJoinRequest(

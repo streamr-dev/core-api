@@ -122,7 +122,7 @@ log4j.main = {
 		info 'stdout'
 	}
 
-	// No need to log all exceptions thrown in API calls. For example, InvalidAPIKeyExceptions easily pollute the logs.
+	// No need to log all exceptions thrown in API calls. For example, invalid login attemps easily pollute the logs.
 	fatal 'org.codehaus.groovy.grails.web.errors.GrailsExceptionResolver'
 
 	error 'org.codehaus.groovy.grails.web.servlet',  //  controllers
@@ -292,7 +292,6 @@ environments {
 		streamr.encryption.password = System.getProperty("streamr.encryption.password") // in production, the system property must be set
 	}
 }
-streamr.encryption.bcrypt.logrounds = 10
 
 /**
  * Email config
@@ -325,12 +324,8 @@ grails {
 }
 
 unifina.email.sender = "contact@streamr.network"
-unifina.email.waitForInvite.subject = "Thanks for signing up for Streamr"
 unifina.email.registerLink.subject = "Streamr signup link"
-unifina.email.invite.subject = "Invitation to Streamr"
 unifina.email.welcome.subject = "Welcome to Streamr"
-unifina.email.feedback.recipient = "contact@streamr.network"
-unifina.email.forgotPassword.subject = "Streamr Password Reset"
 unifina.email.shareInvite.subject = "%USER% wants to share a %RESOURCE% with you via Streamr Core"
 
 /**

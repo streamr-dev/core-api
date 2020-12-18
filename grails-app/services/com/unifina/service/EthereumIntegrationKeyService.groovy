@@ -1,8 +1,9 @@
 package com.unifina.service
 
-import com.unifina.domain.*
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.SignupMethod
+import com.unifina.domain.User
 import com.unifina.security.StringEncryptor
-import com.unifina.utils.AlphanumericStringGenerator
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import groovy.transform.CompileStatic
@@ -88,11 +89,9 @@ class EthereumIntegrationKeyService {
 
 	@GrailsCompileStatic
 	void delete(String integrationKeyId, User currentUser) {
-		if (currentUser.isEthereumUser()) {
-			int nbKeys = IntegrationKey.countByUserAndService(currentUser, IntegrationKey.Service.ETHEREUM_ID)
-			if (nbKeys <= 1) {
-				throw new CannotRemoveEthereumKeyException("Cannot remove only Ethereum key.")
-			}
+		int nbKeys = IntegrationKey.countByUserAndService(currentUser, IntegrationKey.Service.ETHEREUM_ID)
+		if (nbKeys <= 1) {
+			throw new CannotRemoveEthereumKeyException("Cannot remove only Ethereum key.")
 		}
 
 		IntegrationKey account = IntegrationKey.findByIdAndUser(integrationKeyId, currentUser)
@@ -136,11 +135,9 @@ class EthereumIntegrationKeyService {
 	User createEthereumUser(String address, SignupMethod signupMethod) {
 		User user = userService.createUser([
 			username       : address,
-			password       : AlphanumericStringGenerator.getRandomAlphanumericString(32),
 			name           : "Anonymous User",
 			enabled        : true,
 			accountLocked  : false,
-			passwordExpired: false,
 			signupMethod   : signupMethod
 		])
 		new IntegrationKey(
