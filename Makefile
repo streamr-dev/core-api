@@ -189,6 +189,7 @@ clean: ## Remove all files created by this Makefile
 	rm -rf "$$HOME/.grails"
 	rm -rf $(rest_srv_test_log)
 	$(grails) clean-all
+	mkdir -p "$$HOME/.grails/scripts"
 
 .PHONY: clean-all
 clean-all: clean
