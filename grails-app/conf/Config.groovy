@@ -329,34 +329,6 @@ unifina.email.welcome.subject = "Welcome to Streamr"
 unifina.email.shareInvite.subject = "%USER% wants to share a %RESOURCE% with you via Streamr Core"
 
 /**
- * Recaptcha config
- */
-
-recaptcha.verifyUrl = "https://www.google.com/recaptcha/api/siteverify"
-
-environments {
-	// Same keys used for both dev and test
-	development {
-		recaptchav2.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-		recaptchav2.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
-		recaptchainvisible.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-		recaptchainvisible.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
-	}
-	test {
-		recaptchav2.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-		recaptchav2.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
-		recaptchainvisible.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-		recaptchainvisible.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
-	}
-	production {
-		recaptchav2.sitekey = System.getProperty("recaptchav2.sitekey")
-		recaptchainvisible.sitekey = System.getProperty("recaptchainvisible.sitekey")
-		recaptchav2.secret = System.getProperty("recaptchav2.secret")
-		recaptchainvisible.secret = System.getProperty("recaptchainvisible.secret")
-	}
-}
-
-/**
  * S3 File upload
  */
 streamr.fileUpload.s3.region = System.getProperty("streamr.fileUpload.s3.region") ?: "eu-west-1"
