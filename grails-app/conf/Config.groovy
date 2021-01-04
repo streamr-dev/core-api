@@ -245,7 +245,7 @@ streamr.ethereum.wss = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.
 	sidechain: "ws://localhost:8546",
 ]
 // Ethereum identity of this instance. Don't use this silly development private key for anything.
-streamr.ethereum.nodePrivateKey = "".equals(System.getProperty("streamr.ethereum.nodePrivateKey", "")) ? "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF" : System.getProperty("streamr.ethereum.nodePrivateKey")
+streamr.ethereum.nodePrivateKey = System.getProperty("streamr.ethereum.nodePrivateKey", "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF")
 streamr.ethereum.defaultNetwork = System.getProperty("streamr.ethereum.defaultNetwork") ?: streamr.ethereum.networks.keySet().first()
 
 environments {
@@ -332,34 +332,6 @@ unifina.email.welcome.subject = "Welcome to Streamr"
 unifina.email.feedback.recipient = "contact@streamr.network"
 unifina.email.forgotPassword.subject = "Streamr Password Reset"
 unifina.email.shareInvite.subject = "%USER% wants to share a %RESOURCE% with you via Streamr Core"
-
-/**
- * Recaptcha config
- */
-
-recaptcha.verifyUrl = "https://www.google.com/recaptcha/api/siteverify"
-
-environments {
-	// Same keys used for both dev and test
-	development {
-		recaptchav2.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-		recaptchav2.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
-		recaptchainvisible.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-		recaptchainvisible.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
-	}
-	test {
-		recaptchav2.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-		recaptchav2.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
-		recaptchainvisible.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-		recaptchainvisible.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
-	}
-	production {
-		recaptchav2.sitekey = System.getProperty("recaptchav2.sitekey")
-		recaptchainvisible.sitekey = System.getProperty("recaptchainvisible.sitekey")
-		recaptchav2.secret = System.getProperty("recaptchav2.secret")
-		recaptchainvisible.secret = System.getProperty("recaptchainvisible.secret")
-	}
-}
 
 /**
  * S3 File upload
