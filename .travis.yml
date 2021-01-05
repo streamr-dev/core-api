@@ -28,6 +28,7 @@ before_install:
   - cp $TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh $TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/streamr-docker-dev
   - sed -i -e "s#${OWNER}/${IMAGE_NAME}:dev#${OWNER}/${IMAGE_NAME}:local#g" "$TRAVIS_BUILD_DIR/streamr-docker-dev/docker-compose.override.yml"
   - sudo ifconfig docker0 10.200.10.1/24
+  - docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
 import:
  - source: streamr-dev/travis-ci:aws-staging-secrets.yml@master
  - source: streamr-dev/travis-ci:aws-production-secrets.yml@master
@@ -87,8 +88,7 @@ jobs:
     if: branch = master AND type != pull_request
     install: true
     script:
-    - grails test war
-    - docker build -t $OWNER/$IMAGE_NAME:local .
+    - docker build --build-arg GRAILS_WAR_ENV=test -t $OWNER/$IMAGE_NAME:local .
     - .travis_scripts/smoke_test.sh
     deploy:
     - provider: script
