@@ -68,7 +68,7 @@ public class DataUnionService implements InitializingBean {
 			} catch (ConnectException e) {
 				String msg = "Data Union server is busy or not responding";
 				log.error(msg, e);
-				throw new DataUnionProxyException(503, msg, ["Retry-After": "60"]);	// 1 minute
+				throw new DataUnionProxyException(503, msg, ["Retry-After": "60"]); // 1 minute
 			} catch (SocketTimeoutException e) {
 				String msg = "Data Union server gateway timeout";
 				log.error(msg, e);
@@ -98,7 +98,11 @@ public class DataUnionService implements InitializingBean {
 			}
 		}
 		long total = System.currentTimeMillis() - start;
-		log.info("DataUnionService.proxy() execution took " + total + " ms");
+		if (total >= 50) {
+			log.info("DataUnionService.proxy() execution took " + total + " ms");
+		} else {
+			log.debug("DataUnionService.proxy() execution took " + total + " ms");
+		}
 		log.debug("exiting proxy");
 		return result;
 	}
