@@ -6,4 +6,7 @@ databaseChangeLog = {
 	changeSet(author: "kkn", id: "remove-user-password-2") {
 		dropColumn(columnName: "password_expired", tableName: "user")
 	}
+	changeSet(author: "kkn", id: "remove-user-password-3") {
+		sql('alter table user drop index username;')
+	}
 }
