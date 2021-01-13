@@ -2,8 +2,8 @@ package com.unifina.service
 
 import com.streamr.api.client.CanvasesPerNode
 import com.streamr.api.client.StreamrClient
-import com.unifina.domain.User
 import com.unifina.domain.Canvas
+import com.unifina.domain.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -200,7 +200,7 @@ class ClusterServiceSpec extends Specification {
 		service.canvasService = Mock(CanvasService)
 		CanvasesPerNode canvasesPerNode = new CanvasesPerNode()
 		canvasesPerNode.shouldBeRunning = new ArrayList<HashMap<String, Object>>()
-		User u = new User(username: "pena@host.com", password: "abcabcabcabc123", name: "Pena")
+		User u = new User(username: "pena@host.com", name: "Pena")
 		u.id = 1
 		u.save(failOnError: true)
 		Canvas c = new Canvas(name: "Canvas 1", startedBy: u, json: "{}")

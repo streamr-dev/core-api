@@ -20,14 +20,12 @@ class ProductListParamsSpec extends Specification {
 		user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
 		other = new User(
 			username: "usr@foo.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		other.id = 2
 		other.save(failOnError: true, validate: false)

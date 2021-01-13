@@ -41,7 +41,6 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		me = new User(
 			name: "First Lastname",
 			username: "first@last.com",
-			password: "salasana",
 		)
 		me.id = 1
 		me.save(validate: true, failOnError: true)
@@ -138,7 +137,6 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
@@ -203,7 +201,6 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
@@ -268,7 +265,6 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
@@ -337,7 +333,6 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
@@ -404,7 +399,6 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
@@ -477,7 +471,6 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
@@ -545,7 +538,6 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)

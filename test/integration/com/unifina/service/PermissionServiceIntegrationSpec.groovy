@@ -1,12 +1,6 @@
 package com.unifina.service
 
-import com.unifina.domain.Dashboard
-import com.unifina.domain.DashboardItem
-import com.unifina.domain.Stream
-import com.unifina.domain.Permission
-import com.unifina.domain.SignupInvite
-import com.unifina.domain.User
-import com.unifina.domain.Canvas
+import com.unifina.domain.*
 import com.unifina.utils.Webcomponent
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders
@@ -61,25 +55,21 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		me = new User(
 			username: "me-permission-service-integration-spec@streamr.network",
 			name: "me",
-			password: "foo",
 		).save(failOnError: true)
 
 		anotherUser = new User(
 			username: "him-permission-service-integration-spec@streamr.network",
 			name: "him",
-			password: "bar",
 		).save(failOnError: true)
 
 		stranger = new User(
 			username: "stranger-permission-service-integration-spec@streamr.network",
 			name: "stranger",
-			password: "x",
 		).save(failOnError: true)
 
 		someone = new User(
 			username: "someone-service-integration-spec@streamr.network",
 			name: "someone",
-			password: "x",
 		).save(failOnError: true)
 
 		// Dashboards

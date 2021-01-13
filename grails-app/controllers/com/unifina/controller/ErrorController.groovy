@@ -17,7 +17,6 @@ class ErrorController {
 		InvalidSessionTokenException: { InvalidSessionTokenException e -> new ApiError(401, "INVALID_SESSION_TOKEN_ERROR", e.message)},
 		ChallengeVerificationFailedException: { ChallengeVerificationFailedException e -> new ApiError(401, "CHALLENGE_VERIFICATION_FAILED_ERROR", e.message)},
 		DisabledUserException: {DisabledUserException e -> new ApiError(401, "DISABLED_USER_EXCEPTION", e.message)},
-		InvalidUsernameAndPasswordException: { InvalidUsernameAndPasswordException e -> new ApiError(401, "INVALID_USERNAME_PASSWORD_ERROR", e.message)},
 		InvalidAPIKeyException: { InvalidAPIKeyException e -> new ApiError(401, "INVALID_API_KEY_ERROR", e.message)},
 		BadRequestException: { BadRequestException e -> new ApiError(400, "PARAMETER_MISSING", e.message)},
 		FieldCannotBeUpdatedException: { FieldCannotBeUpdatedException e -> new ApiError(422, "FIELD_CANNOT_BE_UPDATED", e.message)}
