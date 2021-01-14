@@ -1,0 +1,24 @@
+
+# https://docs.github.com/en/free-pro-team@latest/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "08:00"
+      timezone: "Europe/Helsinki"
+    reviewers:
+      - "kare"
+      - "teogeb"
+  - package-manager: "java:gradle"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "08:00"
+      timezone: "Europe/Helsinki"
+    reviewers:
+      - "kare"
+      - "teogeb"
+
