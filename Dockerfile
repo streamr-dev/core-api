@@ -4,9 +4,9 @@ FROM streamr/grails-builder:v0.0.3 AS builder
 ARG GRAILS_WAR_ENV
 ENV GRAILS_WAR_ENV=${GRAILS_WAR_ENV:-prod}
 
-COPY . /build/engine-and-editor
-WORKDIR /build/engine-and-editor
-RUN grails -non-interactive -plain-output $GRAILS_WAR_ENV war
+COPY . /src/engine-and-editor
+WORKDIR /src/engine-and-editor
+RUN grails -verbose -stacktrace -non-interactive -plain-output $GRAILS_WAR_ENV war
 
 FROM tomcat:7.0.106-jdk8-openjdk-buster
 #   bash is required by wait_for_it.sh script and provided by base image
@@ -18,7 +18,7 @@ RUN apt-get update && apt-get -y install \
 
 COPY src/conf/tomcat-server.xml /usr/local/tomcat/conf/server.xml
 COPY scripts/wait-for-it.sh scripts/entrypoint.sh /usr/local/tomcat/bin/
-COPY --from=builder /build/engine-and-editor/target/ROOT.war /usr/local/tomcat/webapps/streamr-core.war
+COPY --from=builder /src/engine-and-editor/target/ROOT.war /usr/local/tomcat/webapps/streamr-core.war
 
 # Default values for ENV variables
 ENV DB_USER root
@@ -49,8 +49,8 @@ ENV DATAUNION_SIDECHAIN_FACTORY_ADDRESS 0x4081B7e107E59af8E82756F96C751174590989
 ENV JAVA_OPTS \
 	-Djava.awt.headless=true \
 	-server \
-	-Xms128M \
-	-Xmx512M \
+	-Xms256M \
+	-Xmx1024M \
 	-XX:+UseG1GC \
     -Dcom.sun.management.jmxremote=true \
     -Dcom.sun.management.jmxremote.authenticate=false \
