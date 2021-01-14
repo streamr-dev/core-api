@@ -53,6 +53,9 @@ jobs:
   e2e:
     name: End to end test
     runs-on: ubuntu-16.04
+    env:
+      DOCKER_BUILDKIT: 0
+      COMPOSE_DOCKER_CLI_BUILD: 0
     steps:
       - uses: actions/checkout@v2.3.4
       - uses: sdkman/sdkman-action@master
