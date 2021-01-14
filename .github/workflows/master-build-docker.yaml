@@ -73,7 +73,7 @@ jobs:
           unzip -q ${{ steps.sdkman-grails.outputs.file }} -d "$HOME"
           echo "$HOME/grails-$GRAILS_VERSION/bin" >> $GITHUB_PATH
       - name: Start Streamr Docker Stack
-        uses: streamr-dev/streamr-docker-dev-action@v1.0.0-alpha.1
+        uses: streamr-dev/streamr-docker-dev-action@v1.0.0-alpha.2
         with:
           services-to-start: "mysql redis"
       - name: Integration test
@@ -94,11 +94,6 @@ jobs:
         with:
           java-version: $JAVA_VERSION
           jdkFile: ${{ steps.sdkman-java.outputs.file }}
-      - uses: sdkman/sdkman-action@master
-        id: sdkman-grails
-        with:
-          candidate: grails
-          version: $GRAILS_VERSION
       - uses: actions/cache@v2.1.3
         with:
           path: ~/.m2/repository
@@ -113,10 +108,6 @@ jobs:
         uses: actions/setup-node@v2.1.4
         with:
           node-version: 14.15.4
-      - name: Install Grails
-        run: |
-          unzip -q ${{ steps.sdkman-grails.outputs.file }} -d "$HOME"
-          echo "$HOME/grails-$GRAILS_VERSION/bin" >> $GITHUB_PATH
       - name: Start Streamr Docker Stack
         uses: streamr-dev/streamr-docker-dev-action@v1.0.0-alpha.1
         with:
