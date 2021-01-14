@@ -48,10 +48,10 @@ grails.project.dependency.resolution = {
 	// whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
 
 	repositories {
-		// Fast local repos first
+		inherits false // Whether to inherit repository definitions from plugins
+		//mavenLocal()
 		mavenRepo "https://repo.grails.org/grails/core"
 		mavenRepo "https://repo.grails.org/grails/plugins"
-		//mavenLocal()
 
 		// Maven central
 		mavenRepo "https://repo1.maven.org/maven2/"
