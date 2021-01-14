@@ -80,6 +80,11 @@ jobs:
         uses: actions/setup-node@v2.1.4
         with:
           node-version: 14.15.4
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Start Streamr Docker Stack
         uses: streamr-dev/streamr-docker-dev-action@v1.0.0-alpha.2
         with:
@@ -96,6 +101,8 @@ jobs:
           push: false
       - name: End to End tests
         run: |
+          echo "GITHUB_PATH: $GITHUB_PATH"
+          echo "NODE_VERSION: $NODE_VERSION"
           streamr-docker-dev start engine-and-editor
           streamr-docker-dev wait
           cd rest-e2e-tests
