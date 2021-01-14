@@ -106,7 +106,8 @@ jobs:
           restore-keys: ${{ runner.os }}-maven
       - name: Set variables
         run: |
-          echo "NODE_VERSION=$(cat rest-e2e-tests/.nvmrc | sed -e '/^v/ s/^v//')" >> $GITHUB_ENV
+          #echo "NODE_VERSION=$(cat rest-e2e-tests/.nvmrc | sed -e '/^v/ s/^v//')" >> $GITHUB_ENV
+          echo "NODE_VERSION=14.15.4" >> $GITHUB_ENV
           echo "Node version: $NODE_VERSION"
       - name: Install Node
         uses: actions/setup-node@v2.1.4
