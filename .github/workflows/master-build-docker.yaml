@@ -26,7 +26,7 @@ jobs:
       - name: Check Java version
         run: java -version
       - uses: sdkman/sdkman-action@master
-        id: sdkman
+        id: sdkman-grails
         with:
           candidate: grails
           version: 2.5.6
@@ -59,7 +59,7 @@ jobs:
           java-version: 8.0
           jdkFile: ${{ steps.sdkman.outputs.file }}
       - uses: sdkman/sdkman-action@master
-        id: sdkman
+        id: sdkman-grails
         with:
           candidate: grails
           version: 2.5.6
@@ -87,7 +87,7 @@ jobs:
           java-version: 8.0
           jdkFile: ${{ steps.sdkman.outputs.file }}
       - uses: sdkman/sdkman-action@master
-        id: sdkman
+        id: sdkman-grails
         with:
           candidate: grails
           version: 2.5.6
@@ -149,7 +149,7 @@ jobs:
           java-version: 8.0
           jdkFile: ${{ steps.sdkman.outputs.file }}
       - uses: sdkman/sdkman-action@master
-        id: sdkman
+        id: sdkman-grails
         with:
           candidate: grails
           version: 2.5.6
