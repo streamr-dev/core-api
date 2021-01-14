@@ -1,0 +1,125 @@
+language: groovy
+os: linux
+dist: xenial
+jdk:
+- openjdk8
+services:
+- docker
+
+# https://docs.travis-ci.com/user/conditional-builds-stages-jobs/#conditional-builds
+if: (branch = master) OR (branch = "/^deployed-\\d+\\.\\d+(\\.\\d+)?(-\\S*)?$/") OR type = pull_request # build whitelisted branches and all PRs
+
+git:
+  submodules: false
+env:
+  global:
+    - NODE_VERSION=$(cat rest-e2e-tests/.nvmrc)
+    - OWNER=streamr
+    - IMAGE_NAME=engine-and-editor
+    - PATH=$PATH:$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev
+before_install:
+  - sudo /etc/init.d/mysql stop
+  - curl -s http://get.sdkman.io | bash
+  - echo sdkman_auto_answer=true > ~/.sdkman/etc/config
+  - source "/home/travis/.sdkman/bin/sdkman-init.sh"
+  - sdk install grails 2.5.6
+  - nvm install $NODE_VERSION
+  - git clone --depth 1 https://github.com/streamr-dev/streamr-docker-dev.git
+  - cp $TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh $TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/streamr-docker-dev
+  - sed -i -e "s#${OWNER}/${IMAGE_NAME}:dev#${OWNER}/${IMAGE_NAME}:local#g" "$TRAVIS_BUILD_DIR/streamr-docker-dev/docker-compose.override.yml"
+  - sudo ifconfig docker0 10.200.10.1/24
+  - docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
+import:
+ - source: streamr-dev/travis-ci:aws-staging-secrets.yml@master
+ - source: streamr-dev/travis-ci:aws-production-secrets.yml@master
+ - source: streamr-dev/travis-ci:docker-secrets.yml@master
+jobs:
+  allow_failures:
+      - env: CAN_FAIL=True
+  include:
+  - stage: Tests
+    name: Unit tests
+    script: grails test-app -unit
+  - stage: Tests
+    name: Validate Swagger
+    script: .travis_scripts/validate_swagger.sh
+  - stage: Tests
+    name: Integration tests
+    script: .travis_scripts/integration_test.sh
+  - stage: Tests
+    name: REST API tests
+    script: .travis_scripts/rest_e2e_test.sh
+  - stage: Tests
+    name: streamr-client tests
+    env:
+    - CAN_FAIL=True
+    script:
+    - grails test war
+    - docker build -t $OWNER/$IMAGE_NAME:local .
+    - .travis_scripts/streamr-client-test.sh
+  - stage: Build war Staging
+    if: NOT type IN (pull_request)
+    script: .travis_scripts/build_war.sh
+    env:
+    - WS_URL="wss://ee-staging.streamr.com/api/v1/ws"
+    deploy:
+    - provider: s3
+      access_key_id: $ACCESS_KEY_STG
+      secret_access_key: $SECRET_ACCESS_KEY_STG
+      bucket: eu-west-1-stg-streamr-vault
+      upload-dir: engine-editor/releases
+      acl: private
+      region: eu-west-1
+      skip_cleanup: true
+      local_dir: build
+      on:
+        branch: master
+    - provider: codedeploy
+      access_key_id: $ACCESS_KEY_STG
+      secret_access_key: $SECRET_ACCESS_KEY_STG
+      bucket: eu-west-1-stg-streamr-vault
+      key: engine-editor/releases/ee-${TRAVIS_JOB_ID}.tar
+      application: eu-west-1-stg-ee-codedeploy
+      deployment_group: eu-west-1-stg-ee-deployment-group
+      region: eu-west-1
+      on:
+        branch: master
+  - stage: Build Docker Dev/Nightly
+    if: branch = master AND type != pull_request
+    install: true
+    script:
+    - docker build --build-arg GRAILS_WAR_ENV=test -t $OWNER/$IMAGE_NAME:local .
+    - .travis_scripts/smoke_test.sh
+    deploy:
+    - provider: script
+      script: .travis_scripts/deploy_docker.sh dev
+  - stage: Deploy Swagger file
+    if: tag IS present
+    deploy:
+    - provider: s3
+      access_key_id: $ACCESS_KEY_PRD
+      secret_access_key: $SECRET_ACCESS_KEY_PRD
+      bucket: eu-west-1-streamr-cdn
+      acl: private
+      region: eu-west-1
+      skip_cleanup: true
+      local_dir: docs
+      glob: "swagger.json"
+      on:
+        branch: master
+  - stage: Build Docker Production
+    if: tag IS present
+    install: true
+    script:
+    - grails prod war
+    - docker build -t $OWNER/$IMAGE_NAME:local .
+    - .travis_scripts/smoke_test.sh
+    deploy:
+    - provider: script
+      script: .travis_scripts/deploy_docker.sh production
+      on:
+        tags: true
+after_failure:
+  - docker ps
+  - .travis_scripts/after_test_failure.sh
+  - docker logs streamr-dev-nginx
