@@ -1,4 +1,4 @@
-FROM tomcat:7.0.106-jdk8-openjdk-buster AS builder
+FROM streamr/grails-builder:v0.0.3 AS builder
 
 # GRAILS_WAR_ENV argument must be 'prod' or 'test'. Default is 'prod'.
 ARG GRAILS_WAR_ENV

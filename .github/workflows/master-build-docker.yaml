@@ -1,4 +1,4 @@
-name: Master
+name: Master build Docker
 
 on:
   pull_request: # TODO: Switch to push before merge
