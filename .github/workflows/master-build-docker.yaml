@@ -1,8 +1,7 @@
 name: Master build Docker
 
-on:
+on: 
   pull_request: # TODO: Switch to push before merge
-    - master
 
 env:
   OWNER: streamr
