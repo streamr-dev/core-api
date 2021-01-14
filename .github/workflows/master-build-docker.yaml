@@ -79,6 +79,25 @@ jobs:
           echo "NODE_VERSION=14.15.4" >> $GITHUB_ENV
           echo "Node version: $NODE_VERSION"
           java -version
+      - uses: sdkman/sdkman-action@master
+        id: sdkman-java
+        with:
+          candidate: java
+          version: 8.0.275-zulu
+      - uses: actions/setup-java@v1.4.3
+        id: setup-java
+        with:
+          java-version: $JAVA_VERSION
+          jdkFile: ${{ steps.sdkman-java.outputs.file }}
+      - uses: sdkman/sdkman-action@master
+        id: sdkman-grails
+        with:
+          candidate: grails
+          version: $GRAILS_VERSION
+      - name: Install Grails
+        run: |
+          unzip -q ${{ steps.sdkman-grails.outputs.file }} -d "$HOME"
+          echo "$HOME/grails-$GRAILS_VERSION/bin" >> $GITHUB_PATH
       - name: Install Node
         uses: actions/setup-node@v2.1.4
         with:
@@ -104,7 +123,7 @@ jobs:
       #     push: false
       - name: Build Docker
         run: |
-          echo "GITHUB_PATH: $GITHUB_PATH"
+          echo "PATH: $PATH"
           echo "NODE_VERSION: $NODE_VERSION"
           docker build -f Dockerfile --build-arg GRAILS_WAR_ENV=test --tag streamr/engine-and-editor:dev .
       - name: End to End tests
