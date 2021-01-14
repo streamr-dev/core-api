@@ -31,7 +31,7 @@ jobs:
           restore-keys: ${{ runner.os }}-maven
       - name: Install Grails
         run: |
-          echo "${{ steps.sdkman.outputs.file }}/bin" >> $GITHUB_PATH
+          echo "${{ steps.sdkman-grails.outputs.file }}/bin" >> $GITHUB_PATH
       - name: Build
         run: |
           make -f Makefile.ci compile
