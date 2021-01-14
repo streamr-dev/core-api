@@ -10,24 +10,24 @@ grails.project.test.reports.dir = "target/test-reports"
 grails.project.war.file = "target/ROOT.war" // "target/${appName}-${appVersion}.war"
 
 grails.project.fork = [
-	run: [
-		maxMemory: System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
-		minMemory: 256,
-		debug: false,
-		maxPerm: 512,
-		forkReserve:false,
-		jvmArgs: [
+	run : [
+		maxMemory  : System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
+		minMemory  : 256,
+		debug      : false,
+		maxPerm    : 512,
+		forkReserve: false,
+		jvmArgs    : [
 			"-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true"
 		]
 	],
 	test: [
-		maxMemory: System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
-		minMemory: 256,
-		debug: false,
-		maxPerm: 512,
-		forkReserve:false,
-		daemon:true,
-		jvmArgs: [
+		maxMemory  : System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
+		minMemory  : 256,
+		debug      : false,
+		maxPerm    : 512,
+		forkReserve: false,
+		daemon     : true,
+		jvmArgs    : [
 			"-Djava.awt.headless=true",
 			"-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true"
 		]
@@ -42,9 +42,10 @@ grails.project.dependency.resolution = {
 		// specify dependency exclusions here; for example, uncomment this to disable ehcache:
 		// excludes 'ehcache'
 	}
-	log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+	log "verbose" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
 	checksums true // Whether to verify checksums on resolve
-	legacyResolve false // whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
+	legacyResolve false
+	// whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
 
 	repositories {
 		// Fast local repos first
@@ -88,7 +89,8 @@ grails.project.dependency.resolution = {
 			excludes('org.springframework:spring-context:*')
 			excludes('org.springframework:spring-orm:*')
 		}
-		compile('org.springframework.security:spring-security-core:4.2.9.RELEASE') { // Needed for bcrypt and PBKDF2 password encoders
+		compile('org.springframework.security:spring-security-core:4.2.9.RELEASE') {
+			// Needed for bcrypt and PBKDF2 password encoders
 			excludes('org.springframework:spring-aop:*')
 			excludes('org.springframework:spring-beans:*')
 			excludes('org.springframework:spring-context:*')

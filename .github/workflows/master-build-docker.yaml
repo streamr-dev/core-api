@@ -91,11 +91,6 @@ jobs:
         run: |
           echo "PATH: $PATH"
           echo "NODE_VERSION: $NODE_VERSION"
-          echo
-          echo
-          cat ~/.docker/config.json
-          echo
-          echo
           docker build -f Dockerfile --build-arg GRAILS_WAR_ENV=test --tag streamr/engine-and-editor:dev .
       - name: End to End tests
         run: |
