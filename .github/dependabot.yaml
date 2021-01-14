@@ -12,7 +12,7 @@ updates:
     reviewers:
       - "kare"
       - "teogeb"
-  - package-manager: "java:gradle"
+  - package-ecosystem: "gradle"
     directory: "/"
     schedule:
       interval: "daily"
