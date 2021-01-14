@@ -74,11 +74,6 @@ jobs:
         with:
           candidate: grails
           version: $GRAILS_VERSION
-      - uses: actions/setup-java@v1.4.3
-        id: setup-java
-        with:
-          java-version: $JAVA_VERSION
-          jdkFile: ${{ steps.sdkman-java.outputs.file }}
       - uses: actions/cache@v2.1.3
         with:
           path: ~/.m2/repository
