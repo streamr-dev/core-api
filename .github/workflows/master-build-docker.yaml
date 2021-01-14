@@ -84,7 +84,6 @@ jobs:
           #echo "NODE_VERSION=$(cat rest-e2e-tests/.nvmrc | sed -e '/^v/ s/^v//')" >> $GITHUB_ENV
           echo "NODE_VERSION=14.15.4" >> $GITHUB_ENV
           echo "Node version: $NODE_VERSION"
-          java -version
       - name: Install Grails
         run: |
           unzip -q ${{ steps.sdkman-grails.outputs.file }} -d "$HOME"
@@ -92,7 +91,7 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v2.1.4
         with:
-          node-version: 14.15.4
+          node-version: ${{ env.NODE_VERSION }}
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
@@ -116,6 +115,9 @@ jobs:
         run: |
           echo "PATH: $PATH"
           echo "NODE_VERSION: $NODE_VERSION"
+          streamr-docker-dev help
+          grails --version
+          java -version
           docker build -f Dockerfile --build-arg GRAILS_WAR_ENV=test --tag streamr/engine-and-editor:dev .
       - name: End to End tests
         run: |
