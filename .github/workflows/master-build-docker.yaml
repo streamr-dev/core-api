@@ -52,7 +52,7 @@ jobs:
           make -f Makefile.ci test-integration
   e2e:
     name: End to end test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04
     steps:
       - uses: actions/checkout@v2.3.4
       - uses: sdkman/sdkman-action@master
