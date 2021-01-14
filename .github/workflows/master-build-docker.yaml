@@ -59,35 +59,11 @@ jobs:
       #COMPOSE_DOCKER_CLI_BUILD: 0
     steps:
       - uses: actions/checkout@v2.3.4
-      - uses: sdkman/sdkman-action@master
-        id: sdkman-java
-        with:
-          candidate: java
-          version: $SDKMAN_JAVA_VERSION
-      - uses: actions/setup-java@v1.4.3
-        id: setup-java
-        with:
-          java-version: $JAVA_VERSION
-          jdkFile: ${{ steps.sdkman-java.outputs.file }}
-      - uses: sdkman/sdkman-action@master
-        id: sdkman-grails
-        with:
-          candidate: grails
-          version: $GRAILS_VERSION
-      - uses: actions/cache@v2.1.3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('grails-app/conf/BuildConfig.groovy') }}
-          restore-keys: ${{ runner.os }}-maven
       - name: Set variables
         run: |
           #echo "NODE_VERSION=$(cat rest-e2e-tests/.nvmrc | sed -e '/^v/ s/^v//')" >> $GITHUB_ENV
           echo "NODE_VERSION=14.15.4" >> $GITHUB_ENV
           echo "Node version: $NODE_VERSION"
-      - name: Install Grails
-        run: |
-          unzip -q ${{ steps.sdkman-grails.outputs.file }} -d "$HOME"
-          echo "$HOME/grails-$GRAILS_VERSION/bin" >> $GITHUB_PATH
       - name: Install Node
         uses: actions/setup-node@v2.1.4
         with:
@@ -115,9 +91,11 @@ jobs:
         run: |
           echo "PATH: $PATH"
           echo "NODE_VERSION: $NODE_VERSION"
-          streamr-docker-dev help
-          grails --version
-          java -version
+          echo
+          echo
+          cat ~/.docker/config.json
+          echo
+          echo
           docker build -f Dockerfile --build-arg GRAILS_WAR_ENV=test --tag streamr/engine-and-editor:dev .
       - name: End to End tests
         run: |
