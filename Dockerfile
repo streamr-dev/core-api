@@ -8,11 +8,11 @@ COPY . /src/engine-and-editor
 WORKDIR /src/engine-and-editor
 RUN grails -verbose -stacktrace -non-interactive -plain-output -version
 RUN echo
-RUN grails -Dhttps.protocols=TLSv1.2 -verbose -stacktrace -non-interactive -plain-output list-plugins
+RUN grails -verbose -stacktrace -non-interactive -plain-output list-plugins
 RUN echo
-RUN grails -Dhttps.protocols=TLSv1.2 -verbose -stacktrace -non-interactive -plain-output refresh-dependencies
+RUN grails -verbose -stacktrace -non-interactive -plain-output refresh-dependencies
 RUN echo
-RUN grails -Dhttps.protocols=TLSv1.2 -verbose -stacktrace -non-interactive -plain-output $GRAILS_WAR_ENV war
+RUN grails -verbose -stacktrace -non-interactive -plain-output $GRAILS_WAR_ENV war
 
 FROM tomcat:7.0.106-jdk8-openjdk-buster
 #   bash is required by wait_for_it.sh script and provided by base image
