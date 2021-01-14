@@ -23,13 +23,15 @@ jobs:
         with:
           java-version: 8.0
           jdkFile: ${{ steps.sdkman.outputs.file }}
-      - run: java --version
+      - name: Check Java version
+        run: java -version
       - uses: sdkman/sdkman-action@master
         id: sdkman
         with:
           candidate: grails
           version: 2.5.6
-      - run: grails --version
+      - name: Check Grails version
+        run: grails --version
       - uses: actions/cache@v2.1.3
         with:
           path: ~/.m2/repository
@@ -56,13 +58,11 @@ jobs:
         with:
           java-version: 8.0
           jdkFile: ${{ steps.sdkman.outputs.file }}
-      - run: java --version
       - uses: sdkman/sdkman-action@master
         id: sdkman
         with:
           candidate: grails
           version: 2.5.6
-      - run: grails --version
       - uses: actions/cache@v2.1.3
         with:
           path: ~/.m2/repository
@@ -86,13 +86,11 @@ jobs:
         with:
           java-version: 8.0
           jdkFile: ${{ steps.sdkman.outputs.file }}
-      - run: java --version
       - uses: sdkman/sdkman-action@master
         id: sdkman
         with:
           candidate: grails
           version: 2.5.6
-      - run: grails --version
       - uses: actions/cache@v2.1.3
         with:
           path: ~/.m2/repository
@@ -150,13 +148,11 @@ jobs:
         with:
           java-version: 8.0
           jdkFile: ${{ steps.sdkman.outputs.file }}
-      - run: java --version
       - uses: sdkman/sdkman-action@master
         id: sdkman
         with:
           candidate: grails
           version: 2.5.6
-      - run: grails --version
       - uses: actions/cache@v2.1.3
         with:
           path: ~/.m2/repository
