@@ -109,7 +109,7 @@ jobs:
           echo "::set-env name=NODE_VERSION::$(cat rest-e2e-tests/.nvmrc)"
           echo "Node version: ${NODE_VERSION}"
       - name: Install Node
-      - uses: actions/setup-node@v2.1.4
+        uses: actions/setup-node@v2.1.4
         with:
           node-version: ${NODE_VERSION}
       - name: Install Grails
