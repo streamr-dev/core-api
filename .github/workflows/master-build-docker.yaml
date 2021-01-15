@@ -2,10 +2,6 @@ name: Master
 
 on:
   pull_request: # TODO: Switch to push before merge
-    paths:
-      - '**'
-      - '!**.md'
-      - '!docs/**'
     branches:
       - master
 
