@@ -104,6 +104,8 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: End to End tests
         run: |
+          streamr-docker-dev start engine-and-editor
+          streamr-docker-dev wait
           cd rest-e2e-tests
           npm ci
           npm run test:e2e
