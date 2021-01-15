@@ -9,18 +9,14 @@ WORKDIR /src/engine-and-editor
 # Building Grails in Docker fails due to ancient Grails version
 #RUN grails -verbose -stacktrace -non-interactive -plain-output $GRAILS_WAR_ENV war
 
-RUN cat /etc/resolv.conf
 
 FROM tomcat:7.0.106-jdk8-openjdk-buster
-
-RUN cat /etc/resolv.conf
-
 #   bash is required by wait_for_it.sh script and provided by base image
 #   curl is required for container healthcheck
 #   mysql-client is required by entrypoint.sh
 RUN apt-get update && apt-get -y install \
-       curl \
-       default-mysql-client
+	curl \
+	default-mysql-client
 
 COPY src/conf/tomcat-server.xml /usr/local/tomcat/conf/server.xml
 COPY scripts/wait-for-it.sh scripts/entrypoint.sh /usr/local/tomcat/bin/
