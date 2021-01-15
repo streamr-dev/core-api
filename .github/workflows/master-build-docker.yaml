@@ -6,6 +6,7 @@ on:
       - master
     paths-ignore:
       - "**.md"
+      - "docs/swagger.json"
 
 env:
   GRAILS_VERSION: '2.5.6'
