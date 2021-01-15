@@ -39,6 +39,7 @@ jobs:
         run: |
           unzip ${{ steps.sdkman-grails.outputs.file }} -d "$HOME"
           echo "$HOME/grails-$GRAILS_VERSION/bin" >> $GITHUB_PATH
+          sudo sysctl -a
       - name: Build
         run: |
           make -f Makefile.ci compile
