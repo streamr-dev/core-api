@@ -12,6 +12,7 @@ env:
   JAVA_VERSION: '1.8'
   SDKMAN_JAVA_VERSION: '8.0.275-zulu'
   GRAILS_WAR_ENV: 'test'
+  DOCKER_BUILDKIT: '1'
 
 jobs:
   test:
