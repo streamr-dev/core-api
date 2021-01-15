@@ -54,8 +54,7 @@ jobs:
     env:
     - CAN_FAIL=True
     script:
-    - grails test war
-    - docker build -t $OWNER/$IMAGE_NAME:local .
+    - docker build --network=host -t $OWNER/$IMAGE_NAME:local .
     - .travis_scripts/streamr-client-test.sh
   - stage: Build war Staging
     if: NOT type IN (pull_request)
@@ -88,7 +87,7 @@ jobs:
     if: branch = master AND type != pull_request
     install: true
     script:
-    - docker build --build-arg GRAILS_WAR_ENV=test -t $OWNER/$IMAGE_NAME:local .
+    - docker build --network=host --build-arg GRAILS_WAR_ENV=test -t $OWNER/$IMAGE_NAME:local .
     - .travis_scripts/smoke_test.sh
     deploy:
     - provider: script
@@ -112,7 +111,7 @@ jobs:
     install: true
     script:
     - grails prod war
-    - docker build -t $OWNER/$IMAGE_NAME:local .
+    - docker build --network=host -t $OWNER/$IMAGE_NAME:local .
     - .travis_scripts/smoke_test.sh
     deploy:
     - provider: script
