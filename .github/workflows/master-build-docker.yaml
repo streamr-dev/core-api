@@ -98,9 +98,6 @@ jobs:
             GRAILS_WAR_ENV=${{ env.GRAILS_WAR_ENV }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
-      - name: Inspect Docker build
-        run: |
-          docker image inspect streamr/engine-and-editor:dev
       - name: Start Streamr Docker Stack
         uses: streamr-dev/streamr-docker-dev-action@v1.0.0-alpha.2
         with:
