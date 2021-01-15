@@ -95,7 +95,7 @@ jobs:
           load: true
           tags: streamr/engine-and-editor:dev
           build-args: |
-            GRAILS_WAR_ENV=$GRAILS_WAR_ENV
+            GRAILS_WAR_ENV=${{ env.GRAILS_WAR_ENV }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
       - name: Inspect Docker build
