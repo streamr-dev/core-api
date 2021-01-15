@@ -39,7 +39,6 @@ jobs:
         run: |
           unzip ${{ steps.sdkman-grails.outputs.file }} -d "$HOME"
           echo "$HOME/grails-$GRAILS_VERSION/bin" >> $GITHUB_PATH
-          sudo ls -l /etc/resolv.conf
       - name: Build
         run: |
           make -f Makefile.ci compile
@@ -55,7 +54,7 @@ jobs:
           make -f Makefile.ci test-integration
   e2e:
     name: End to end test
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
       - uses: sdkman/sdkman-action@master
