@@ -41,7 +41,7 @@ public class FakeStreamrClient extends StreamrClient {
 
 	@Override
 	public UserInfo getUserInfo() throws IOException {
-		return new UserInfo("test-user", "test-username");
+		return new UserInfo("test-user", "test-username", "id");
 	}
 
 	public Map<String, List<SentMessage>> getAndClearSentMessages() {
