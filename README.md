@@ -10,6 +10,8 @@ Web application containing the backend for Streamr Core, facilitating things lik
 
 The application uses the Grails web framework and runs on Java VM. 
 
+This README edit doesnt trigger workflow
+
 ## Dependencies
 
 ### Tools
