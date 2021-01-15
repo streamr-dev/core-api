@@ -27,7 +27,7 @@
   "tags": [
     {
       "name": "categories",
-      "description": "Product categories. Should not trigger build"
+      "description": "Product categories"
     },
     {
       "name": "canvases",
