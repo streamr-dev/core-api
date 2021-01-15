@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/streamr-dev/engine-and-editor.svg?branch=master)](https://travis-ci.org/streamr-dev/engine-and-editor)
 
+Should not trigger build
+
 Web application containing the backend for Streamr Core, facilitating things like:
 - Creating streams
 - Creating and running canvases
