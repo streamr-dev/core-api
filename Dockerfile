@@ -1,4 +1,4 @@
-FROM streamr/grails-builder:v0.0.3 AS builder
+FROM ubuntu:20.04 AS builder
 
 # GRAILS_WAR_ENV argument must be 'prod' or 'test'. Default is 'prod'.
 ARG GRAILS_WAR_ENV
