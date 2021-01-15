@@ -100,7 +100,7 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache
       - name: Inspect Docker build
         run: |
-          docker image inspect engine-and-editor:dev
+          docker image inspect streamr/engine-and-editor:dev
       - name: Start Streamr Docker Stack
         uses: streamr-dev/streamr-docker-dev-action@v1.0.0-alpha.2
         with:
