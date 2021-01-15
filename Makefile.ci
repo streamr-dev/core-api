@@ -12,31 +12,9 @@ test-unit: ## Run unit tests
 test-integration: ## Run integration tests
 	$(grails) test-app -integration -no-reports
 
-.PHONY: test-e2e
-test-e2e:
-	$(MAKE) -C rest-e2e-tests test/e2e
-
-.PHONY: test-stress
-test-stress:
-	$(MAKE) -C rest-e2e-tests test/stress
-
-
 .PHONY: compile
 compile: ## Compile code
 	$(grails) compile
-
-.NOTPARALLEL: start-wait
-.PHONY: start-wait
-start-wait: ## Run streamr-docker-dev start ... --wait
-	streamr-docker-dev start $(services) --wait
-
-.PHONY: stop
-stop: ## Run streamr-docker-dev stop
-	streamr-docker-dev stop
-
-.PHONY: ps
-ps: ## Run streamr-docker-dev ps
-	streamr-docker-dev ps
 
 .PHONY: help
 help: ## Show Help
