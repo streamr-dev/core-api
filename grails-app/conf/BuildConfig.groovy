@@ -10,24 +10,24 @@ grails.project.test.reports.dir = "target/test-reports"
 grails.project.war.file = "target/ROOT.war" // "target/${appName}-${appVersion}.war"
 
 grails.project.fork = [
-	run : [
-		maxMemory  : System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
-		minMemory  : 256,
-		debug      : false,
-		maxPerm    : 512,
-		forkReserve: false,
-		jvmArgs    : [
+	run: [
+		maxMemory: System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
+		minMemory: 256,
+		debug: false,
+		maxPerm: 512,
+		forkReserve:false,
+		jvmArgs: [
 			"-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true"
 		]
 	],
 	test: [
-		maxMemory  : System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
-		minMemory  : 256,
-		debug      : false,
-		maxPerm    : 512,
-		forkReserve: false,
-		daemon     : true,
-		jvmArgs    : [
+		maxMemory: System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
+		minMemory: 256,
+		debug: false,
+		maxPerm: 512,
+		forkReserve:false,
+		daemon:true,
+		jvmArgs: [
 			"-Djava.awt.headless=true",
 			"-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true"
 		]
@@ -44,14 +44,12 @@ grails.project.dependency.resolution = {
 	}
 	log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
 	checksums true // Whether to verify checksums on resolve
-	legacyResolve false
-	// whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
+	legacyResolve false // whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
 
 	repositories {
-		inherits false // Whether to inherit repository definitions from plugins
-		//mavenLocal()
-		mavenRepo "http://repo.grails.org/grails/core"
-		mavenRepo "http://repo.grails.org/grails/plugins"
+		// Fast local repos first
+		grailsHome()
+		mavenLocal()
 
 		// Maven central
 		mavenRepo "https://repo1.maven.org/maven2/"
@@ -61,6 +59,13 @@ grails.project.dependency.resolution = {
 
 		// Streamr Maven
 		mavenRepo "https://dl.bintray.com/streamr/maven/"
+
+		// Remote Grails repos
+		grailsPlugins()
+		grailsCentral()
+
+		// New Grails repo
+		mavenRepo "https://repo.grails.org/grails/plugins"
 	}
 
 	dependencies {
@@ -83,8 +88,7 @@ grails.project.dependency.resolution = {
 			excludes('org.springframework:spring-context:*')
 			excludes('org.springframework:spring-orm:*')
 		}
-		compile('org.springframework.security:spring-security-core:4.2.9.RELEASE') {
-			// Needed for bcrypt and PBKDF2 password encoders
+		compile('org.springframework.security:spring-security-core:4.2.9.RELEASE') { // Needed for bcrypt and PBKDF2 password encoders
 			excludes('org.springframework:spring-aop:*')
 			excludes('org.springframework:spring-beans:*')
 			excludes('org.springframework:spring-context:*')
