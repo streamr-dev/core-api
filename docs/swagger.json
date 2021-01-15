@@ -55,7 +55,7 @@
     },
     {
       "name": "products",
-      "description": "Products sold on a marketplace containing Streams. Should not trigger workflow"
+      "description": "Products sold on a marketplace containing Streams"
     },
     {
       "name": "streams",
