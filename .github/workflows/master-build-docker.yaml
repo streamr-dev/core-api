@@ -59,11 +59,10 @@ jobs:
   e2e:
     name: End to end test
     runs-on: ubuntu-latest
+    env:
+      NODE_VERSION: $(cat rest-e2e-tests/.nvmrc | sed -e '/^v/ s/^v//')
     steps:
       - uses: actions/checkout@v2.3.4
-      - name: Set variables
-        run: |
-          echo "NODE_VERSION=$(cat rest-e2e-tests/.nvmrc | sed -e '/^v/ s/^v//')" >> $GITHUB_ENV
       - name: Install Node
         uses: actions/setup-node@v2.1.4
         with:
