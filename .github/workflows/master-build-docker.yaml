@@ -2,11 +2,11 @@ name: Master
 
 on:
   pull_request: # TODO: Switch to push before merge
-    branches:
-      - master
     paths-ignore:
       - "**.md"
       - "docs/swagger.json"
+    branches:
+      - master
 
 env:
   GRAILS_VERSION: '2.5.6'
