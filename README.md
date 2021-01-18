@@ -1,5 +1,7 @@
 # Streamr Engine and Editor 
 
+This commit should trigger Markdown CI workflow.
+
 [![Build Status](https://travis-ci.org/streamr-dev/engine-and-editor.svg?branch=master)](https://travis-ci.org/streamr-dev/engine-and-editor)
 
 Web application containing the backend for Streamr Core, facilitating things like:
