@@ -4,8 +4,9 @@ name: Master
 
 on:
   pull_request: # TODO: Switch to push before merge
-    branches:
-      - master
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
 
 env:
   GRAILS_WAR_ENV: 'test'

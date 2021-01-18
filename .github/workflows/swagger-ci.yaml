@@ -1,0 +1,17 @@
+name: Swagger CI
+
+on:
+  pull_request:
+    paths:
+      - 'docs/swagger.json'
+
+jobs:
+  ci:
+    name: Swagger CI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - name: Validate Swagger
+        run: |
+          echo "not implemented" 1>&2
+          exit 1
