@@ -27,7 +27,7 @@
   "tags": [
     {
       "name": "categories",
-      "description": "Product categories"
+      "description": "Product categories. This commit should trigger Swagger workflow."
     },
     {
       "name": "canvases",
