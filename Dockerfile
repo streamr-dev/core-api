@@ -6,7 +6,6 @@ COPY . /src/engine-and-editor
 WORKDIR /src/engine-and-editor
 RUN grails -verbose -stacktrace -non-interactive -plain-output $GRAILS_WAR_ENV war
 
-RUN cat /etc/resolv.conf
 
 FROM tomcat:7.0.106-jdk8-openjdk-buster
 # bash is required by wait_for_it.sh script and provided by base image
@@ -19,8 +18,6 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
 COPY src/conf/tomcat-server.xml /usr/local/tomcat/conf/server.xml
 COPY scripts/wait-for-it.sh scripts/entrypoint.sh /usr/local/tomcat/bin/
 COPY --from=builder /src/engine-and-editor/target/ROOT.war /usr/local/tomcat/webapps/streamr-core.war
-
-RUN cat /etc/resolv.conf
 
 # Default values for ENV variables
 ENV DB_USER root
