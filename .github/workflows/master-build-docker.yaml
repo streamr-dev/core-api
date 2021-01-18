@@ -102,10 +102,13 @@ jobs:
         uses: actions/setup-node@v2.1.4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - name: End to End tests
+      - name: Setup End to End tests
         run: |
           streamr-docker-dev start engine-and-editor
           streamr-docker-dev wait
           cd rest-e2e-tests
           npm ci
+      - name: Run End to End tests
+        run: |
+          cd rest-e2e-tests
           npm run test:e2e
