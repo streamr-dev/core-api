@@ -1,8 +1,13 @@
-name: Master
+name: CI & CD
 
 on:
-  workflow_dispatch:
-  pull_request: # TODO change to push
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
+      - 'docs/swagger.json'
+  pull_request:
     paths-ignore:
       - '**.md'
       - 'docs/swagger.json'
@@ -16,7 +21,7 @@ env:
 jobs:
 
   test:
-    name: Build and test
+    name: Build, lint and test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
@@ -119,7 +124,7 @@ jobs:
     name: Build Docker and push to Docker Hub
     needs:
       - test
-#      - e2e TODO: Enable once AWS account is set
+      - e2e
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
