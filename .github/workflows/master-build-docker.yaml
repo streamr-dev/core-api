@@ -1,7 +1,5 @@
 name: Master
 
-# TODO: Commit a change that verifies freshly build engine-and-editor is used in e2e tests!
-
 on:
   pull_request: # TODO: Switch to push before merge
     paths-ignore:
@@ -111,6 +109,5 @@ jobs:
           npm ci
       - name: Run End to End tests
         run: |
-          streamr-docker-dev log -f engine-and-editor &
           cd rest-e2e-tests
           npm run test:e2e
