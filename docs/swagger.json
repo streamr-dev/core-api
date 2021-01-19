@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Streamr API",
+    "title": "Streamr API. swagger trigger",
     "version": "1.0.0"
   },
   "host": "streamr.network",
