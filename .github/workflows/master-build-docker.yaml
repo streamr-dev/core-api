@@ -4,10 +4,9 @@ name: Master
 
 on:
   pull_request: # TODO: Switch to push before merge
-    paths:
-      - '**'
-      - '!**.md'
-      - '!docs/swagger.json'
+    paths-ignore:
+      - '**.md'
+      - 'docs/swagger.json'
 
 env:
   GRAILS_WAR_ENV: 'test'
