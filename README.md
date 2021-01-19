@@ -1,6 +1,7 @@
 # Streamr Engine and Editor 
 
 [![Build Status](https://travis-ci.org/streamr-dev/engine-and-editor.svg?branch=master)](https://travis-ci.org/streamr-dev/engine-and-editor)
+![CI & CD](https://github.com/streamr-dev/engine-and-editor/workflows/CI%20&%20CD/badge.svg)
 
 Web application containing the backend for Streamr Core, facilitating things like:
 - Creating streams
