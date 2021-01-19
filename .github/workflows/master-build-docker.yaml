@@ -107,10 +107,10 @@ jobs:
         run: |
           streamr-docker-dev start engine-and-editor
           streamr-docker-dev wait
-          streamr-docker-dev log -f engine-and-editor &
           cd rest-e2e-tests
           npm ci
       - name: Run End to End tests
         run: |
+          streamr-docker-dev log -f engine-and-editor &
           cd rest-e2e-tests
           npm run test:e2e
