@@ -21,7 +21,7 @@ class LoginApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def response(ChallengeResponseCommand cmd) {
 		if (cmd.hasErrors()) {
-			throw new InvalidArgumentsException(cmd.errors.getFieldErrors().collect { it.field + " expected." }.join(" "))
+			throw new InvalidArgumentsException(cmd.errors.getFieldErrors().collect {it.field+" expected."}.join(" "))
 		}
 		challengeService.checkValidChallengeResponse(cmd.challenge?.id,
 			cmd.challenge?.challenge, cmd.signature.toLowerCase(), cmd.address.toLowerCase())
@@ -33,9 +33,8 @@ class LoginApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def apikey(ApiKeyCommand cmd) {
-		println("HELLO GITHUB ACTIONS!")
 		if (cmd.hasErrors()) {
-			throw new InvalidArgumentsException(cmd.errors.getFieldErrors().collect { it.field + " expected." }.join(" "))
+			throw new InvalidArgumentsException(cmd.errors.getFieldErrors().collect {it.field+" expected."}.join(" "))
 		}
 		String privateKey = ApiKeyConverter.createEthereumPrivateKey(cmd.apiKey);
 		String address = "0x" + EthereumIntegrationKeyService.getAddress(privateKey);
