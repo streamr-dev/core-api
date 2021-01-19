@@ -1,5 +1,7 @@
 # Streamr Engine and Editor 
 
+Trying not to trigger a build
+
 [![Build Status](https://travis-ci.org/streamr-dev/engine-and-editor.svg?branch=master)](https://travis-ci.org/streamr-dev/engine-and-editor)
 
 Web application containing the backend for Streamr Core, facilitating things like:
