@@ -451,7 +451,7 @@
     },
     "/dataunions/{contractAddress}/stats": {
       "get": {
-        "summary": "Proxy calls to to data union server.",
+        "summary": "Proxy calls to to data union server",
         "description": "Return data union stats",
         "tags": [
           "dataunions"
