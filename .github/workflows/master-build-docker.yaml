@@ -2,7 +2,7 @@ name: Master
 
 on:
   workflow_dispatch:
-  pull_request:
+  pull_request: # TODO change to push
     paths-ignore:
       - '**.md'
       - 'docs/swagger.json'
@@ -119,7 +119,7 @@ jobs:
     name: Build Docker and push to Docker Hub
     needs:
       - test
-      - e2e
+#      - e2e TODO: Enable once AWS account is set
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
