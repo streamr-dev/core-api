@@ -1,0 +1,21 @@
+LANG := en_US.UTF-8
+SHELL := bash
+.SHELLFLAGS := -eu -o pipefail -c # run '/bin/bash ... -c /bin/cmd'
+
+grails := grails -plain-output -non-interactive
+
+.PHONY: test-unit
+test-unit: ## Run unit tests
+	$(grails) test-app -unit -no-reports
+
+.PHONY: test-integration
+test-integration: ## Run integration tests
+	$(grails) test-app -integration -no-reports
+
+.PHONY: compile
+compile: ## Compile code
+	$(grails) compile
+
+.PHONY: help
+help: ## Show Help
+	@grep -E '^[a-zA-Z_-]+%?:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "%-20s %s\n", $$1, $$2}'|sort
