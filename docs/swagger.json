@@ -483,7 +483,7 @@
     },
     "/dataunions/{contractAddress}/members": {
       "get": {
-        "summary": "Proxy calls to to data union server.",
+        "summary": "Proxy calls to to data union server",
         "description": "Return a list of members",
         "tags": [
           "dataunions"
@@ -515,7 +515,7 @@
     },
     "/dataunions/{contractAddress}/members/{memberAddress}": {
       "get": {
-        "summary": "Proxy calls to to data union server.",
+        "summary": "Proxy calls to to data union server",
         "description": "Return stats for individual members",
         "tags": [
           "dataunions"
