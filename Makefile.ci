@@ -16,6 +16,18 @@ test-integration: ## Run integration tests
 compile: ## Compile code
 	$(grails) compile
 
+.PHONY: validate-swagger
+validate-swagger:
+	if ! curl --silent --fail --max-time 5 -o /dev/null https://validator.swagger.io; then \
+       echo "Skipping Swagger validation since swagger.io is down" 1>&2;\
+       exit 0;\
+	fi
+	result=$$(./scripts/validate-swagger);\
+	if [ "$$result" != "{}" ]; then \
+		echo "Swagger validation error: $$result"  1>&2;\
+		exit 1;\
+	fi
+
 .PHONY: help
 help: ## Show Help
 	@grep -E '^[a-zA-Z_-]+%?:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "%-20s %s\n", $$1, $$2}'|sort
