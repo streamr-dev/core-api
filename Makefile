@@ -13,7 +13,7 @@ SHELL := bash
 .SHELLFLAGS := -eu -o pipefail -c # run '/bin/bash ... -c /bin/cmd'
 .ONESHELL:
 .DELETE_ON_ERROR:
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL := idea
 
 grails := grails -plain-output
 
@@ -66,6 +66,10 @@ test-engine-stop: ## Kill processes started by test-engine-start
 	rm -rf $(rest_srv_tail_pid)
 
 # Development recipes
+
+.PHONY: idea
+idea: ## Generate IntelliJ IDEA project files
+	$(grails) idea-print-project-settings
 
 .PHONY: compile
 compile: ## Compile code

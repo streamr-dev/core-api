@@ -39,7 +39,9 @@ class EthereumIntegrationKeyService {
 
 		try {
 			String address = "0x" + getAddress(privateKey)
-			String encryptedPrivateKey = encryptor.encrypt(privateKey, user.id.byteValue())
+			final byte[] salt = new byte[1]
+			salt[0] = user.id.byteValue()
+			String encryptedPrivateKey = encryptor.encrypt(privateKey, salt)
 
 			assertUnique(address)
 
@@ -110,13 +112,15 @@ class EthereumIntegrationKeyService {
 		IntegrationKey.findAllByServiceAndUser(IntegrationKey.Service.ETHEREUM, user)
 	}
 
-    User getEthereumUser(String address) {
+	User getEthereumUser(String address) {
 		if (address == null) {
 			return null
 		}
 		IntegrationKey key = IntegrationKey.createCriteria().get {
 			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
-			ilike("idInService", address) // ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
+			// ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems
+			// are in use (checksum-case, lower-case at least)
+			ilike("idInService", address)
 		}
 		if (key == null) {
 			return null
@@ -134,11 +138,11 @@ class EthereumIntegrationKeyService {
 
 	User createEthereumUser(String address, SignupMethod signupMethod) {
 		User user = userService.createUser([
-			username       : address,
-			name           : "Anonymous User",
-			enabled        : true,
-			accountLocked  : false,
-			signupMethod   : signupMethod
+			username     : address,
+			name         : "Anonymous User",
+			enabled      : true,
+			accountLocked: false,
+			signupMethod : signupMethod
 		])
 		new IntegrationKey(
 			name: address,
