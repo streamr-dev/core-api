@@ -1,8 +1,6 @@
 package com.unifina.service
 
-
 import com.unifina.domain.*
-import com.unifina.security.PasswordEncoder
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.context.MessageSource
 import org.springframework.validation.FieldError
@@ -12,18 +10,12 @@ class UserService {
 	MessageSource messageSource
 
 	GrailsApplication grailsApplication
-	PasswordEncoder passwordEncoder
 	PermissionService permissionService
 	StreamService streamService
 	CanvasService canvasService
 
 	User createUser(Map properties, List<Role> roles = null) {
 		User user = new User(properties)
-		// Encode the password
-		if (user.password == null) {
-			throw new UserCreationFailedException("The password is empty!")
-		}
-		user.password = passwordEncoder.encodePassword(user.password)
 
 		// When created, the account is always enabled
 		user.enabled = true
@@ -82,19 +74,6 @@ class UserService {
 		}
 	}
 
-	def passwordValidator = { String password, command ->
-		// Check password score
-		if (command.password != null && command.password.size() < 8) {
-			return ['command.password.error.length', 8]
-		}
-	}
-
-	def password2Validator = { value, command ->
-		if (command.password != command.password2) {
-			return 'command.password2.error.mismatch'
-		}
-	}
-
 	def delete(User user) {
 		if (user == null) {
 			throw new NotFoundException("user not found", "User", null)
@@ -112,13 +91,13 @@ class UserService {
 	 * @param errorList
 	 * @return
 	 */
-	List checkErrors(List<FieldError> errorList) {
+	List<FieldError> checkErrors(List<FieldError> errorList) {
 		List<String> blackList = (List<String>) grailsApplication?.config?.grails?.exceptionresolver?.params?.exclude
 		if (blackList == null) {
-			blackList = Collections.emptyList();
+			blackList = Collections.emptyList()
 		}
 		List<FieldError> finalErrors = new ArrayList<>()
-		List<FieldError> toBeCensoredList = new ArrayList<>();
+		List<FieldError> toBeCensoredList = new ArrayList<>()
 		errorList.each {
 			if (blackList.contains(it.getField())) {
 				toBeCensoredList.add(it)
@@ -144,19 +123,6 @@ class UserService {
 	List beautifyErrors(List<FieldError> errorList) {
 		checkErrors(errorList).collect { FieldError it ->
 			messageSource.getMessage(it, null)
-		}
-	}
-
-	User getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
-		User user = User.findByUsername(username)
-		if (user == null) {
-			throw new InvalidUsernameAndPasswordException("Invalid username or password")
-		}
-		String dbHash = user.password
-		if (passwordEncoder.isPasswordValid(dbHash, password)) {
-			return user
-		} else {
-			throw new InvalidUsernameAndPasswordException("Invalid username or password")
 		}
 	}
 }

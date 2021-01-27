@@ -8,8 +8,6 @@ class UrlMappings {
 		// API v1 url mappings
 		"/api/v1/signups"(method: "POST", controller: "authApi", action: "signup")
 		"/api/v1/users"(method: "POST", controller: "authApi", action: "register")
-		"/api/v1/passwords/tokens"(method: "POST", controller: "authApi", action: "forgotPassword")
-		"/api/v1/passwords"(method: "POST", controller: "authApi", action: "resetPassword")
 
 		"/api/v1/canvases"(resources: "canvasApi", excludes: ["create", "edit"])
 		"/api/v1/canvases/$id/start"(controller: "canvasApi", action: "start")
@@ -58,7 +56,6 @@ class UrlMappings {
 		"/api/v1/users/me"(method: "DELETE", controller: "userApi", action: "delete")
 
 		"/api/v1/users/me/products"(method: "GET", controller: "productApi", action: "index") { operation = Permission.Operation.PRODUCT_SHARE }
-		"/api/v1/users/me/changePassword"(method: "POST", controller: "userApi", action: "changePassword")
 		"/api/v1/users/me/image"(method: "POST", controller: "userApi", action: "uploadAvatarImage")
 		"/api/v1/users/me/balance"(method: "GET", controller: "userApi", action: "getCurrentUserBalance")
 

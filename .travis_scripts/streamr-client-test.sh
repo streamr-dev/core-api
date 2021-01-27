@@ -1,14 +1,7 @@
 #!/bin/bash
 set -e
 
-sudo /etc/init.d/mysql stop
-if [ ! -d streamr-docker-dev ]; then # Skip clone on subsequent attemps.
-	git clone https://github.com/streamr-dev/streamr-docker-dev.git
-fi
-## Switch EE tag to the one built locally
-sed -i "s/engine-and-editor:dev/engine-and-editor:local/g" $TRAVIS_BUILD_DIR/streamr-docker-dev/docker-compose.override.yml
-sudo ifconfig docker0 10.200.10.1/24
-"$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" start --except hsl-demo --wait
+streamr-docker-dev start --except hsl-demo --wait
 
 ## Setup testing Tool
 git clone https://github.com/streamr-dev/streamr-client-testing.git

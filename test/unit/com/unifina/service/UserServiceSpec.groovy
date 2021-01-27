@@ -1,7 +1,5 @@
 package com.unifina.service
 
-
-import com.unifina.controller.UnitTestPasswordEncoder
 import com.unifina.domain.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -24,7 +22,6 @@ class UserServiceSpec extends Specification {
 	def permissionService
 
 	def setup() {
-		service.passwordEncoder = new UnitTestPasswordEncoder()
 		permissionService = service.permissionService = Mock(PermissionService)
 		service.streamService = Mock(StreamService)
 		service.canvasService = Mock(CanvasService)
@@ -33,7 +30,7 @@ class UserServiceSpec extends Specification {
 	def "the user is created when called"() {
 		when:
 		createData()
-		User user = service.createUser([username: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false])
+		User user = service.createUser([username: "test@test.com", name:"test", enabled:true, accountLocked:false])
 
 		then:
 		User.count() == 1
@@ -42,7 +39,6 @@ class UserServiceSpec extends Specification {
 
 	void "censoring errors with checkErrors() works properly"() {
 		List checkedErrors
-		service.grailsApplication.config.grails.exceptionresolver.params.exclude = ["password"]
 
 		when: "given list of fieldErrors"
 		List<FieldError> errorList = new ArrayList<>()
@@ -62,30 +58,6 @@ class UserServiceSpec extends Specification {
 		checkedErrors.get(1).getField() == "password"
 		checkedErrors.get(1).getRejectedValue() == "***"
 		checkedErrors.get(1).getArguments() == ['null', 'null', '***']
-	}
-
-	def "should find user from both username and password"() {
-		String username = "username"
-		String password = "password"
-		String hashedPassword = service.passwordEncoder.encodePassword(password)
-		new User(username: username, password: hashedPassword).save(failOnError: true, validate: false)
-		when:
-		User retrievedUser = service.getUserFromUsernameAndPassword(username, password)
-		then:
-		retrievedUser != null
-		retrievedUser.username == username
-	}
-
-	def "should throw if wrong password"() {
-		String username = "username"
-		String password = "password"
-		String wrongPassword = "wrong"
-		String hashedPassword = service.passwordEncoder.encodePassword(password)
-		new User(username: username, password: hashedPassword).save(failOnError: true, validate: false)
-		when:
-		service.getUserFromUsernameAndPassword(username, wrongPassword)
-		then:
-		thrown(InvalidUsernameAndPasswordException)
 	}
 
 	def "delete user"() {

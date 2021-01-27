@@ -2,25 +2,18 @@ package com.unifina.domain
 
 import grails.persistence.Entity
 import groovy.transform.CompileStatic
-import org.apache.commons.codec.digest.DigestUtils
 
 @Entity
 class User implements Userish {
-
 	Long id
 	String username
 	String email
-	String password
 	boolean enabled = true
 	boolean accountExpired
 	boolean accountLocked
-	boolean passwordExpired
 	SignupMethod signupMethod = SignupMethod.UNKNOWN
-
 	String name
-
 	Set<Permission> permissions
-
 	// dateCreated is the date when account is created.
 	Date dateCreated
 	// lastLogin is the date when last successful login was made.
@@ -34,7 +27,6 @@ class User implements Userish {
 	static constraints = {
 		username blank: false, unique: true, validator: UsernameValidator.validate
 		email nullable: true, validator: EmailValidator.validateNullEmail
-		password blank: false
 		name blank: false
 		dateCreated nullable: true
 		lastLogin nullable: true
@@ -44,7 +36,6 @@ class User implements Userish {
 	}
 
 	static mapping = {
-		password column: '`password`'
 		permissions cascade: 'all-delete-orphan'
 	}
 
@@ -106,17 +97,8 @@ class User implements Userish {
 		User.get(userId)
 	}
 
-	//TODO: Once all users are defined with their ethereum public key we can remove this
-	boolean isEthereumUser() {
-		return EthereumAddressValidator.validate(username)
-	}
-
 	String getPublisherId() {
-		if (isEthereumUser()) {
-			return username
-		}
-		// 'username' is the email address of the user. For privacy concerns, the publisher id is the hash of the email address.
-		return DigestUtils.sha256Hex(username)
+		return username
 	}
 
 	String getEmail() {
