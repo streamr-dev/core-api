@@ -1,13 +1,7 @@
 package com.unifina.controller
 
 import com.unifina.domain.User
-import com.unifina.security.PasswordEncoder
-import com.unifina.service.InvalidUsernameAndPasswordException
-import com.unifina.service.SessionService
-import com.unifina.service.UserAvatarImageService
-import com.unifina.service.UserService
-import com.unifina.service.EthereumIntegrationKeyService
-import com.unifina.service.ApiException
+import com.unifina.service.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
@@ -18,10 +12,8 @@ import org.springframework.mock.web.MockMultipartFile
 @Mock([User, RESTAPIFilters])
 @TestMixin(FiltersUnitTestMixin)
 class UserApiControllerSpec extends ControllerSpecification {
-
 	User me
 	User ethUser
-	PasswordEncoder passwordEncoder = new UnitTestPasswordEncoder()
 	SessionService sessionService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
@@ -31,7 +23,6 @@ class UserApiControllerSpec extends ControllerSpecification {
 			username: "me@too.com",
 			email: "me@too.com",
 			enabled: true,
-			password: passwordEncoder.encodePassword("foobar123!"),
 		)
 		me.id = 1
 		me.save(validate: false)
@@ -40,11 +31,9 @@ class UserApiControllerSpec extends ControllerSpecification {
 			username: "0x0000000000000000000000000000000000000000",
 			email: "eth@eth.com",
 			enabled: true,
-			password: passwordEncoder.encodePassword("foobar123!"),
 		)
 		ethUser.id = 2
 		ethUser.save(validate: false)
-		controller.passwordEncoder = passwordEncoder
 		sessionService = mockBean(SessionService, Mock(SessionService))
 		ethereumIntegrationKeyService = mockBean(EthereumIntegrationKeyService, Mock(EthereumIntegrationKeyService))
 	}
@@ -64,7 +53,6 @@ class UserApiControllerSpec extends ControllerSpecification {
 		then:
 		response.json.name == me.name
 		response.json.username == me.username
-		!response.json.hasProperty("password")
 		!response.json.hasProperty("id")
 	}
 
@@ -112,30 +100,6 @@ class UserApiControllerSpec extends ControllerSpecification {
 		response.json.username == "0x0000000000000000000000000000000000000000"
 	}
 
-	void "update user profile who registered with username and password"() {
-		controller.userService = new UserService()
-		request.addHeader("Authorization", "Bearer token")
-		request.method = "PUT"
-		request.requestURI = "/api/v1/users/me"
-		request.json = [
-			name: "Changed Name",
-			email: "changed@emailaddress.com",
-		]
-		request.apiUser = me
-
-		when: "updated profile is submitted"
-		withFilters(action: "update") {
-			controller.update()
-		}
-
-		then: "values must be updated and show update message"
-		1 * sessionService.getUserishFromToken("token") >> request.apiUser
-		User.get(1).name == "Changed Name"
-		response.json.name == "Changed Name"
-		response.json.email == "changed@emailaddress.com"
-		response.json.username == "changed@emailaddress.com"
-	}
-
 	void "private user fields cannot be changed via update profile"() {
 		setup:
 		controller.userService = new UserService()
@@ -158,25 +122,6 @@ class UserApiControllerSpec extends ControllerSpecification {
 		User.get(1).username == "me@too.com"
 		response.json.username == "me@too.com"
 		User.get(1).enabled
-	}
-
-	void "submitting valid content in user password change form must change user password"() {
-		when: "password change form is submitted"
-		def cmd = new ChangePasswordCommand(username: me.username, currentpassword: "foobar123!", password: "barbar123!", password2: "barbar123!")
-		cmd.passwordEncoder = passwordEncoder
-		cmd.userService = new UserService() {
-			User getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
-				return me
-			}
-		}
-		request.method = "POST"
-		authenticatedAs(me) {
-			controller.changePassword(cmd)
-		}
-		then: "password must be changed"
-		cmd.passwordEncoder.isPasswordValid(User.get(me.id).password, "barbar123!")
-		then:
-		response.status == 204
 	}
 
 	void "uploadAvatarImage() responds with 400 and PARAMETER_MISSING if file not given"() {
@@ -280,71 +225,5 @@ class UserApiControllerSpec extends ControllerSpecification {
 		then:
 		1 * sessionService.getUserishFromToken("token") >> new User(username: "foo@ƒoo.bar")
 		response.status == 415
-	}
-
-	void "submitting an invalid current password won't let the password be changed"() {
-		when: "password change form is submitted with invalid password"
-		def cmd = new ChangePasswordCommand(username: me.username, currentpassword: "invalid", password: "barbar123!", password2: "barbar123!")
-		cmd.passwordEncoder = passwordEncoder
-		cmd.userService = new UserService() {
-			User getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
-				throw new InvalidUsernameAndPasswordException("mocked: invalid current password!")
-			}
-		}
-		request.method = "POST"
-		authenticatedAs(me) {
-			controller.changePassword(cmd)
-		}
-		then: "the old password must remain valid"
-		cmd.passwordEncoder.isPasswordValid(User.get(me.id).password, "foobar123!")
-		then:
-		def e = thrown(ApiException)
-		e.message == "Password not changed!"
-		e.code == "PASSWORD_CHANGE_FAILED"
-		e.statusCode == 400
-	}
-
-	void "submitting a too short new password won't let the password be changed"() {
-		when: "password change form is submitted with invalid new password"
-		def cmd = new ChangePasswordCommand(username: me.username, currentpassword: "foobar", password: "asd", password2: "asd")
-		cmd.passwordEncoder = passwordEncoder
-		cmd.userService = new UserService() {
-			User getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
-				return me
-			}
-		}
-		request.method = "POST"
-		authenticatedAs(me) {
-			controller.changePassword(cmd)
-		}
-		then: "the old password must remain valid"
-		cmd.passwordEncoder.isPasswordValid(User.get(me.id).password, "foobar123!")
-		then:
-		def e = thrown(ApiException)
-		e.message == "Password not changed!"
-		e.code == "PASSWORD_CHANGE_FAILED"
-		e.statusCode == 400
-	}
-
-	void "submitting a too weak new password won't let the password be changed"() {
-		when: "password change form is submitted with invalid new password"
-		def cmd = new ChangePasswordCommand(currentpassword: "foobar123", password: "asd", password2: "asd")
-		cmd.passwordEncoder = passwordEncoder
-		cmd.userService = new UserService() {
-			User getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
-				return me
-			}
-		}
-		request.method = "POST"
-		authenticatedAs(me) {
-			controller.changePassword(cmd)
-		}
-		then: "the old password must remain valid"
-		cmd.passwordEncoder.isPasswordValid(User.get(me.id).password, "foobar123!")
-		then:
-		def e = thrown(ApiException)
-		e.message == "Password not changed!"
-		e.code == "PASSWORD_CHANGE_FAILED"
-		e.statusCode == 400
 	}
 }

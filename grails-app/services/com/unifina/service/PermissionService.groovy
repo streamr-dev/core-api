@@ -586,7 +586,7 @@ class PermissionService {
 			return
 		}
 		if (op == Operation.STREAM_GET || op == Operation.CANVAS_GET || op == Operation.DASHBOARD_GET) {
-			// Users with email/password registration get an email
+			// Users who have provided an email address get an email
 			// send only one email for each read/get permission
 			String content = groovyPageRenderer.render([
 				template: "/emails/email_share_resource",
