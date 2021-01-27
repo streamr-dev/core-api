@@ -1,6 +1,10 @@
 package com.unifina.controller
 
-import com.unifina.domain.*
+
+import com.unifina.domain.Category
+import com.unifina.domain.Permission
+import com.unifina.domain.Product
+import com.unifina.domain.User
 import com.unifina.service.ProductService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -40,14 +44,12 @@ class RelatedProductsControllerSpec extends ControllerSpecification {
 		me = new User(
 			username: "username: api@user.com",
 			name: "Regular API user",
-			password: "xxx"
 		)
 
 		// u1 is the user who owns the product p1 used to search for related products
 		u1 = new User(
 			username: "username: masa@hypätääneka.com",
 			name: "Matti Nykänen",
-			password: "xxx"
 		)
 		u1.id = 1
 		u1.save(validate: false, failOnError: true)
@@ -55,7 +57,6 @@ class RelatedProductsControllerSpec extends ControllerSpecification {
 		u2 = new User(
 			username: "username: marilyn@monroe.com",
 			name: "Marilyn Monroe",
-			password: "xxx"
 		)
 		u2.id = 2
 		u2.save(validate: false, failOnError: true)

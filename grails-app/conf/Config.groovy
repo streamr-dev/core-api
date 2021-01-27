@@ -122,7 +122,7 @@ log4j.main = {
 		info 'stdout'
 	}
 
-	// No need to log all exceptions thrown in API calls. For example, InvalidAPIKeyExceptions easily pollute the logs.
+	// No need to log all exceptions thrown in API calls. For example, invalid login attemps easily pollute the logs.
 	fatal 'org.codehaus.groovy.grails.web.errors.GrailsExceptionResolver'
 
 	error 'org.codehaus.groovy.grails.web.servlet',  //  controllers
@@ -162,6 +162,10 @@ streamr.cps.socketTimeout = 60 * 1000
 streamr.cps.maxConnTotal = 400
 // Maximum number of connections per route
 streamr.cps.maxConnPerRoute = 200
+
+// Data Union 2.0
+streamr.dataunion.mainnet.factory.address = System.getProperty("streamr.dataunion.mainnet.factory.address") ? System.getProperty("streamr.dataunion.mainnet.factory.address") : "0x5E959e5d5F3813bE5c6CeA996a286F734cc9593b"
+streamr.dataunion.sidechain.factory.address = System.getProperty("streamr.dataunion.sidechain.factory.address") ? System.getProperty("streamr.dataunion.sidechain.factory.address") : "0x4081B7e107E59af8E82756F96C751174590989FE"
 
 /**
  * Streamr cluster config
@@ -232,8 +236,14 @@ streamr.ethereum.datacoinAddress = System.getProperty("streamr.ethereum.datacoin
  * -Dstreamr.ethereum.networks.someNetwork=http://some-network-rpc-url
  * -Dstreamr.ethereum.networks.anotherNetwork=http://some-network-rpc-url
  */
-streamr.ethereum.networks = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.networks.", System.getProperties()) ?: [ local: "http://localhost:8545" ]
-streamr.ethereum.wss = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.wss.", System.getProperties()) ?: [ local: "ws://localhost:8545" ]
+streamr.ethereum.networks = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.networks.", System.getProperties()) ?: [
+	local: "http://localhost:8545",
+	sidechain: "http://localhost:8546",
+]
+streamr.ethereum.wss = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.wss.", System.getProperties()) ?: [
+	local: "ws://localhost:8545",
+	sidechain: "ws://localhost:8546",
+]
 // Ethereum identity of this instance. Don't use this silly development private key for anything.
 streamr.ethereum.nodePrivateKey = "".equals(System.getProperty("streamr.ethereum.nodePrivateKey", "")) ? "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF" : System.getProperty("streamr.ethereum.nodePrivateKey")
 streamr.ethereum.defaultNetwork = System.getProperty("streamr.ethereum.defaultNetwork") ?: streamr.ethereum.networks.keySet().first()
@@ -282,7 +292,6 @@ environments {
 		streamr.encryption.password = System.getProperty("streamr.encryption.password") // in production, the system property must be set
 	}
 }
-streamr.encryption.bcrypt.logrounds = 10
 
 /**
  * Email config
@@ -315,41 +324,9 @@ grails {
 }
 
 unifina.email.sender = "contact@streamr.network"
-unifina.email.waitForInvite.subject = "Thanks for signing up for Streamr"
 unifina.email.registerLink.subject = "Streamr signup link"
-unifina.email.invite.subject = "Invitation to Streamr"
 unifina.email.welcome.subject = "Welcome to Streamr"
-unifina.email.feedback.recipient = "contact@streamr.network"
-unifina.email.forgotPassword.subject = "Streamr Password Reset"
 unifina.email.shareInvite.subject = "%USER% wants to share a %RESOURCE% with you via Streamr Core"
-
-/**
- * Recaptcha config
- */
-
-recaptcha.verifyUrl = "https://www.google.com/recaptcha/api/siteverify"
-
-environments {
-	// Same keys used for both dev and test
-	development {
-		recaptchav2.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-		recaptchav2.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
-		recaptchainvisible.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-		recaptchainvisible.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
-	}
-	test {
-		recaptchav2.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-		recaptchav2.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
-		recaptchainvisible.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-		recaptchainvisible.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
-	}
-	production {
-		recaptchav2.sitekey = System.getProperty("recaptchav2.sitekey")
-		recaptchainvisible.sitekey = System.getProperty("recaptchainvisible.sitekey")
-		recaptchav2.secret = System.getProperty("recaptchav2.secret")
-		recaptchainvisible.secret = System.getProperty("recaptchainvisible.secret")
-	}
-}
 
 /**
  * S3 File upload

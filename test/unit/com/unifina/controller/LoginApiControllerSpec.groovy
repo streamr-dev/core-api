@@ -15,7 +15,6 @@ import java.text.SimpleDateFormat
 @TestFor(LoginApiController)
 @Mock([User])
 class LoginApiControllerSpec extends ControllerSpecification {
-
 	private static final String USER_API_KEY = "myApiKey"
 	private static final String USER_ACCOUNT_ADDRESS = "0xa0f7f3ff8a0965d0d46e5f1f963102fc6bed45ec"
 
@@ -58,7 +57,6 @@ class LoginApiControllerSpec extends ControllerSpecification {
 
 		User user = new User(
 			username: "username",
-			password: "password",
 			name: "name",
 			email: "email@email.com",
 			timezone: "timezone"
@@ -137,70 +135,9 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		thrown DisabledUserException
 	}
 
-	def "password-based login should pass"() {
-		User user = new User(
-			username: "username",
-			password: "password"
-		).save(failOnError: true, validate: false)
-
-		SessionToken token = new SessionToken(64, user, 3)
-
-		when:
-		request.method = "POST"
-		request.JSON = [
-			username: user.username,
-			password: user.password
-		]
-		authenticatedAs(me) { controller.password() }
-
-		then:
-		1 * userService.getUserFromUsernameAndPassword(user.username, user.password) >> user
-		1 * sessionService.generateToken(user) >> token
-		response.status == 200
-		response.json == token.toMap()
-	}
-
-	def "password-based login should fail"() {
-		String username = "username"
-		String password = "password"
-
-		when:
-		request.method = "POST"
-		request.JSON = [
-			username: username,
-			password: password
-		]
-		authenticatedAs(me) { controller.password() }
-
-		then:
-		1 * userService.getUserFromUsernameAndPassword(username, password) >> { throw new InvalidUsernameAndPasswordException() }
-		thrown InvalidUsernameAndPasswordException
-	}
-
-	def "password-based login should fail if disabled user"() {
-		User user = new User(
-			username: "username",
-			password: "password",
-			enabled: false,
-		).save(failOnError: true, validate: false)
-
-		when:
-		request.method = "POST"
-		request.JSON = [
-			username: user.username,
-			password: user.password
-		]
-		authenticatedAs(me) { controller.password() }
-
-		then:
-		1 * userService.getUserFromUsernameAndPassword(user.username, user.password) >> user
-		thrown DisabledUserException
-	}
-
 	def "apikey-based login should pass"() {
 		User user = new User(
 			username: "username",
-			password: "password"
 		).save(failOnError: true, validate: false)
 
 		SessionToken token = new SessionToken(64, user, 3)
@@ -254,18 +191,6 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		request.method = "POST"
 		request.JSON = [
 			wrongfield: "apiKey"
-		]
-		authenticatedAs(me) { controller.apikey() }
-
-		then:
-		thrown InvalidArgumentsException
-	}
-
-	def "password-based login should return 400 if no username or password provided"() {
-		when:
-		request.method = "POST"
-		request.JSON = [
-			wrongfield: "password"
 		]
 		authenticatedAs(me) { controller.apikey() }
 

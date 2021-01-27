@@ -1,0 +1,43 @@
+name: Swagger
+
+on:
+  pull_request:
+    paths:
+      - 'docs/swagger.json'
+  push:
+    branches:
+      - master
+    paths:
+      - 'docs/swagger.json'
+
+jobs:
+
+  swagger-validate:
+    name: Swagger validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - name: Validate Swagger
+        run: |
+          make -f Makefile.ci validate-swagger
+
+  # GitHub Pages is stored on orphan branch github-pages
+  swagger-publish:
+    name: Publish Swagger to GitHub Pages
+    needs: swagger-validate
+    # https://stackoverflow.com/questions/58139406/only-run-job-on-specific-branch-with-github-actions/62419599#62419599
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 0
+      - name: Commit Swagger
+        run: |
+          git checkout github-pages
+          git config --local user.email "9865656+streamr-devops@users.noreply.github.com"
+          git config --local user.name "Streamr Devops Robot"
+          git show master:docs/swagger.json >swagger.json
+          git add swagger.json
+          git commit -m "${{ github.actor }} updated swagger.json"
+          git push origin github-pages
