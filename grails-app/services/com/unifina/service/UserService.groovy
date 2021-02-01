@@ -153,19 +153,6 @@ class UserService {
 		}
 	}
 
-	User getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
-		User user = User.findByUsername(username)
-		if (user == null) {
-			throw new InvalidUsernameAndPasswordException("Invalid username or password")
-		}
-		String dbHash = user.password
-		if (passwordEncoder.isPasswordValid(dbHash, password)) {
-			return user
-		} else {
-			throw new InvalidUsernameAndPasswordException("Invalid username or password")
-		}
-	}
-
 	void updateUsersLoginDate(User u, Date date) {
 		User.withSession { Session session ->
 			User user
