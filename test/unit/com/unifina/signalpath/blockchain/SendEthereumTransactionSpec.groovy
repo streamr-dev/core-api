@@ -4,10 +4,10 @@ import com.google.gson.Gson
 import com.unifina.ModuleTestingSpecification
 import com.unifina.data.Event
 import com.unifina.datasource.DataSource
-import com.unifina.domain.IntegrationKey
-import com.unifina.domain.User
 import com.unifina.domain.Canvas
+import com.unifina.domain.IntegrationKey
 import com.unifina.domain.Module
+import com.unifina.domain.User
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
@@ -56,7 +56,7 @@ class SendEthereumTransactionSpec extends ModuleTestingSpecification {
 
 	def setup() {
 		// mock the key for ethereum account
-		User user = new User(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false)
+		User user = new User(name: "name", username: "name@name.com").save(failOnError: true, validate: false)
 		IntegrationKey key = new IntegrationKey(service: IntegrationKey.Service.ETHEREUM, name: "test key", json: '{"privateKey":"0x5e98cce00cff5dea6b454889f359a4ec06b9fa6b88e9d69b86de8e1c81887da0","address":"0x1234"}', user: user, idInService: "0x1234")
 		key.id = "sgKjr1eHQpqTmwz3vK3DqwUK1wFlrfRJa9mnf_xTeFJQ"
 		key.save(failOnError: true, validate: true)

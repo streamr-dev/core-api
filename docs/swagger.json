@@ -451,7 +451,7 @@
     },
     "/dataunions/{contractAddress}/stats": {
       "get": {
-        "summary": "Proxy calls to to data union server.",
+        "summary": "Proxy calls to to data union server",
         "description": "Return data union stats",
         "tags": [
           "dataunions"
@@ -483,7 +483,7 @@
     },
     "/dataunions/{contractAddress}/members": {
       "get": {
-        "summary": "Proxy calls to to data union server.",
+        "summary": "Proxy calls to to data union server",
         "description": "Return a list of members",
         "tags": [
           "dataunions"
@@ -515,7 +515,7 @@
     },
     "/dataunions/{contractAddress}/members/{memberAddress}": {
       "get": {
-        "summary": "Proxy calls to to data union server.",
+        "summary": "Proxy calls to to data union server",
         "description": "Return stats for individual members",
         "tags": [
           "dataunions"
@@ -612,46 +612,6 @@
               "application/json": {
                 "code": "INVALID_CHALLENGE",
                 "message": "Challenge-based login failed"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/login/password": {
-      "post": {
-        "summary": "Log in with password verification",
-        "description": "Verifies a username/password combination. If correct, generates a session token for the user.",
-        "tags": [
-          "login"
-        ],
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "description": "Username and password combination",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/UsernamePassword"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A session token and its expiration",
-            "schema": {
-              "$ref": "#/definitions/SessionToken"
-            }
-          },
-          "400": {
-            "description": "Password-based login failed",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "INVALID_USERNAME_OR_PASSWORD",
-                "message": "Password-based login failed"
               }
             }
           }
@@ -2715,144 +2675,144 @@
         }
       }
     },
-	"/storageNodes/{storageNodeAddress}/streams": {
-		"get": {
-			"summary": "Get streams by storage node",
-			"parameters": [
-				{
-					"in": "path",
-					"name": "storageNodeAddress",
-					"required": true,
-					"type": "string"
-				}
-			],
-			"tags": ["streams"],
-			"responses": {
-				"200": {
-					"description": "An array of streams",
-					"schema": {
-						"type": "array",
-						"items": {
-							"$ref": "#/definitions/StreamSummary"
-						}
-					}
-				},
-				"500": {
-					"description": "Unexpected error"
-				},
-				"422": {
-					"description": "Validation error"
-				}
-			}
-		}
-	},
-	"/streams/{streamId}/storageNodes": {
-		"get": {
-			"summary": "Get storage nodes by stream",
-			"parameters": [
-				{
-					"in": "path",
-					"name": "streamId",
-					"description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
-					"required": true,
-					"type": "string"
-				}
-			],
-			"tags": ["streams"],
-			"responses": {
-				"200": {
-					"description": "An array of stream storage nodes",
-					"schema": {
-						"type": "array",
-						"items": {
-							"$ref": "#/definitions/StreamStorageNode"
-						}
-					}
-				},
-				"404": {
-					"description": "Stream not found"
-				},
-				"500": {
-					"description": "Unexpected error"
-				}
-			}
-		},
-		"post": {
-			"summary": "Create stream storage node",
-			"tags": ["streams"],
-			"parameters": [
-				{
-					"in": "path",
-					"name": "streamId",
-					"required": true,
-					"type": "string"
-				},
-				{
-					"name": "body",
-					"in": "body",
-					"description": "StorageNodeAddRequest object",
-					"required": true,
-					"schema": {
-						"$ref": "#/definitions/StorageNodeAddRequest"
-					}
-				}
-			],
-			"responses": {
-				"200": {
-					"description": "Success"
-				},
-				"400": {
-					"description": "Storage node already exists"
-				},
-				"401": {
-					"description": "No authentication"
-				},
-				"403": {
-					"description": "Authentication failed"
-				},
-				"422": {
-					"description": "Validation error"
-				}
-			}
-		}
-	},
-	"/streams/{streamId}/storageNodes/{storageNodeAddress}": {
-		"delete": {
-			"summary": "Delete stream storage node",
-			"tags": ["streams"],
-			"parameters": [
-				{
-					"in": "path",
-					"name": "streamId",
-					"description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
-					"required": true,
-					"type": "string"
-				},
-				{
-					"in": "path",
-					"name": "storageNodeAddress",
-					"required": true,
-					"type": "string"
-				}
-			],
-			"responses": {
-				"204": {
-					"description": "Success"
-				},
-				"404": {
-					"description": "Not found"
-				},
-				"401": {
-					"description": "No authentication"
-				},
-				"403": {
-					"description": "Authentication failed"
-				},
-				"422": {
-					"description": "Validation error"
-				}
-			}
-		}
+  "/storageNodes/{storageNodeAddress}/streams": {
+    "get": {
+      "summary": "Get streams by storage node",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "storageNodeAddress",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "tags": ["streams"],
+      "responses": {
+        "200": {
+          "description": "An array of streams",
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/StreamSummary"
+            }
+          }
+        },
+        "500": {
+          "description": "Unexpected error"
+        },
+        "422": {
+          "description": "Validation error"
+        }
+      }
+    }
+  },
+  "/streams/{streamId}/storageNodes": {
+    "get": {
+      "summary": "Get storage nodes by stream",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "streamId",
+          "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "tags": ["streams"],
+      "responses": {
+        "200": {
+          "description": "An array of stream storage nodes",
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/StreamStorageNode"
+            }
+          }
+        },
+        "404": {
+          "description": "Stream not found"
+        },
+        "500": {
+          "description": "Unexpected error"
+        }
+      }
+    },
+    "post": {
+      "summary": "Create stream storage node",
+      "tags": ["streams"],
+      "parameters": [
+        {
+          "in": "path",
+          "name": "streamId",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "body",
+          "in": "body",
+          "description": "StorageNodeAddRequest object",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/StorageNodeAddRequest"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Success"
+        },
+        "400": {
+          "description": "Storage node already exists"
+        },
+        "401": {
+          "description": "No authentication"
+        },
+        "403": {
+          "description": "Authentication failed"
+        },
+        "422": {
+          "description": "Validation error"
+        }
+      }
+    }
+  },
+  "/streams/{streamId}/storageNodes/{storageNodeAddress}": {
+    "delete": {
+      "summary": "Delete stream storage node",
+      "tags": ["streams"],
+      "parameters": [
+        {
+          "in": "path",
+          "name": "streamId",
+          "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "in": "path",
+          "name": "storageNodeAddress",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "responses": {
+        "204": {
+          "description": "Success"
+        },
+        "404": {
+          "description": "Not found"
+        },
+        "401": {
+          "description": "No authentication"
+        },
+        "403": {
+          "description": "Authentication failed"
+        },
+        "422": {
+          "description": "Validation error"
+        }
+      }
+    }
     },
     "/subscriptions": {
       "get": {
@@ -3213,7 +3173,7 @@
     "/canvases/{id}/start": {
       "post": {
         "summary": "Starts a canvas",
-        "description": "Starts a canvas changing its state to 'running', or in the case of adhoc=true, creates a copy of the Canvas with state 'running'.",
+        "description": "Starts a canvas changing its state to 'RUNNING', or in the case of adhoc=true, creates a copy of the Canvas with state 'RUNNING'.",
         "tags": [
           "canvases"
         ],
@@ -4424,70 +4384,70 @@
       }
     },
     "StreamSummary": {
-		"type": "object",
-		"required": [
-		  "name"
-		],
-		"properties": {
-		  "id": {
-			"type": "string",
-			"description": "Unique identifier for this stream.",
-			"example": "ln2g8OKHSdr7BcL-rcnh2r"
-		  },
-		  "name": {
-			"type": "string",
-			"description": "Name of this stream.",
-			"example": "My stream"
-		  },
-		  "description": {
-			"type": "string",
-			"description": "Description of this stream.",
-			"example": "My stream description"
-		  },
-		  "uiChannel": {
-			"type": "boolean",
-			"description": "Indicates whether this stream is an UI channel: a stream used internally to push updates to UI widgets.",
-			"example": false
-		  },
-		  "partitions": {
-			"type": "integer",
-			"description": "Number of partitions in this stream. Defaults to 1 (unpartitioned).",
-			"example": 1
-		  },
-		  "requireSignedData": {
-			"type": "boolean",
-			"description": "If true, all messages in this stream must be cryptographically signed. Client's should not accept unsigned messages.",
-			"example": false
-		  },
-		  "requireEncryptedData": {
-			"type": "boolean",
-			"description": "If true, all data in this stream must be encrypted.",
-			"example": false
-		  },
-		  "dateCreated": {
-			"type": "string",
-			"description": "ISO-8601 timestamp of when stream was created.",
-			"example": "2018-02-21T12:26:18Z"
-		  },
-		  "lastUpdated": {
-			"type": "string",
-			"description": "ISO-8601 timestamp of when stream details were updated.",
-			"example": "2018-02-21T12:26:18Z"
-		  },
-		  "storageDays": {
-			"type": "integer",
-			"description": "Historical data storage period (days)",
-			"example": 365
-		  }
-		}
-	  },
+    "type": "object",
+    "required": [
+      "name"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "Unique identifier for this stream.",
+        "example": "ln2g8OKHSdr7BcL-rcnh2r"
+      },
+      "name": {
+        "type": "string",
+        "description": "Name of this stream.",
+        "example": "My stream"
+      },
+      "description": {
+        "type": "string",
+        "description": "Description of this stream.",
+        "example": "My stream description"
+      },
+      "uiChannel": {
+        "type": "boolean",
+        "description": "Indicates whether this stream is an UI channel: a stream used internally to push updates to UI widgets.",
+        "example": false
+      },
+      "partitions": {
+        "type": "integer",
+        "description": "Number of partitions in this stream. Defaults to 1 (unpartitioned).",
+        "example": 1
+      },
+      "requireSignedData": {
+        "type": "boolean",
+        "description": "If true, all messages in this stream must be cryptographically signed. Client's should not accept unsigned messages.",
+        "example": false
+      },
+      "requireEncryptedData": {
+        "type": "boolean",
+        "description": "If true, all data in this stream must be encrypted.",
+        "example": false
+      },
+      "dateCreated": {
+        "type": "string",
+        "description": "ISO-8601 timestamp of when stream was created.",
+        "example": "2018-02-21T12:26:18Z"
+      },
+      "lastUpdated": {
+        "type": "string",
+        "description": "ISO-8601 timestamp of when stream details were updated.",
+        "example": "2018-02-21T12:26:18Z"
+      },
+      "storageDays": {
+        "type": "integer",
+        "description": "Historical data storage period (days)",
+        "example": 365
+      }
+    }
+    },
     "StreamCreateRequest": {
       "type": "object",
       "properties": {
         "id": {
           "type": "string",
           "description": "ID of this stream.",
-          "example": "sandbox/foo/bar"
+          "example": "foobar.eth/foo/bar"
         },
         "name": {
           "type": "string",
@@ -4699,8 +4659,8 @@
     "CanvasState": {
       "type": "string",
       "enum": [
-        "running",
-        "stopped"
+        "RUNNING",
+        "STOPPED"
       ]
     },
     "CanvasSettings": {
@@ -5546,25 +5506,6 @@
         }
       }
     },
-    "UsernamePassword": {
-      "type": "object",
-      "required": [
-        "username",
-        "password"
-      ],
-      "properties": {
-        "username": {
-          "type": "string",
-          "description": "User's username",
-          "example": "john123"
-        },
-        "password": {
-          "type": "string",
-          "description": "User's password",
-          "example": "fjkn56fdjk23"
-        }
-      }
-    },
     "APIKey": {
       "type": "object",
       "required": [
@@ -5664,44 +5605,44 @@
         }
       }
     },
-	"StreamStorageNode": {
-		"type": "object",
-		"required": [
-			"streamId",
-			"storageNodeAddress",
-			"dateCreated"
-		],
-		"properties": {
-			"streamId": {
-				"type": "string",
-				"description": "Stream id"
-			},
-			"storageNodeAddress": {
-				"type": "string",
-				"description": "Ethereum address of the storage node",
-				"example": "0x1234567890123456789012345678901234567890"
-			},
-			"dateCreated": {
-				"type": "string",
-				"description": "ISO-8601 datetime",
-				"example": "2000-12-31T23:59:59Z"
-			}
+  "StreamStorageNode": {
+    "type": "object",
+    "required": [
+      "streamId",
+      "storageNodeAddress",
+      "dateCreated"
+    ],
+    "properties": {
+      "streamId": {
+        "type": "string",
+        "description": "Stream id"
+      },
+      "storageNodeAddress": {
+        "type": "string",
+        "description": "Ethereum address of the storage node",
+        "example": "0x1234567890123456789012345678901234567890"
+      },
+      "dateCreated": {
+        "type": "string",
+        "description": "ISO-8601 datetime",
+        "example": "2000-12-31T23:59:59Z"
+      }
 
-		}
-	},
-	"StorageNodeAddRequest": {
-		"type": "object",
-		"required": [
-			"address"
-		],
-		"properties": {
-			"address": {
-				"type": "string",
-				"description": "Ethereum address of the storage node",
-				"example": "0x1234567890123456789012345678901234567890"
-			}
-		}
-	},
+    }
+  },
+  "StorageNodeAddRequest": {
+    "type": "object",
+    "required": [
+      "address"
+    ],
+    "properties": {
+      "address": {
+        "type": "string",
+        "description": "Ethereum address of the storage node",
+        "example": "0x1234567890123456789012345678901234567890"
+      }
+    }
+  },
     "Error": {
       "type": "object",
       "required": [

@@ -1,9 +1,7 @@
 package com.unifina.controller
 
-
 import com.unifina.domain.SignupMethod
 import com.unifina.domain.User
-import com.unifina.domain.Userish
 import com.unifina.security.ApiKeyConverter
 import com.unifina.service.*
 import grails.converters.JSON
@@ -28,17 +26,6 @@ class LoginApiController {
 		challengeService.checkValidChallengeResponse(cmd.challenge?.id,
 			cmd.challenge?.challenge, cmd.signature.toLowerCase(), cmd.address.toLowerCase())
 		User user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(cmd.address.toLowerCase(), SignupMethod.fromRequest(request))
-		assertEnabled(user)
-		SessionToken token = sessionService.generateToken(user)
-		render(token.toMap() as JSON)
-	}
-
-	@StreamrApi(authenticationLevel = AuthLevel.NONE)
-	def password(UsernamePasswordCommand cmd) {
-		if (cmd.hasErrors()) {
-			throw new InvalidArgumentsException(cmd.errors.getFieldErrors().collect {it.field+" expected."}.join(" "))
-		}
-        User user = userService.getUserFromUsernameAndPassword(cmd.username, cmd.password)
 		assertEnabled(user)
 		SessionToken token = sessionService.generateToken(user)
 		render(token.toMap() as JSON)

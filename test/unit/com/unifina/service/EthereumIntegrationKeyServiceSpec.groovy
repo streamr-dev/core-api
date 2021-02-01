@@ -1,6 +1,9 @@
 package com.unifina.service
 
-import com.unifina.domain.*
+
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.SignupMethod
+import com.unifina.domain.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
@@ -10,7 +13,6 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin)
-// "as JSON" converter
 @TestFor(EthereumIntegrationKeyService)
 @Mock([IntegrationKey, User])
 class EthereumIntegrationKeyServiceSpec extends Specification {
@@ -179,20 +181,37 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 	void "delete() deletes matching IntegrationKey"() {
 		service.subscriptionService = Stub(SubscriptionService)
 
-		def integrationKey = new IntegrationKey(user: me)
+		IntegrationKey extraKey = new IntegrationKey(
+			user: me,
+			service: IntegrationKey.Service.ETHEREUM_ID,
+		)
+		extraKey.id = "extra-key"
+		extraKey.save(failOnError: true, validate: false)
+
+		IntegrationKey integrationKey = new IntegrationKey(
+			user: me,
+			service: IntegrationKey.Service.ETHEREUM_ID,
+		)
 		integrationKey.id = "integration-key"
 		integrationKey.save(failOnError: true, validate: false)
 
 		when:
 		service.delete("integration-key", me)
 		then:
-		IntegrationKey.count() == 0
+		IntegrationKey.count() == 1
 	}
 
 	void "delete() invokes subscriptionService#beforeIntegrationKeyRemoved for Ethereum IDs"() {
 		def subscriptionService = service.subscriptionService = Mock(SubscriptionService)
 
-		def integrationKey = new IntegrationKey(user: me)
+		IntegrationKey extraKey = new IntegrationKey(
+			user: me,
+			service: IntegrationKey.Service.ETHEREUM_ID,
+		)
+		extraKey.id = "extra-key"
+		extraKey.save(failOnError: true, validate: false)
+
+		IntegrationKey integrationKey = new IntegrationKey(user: me)
 		integrationKey.id = "integration-key"
 		integrationKey.service = IntegrationKey.Service.ETHEREUM_ID
 		integrationKey.save(failOnError: true, validate: false)
@@ -204,20 +223,48 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 	}
 
 	void "delete() does not delete matching IntegrationKey if not owner"() {
-		def integrationKey = new IntegrationKey(user: me)
+		User someoneElse = new User(username: "someoneElse@streamr.network").save(failOnError: true, validate: false)
+
+		IntegrationKey extraKey = new IntegrationKey(
+			user: someoneElse,
+			service: IntegrationKey.Service.ETHEREUM_ID,
+		)
+		extraKey.id = "extra-key"
+		extraKey.save(failOnError: true, validate: false)
+		IntegrationKey extraKey2 = new IntegrationKey(
+			user: someoneElse,
+			service: IntegrationKey.Service.ETHEREUM_ID,
+		)
+		extraKey2.id = "extra-key-2"
+		extraKey2.save(failOnError: true, validate: false)
+
+		IntegrationKey integrationKey = new IntegrationKey(
+			user: me,
+			service: IntegrationKey.Service.ETHEREUM_ID,
+		)
 		integrationKey.id = "integration-key"
 		integrationKey.save(failOnError: true, validate: false)
-
-		User someoneElse = new User(username: "someoneElse@streamr.network").save(failOnError: true, validate: false)
 
 		when:
 		service.delete("integration-key", someoneElse)
 		then:
-		IntegrationKey.count() == 1
+		IntegrationKey.count() == 3
 	}
 
 	void "delete() does not invoke subscriptionService#beforeIntegrationKeyRemoved if not found"() {
 		def subscriptionService = service.subscriptionService = Mock(SubscriptionService)
+		IntegrationKey extraKey = new IntegrationKey(
+			user: me,
+			service: IntegrationKey.Service.ETHEREUM_ID,
+		)
+		extraKey.id = "extra-key"
+		extraKey.save(failOnError: true, validate: false)
+		IntegrationKey extraKey2 = new IntegrationKey(
+			user: me,
+			service: IntegrationKey.Service.ETHEREUM_ID,
+		)
+		extraKey2.id = "extra-key-2"
+		extraKey2.save(failOnError: true, validate: false)
 
 		when:
 		service.delete("integration-key", me)
@@ -227,12 +274,27 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 
 	void "delete() does not invoke subscriptionService#beforeIntegrationKeyRemoved if not owner"() {
 		def subscriptionService = service.subscriptionService = Mock(SubscriptionService)
+		User someoneElse = new User(username: "someoneElse@streamr.network").save(failOnError: true, validate: false)
 
-		def integrationKey = new IntegrationKey(user: me)
+		IntegrationKey extraKey = new IntegrationKey(
+			user: someoneElse,
+			service: IntegrationKey.Service.ETHEREUM_ID,
+		)
+		extraKey.id = "extra-key"
+		extraKey.save(failOnError: true, validate: false)
+		IntegrationKey extraKey2 = new IntegrationKey(
+			user: someoneElse,
+			service: IntegrationKey.Service.ETHEREUM_ID,
+		)
+		extraKey2.id = "extra-key-2"
+		extraKey2.save(failOnError: true, validate: false)
+
+		IntegrationKey integrationKey = new IntegrationKey(
+			user: me,
+			service: IntegrationKey.Service.ETHEREUM_ID,
+		)
 		integrationKey.id = "integration-key"
 		integrationKey.save(failOnError: true, validate: false)
-
-		User someoneElse = new User(username: "someoneElse@streamr.network").save(failOnError: true, validate: false)
 
 		when:
 		service.delete("integration-key", someoneElse)

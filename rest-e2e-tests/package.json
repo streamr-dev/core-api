@@ -11,16 +11,20 @@
   },
   "author": "Streamr developers",
   "license": "AGPL-3.0-only",
+  "engines": {
+    "node": ">=14",
+    "npm": ">=6.14"
+  },
   "dependencies": {
-    "ajv": "6.12.4",
+    "ajv": "6.12.6",
     "async-wait-until": "1.2.6",
     "chai": "4.2.0",
     "form-data": "3.0.0",
     "lodash": "4.17.20",
-    "mocha": "8.1.3",
+    "mocha": "8.2.1",
     "node-fetch": "2.6.1",
     "sleep-promise": "8.0.1",
-    "streamr-client": "^4.1.3"
+    "streamr-client": "4.2.0-alpha.9"
   },
   "devDependencies": {}
 }

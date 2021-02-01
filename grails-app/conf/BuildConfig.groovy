@@ -57,6 +57,9 @@ grails.project.dependency.resolution = {
 		// Ethereum Repository
 		mavenRepo "https://dl.bintray.com/ethereum/maven/"
 
+		// Streamr Maven
+		mavenRepo "https://dl.bintray.com/streamr/maven/"
+
 		// Remote Grails repos
 		grailsPlugins()
 		grailsCentral()
@@ -98,7 +101,7 @@ grails.project.dependency.resolution = {
 		compile('org.web3j:core:5.0.0') {
 			excludes "org.java-websocket:Java-WebSocket:1.3.8" // Version conflict with com.streamr:client
 		}
-		compile('com.amazonaws:aws-java-sdk:1.11.294')
+		compile('com.amazonaws:aws-java-sdk-s3:1.11.908')
 		compile('org.imgscalr:imgscalr-lib:4.2')
 		compile('commons-io:commons-io:2.4')
 		compile('org.glassfish.jersey.core:jersey-client:2.27')
@@ -106,10 +109,11 @@ grails.project.dependency.resolution = {
 		compile('org.glassfish.jersey.media:jersey-media-json-jackson:2.27')
 		compile('com.fasterxml.jackson.core:jackson-databind:2.9.6')
 		compile('com.fasterxml.jackson.core:jackson-annotations:2.9.6')
-		compile('com.streamr:client:2.0.2')
+		compile('com.streamr:client:DU2-alpha.1')
 
 		compile('com.google.code.gson:gson:2.8.5')
 		runtime('mysql:mysql-connector-java:5.1.20')
+		runtime('com.mchange:c3p0:0.9.5.5')
 		runtime('commons-net:commons-net:3.3')
 		runtime('org.apache.commons:commons-math3:3.2')
 		runtime('commons-codec:commons-codec:1.15')
@@ -125,7 +129,7 @@ grails.project.dependency.resolution = {
 	}
 
 	plugins {
-		build(":tomcat:8.0.50") {
+		provided(":tomcat:8.0.50") {
 			export = false
 		}
 

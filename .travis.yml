@@ -1,6 +1,6 @@
 language: groovy
 os: linux
-dist: xenial
+dist: bionic
 jdk:
 - openjdk8
 services:
@@ -11,17 +11,24 @@ if: (branch = master) OR (branch = "/^deployed-\\d+\\.\\d+(\\.\\d+)?(-\\S*)?$/")
 
 git:
   submodules: false
-before_install:
-- curl -s http://get.sdkman.io | bash
-- echo sdkman_auto_answer=true > ~/.sdkman/etc/config
-- source "/home/travis/.sdkman/bin/sdkman-init.sh"
-- sdk install grails 2.5.6
-- nvm install $NODE_VERSION
 env:
   global:
-  - NODE_VERSION=$(cat rest-e2e-tests/.nvmrc)
-  - OWNER=streamr
-  - IMAGE_NAME=engine-and-editor
+    - NODE_VERSION=$(cat rest-e2e-tests/.nvmrc)
+    - OWNER=streamr
+    - IMAGE_NAME=engine-and-editor
+    - PATH=$PATH:$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev
+before_install:
+  - sudo /etc/init.d/mysql stop
+  - curl -s http://get.sdkman.io | bash
+  - echo sdkman_auto_answer=true > ~/.sdkman/etc/config
+  - source "/home/travis/.sdkman/bin/sdkman-init.sh"
+  - sdk install grails 2.5.6
+  - nvm install $NODE_VERSION
+  - git clone --depth 1 https://github.com/streamr-dev/streamr-docker-dev.git
+  - cp $TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh $TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/streamr-docker-dev
+  - sed -i -e "s#${OWNER}/${IMAGE_NAME}:dev#${OWNER}/${IMAGE_NAME}:local#g" "$TRAVIS_BUILD_DIR/streamr-docker-dev/docker-compose.override.yml"
+  - sudo ifconfig docker0 10.200.10.1/24
+  - echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 import:
  - source: streamr-dev/travis-ci:aws-staging-secrets.yml@master
  - source: streamr-dev/travis-ci:aws-production-secrets.yml@master
@@ -47,8 +54,7 @@ jobs:
     env:
     - CAN_FAIL=True
     script:
-    - grails test war
-    - docker build -t $OWNER/$IMAGE_NAME:local .
+    - docker build --network=host --build-arg GRAILS_WAR_ENV=test -t $OWNER/$IMAGE_NAME:local .
     - .travis_scripts/streamr-client-test.sh
   - stage: Build war Staging
     if: NOT type IN (pull_request)
@@ -81,8 +87,7 @@ jobs:
     if: branch = master AND type != pull_request
     install: true
     script:
-    - grails test war
-    - docker build -t $OWNER/$IMAGE_NAME:local .
+    - docker build --network=host --build-arg GRAILS_WAR_ENV=test -t $OWNER/$IMAGE_NAME:local .
     - .travis_scripts/smoke_test.sh
     deploy:
     - provider: script
@@ -105,8 +110,7 @@ jobs:
     if: tag IS present
     install: true
     script:
-    - grails prod war
-    - docker build -t $OWNER/$IMAGE_NAME:local .
+    - docker build --network=host --build-arg GRAILS_WAR_ENV=prod -t $OWNER/$IMAGE_NAME:local .
     - .travis_scripts/smoke_test.sh
     deploy:
     - provider: script

@@ -22,7 +22,6 @@ class ProductApiControllerSpec extends Specification {
 		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
