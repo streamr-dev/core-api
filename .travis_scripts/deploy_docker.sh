@@ -8,8 +8,6 @@ if [ -z "$1" ]; then
 	exit 1
 fi
 
-docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
-
 case "$1" in
 	dev)
 		# If the build is a cron build then it should tag and push a nightly build

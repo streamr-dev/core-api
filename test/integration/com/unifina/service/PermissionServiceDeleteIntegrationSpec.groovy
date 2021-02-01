@@ -1,6 +1,9 @@
 package com.unifina.service
 
-import com.unifina.domain.*
+import com.unifina.domain.Canvas
+import com.unifina.domain.Permission
+import com.unifina.domain.Resource
+import com.unifina.domain.User
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders
 
@@ -15,13 +18,13 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 
 	void setup() {
 		service = Holders.getApplicationContext().getBean(PermissionService)
-		user = new User(name: "name", username: "me@me.com", password: "x")
+		user = new User(name: "name", username: "me@me.com")
 		user.save(validate: true, failOnError: true)
 
 		resource = new Canvas()
 		resource.id = "canvas-id-1"
 		resource.save(validate: true, failOnError: true)
-		another = new User(name: "another", username: "another@example.com", password: "x")
+		another = new User(name: "another", username: "another@example.com")
 		another.save(validate: true, failOnError: true)
 
 		anotherResource = new Canvas()
@@ -46,7 +49,7 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 		Resource res = new Resource(Canvas, resource.id)
 
 		when:
-		service.deletePermission(permission.id, res, user, null)
+		service.deletePermission(permission.id, res, user)
 
 		then:
 		Permission.get(permission.id) == null
@@ -58,7 +61,7 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 		Resource res = new Resource(Canvas, resource.id)
 
 		when:
-		service.deletePermission(permission.id, res, user, null)
+		service.deletePermission(permission.id, res, user)
 
 		then:
 		def e = thrown(NotPermittedException)
@@ -71,7 +74,7 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 		Resource res = new Resource(Canvas, resource.id)
 
 		when:
-		service.deletePermission(permission.id, res, user, null)
+		service.deletePermission(permission.id, res, user)
 
 		then:
 		Permission.get(permission.id) == null
@@ -84,7 +87,7 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 		Resource res = new Resource(Canvas, anotherResource.id)
 
 		when:
-		service.deletePermission(anotherPermission.id, res, user, null)
+		service.deletePermission(anotherPermission.id, res, user)
 
 		then:
 		def e = thrown(NotPermittedException)
@@ -95,12 +98,11 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 		setup:
 		Resource res = new Resource(Canvas, resource.id)
 		User apiUser = user
-		Key apiKey = null
 		Permission share = service.systemGrant(apiUser, resource, Permission.Operation.CANVAS_SHARE)
 		Permission share2 = service.systemGrant(apiUser, resource, Permission.Operation.CANVAS_SHARE)
 		Permission p = service.systemGrant(apiUser, resource, Permission.Operation.CANVAS_INTERACT)
 		when:
-		service.deletePermission(p.id, res, apiUser, apiKey)
+		service.deletePermission(p.id, res, apiUser)
 		then:
 		Permission.get(p.id) == null
 	}
@@ -109,11 +111,10 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 		setup:
 		Resource res = new Resource(Canvas, resource.id)
 		User apiUser = user
-		Key apiKey = null
 		Permission share = service.systemGrant(apiUser, resource, Permission.Operation.CANVAS_SHARE)
 		Permission p = service.systemGrant(apiUser, resource, Permission.Operation.CANVAS_INTERACT)
 		when:
-		service.deletePermission(null, res, apiUser, apiKey)
+		service.deletePermission(null, res, apiUser)
 		then:
 		def e = thrown(NotFoundException)
 		e.type == "Canvas"

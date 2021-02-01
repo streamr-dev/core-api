@@ -2,9 +2,11 @@ package com.unifina.signalpath.streams;
 
 import com.unifina.domain.Stream;
 import com.unifina.domain.User;
+import com.unifina.service.CreateStreamCommand;
 import com.unifina.service.StreamService;
 import com.unifina.service.ValidationException;
 import com.unifina.signalpath.*;
+import com.unifina.utils.JSONUtil;
 import grails.util.Holders;
 
 import java.util.ArrayList;
@@ -15,6 +17,7 @@ import java.util.Map;
 public class CreateStream extends AbstractSignalPathModule {
 
 	private final MapParameter fields = new MapParameter(this, "fields");
+	private final StringInput idInput = new StringInput(this, "id");
 	private final StringInput nameInput = new StringInput(this, "name");
 	private final StringInput description = new StringInput(this, "description");
 
@@ -27,6 +30,7 @@ public class CreateStream extends AbstractSignalPathModule {
 	@Override
 	public void init() {
 		addInput(fields);
+		addInput(idInput);
 		addInput(nameInput);
 		addInput(description);
 		addOutput(created);
@@ -45,7 +49,7 @@ public class CreateStream extends AbstractSignalPathModule {
 		}
 
 		try {
-			Stream s = streamService.createStream(buildParams(), User.loadViaJava(getGlobals().getUserId()));
+			Stream s = streamService.createStream(buildCommand(), User.loadViaJava(getGlobals().getUserId()), null);
 			sendOutputs(true, s.getId());
 			cachedStreamIdsByName.put(nameInput.getValue(), s.getId());
 		} catch (ValidationException ex) {
@@ -58,14 +62,17 @@ public class CreateStream extends AbstractSignalPathModule {
 		cachedStreamIdsByName.clear();
 	}
 
-	private Map<String, Object> buildParams() {
-		Map<String, Object> params = new HashMap<>();
-		params.put("name", nameInput.getValue());
-		params.put("description", description.getValue());
+	private CreateStreamCommand buildCommand() {
+		CreateStreamCommand cmd = new CreateStreamCommand();
+		if (!idInput.getValue().isEmpty()) {
+			cmd.setId(idInput.getValue());
+		}
+		cmd.setName(nameInput.getValue());
+		cmd.setDescription(description.getValue());
 		Map<String, Object> config = new HashMap<>();
 		config.put("fields", mapToListOfFieldConfigs(fields.getValue()));
-		params.put("config", config);
-		return params;
+		cmd.setConfig(config);
+		return cmd;
 	}
 
 	protected String getStreamName() {

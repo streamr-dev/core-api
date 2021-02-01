@@ -1,12 +1,9 @@
 const assert = require('chai').assert
 const fetch = require('node-fetch')
-const StreamrClient = require('streamr-client')
 
 const URL = 'http://localhost/api/v1'
-
 const API_KEY = 'tester1-api-key'
-
-const TIMEOUT = 5000
+const TIMEOUT = 10000
 
 describe('Login API', () => {
 

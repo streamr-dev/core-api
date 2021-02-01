@@ -1,42 +1,124 @@
 const assert = require('chai').assert
-const fs = require('fs')
-const initStreamrApi = require('./streamr-api-clients')
-const SchemaValidator = require('./schema-validator')
+const Streamr = require('./streamr-api-clients')
 const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
-
-const URL = 'http://localhost:8081/streamr-core/api/v1/'
-const LOGGING_ENABLED = false
-
-const API_KEY = 'stream-api-tester-key'
-const API_KEY_2 = 'stream-api-tester2-key'
-
-const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
+const assertStreamrClientResponseError = require('./test-utilities.js').assertStreamrClientResponseError
+const getStreamrClient = require('./test-utilities.js').getStreamrClient
+const testUsers = require('./test-utilities.js').testUsers
+const StreamrClient = require('streamr-client')
 
 describe('Streams API', () => {
-    let streamId
+
+	let streamId
+	const streamOwner = StreamrClient.generateEthereumAccount()
+	const anonymousUser = StreamrClient.generateEthereumAccount()
+	const ensDomainOwner = testUsers.ensDomainOwner
 
     before(async () => {
-        const response = await Streamr.api.v1.streams
-            .create({
-                name: 'stream-id-' + Date.now()
-            })
-            .withApiKey(API_KEY)
-            .execute()
+        const response = await getStreamrClient(streamOwner).createStream({
+            name: 'stream-id-' + Date.now()
+        })
         streamId = response.id
+	})
+
+	describe('POST /api/v1/streams', function() {
+
+		it('happy path', async function() {
+			const assertValidResponse = (json, properties, expectedId) => {
+				assert.equal(json.name, properties.name)
+				assert.equal(json.description, properties.description)
+				assert.deepEqual(json.config, properties.config)
+				assert.equal(json.partitions, properties.partitions)
+				assert.equal(json.uiChannel, properties.uiChannel)
+				assert.equal(json.autoConfigure, properties.autoConfigure)
+				assert.equal(json.storageDays, properties.storageDays)
+				assert.equal(json.inactivityThresholdHours, properties.inactivityThresholdHours)
+				if (expectedId !== undefined) {
+					assert.equal(json.id, expectedId)
+				}
+			}
+			const properties = {
+				name: 'Mock name',
+				description: "Mock description",
+				config: {
+				   fields: [
+					  {
+						 name: 'mock-field',
+						 type: 'string'
+					  }
+				   ]
+				},
+				partitions: 12,
+				autoConfigure: false,
+				storageDays: 66,
+				inactivityThresholdHours: 4,
+				uiChannel: false
+			}
+			const createResponse = await getStreamrClient(streamOwner).createStream(properties)
+			assertValidResponse(createResponse, properties)
+			const streamId = createResponse.id
+			const fetchResponse = await getStreamrClient(streamOwner).getStream(streamId)
+			assertValidResponse(fetchResponse, properties, streamId)
+		});
+
+		it('invalid properties', async function() {
+			const request = getStreamrClient(streamOwner).createStream({
+				partitions: 999
+			})
+			await assertStreamrClientResponseError(request, 422)
+		})
+
+		it('create with owned domain id', async function() {
+			const streamId = 'testdomain1.eth/foo/bar' + Date.now()
+			const properties = {
+				id: streamId
+			}
+			const response = await getStreamrClient(ensDomainOwner).createStream(properties)
+			assert.equal(response.id, streamId)
+		})
+
+		it('create with integration key id', async function() {
+			const streamId = streamOwner.address + '/foo/bar' + Date.now()
+			const properties = {
+				id: streamId
+			}
+			const response = await getStreamrClient(streamOwner).createStream(properties)
+			assert.equal(response.id, streamId)
+		})
+
+		it('create with invalid id', async function() {
+			const streamId = 'foobar.eth/loremipsum'
+			const properties = {
+				id: streamId
+			}
+			const request = getStreamrClient(streamOwner).createStream(properties)
+			await assertStreamrClientResponseError(request, 422)
+		})
+
+	})
+
+    describe('GET /api/v1/streams/:id', () => {
+        it('works with uri-encoded ids', async () => {
+            const id = streamOwner.address + '/streams-api.test.js/stream-' + Date.now()
+            await getStreamrClient(streamOwner).createStream({
+                id
+            })
+            const json = await getStreamrClient(streamOwner).getStream(id)
+            assert.equal(json.id, id)
+        })
     })
 
     describe('GET /api/v1/streams/:id/permissions/me', () => {
         it('responds with status 404 when authenticated but stream does not exist', async () => {
             const response = await Streamr.api.v1.streams.permissions
                 .getOwnPermissions('non-existing-stream-id')
-                .withApiKey(API_KEY)
+                .withAuthenticatedUser(streamOwner)
                 .call()
             assert.equal(response.status, 404)
         })
         it('succeeds with authentication', async () => {
             const response = await Streamr.api.v1.streams.permissions
                 .getOwnPermissions(streamId)
-                .withApiKey(API_KEY)
+                .withAuthenticatedUser(streamOwner)
                 .call()
             assert.equal(response.status, 200)
         })
@@ -47,16 +129,18 @@ describe('Streams API', () => {
             assert.equal(response.status, 200)
         })
         it('responds with status 401 when wrong token even if endpoint does not require authentication', async () => {
+            const sessionToken = 'wrong-token';
             const response = await Streamr.api.v1.streams.permissions
                 .getOwnPermissions(streamId)
-                .withSessionToken('wrong-token')
+                .withHeader('Authorization', `Bearer ${sessionToken}`)
                 .call()
             assert.equal(response.status, 401)
         })
         it('responds with status 401 when wrong API key even if endpoint does not require authentication', async () => {
+            const apiKey = 'wrong-api-key'
             const response = await Streamr.api.v1.streams.permissions
                 .getOwnPermissions(streamId)
-                .withApiKey('wrong-api-key')
+                .withHeader('Authorization', `Token ${apiKey}`)
                 .call()
             assert.equal(response.status, 401)
         })
@@ -64,22 +148,22 @@ describe('Streams API', () => {
 
     describe('GET /api/v1/streams/:id/validation', () => {
         it('does not require authentication', async () => {
-            const response = await Streamr.api.v1.streams.getValidationInfo(streamId).call()
-            assert.equal(response.status, 200)
+            const json = await getStreamrClient(anonymousUser).getStreamValidationInfo(streamId)
+            assert.isOk(json)
         })
     })
 
     describe('GET /api/v1/streams/:id/publishers', () => {
         it('does not require authentication', async () => {
-            const response = await Streamr.api.v1.streams.getPublishers(streamId).call()
-            assert.equal(response.status, 200)
+            const json = await getStreamrClient(anonymousUser).getStreamPublishers(streamId)
+            assert.isOk(json)
         })
     })
 
     describe('GET /api/v1/streams/:id/subscribers', () => {
         it('does not require authentication', async () => {
-            const response = await Streamr.api.v1.streams.getSubscribers(streamId).call()
-            assert.equal(response.status, 200)
+            const json = await getStreamrClient(anonymousUser).getStreamSubscribers(streamId)
+            assert.isOk(json)
         })
     })
 
@@ -113,7 +197,7 @@ describe('Streams API', () => {
                         type: 'map'
                     }
                 ])
-                .withApiKey(API_KEY)
+                .withAuthenticatedUser(streamOwner)
                 .call()
 
             await assertResponseIsError(response, 404, 'NOT_FOUND')
@@ -131,7 +215,7 @@ describe('Streams API', () => {
                         type: 'map'
                     }
                 ])
-                .withApiKey(API_KEY_2)
+                .withAuthenticatedUser(anonymousUser)
                 .call()
 
             await assertResponseIsError(response, 403, 'FORBIDDEN', 'stream_edit')
@@ -152,7 +236,7 @@ describe('Streams API', () => {
                             type: 'map'
                         }
                     ])
-                    .withApiKey(API_KEY)
+                    .withAuthenticatedUser(streamOwner)
                     .call()
             })
 

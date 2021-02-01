@@ -1,7 +1,6 @@
 package com.unifina.controller
 
 import com.unifina.domain.Canvas
-import com.unifina.domain.Key
 import com.unifina.domain.User
 import com.unifina.service.ClusterService
 import grails.test.mixin.Mock
@@ -11,17 +10,13 @@ import spock.lang.Specification
 import javax.ws.rs.core.HttpHeaders
 
 @TestFor(ClusterApiController)
-@Mock([RESTAPIFilters, Canvas, User, Key])
+@Mock([RESTAPIFilters, Canvas, User])
 class ClusterApiControllerSpec extends Specification {
 	User me
 	String apiKey = "token myApiKey"
 
     def setup() {
 		me = new User().save(failOnError: true, validate: false)
-		Key key = new Key(name: "key", user: me)
-		key.id = "myApiKey"
-		key.save(failOnError: true, validate: false)
-
 		controller.clusterService = Mock(ClusterService)
 	}
 

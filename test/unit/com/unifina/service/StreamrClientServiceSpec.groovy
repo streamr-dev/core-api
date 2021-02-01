@@ -20,7 +20,6 @@ class StreamrClientServiceSpec extends Specification {
 		user = new User(
 			username: "StreamrClientServiceIntegrationSpec-${System.currentTimeMillis()}@streamr.invalid",
 			name: "user",
-			password: "password",
 		).save(failOnError: true)
 
 		service.setClientClass(FakeStreamrClient)

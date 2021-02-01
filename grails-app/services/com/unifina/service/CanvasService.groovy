@@ -1,7 +1,6 @@
 package com.unifina.service
 
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
 import com.unifina.domain.*
 import com.unifina.serialization.SerializationException
@@ -12,7 +11,7 @@ import com.unifina.signalpath.utils.InvalidStreamConfigException
 import com.unifina.task.CanvasDeleteTask
 import com.unifina.task.CanvasStartTask
 import com.unifina.utils.Globals
-import com.unifina.utils.NullJsonSerializer
+import com.unifina.utils.JSONUtil
 import grails.converters.JSON
 import grails.transaction.Transactional
 import groovy.json.JsonSlurper
@@ -23,11 +22,7 @@ import org.codehaus.groovy.runtime.InvokerHelper
 import org.codehaus.groovy.runtime.InvokerInvocationException
 
 class CanvasService {
-	private final static Gson gson = new GsonBuilder()
-		.serializeNulls()
-		.setPrettyPrinting()
-		.registerTypeAdapter(JSONObject.Null, new NullJsonSerializer())
-		.create()
+	private final static Gson gson = JSONUtil.createPrettyPrintingGsonBuilder()
 
 	SignalPathService signalPathService
 	TaskService taskService
@@ -130,6 +125,7 @@ class CanvasService {
 	}
 
 	void start(Canvas canvas, boolean clearSerialization, User asUser) {
+		log.info("Start canvas: id=" + canvas.id)
 		if (canvas.state == Canvas.State.RUNNING) {
 			throw new InvalidStateException("Cannot run canvas $canvas.id because it's already running. Stop it first.")
 		}
@@ -157,6 +153,7 @@ class CanvasService {
 
 	@Transactional(noRollbackFor=[CanvasUnreachableException])
 	void stop(Canvas canvas, User user, AuthorizationHeader authorizationHeader) {
+		log.info("Stop canvas: id=" + canvas.id)
 		if (canvas.state != Canvas.State.RUNNING) {
 			throw new InvalidStateException("Canvas $canvas.id not currently running.")
 		}

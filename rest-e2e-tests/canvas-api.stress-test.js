@@ -3,18 +3,12 @@ const StreamrClient = require('streamr-client')
 const assert = require('chai').assert
 const fs = require('fs')
 const Emitter = require('events')
-const initStreamrApi = require('./streamr-api-clients')
+const Streamr = require('./streamr-api-clients')
 
-const REST_URL = 'http://localhost:8081/streamr-core/api/v1'
-const WS_URL = 'ws://localhost:8890/api/v1/ws'
-const LOGGING_ENABLED = false
-
-const Streamr = initStreamrApi(REST_URL, LOGGING_ENABLED)
-
+const REST_URL = 'http://localhost/api/v1'
+const WS_URL = 'ws://localhost/api/v1/ws'
 const TIMEOUT = 130 * 1000
-
 const NUM_MESSAGES = 50
-
 const WAIT_TIME = 15000
 
 const pollCondition = async (condition, timeout = TIMEOUT, interval = 100) => {
@@ -28,38 +22,32 @@ const pollCondition = async (condition, timeout = TIMEOUT, interval = 100) => {
     return result
 }
 
-async function CreateClientUser() {
-    // Generate a new user to isolate the test and not require any pre-existing resources
-    const freshUser = StreamrClient.generateEthereumAccount()
-
+async function createStreamrClient(user) {
     const client = new StreamrClient({
         url: WS_URL,
         restUrl: REST_URL,
         auth: {
-            privateKey: freshUser.privateKey,
+            privateKey: user.privateKey,
         },
     })
     await client.connect()
-
-    const sessionToken = await client.session.getSessionToken()
-    return { client, sessionToken }
+    return client
 }
+
+const freshUser = StreamrClient.generateEthereumAccount()
 
 // The tests should be run sequentially
 describe('Canvas API', function() {
 
     let streamrClient
-    let sessionToken
     let stream
-    let canvas
+	let canvas
 
     // sets timeout on before and all test cases in this suite
     this.timeout(TIMEOUT)
 
     before(async () => {
-        const created = await CreateClientUser()
-        streamrClient = created.client
-        sessionToken = created.sessionToken
+        streamrClient = await createStreamrClient(freshUser)
 
         // Create a unique stream for this test
         stream = await streamrClient.createStream({
@@ -87,7 +75,7 @@ describe('Canvas API', function() {
 
         const canvasResponse = await Streamr.api.v1.canvases
             .create(canvasTemplate)
-            .withSessionToken(sessionToken)
+            .withAuthenticatedUser(freshUser)
             .call()
 
         canvas = await canvasResponse.json()
@@ -105,7 +93,7 @@ describe('Canvas API', function() {
         it('starts the canvas', async () => {
             const response = await Streamr.api.v1.canvases
                 .start(canvas.id)
-                .withSessionToken(sessionToken)
+                .withAuthenticatedUser(freshUser)
                 .call()
 
             const json = await response.json()
@@ -162,7 +150,7 @@ describe('Canvas API', function() {
                 await pollCondition(async () => {
                     response = await Streamr.api.v1.canvases
                         .getRuntimeState(canvas.id, 'modules/0')
-                        .withSessionToken(sessionToken)
+                        .withAuthenticatedUser(freshUser)
                         .call()
 
                     json = await response.json()
@@ -182,7 +170,7 @@ describe('Canvas API', function() {
                 await pollCondition(async () => {
                     response = await Streamr.api.v1.canvases
                         .getRuntimeState(canvas.id, 'modules/1')
-                        .withSessionToken(sessionToken)
+                        .withAuthenticatedUser(freshUser)
                         .call()
 
                     json = await response.json()
@@ -205,7 +193,7 @@ describe('Canvas API', function() {
         it('stops the canvas', async () => {
             const response = await Streamr.api.v1.canvases
                 .stop(canvas.id)
-                .withSessionToken(sessionToken)
+                .withAuthenticatedUser(freshUser)
                 .call()
 
             const json = await response.json()
@@ -225,14 +213,14 @@ describe('Canvas API', function() {
             const p = new Promise((resolve, reject) => done = (err) => err ? reject(err) : resolve())
             const r1 = await Streamr.api.v1.canvases
                 .start(canvas.id)
-                .withSessionToken(sessionToken)
+                .withAuthenticatedUser(freshUser)
                 .call()
-            assert.equal(r1.status, 200)
+            assert.equal(r1.status, 200, 'Canvas start failed')
             const r2 = await Streamr.api.v1.canvases
                 .stop(canvas.id)
-                .withSessionToken(sessionToken)
+                .withAuthenticatedUser(freshUser)
                 .call()
-            assert.equal(r2.status, 200)
+            assert.equal(r2.status, 200, 'Canvas stop failed')
 
             const table = canvas.modules.find(({ name }) => name === 'Table')
             subscription = streamrClient.subscribe({
@@ -262,9 +250,9 @@ describe('Canvas API', function() {
                 // restart for second time
                 const r3 = await Streamr.api.v1.canvases
                     .start(canvas.id)
-                    .withSessionToken(sessionToken)
+                    .withAuthenticatedUser(freshUser)
                     .call()
-                assert.equal(r3.status, 200)
+                assert.equal(r3.status, 200, 'Canvas restart failed')
 
                 // reduce flakiness by allowing the subscriptions of the canvas some time to get set up
                 await sleep(5000)
@@ -285,7 +273,7 @@ describe('Canvas API', function() {
         after(async () => {
             await Streamr.api.v1.canvases
                 .stop(canvas.id)
-                .withSessionToken(sessionToken)
+                .withAuthenticatedUser(freshUser)
                 .call()
         })
 
@@ -341,7 +329,6 @@ describe('Canvas API', function() {
 
 function TestClockTable() {
     let streamrClient
-    let sessionToken
     let canvas
     let subscription
 
@@ -349,9 +336,7 @@ function TestClockTable() {
     this.timeout(80000)
 
     before(async () => {
-        const created = await CreateClientUser()
-        streamrClient = created.client
-        sessionToken = created.sessionToken
+        streamrClient = await createStreamrClient(freshUser)
     })
 
     before(async () => {
@@ -360,7 +345,7 @@ function TestClockTable() {
 
         const canvasResponse = await Streamr.api.v1.canvases
             .create(canvasTemplate)
-            .withSessionToken(sessionToken)
+            .withAuthenticatedUser(freshUser)
             .call()
 
         canvas = await canvasResponse.json()
@@ -391,7 +376,7 @@ function TestClockTable() {
 
         Streamr.api.v1.canvases
             .start(canvas.id)
-            .withSessionToken(sessionToken)
+            .withAuthenticatedUser(freshUser)
             .call()
             .then((r1) => {
                 assert.equal(r1.status, 200)
@@ -399,10 +384,10 @@ function TestClockTable() {
     })
 
     after(async () => {
-        if (canvas && sessionToken) {
+        if (canvas) {
             await Streamr.api.v1.canvases
                 .stop(canvas.id)
-                .withSessionToken(sessionToken)
+                .withAuthenticatedUser(freshUser)
                 .call()
                 .catch(console.warn) // ignore
         }

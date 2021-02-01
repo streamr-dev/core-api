@@ -18,7 +18,7 @@ class PermissionApiController {
 			subscriptions = Boolean.parseBoolean(params.subscriptions)
 		}
 		Resource resource = new Resource(params.resourceClass, params.resourceId)
-		List<Permission> permissions = permissionService.findAllPermissions(resource, request.apiUser, request.apiKey, subscriptions)
+		List<Permission> permissions = permissionService.findAllPermissions(resource, request.apiUser, subscriptions)
 		def perms = permissions*.toMap()
 		render(perms as JSON)
 	}
@@ -26,7 +26,7 @@ class PermissionApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def getOwnPermissions() {
 		Resource resource = new Resource(params.resourceClass, params.resourceId)
-		List<Permission> permissions = permissionService.getOwnPermissions(resource, request.apiUser, request.apiKey)
+		List<Permission> permissions = permissionService.getOwnPermissions(resource, request.apiUser)
 		def perms = permissions*.toMap()
 		render(perms as JSON)
 	}
@@ -40,10 +40,9 @@ class PermissionApiController {
 		Operation op = cmd.operationToEnum()
 		Resource res = new Resource(params.resourceClass, params.resourceId)
 		User apiUser = request.apiUser
-		Key apiKey = request.apiKey
 		Permission newPermission
 		if (cmd.anonymous) {
-			newPermission = permissionService.saveAnonymousPermission(apiUser, apiKey, op, res)
+			newPermission = permissionService.saveAnonymousPermission(apiUser, op, res)
 		} else {
 			String subjectTemplate = grailsApplication.config.unifina.email.shareInvite.subject
 			String sharer = apiUser?.username
@@ -55,7 +54,6 @@ class PermissionApiController {
 				EmailMessage msg = new EmailMessage(sharer, recipient, subjectTemplate, res)
 				newPermission = permissionService.savePermissionAndSendShareResourceEmail(
 					apiUser,
-					apiKey,
 					op,
 					user.username,
 					msg
@@ -78,14 +76,14 @@ class PermissionApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(Long id) {
 		Resource resource = new Resource(params.resourceClass, params.resourceId)
-		Permission p = permissionService.findPermission(id, resource, request.apiUser, request.apiKey)
+		Permission p = permissionService.findPermission(id, resource, request.apiUser)
 		render(p.toMap() as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def delete(Long id) {
 		Resource resource = new Resource(params.resourceClass, params.resourceId)
-		permissionService.deletePermission(id, resource, request.apiUser, request.apiKey)
+		permissionService.deletePermission(id, resource, request.apiUser)
 		render(status: 204)
 	}
 

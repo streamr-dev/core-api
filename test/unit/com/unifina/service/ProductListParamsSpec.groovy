@@ -13,21 +13,19 @@ import static plastic.criteria.PlasticCriteria.mockCriteria
 @Mock(Product)
 class ProductListParamsSpec extends Specification {
 
-	Category c1, c2, c3
+	Category c1, c2, c3, c4
 	User user, other
 
 	void setup() {
 		user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
 		other = new User(
 			username: "usr@foo.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		other.id = 2
 		other.save(failOnError: true, validate: false)
@@ -35,7 +33,8 @@ class ProductListParamsSpec extends Specification {
 		c1 = new Category(name: "category-1")
 		c2 = new Category(name: "category-2")
 		c3 = new Category(name: "category-3")
-		[c1, c2, c3]*.save(failOnError: true, validate: true)
+		c4 = new Category(name: "category-4")
+		[c1, c2, c3, c4]*.save(failOnError: true, validate: true)
 
 		Product p1 = new Product(
 			name: "Generic Product",
@@ -77,12 +76,24 @@ class ProductListParamsSpec extends Specification {
 			state: Product.State.DEPLOYED,
 			owner: other
 		)
+		Product p5 = new Product(
+			name: "Water Product",
+			description: "Water quality",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			category: c4,
+			pricePerSecond: 11,
+			state: Product.State.DEPLOYED,
+			type: Product.Type.DATAUNION,
+			owner: user,
+		)
 
 		mockCriteria(Product) // support for criteria `in`
 
-		[p1, p2, p3, p4].eachWithIndex { Product p, int i -> p.id = "product-${i+1}" } // Assign ids: product-1, ...
+		[p1, p2, p3, p4, p5].eachWithIndex { Product p, int i -> p.id = "product-${i + 1}" }
+		// Assign ids: product-1, ...
 
-		[p1, p2, p3, p4]*.save(failOnError: true, validate: true)
+		[p1, p2, p3, p4, p5]*.save(failOnError: true, validate: true)
 	}
 
 	void "passes validation with no args"() {
@@ -100,17 +111,17 @@ class ProductListParamsSpec extends Specification {
 		params.errors.getFieldErrors()*.field == fieldsWithError
 
 		where:
-		map                  | numOfErrors | fieldsWithError
-		[minPrice: -1]       | 1           | ["minPrice"]
-		[categories: []]     | 1           | ["categories"]
-		[states: []]         | 1           | ["states"]
+		map              | numOfErrors | fieldsWithError
+		[minPrice: -1]   | 1           | ["minPrice"]
+		[categories: []] | 1           | ["categories"]
+		[states: []]     | 1           | ["states"]
 	}
 
 	void "createListCriteria() with empty-args constructor returns criteria that returns all"() {
 		when:
 		def paramsList = new ProductListParams()
 		then:
-		fetchProductIdsFor(paramsList).size() == 4
+		fetchProductIdsFor(paramsList).size() == 5
 	}
 
 	void "createListCriteria() with search arg returns criteria that searches through name, description"() {
@@ -124,7 +135,7 @@ class ProductListParamsSpec extends Specification {
 		when:
 		def paramsList = new ProductListParams(minPrice: 3)
 		then:
-		fetchProductIdsFor(paramsList) == ["product-1", "product-2", "product-4"] as Set
+		fetchProductIdsFor(paramsList) == ["product-1", "product-2", "product-4", "product-5"] as Set
 	}
 
 	void "createListCriteria() with maxPrice returns criteria that filters products by price"() {
@@ -159,7 +170,15 @@ class ProductListParamsSpec extends Specification {
 		when:
 		def paramsList = new ProductListParams(productOwner: user)
 		then:
-		fetchProductIdsFor(paramsList) == ["product-1", "product-2", "product-3"] as Set
+		fetchProductIdsFor(paramsList) == ["product-1", "product-2", "product-3", "product-5"] as Set
+	}
+
+	void "createListCriteria() with owner returns criteria that filters products by type"() {
+		when:
+		def paramsList = new ProductListParams(productOwner: user)
+		paramsList.type = Product.Type.DATAUNION
+		then:
+		fetchProductIdsFor(paramsList) == ["product-5"] as Set
 	}
 
 	private static Set<String> fetchProductIdsFor(ListParams listParams) {

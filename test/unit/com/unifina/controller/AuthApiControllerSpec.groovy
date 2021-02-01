@@ -1,7 +1,6 @@
 package com.unifina.controller
 
 import com.unifina.domain.*
-import com.unifina.security.PasswordEncoder
 import com.unifina.service.*
 import com.unifina.signalpath.messaging.MockMailService
 import grails.test.mixin.Mock
@@ -11,11 +10,9 @@ import org.springframework.context.MessageSource
 import spock.lang.Specification
 
 @TestFor(AuthApiController)
-@Mock([SignupInvite, SignupCodeService, RegistrationCode, User, Key, Role, UserRole, Permission, UserService])
+@Mock([SignupInvite, SignupCodeService, User, Role, UserRole, Permission, UserService])
 class AuthApiControllerSpec extends Specification {
-
 	String username = "user@invite.to"
-	PasswordEncoder passwordEncoder = new UnitTestPasswordEncoder()
 
 	def messageSource = [
 	    getMessage: { error, locale ->
@@ -25,11 +22,9 @@ class AuthApiControllerSpec extends Specification {
 
 	void setup() {
 		controller.mailService = new MockMailService()
-		controller.passwordEncoder = passwordEncoder
 		controller.signupCodeService = new SignupCodeService()
 		def permissionService = Stub(PermissionService)
 		controller.userService = new UserService()
-		controller.userService.passwordEncoder = passwordEncoder
 		controller.userService.grailsApplication = grailsApplication as GrailsApplication
 		controller.userService.permissionService = permissionService as PermissionService
 		controller.userService.messageSource = messageSource as MessageSource
@@ -107,33 +102,12 @@ class AuthApiControllerSpec extends Specification {
 		params.invite = inv.code
 		params.username = username
 		params.name = "Name"
-		params.password = 'fooBar123!'
-		params.password2 = 'fooBar123!'
 		request.method = 'POST'
 		controller.register()
 		then: "should fail"
 		response.status == 400
 		!response.json.success
 		response.json.error.find { it.contains("field 'tosConfirmed': rejected value [null]") }
-	}
-
-	void "submitting registration without matching passwords should fail"() {
-		when: "submitting unmatched passwords"
-		def inv = controller.signupCodeService.create(username)
-		inv.sent = true
-		inv.save()
-		params.invite = inv.code
-		params.username = username
-		params.name = "Name"
-		params.password = 'fooBar123!'
-		params.password2 = 'fooBar234!'
-		params.tosConfirmed = true
-		request.method = 'POST'
-		controller.register()
-		then: "should fail"
-		response.status == 400
-		!response.json.success
-		response.json.error.find { it.contains("on field 'password2'") }
 	}
 
 	void "submitting registration without name should fail"() {
@@ -143,8 +117,6 @@ class AuthApiControllerSpec extends Specification {
 		inv.save()
 		params.invite = inv.code
 		params.username = username
-		params.password = 'fooBar123!'
-		params.password2 = 'fooBar123!'
 		params.tosConfirmed = true
 		request.method = 'POST'
 		controller.register()
@@ -154,32 +126,12 @@ class AuthApiControllerSpec extends Specification {
 		response.json.error.find { it.contains("on field 'name': rejected value [null]") }
 	}
 
-	void "submitting registration with weak password should fail"() {
-		when: "weak password"
-		def inv = controller.signupCodeService.create(username)
-		inv.sent = true
-		inv.save()
-		params.invite = inv.code
-		params.username = username
-		params.name = "Name"
-		params.password = 'weak'
-		params.password2 = 'weak'
-		params.tosConfirmed = true
-		request.method = 'POST'
-		controller.register()
-		then: "should fail"
-		response.status == 400
-		!response.json.success
-		response.json.error.find { it.contains("on field 'password'") }
-	}
-
 	void "submitting registration for existing username fails with 400 status"() {
 		when: "username already exists"
 		def user = new User(
 			id: 1,
 			username: "test@test.com",
 			name: "Test User",
-			password: passwordEncoder.encodePassword("foobar123!"),
 		)
 		user.save(validate: false)
 		def inv = controller.signupCodeService.create(user.username)
@@ -189,8 +141,6 @@ class AuthApiControllerSpec extends Specification {
 		params.invite = inv.code
 		params.name = "Name"
 		params.username = user.username
-		params.password = 'fooBar123!'
-		params.password2 = 'fooBar123!'
 		params.tosConfirmed = true
 		request.method = 'POST'
 		controller.register()
@@ -217,8 +167,6 @@ class AuthApiControllerSpec extends Specification {
 		params.invite = inv.code
 		params.name = "Name"
 		params.username = username
-		params.password = 'fooBar123!'
-		params.password2 = 'fooBar123!'
 		params.tosConfirmed = true
 		request.method = 'POST'
 		request.addHeader("Origin", "http://mock-host")
@@ -226,7 +174,6 @@ class AuthApiControllerSpec extends Specification {
 
 		then: "should create user"
 		User.findByUsername(username) != null
-		User.findByUsername(username).password == 'fooBar123!-encoded'
 		User.findByUsername(username).signupMethod == SignupMethod.CORE
 		response.status == 200
 		response.json.name == "Name"
@@ -235,32 +182,4 @@ class AuthApiControllerSpec extends Specification {
 		then: "welcome email should be sent"
 		controller.mailService.mailSent
 	}
-
-	void "forgotPassword returns emailSent=true but does not send email if the user does not exist"() {
-		EmailCommand cmd = new EmailCommand()
-
-		when: "requested new password"
-		cmd.username = "test@streamr.com"
-		request.method = "POST"
-		controller.forgotPassword(cmd)
-		then:
-		!controller.mailService.mailSent
-		response.json.emailSent
-	}
-
-	void "forgotPassword sends email and returns emailSent=true if the user exists"() {
-		EmailCommand cmd = new EmailCommand()
-		User me = new User()
-		me.username = "test@streamr.com"
-		me.save(validate: false)
-
-		when: "requested new password"
-		cmd.username = "test@streamr.com"
-		request.method = "POST"
-		controller.forgotPassword(cmd)
-		then:
-		controller.mailService.mailSent
-		// The text of the html contains the link
-		controller.mailService.html.contains("/resetPassword?t=")
-		response.json.emailSent	}
 }

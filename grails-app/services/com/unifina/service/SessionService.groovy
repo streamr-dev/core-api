@@ -1,7 +1,5 @@
 package com.unifina.service
 
-
-import com.unifina.domain.Key
 import com.unifina.domain.User
 import com.unifina.domain.Userish
 import org.apache.log4j.Logger
@@ -47,8 +45,6 @@ class SessionService {
 	String userishToString(Userish u) {
 		if (u instanceof User) {
 			return "User"+u.id.toString()
-		} else if (u instanceof Key) {
-			return "Key"+u.id.toString()
 		}
 		throw new InvalidArgumentsException("Unrecognized userish")
 	}
@@ -60,9 +56,6 @@ class SessionService {
 		} else if (s.startsWith("SecUser")) {
 			String id = s.substring(7)
 			return User.get(id)
-		} else if (s.startsWith("Key")) {
-			String id = s.substring(3)
-			return Key.get(id)
 		} else {
 			throw new InvalidArgumentsException("Unrecognized string")
 		}

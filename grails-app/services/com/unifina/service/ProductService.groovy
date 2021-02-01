@@ -1,13 +1,11 @@
 package com.unifina.service
 
-import com.streamr.client.protocol.message_layer.StreamMessage
 import com.unifina.domain.Permission
 import com.unifina.domain.Product
 import com.unifina.domain.Stream
 import com.unifina.domain.User
 import grails.compiler.GrailsCompileStatic
 
-import java.text.SimpleDateFormat
 import java.util.concurrent.ThreadLocalRandom
 
 @GrailsCompileStatic
@@ -15,72 +13,9 @@ class ProductService {
 	ApiService apiService
 	PermissionService permissionService
 	SubscriptionService subscriptionService
-	CassandraService cassandraService
 	DataUnionJoinRequestService dataUnionJoinRequestService
 	ProductStore store = new ProductStore()
 	Random random = ThreadLocalRandom.current()
-
-	static class StreamWithLatestMessage {
-		Stream stream
-		StreamMessage latestMessage
-		StreamWithLatestMessage(Stream s, StreamMessage latest) {
-			this.stream = s
-			this.latestMessage = latest
-		}
-		String toString() {
-			return String.format("StreamWithLatestMessage[stream=%s, latestMessage=%s]", stream, latestMessage)
-		}
-		String formatDate() {
-			if (latestMessage == null) {
-				return "stream contains no data"
-			}
-			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z")
-			df.setTimeZone(TimeZone.getTimeZone("UTC"))
-			String date = df.format(latestMessage.getTimestampAsDate())
-			return String.format("no data since %s", date)
-		}
-	}
-
-	static class StaleProduct {
-		Product product
-		final List<StreamWithLatestMessage> streams = new ArrayList<>()
-		StaleProduct(Product p) {
-			this.product = p
-		}
-		String toString() {
-			return String.format("StaleProduct[product=%s, streams=%s]", product, streams.toString())
-		}
-	}
-
-	List<StaleProduct> findStaleProducts(List<Product> products, final Date now) {
-		final List<StaleProduct> staleProducts = new ArrayList<>()
-		for (Product p : products) {
-			StaleProduct stale = new StaleProduct(p)
-			for (Stream s : p.getStreams()) {
-				if (s.inactivityThresholdHours == 0) {
-					continue
-				}
-				final StreamMessage msg = cassandraService.getLatestFromAllPartitions(s)
-				if (msg != null && s.isStale(now, msg.getTimestampAsDate())) {
-					stale.streams.add(new StreamWithLatestMessage(s, msg))
-				} else if (msg == null) {
-					stale.streams.add(new StreamWithLatestMessage(s, null))
-				}
-			}
-			if (!stale.streams.isEmpty()) {
-				staleProducts.add(stale)
-			}
-		}
-
-		return staleProducts
-	}
-
-	Map<User, List<ProductService.StaleProduct>> findStaleProductsByOwner(User user) {
-		List<Product> products = list(new ProductListParams(publicAccess: true), user)
-		List<ProductService.StaleProduct> staleProducts = findStaleProducts(products, new Date())
-		Map<User, List<ProductService.StaleProduct>> staleProductsByOwner = staleProducts.groupBy { StaleProduct sp -> sp.product.owner }
-		return staleProductsByOwner
-	}
 
 	List<Product> relatedProducts(Product product, int maxResults, User user) {
 		// find Product.owner's other products
@@ -319,6 +254,12 @@ class ProductService {
 		product.save(failOnError: true)
 		permissionService.systemRevokeAnonymousAccess(product, Permission.Operation.PRODUCT_GET)
 		return true
+	}
+
+	Product findByBeneficiaryAddress(String beneficiaryAddress) {
+		return (Product) Product.createCriteria().get {
+			ilike("beneficiaryAddress", beneficiaryAddress)	// ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
+		}
 	}
 
 	private static void verifyDevops(User currentUser) {

@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * API methods should be use the @StreamrApi annotation and be mapped to /api/* via UrlMappings.
  * This will allow the RESTAPIFilters to check user credentials. The authenticated User can be referenced
- * by request.apiUser, or the authenticated Key by request.apiKey.
+ * by request.apiUser.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})

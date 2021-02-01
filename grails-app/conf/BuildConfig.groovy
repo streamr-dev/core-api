@@ -15,7 +15,10 @@ grails.project.fork = [
 		minMemory: 256,
 		debug: false,
 		maxPerm: 512,
-		forkReserve:false
+		forkReserve:false,
+		jvmArgs: [
+			"-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true"
+		]
 	],
 	test: [
 		maxMemory: System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
@@ -25,7 +28,8 @@ grails.project.fork = [
 		forkReserve:false,
 		daemon:true,
 		jvmArgs: [
-			"-Djava.awt.headless=true"
+			"-Djava.awt.headless=true",
+			"-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true"
 		]
 	]
 ]
@@ -53,6 +57,9 @@ grails.project.dependency.resolution = {
 		// Ethereum Repository
 		mavenRepo "https://dl.bintray.com/ethereum/maven/"
 
+		// Streamr Maven
+		mavenRepo "https://dl.bintray.com/streamr/maven/"
+
 		// Remote Grails repos
 		grailsPlugins()
 		grailsCentral()
@@ -70,11 +77,9 @@ grails.project.dependency.resolution = {
 		compile('com.mashape.unirest:unirest-java:1.4.9')
 		compile('org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.1')
 		compile('org.antlr:ST4:4.0.8')
-		compile('org.postgresql:postgresql:9.4.1208.jre7')
 		compile('biz.paluch.redis:lettuce:3.5.0.Final') {
 			excludes('com.google.guava:guava:*')
 		}
-		compile('com.datastax.cassandra:cassandra-driver-core:3.7.1')
 		compile('com.google.code.findbugs:jsr305:3.0.2')
 		compile('org.jetbrains:annotations:17.0.0')
 		compile('org.ethereum:ethereumj-core:1.12.0-RELEASE') {
@@ -96,7 +101,7 @@ grails.project.dependency.resolution = {
 		compile('org.web3j:core:5.0.0') {
 			excludes "org.java-websocket:Java-WebSocket:1.3.8" // Version conflict with com.streamr:client
 		}
-		compile('com.amazonaws:aws-java-sdk:1.11.294')
+		compile('com.amazonaws:aws-java-sdk-s3:1.11.908')
 		compile('org.imgscalr:imgscalr-lib:4.2')
 		compile('commons-io:commons-io:2.4')
 		compile('org.glassfish.jersey.core:jersey-client:2.27')
@@ -104,13 +109,14 @@ grails.project.dependency.resolution = {
 		compile('org.glassfish.jersey.media:jersey-media-json-jackson:2.27')
 		compile('com.fasterxml.jackson.core:jackson-databind:2.9.6')
 		compile('com.fasterxml.jackson.core:jackson-annotations:2.9.6')
-		compile('com.streamr:client:2.0.1')
+		compile('com.streamr:client:DU2-alpha.1')
 
 		compile('com.google.code.gson:gson:2.8.5')
 		runtime('mysql:mysql-connector-java:5.1.49')
+		runtime('com.mchange:c3p0:0.9.5.5')
 		runtime('commons-net:commons-net:3.3')
 		runtime('org.apache.commons:commons-math3:3.2')
-		runtime('commons-codec:commons-codec:1.6')
+		runtime('commons-codec:commons-codec:1.15')
 		runtime('com.opencsv:opencsv:3.3')
 		runtime('de.ruedigermoeller:fst:2.56')
 		runtime('joda-time:joda-time:2.10.6')
@@ -123,13 +129,13 @@ grails.project.dependency.resolution = {
 	}
 
 	plugins {
-		build(":tomcat:8.0.50") {
+		provided(":tomcat:8.0.50") {
 			export = false
 		}
 
 		compile(":mail:1.0.8-SNAPSHOT")
 
-		runtime(':hibernate4:4.3.10')
+		runtime(':hibernate:3.6.10.19') // or :hibernate4:4.3.10
 		runtime(":cors:1.3.0") {
 			excludes('spring-security-core')
 			excludes('spring-security-web')

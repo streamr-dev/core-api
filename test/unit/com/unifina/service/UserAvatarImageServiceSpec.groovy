@@ -18,14 +18,13 @@ class UserAvatarImageServiceSpec extends Specification {
     def setup() {
 		service.imageResizer = Stub(ImageResizer)
 		service.fileUploadProvider = Stub(FileUploadProvider) {
-			uploadFile(_, _) >> new URL("https://www.streamr.com/files/id-0")
+			uploadFile(_, _) >> new URL("https://streamr.network/files/id-0")
 		}
 		service.idGenerator = new FakeIdGenerator()
 
 		user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 	}
@@ -80,14 +79,14 @@ class UserAvatarImageServiceSpec extends Specification {
 		service.fileUploadProvider = Mock(FileUploadProvider)
 		service.imageVerifier = Mock(ImageVerifier)
 		def bytes = new byte[256]
-		user.imageUrlLarge = "https://www.streamr.com/files/1.png"
-		user.imageUrlSmall = "https://www.streamr.com/files/2.png"
+		user.imageUrlLarge = "https://streamr.network/files/1.png"
+		user.imageUrlSmall = "https://streamr.network/files/2.png"
 
 		when:
 		service.replaceImage(user, bytes, filename)
 		then:
-		1 * service.fileUploadProvider.deleteFile("https://www.streamr.com/files/1.png")
-		1 * service.fileUploadProvider.deleteFile("https://www.streamr.com/files/2.png")
+		1 * service.fileUploadProvider.deleteFile("https://streamr.network/files/1.png")
+		1 * service.fileUploadProvider.deleteFile("https://streamr.network/files/2.png")
 	}
 
 	void "replaceImage() invokes fileUploadProvider#deleteFile if User has existing image"() {
@@ -95,13 +94,13 @@ class UserAvatarImageServiceSpec extends Specification {
 		service.imageVerifier = Mock(ImageVerifier)
 		service.imageResizer = Mock(ImageResizer)
 		def bytes = new byte[256]
-		user.imageUrlSmall = "https://www.streamr.com/files/2.png"
+		user.imageUrlSmall = "https://streamr.network/files/2.png"
 
 		when:
 		service.replaceImage(user, bytes, filename)
 
 		then:
-		1 * service.fileUploadProvider.deleteFile("https://www.streamr.com/files/2.png")
+		1 * service.fileUploadProvider.deleteFile("https://streamr.network/files/2.png")
 	}
 
 	void "replaceImage() updates Product.imageUrlSmall"() {
@@ -112,7 +111,7 @@ class UserAvatarImageServiceSpec extends Specification {
 		when:
 		service.replaceImage(user, bytes, filename)
 		then:
-		User.get("1").imageUrlSmall == "https://www.streamr.com/files/id-0"
+		User.get("1").imageUrlSmall == "https://streamr.network/files/id-0"
 	}
 
 }

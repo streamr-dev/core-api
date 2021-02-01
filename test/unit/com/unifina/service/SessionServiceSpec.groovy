@@ -1,6 +1,5 @@
 package com.unifina.service
 
-import com.unifina.domain.Key
 import com.unifina.domain.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -34,15 +33,6 @@ class SessionServiceSpec extends Specification {
 		token.getToken().length() == SessionService.TOKEN_LENGTH
 	}
 
-	void "generateToken() should generate session token from anonymous key"() {
-		Key key = new Key(id: 123L).save(failOnError: true, validate: false)
-		when:
-		SessionToken token = service.generateToken(key)
-		then:
-		1 * keyValueStoreService.setWithExpiration(_, _, _)
-		token.getToken().length() == SessionService.TOKEN_LENGTH
-	}
-
 	void "generateToken() should update SecUsers lastLogin"() {
 		User user = new User(id: 123L).save(failOnError: true, validate: false)
 		when:
@@ -60,15 +50,4 @@ class SessionServiceSpec extends Specification {
 		1 * keyValueStoreService.get(token) >> "User"+user.id.toString()
 		retrieved.id == user.id
 	}
-
-	void "getUserishFromToken() should return anonymous key"() {
-		Key key = new Key(id: 123L).save(failOnError: true, validate: false)
-		String token = "token"
-		when:
-		Key retrieved = (Key) service.getUserishFromToken(token)
-		then:
-		1 * keyValueStoreService.get(token) >> "Key"+key.id.toString()
-		retrieved.id == key.id
-	}
-
 }

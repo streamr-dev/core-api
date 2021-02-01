@@ -14,7 +14,6 @@
     "lastUpdated",
     "requireSignedData",
     "requireEncryptedData",
-    "inbox",
     "autoConfigure",
     "storageDays",
     "inactivityThresholdHours"
@@ -66,10 +65,6 @@
     },
     "requireEncryptedData": {
       "description": "Does this stream require data to be encrypted?",
-      "type": "boolean"
-    },
-    "inbox": {
-      "description": "Is this an inbox stream?",
       "type": "boolean"
     },
     "autoConfigure": {
