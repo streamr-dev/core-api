@@ -30,9 +30,9 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 
     def setup() {
 		// Users
-		me = new User(username: "me", password: "foo").save(validate:false)
-		anotherUser = new User(username: "him", password: "bar").save(validate:false)
-		stranger = new User(username: "stranger", password: "x").save(validate:false)
+		me = new User(username: "me").save(validate:false)
+		anotherUser = new User(username: "him").save(validate:false)
+		stranger = new User(username: "stranger").save(validate:false)
 
 		// Dashboards
 		dashAllowed = new Dashboard(id: "allowed", name:"allowed").save(validate:false)
@@ -207,7 +207,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 	}
 
 	void "cleanUpExpiredPermissions() deletes permissions that already ended"() {
-		User testUser = new User(username: "testUser", password: "foo").save(validate:false)
+		User testUser = new User(username: "testUser").save(validate:false)
 		Stream testStream = new Stream(name: "testStream")
 		testStream.id = "testStream"
 		testStream.save(validate: false)
@@ -318,7 +318,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.groovyPageRenderer = Mock(PageRenderer)
 		EthereumIntegrationKeyService ethereumIntegrationKeyService = mockBean(EthereumIntegrationKeyService, Mock(EthereumIntegrationKeyService))
 		String ethUserUsername = "0xa50E97f6a98dD992D9eCb8207c2Aa58F54970729"
-        User createdEthUser = new User(username: ethUserUsername, password: "x", name: "Ethereum User")
+        User createdEthUser = new User(username: ethUserUsername, name: "Ethereum User")
 		createdEthUser.save(validate: true, failOnError: true)
 		Canvas canvasOwned = newCanvas("own")
 		Resource res = new Resource(Canvas, canvasOwned.id)

@@ -32,17 +32,6 @@ class LoginApiController {
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
-	def password(UsernamePasswordCommand cmd) {
-		if (cmd.hasErrors()) {
-			throw new InvalidArgumentsException(cmd.errors.getFieldErrors().collect {it.field+" expected."}.join(" "))
-		}
-        User user = userService.getUserFromUsernameAndPassword(cmd.username, cmd.password)
-		assertEnabled(user)
-		SessionToken token = sessionService.generateToken(user)
-		render(token.toMap() as JSON)
-	}
-
-	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def apikey(ApiKeyCommand cmd) {
 		if (cmd.hasErrors()) {
 			throw new InvalidArgumentsException(cmd.errors.getFieldErrors().collect {it.field+" expected."}.join(" "))

@@ -1,14 +1,11 @@
 import com.mchange.v2.c3p0.ComboPooledDataSource
 import com.streamr.api.client.StreamrClientProvider
 import com.unifina.provider.S3FileUploadProvider
-import com.unifina.security.BCryptPasswordEncoder
 import com.unifina.utils.CustomEditorRegistrar
 
 // Place your Spring DSL code here
 beans = {
 	myOwnCustomEditorRegistrar(CustomEditorRegistrar)
-
-	passwordEncoder(BCryptPasswordEncoder, grailsApplication.config.streamr.encryption.bcrypt.logrounds)
 
 	fileUploadProvider(S3FileUploadProvider,
 		(String) grailsApplication.config.streamr.fileUpload.s3.region,

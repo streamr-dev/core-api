@@ -57,6 +57,9 @@ grails.project.dependency.resolution = {
 		// Ethereum Repository
 		mavenRepo "https://dl.bintray.com/ethereum/maven/"
 
+		// Streamr Maven
+		mavenRepo "https://dl.bintray.com/streamr/maven/"
+
 		// Remote Grails repos
 		grailsPlugins()
 		grailsCentral()
@@ -126,7 +129,7 @@ grails.project.dependency.resolution = {
 	}
 
 	plugins {
-		build(":tomcat:8.0.50") {
+		provided(":tomcat:8.0.50") {
 			export = false
 		}
 

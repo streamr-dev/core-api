@@ -1,6 +1,9 @@
 package com.unifina.service
 
-import com.unifina.domain.*
+import com.unifina.domain.Canvas
+import com.unifina.domain.Permission
+import com.unifina.domain.Resource
+import com.unifina.domain.User
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders
 
@@ -15,13 +18,13 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 
 	void setup() {
 		service = Holders.getApplicationContext().getBean(PermissionService)
-		user = new User(name: "name", username: "me@me.com", password: "x")
+		user = new User(name: "name", username: "me@me.com")
 		user.save(validate: true, failOnError: true)
 
 		resource = new Canvas()
 		resource.id = "canvas-id-1"
 		resource.save(validate: true, failOnError: true)
-		another = new User(name: "another", username: "another@example.com", password: "x")
+		another = new User(name: "another", username: "another@example.com")
 		another.save(validate: true, failOnError: true)
 
 		anotherResource = new Canvas()

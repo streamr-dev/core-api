@@ -61,11 +61,11 @@ test/server/wait: ## Wait for server to come online
 test: vendor test/e2e test/stress ## Run tests
 
 .PHONY: test/e2e
-test/e2e: ## Run tests
+test/e2e: ## Run end to end tests
 	$(call npm, run test:e2e)
 
 .PHONY: test/stress
-test/stress: ## Run tests
+test/stress: ## Run stress tests
 	$(call npm, run test:stress)
 
 .PHONY: clean
@@ -74,5 +74,5 @@ clean: ## Remove generated files
 
 .PHONY: help
 help: ## Show Help
-	@grep -E '^[a-zA-Z_-]+%?:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "%-20s %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z0-9_\-\/]+%?:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "%-20s %s\n", $$1, $$2}'|sort
 

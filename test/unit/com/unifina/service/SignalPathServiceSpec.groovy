@@ -21,12 +21,12 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 	CanvasService canvasService
 
 	def setup() {
-		me = new User(username: "me@streamr.network", password: "pw", name: "name")
+		me = new User(username: "me@streamr.network", name: "name")
 		me.save(failOnError: true)
 
 		Role role = new Role(authority: "ROLE_ADMIN")
 		role.save(failOnError: true)
-		admin = new User(username: "admin@streamr.network", password: "pw", name: "admin")
+		admin = new User(username: "admin@streamr.network", name: "admin")
 		admin.save(failOnError: true)
 		new UserRole(user: admin, role: role).save(failOnError: true)
 
