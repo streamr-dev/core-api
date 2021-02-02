@@ -8,7 +8,7 @@ import com.unifina.domain.*
 import com.unifina.utils.ThreadUtil
 import groovy.json.JsonSlurper
 import org.apache.log4j.Logger
-import com.unifina.utils.MapTraversal
+import com.unifina.utils.ApplicationConfig
 import grails.util.Holders
 
 class DataUnionJoinRequestService {
@@ -251,7 +251,7 @@ class DataUnionJoinRequestService {
 	}
 
 	DataUnionClient getClient() {
-		String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
+		String nodePrivateKey = ApplicationConfig.getString("streamr.ethereum.nodePrivateKey")
 		return streamrClientService.getInstanceForThisEngineNode().dataUnionClient(nodePrivateKey, nodePrivateKey)
 	}
 

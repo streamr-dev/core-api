@@ -4,6 +4,7 @@ import com.lambdaworks.redis.RedisClient
 import com.lambdaworks.redis.RedisConnection
 import com.lambdaworks.redis.RedisURI
 import com.unifina.utils.MapTraversal
+import com.unifina.utils.ApplicationConfig
 import grails.util.Holders
 import org.joda.time.DateTime
 import org.springframework.util.Assert
@@ -17,7 +18,7 @@ class KeyValueStoreServiceIntegrationSpec extends Specification {
 		service = Holders.getApplicationContext().getBean(KeyValueStoreService)
 
 		List<String> hosts = MapTraversal.getList(Holders.getConfig(), "streamr.redis.hosts");
-		String password = MapTraversal.getString(Holders.getConfig(), "streamr.redis.password");
+		String password = ApplicationConfig.getString("streamr.redis.password");
 
 		Assert.notNull(hosts, "streamr.redis.hosts is null!")
 		Assert.notEmpty(hosts, "streamr.redis.hosts is empty!")

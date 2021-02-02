@@ -9,7 +9,7 @@ import com.unifina.domain.EthereumAddress
 import com.unifina.domain.Permission
 import com.unifina.security.MyPolicy
 import com.unifina.security.MySecurityManager
-import com.unifina.utils.MapTraversal
+import com.unifina.utils.ApplicationConfig
 import grails.util.Environment
 import grails.util.Holders
 import org.apache.log4j.Logger
@@ -99,7 +99,8 @@ class BootService {
 	}
 
 	def createStorageNodeAssignmentsStream() {
-		String streamId = getNodeAddress().toString() + "/storage-node-assignments"
+		EthereumAddress nodeAddress = EthereumAddress.fromPrivateKey(ApplicationConfig.getString("streamr.ethereum.nodePrivateKey"))
+		String streamId = nodeAddress.toString() + "/storage-node-assignments"
 		Stream stream = streamService.getStream(streamId)
 		if (stream == null) {
 			User nodeUser = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(nodeAddress.toString(), SignupMethod.UNKNOWN)
@@ -107,10 +108,5 @@ class BootService {
 			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_GET)
 			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
 		}
-	}
-
-	def getNodeAddress() {
-		String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
-		return EthereumAddress.fromPrivateKey(nodePrivateKey)
 	}
 }
