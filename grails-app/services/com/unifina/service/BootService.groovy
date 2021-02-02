@@ -2,8 +2,14 @@ package com.unifina.service
 
 import com.unifina.domain.HostConfig
 import com.unifina.domain.Role
+import com.unifina.domain.Stream
+import com.unifina.domain.User
+import com.unifina.domain.SignupMethod
+import com.unifina.domain.EthereumAddress
+import com.unifina.domain.Permission
 import com.unifina.security.MyPolicy
 import com.unifina.security.MySecurityManager
+import com.unifina.utils.MapTraversal
 import grails.util.Environment
 import grails.util.Holders
 import org.apache.log4j.Logger
@@ -22,6 +28,9 @@ class BootService {
 	def taskService
 	NodeService nodeService
 	def servletContext
+	StreamService streamService
+	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	PermissionService permissionService
 
 	private static final Logger log = Logger.getLogger(BootService.class)
 
@@ -61,6 +70,7 @@ class BootService {
 		def adminRole = Role.findByAuthority('ROLE_ADMIN') ?: new Role(authority: 'ROLE_ADMIN').save(failOnError: true)
 		def liveRole = Role.findByAuthority('ROLE_LIVE') ?: new Role(authority: 'ROLE_LIVE').save(failOnError: true)
 
+		createStorageNodeAssignmentsStream()
 
 		/**
 		 * Start a number of taskWorkers, specified by system property or config
@@ -88,4 +98,19 @@ class BootService {
 		}
 	}
 
+	def createStorageNodeAssignmentsStream() {
+		String streamId = getNodeAddress().toString() + "/storage-node-assignments"
+		Stream stream = streamService.getStream(streamId)
+		if (stream == null) {
+			User nodeUser = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(nodeAddress.toString(), SignupMethod.UNKNOWN)
+			stream = streamService.createStream(new CreateStreamCommand(id: streamId), nodeUser, null)
+			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_GET)
+			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
+		}
+	}
+
+	def getNodeAddress() {
+		String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
+		return EthereumAddress.fromPrivateKey(nodePrivateKey)
+	}
 }
