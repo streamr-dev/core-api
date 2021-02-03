@@ -99,10 +99,10 @@ class BootService {
 	}
 
 	def createStorageNodeAssignmentsStream() {
-		EthereumAddress nodeAddress = EthereumAddress.fromPrivateKey(ApplicationConfig.getString("streamr.ethereum.nodePrivateKey"))
-		String streamId = nodeAddress.toString() + "/storage-node-assignments"
+		String streamId = StorageNodeService.createAssignmentStreamId()
 		Stream stream = streamService.getStream(streamId)
 		if (stream == null) {
+			EthereumAddress nodeAddress = EthereumAddress.fromPrivateKey(ApplicationConfig.getString("streamr.ethereum.nodePrivateKey"))
 			User nodeUser = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(nodeAddress.toString(), SignupMethod.UNKNOWN)
 			stream = streamService.createStream(new CreateStreamCommand(id: streamId), nodeUser, null)
 			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_GET)
