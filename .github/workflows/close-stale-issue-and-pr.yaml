@@ -8,7 +8,7 @@ on:
 jobs:
   stale:
     name: Close stale issues and PRs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/stale@v3.0.15
       with:
