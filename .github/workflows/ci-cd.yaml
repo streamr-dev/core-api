@@ -114,6 +114,10 @@ jobs:
         run: |
           cd rest-e2e-tests
           npm run test:e2e
+      - name: Run End to End stress tests
+        run: |
+          cd rest-e2e-tests
+          npm run test:stress
 
   build-docker:
     name: Build Docker and push to Docker Hub
