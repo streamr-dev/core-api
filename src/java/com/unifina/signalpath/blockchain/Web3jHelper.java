@@ -291,15 +291,9 @@ public class Web3jHelper {
 		String ensContractAddress = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.ensRegistryContractAddress");
 		ENS ensRegistry = ENS.load(ensContractAddress, web3j, transactionManager, new DefaultGasProvider());
 		byte[] nameHash = NameHash.nameHashAsBytes(domain);
-		String resolverAddress = send(ensRegistry.resolver(nameHash));
-		if (!Objects.equals(resolverAddress, ADDRESS_NONE)) {
-			PublicResolver resolver = PublicResolver.load(resolverAddress, web3j, transactionManager, new DefaultGasProvider());
-			String contractAddress = send(resolver.addr(NameHash.nameHashAsBytes(domain)));
-			if (!Objects.equals(contractAddress, ADDRESS_NONE)) {
-				return contractAddress;
-			} else {
-				return null;
-			}
+		String contractAddress = send(ensRegistry.owner(nameHash));
+		if (!Objects.equals(contractAddress, ADDRESS_NONE)) {
+			return contractAddress;
 		} else {
 			return null;
 		}
