@@ -1,4 +1,4 @@
-name: 'Close stale issues and PRs'
+name: Close stale issues and PRs CI
 on:
   schedule:
   - cron: "0 0 * * *"
@@ -10,7 +10,7 @@ jobs:
     name: Close stale issues and PRs
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/stale@v3.0.14
+    - uses: actions/stale@v3.0.15
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         days-before-stale: 60

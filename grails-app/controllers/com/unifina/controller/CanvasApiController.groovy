@@ -1,17 +1,14 @@
 package com.unifina.controller
 
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.unifina.domain.Canvas
 import com.unifina.domain.Permission.Operation
 import com.unifina.domain.User
 import com.unifina.service.*
 import com.unifina.signalpath.ModuleException
-import com.unifina.utils.NullJsonSerializer
-import grails.converters.JSON
+import com.unifina.utils.JSONUtil
 import grails.transaction.NotTransactional
 import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.util.FileCopyUtils
 
 class CanvasApiController {
@@ -20,10 +17,7 @@ class CanvasApiController {
 	SignalPathService signalPathService
 	ApiService apiService
 
-	private static final Gson gson = new GsonBuilder()
-		.serializeNulls()
-		.registerTypeAdapter(JSONObject.Null, new NullJsonSerializer())
-		.create()
+	private static final Gson gson = JSONUtil.createGsonBuilder()
 
 	private static final Logger log = Logger.getLogger(CanvasApiController)
 
@@ -34,7 +28,7 @@ class CanvasApiController {
 		}
 		def results = apiService.list(Canvas, listParams, (User) request.apiUser)
 		PaginationUtils.setHint(response, listParams, results.size(), params)
-		render(results*.toMap() as JSON)
+		render(gson.toJson(results*.toMap()))
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
@@ -44,21 +38,20 @@ class CanvasApiController {
 			Map result = canvas.toMap()
 			Map runtimeJson = signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest([type: 'json'], "canvases/$canvas.id", request.apiUser, TokenAuthenticator.getAuthorizationHeader(request)), false).json
 			result.putAll(runtimeJson)
-			render result as JSON
-		}
-		else {
+			render(gson.toJson(result))
+		} else {
 			try {
 				Map result = canvasService.reconstruct(canvas, request.apiUser)
 				// Need to discard this change below to prevent auto-update
-				canvas.json = result as JSON
-				render canvas.toMap() as JSON
+				canvas.json = gson.toJson(result)
+				render(gson.toJson(canvas.toMap()))
 				// Prevent auto-update of the canvas
 				canvas.discard()
 			} catch (ModuleException e) {
 				// Load canvas even if it is in an invalid state. For front-end auto-save.
 				Map<String, Object> response = canvas.toMap()
 				response.moduleErrors = e.getModuleExceptions()*.toMap()
-				render response as JSON
+				render(gson.toJson(response))
 			}
 		}
 	}
@@ -66,7 +59,7 @@ class CanvasApiController {
 	@StreamrApi
 	def save() {
 		Canvas canvas = canvasService.createNew(readSaveCommand(), request.apiUser)
-		render canvas.toMap() as JSON
+		render(gson.toJson(canvas.toMap()))
 	}
 
 	@StreamrApi
@@ -77,10 +70,10 @@ class CanvasApiController {
 		} catch (ModuleException e) {
 			Map<String, Object> response = canvas.toMap()
 			response.moduleErrors = e.getModuleExceptions()*.toMap()
-			render gson.toJson(response)
+			render(gson.toJson(response))
 			return
 		}
-		render gson.toJson(canvas.toMap())
+		render(gson.toJson(canvas.toMap()))
 	}
 
 	@StreamrApi
@@ -95,7 +88,7 @@ class CanvasApiController {
 	def start(String id) {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.CANVAS_STARTSTOP)
 		canvasService.start(canvas, request.JSON?.clearState ?: false, request.apiUser)
-		render canvas.toMap() as JSON
+		render(gson.toJson(canvas.toMap()))
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.USER, allowRoles = AllowRole.ADMIN)
@@ -106,7 +99,7 @@ class CanvasApiController {
 
 		Canvas canvas = apiService.getByIdAndThrowIfNotFound(Canvas, id)
 		canvasService.start(canvas, request.JSON?.clearState ?: false, adminParams.startedBy)
-		render canvas.toMap() as JSON
+		render(gson.toJson(canvas.toMap()))
 	}
 
 	@StreamrApi
@@ -120,7 +113,7 @@ class CanvasApiController {
 			render ""
 		} else {
 			canvas.refresh()
-			render canvas.toMap() as JSON
+			render(gson.toJson(canvas.toMap()))
 		}
 	}
 
@@ -130,22 +123,23 @@ class CanvasApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def module(String canvasId, Integer moduleId, String dashboardId, Boolean runtime) {
 		if (runtime) {
-			render signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest([type: 'json'], "canvases/$canvasId/modules/$moduleId", request.apiUser, TokenAuthenticator.getAuthorizationHeader(request)), false).json as JSON
+			def json = signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest([type: 'json'], "canvases/$canvasId/modules/$moduleId", request.apiUser, TokenAuthenticator.getAuthorizationHeader(request)), false).json
+			render(gson.toJson(json))
 		} else {
 			Map moduleMap = canvasService.authorizedGetModuleOnCanvas(canvasId, moduleId, dashboardId, request.apiUser, Operation.CANVAS_GET)
-			render moduleMap as JSON
+			render(gson.toJson(moduleMap))
 		}
 	}
 
 	/**
 	 * Sends a runtime request to a running canvas or module
-     */
+	 */
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def runtimeRequest(String path, Boolean local) {
 		def msg = request.JSON
 		Map response = signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest(msg, "canvases/$path", request.apiUser, TokenAuthenticator.getAuthorizationHeader(request)), local ? true : false)
 		log.debug("request: responding with $response")
-		render response as JSON
+		render(gson.toJson(response))
 	}
 
 	private SaveCanvasCommand readSaveCommand() {

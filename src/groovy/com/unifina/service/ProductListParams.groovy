@@ -4,7 +4,6 @@ import com.unifina.domain.Category
 import com.unifina.domain.Permission
 import com.unifina.domain.Product
 import com.unifina.domain.User
-import com.unifina.service.ListParams
 import grails.validation.Validateable
 
 @Validateable
@@ -14,6 +13,7 @@ class ProductListParams extends ListParams {
 	Long minPrice
 	Long maxPrice
 	User productOwner
+	String type
 
 	ProductListParams() {
 		super()
@@ -26,6 +26,7 @@ class ProductListParams extends ListParams {
 		minPrice(nullable: true, min: 0L)
 		maxPrice(nullable: true)
 		productOwner(nullable: true)
+		type(nullable: true)
 	}
 
 	@Override
@@ -51,17 +52,25 @@ class ProductListParams extends ListParams {
 			if (productOwner != null) {
 				eq("owner", productOwner)
 			}
+			if (type != null) {
+				try {
+					Product.Type value = Product.Type.valueOf(type.toUpperCase())
+					eq("type", value)
+				} catch (final IllegalArgumentException ignored) {
+				}
+			}
 		}
 	}
 
 	@Override
-	Map toMap() {
+	Map<String, Object> toMap() {
 		return super.toMap() + [
-		    categories: categories*.id,
-			states: states*.id,
-			minPrice: minPrice,
-			maxPrice: maxPrice,
-			owner: productOwner
-		]
+			categories: categories*.id,
+			states    : states*.id,
+			minPrice  : minPrice,
+			maxPrice  : maxPrice,
+			owner     : productOwner,
+			type      : type,
+		] as Map<String, Object>
 	}
 }
