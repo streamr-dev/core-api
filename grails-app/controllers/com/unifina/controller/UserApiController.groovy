@@ -1,10 +1,8 @@
 package com.unifina.controller
 
-import com.unifina.api.ApiException
-import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.domain.EmailValidator
 import com.unifina.domain.User
-import com.unifina.security.PasswordEncoder
+import com.unifina.service.ApiException
 import com.unifina.service.BalanceService
 import com.unifina.service.UserAvatarImageService
 import com.unifina.service.UserService
@@ -14,7 +12,6 @@ import groovy.transform.ToString
 import org.springframework.web.multipart.MultipartFile
 
 class UserApiController {
-	PasswordEncoder passwordEncoder
 	UserService userService
 	UserAvatarImageService userAvatarImageService
 	BalanceService balanceService
@@ -39,21 +36,9 @@ class UserApiController {
 		return render(user.toMap() as JSON)
 	}
 
-	@StreamrApi
-	def changePassword(ChangePasswordCommand cmd) {
-		if (!cmd.validate()) {
-			throw new ApiException(400, "PASSWORD_CHANGE_FAILED", "Password not changed!")
-		}
-		User user = loggedInUser()
-		user.password = passwordEncoder.encodePassword(cmd.password)
-		user.save(flush: false, failOnError: true)
-		log.info("User $user.username changed password!")
-		render(status: 204, body: "")
-	}
-
-	@StreamrApi(authenticationLevel = AuthLevel.KEY)
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def getUserInfo() {
-		render((request.apiUser ?: request.apiKey)?.toMap() as JSON)
+		render(request.apiUser.toMap() as JSON)
 	}
 
 	@StreamrApi
@@ -94,46 +79,9 @@ class UserApiController {
 	}
 }
 
-
 @Validateable
 @ToString
 class UpdateProfileCommand {
 	String name
 	String email
-}
-
-@Validateable
-@ToString(excludes = ["currentpassword", "password", "password2"])
-class ChangePasswordCommand {
-
-	PasswordEncoder passwordEncoder
-	def userService
-
-	String username
-	String currentpassword
-	String password
-	String password2
-
-	static constraints = {
-		username(blank: false)
-		currentpassword validator: {String pwd, ChangePasswordCommand cmd->
-			User user
-			try {
-				user = cmd.userService.getUserFromUsernameAndPassword(cmd.username, cmd.currentpassword)
-			} catch (InvalidUsernameAndPasswordException e) {
-				return false
-			}
-			if (user == null) {
-				return false
-			}
-			def encodedPassword = user.password
-			return cmd.passwordEncoder.isPasswordValid(encodedPassword, pwd)
-		}
-		password validator: {String password, ChangePasswordCommand command ->
-			return command.userService.passwordValidator(password, command)
-		}
-		password2 validator: {value, ChangePasswordCommand command ->
-			return command.userService.password2Validator(value, command)
-		}
-	}
 }

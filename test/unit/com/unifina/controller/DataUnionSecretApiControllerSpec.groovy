@@ -1,13 +1,8 @@
 package com.unifina.controller
 
-import com.unifina.api.ApiException
-import com.unifina.api.BadRequestException
-import com.unifina.api.NotFoundException
 import com.unifina.domain.DataUnionSecret
 import com.unifina.domain.User
-import com.unifina.service.DataUnionSecretCommand
-import com.unifina.service.DataUnionSecretService
-import com.unifina.service.EthereumService
+import com.unifina.service.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -20,7 +15,7 @@ class DataUnionSecretApiControllerSpec extends Specification {
 	final String validID = "L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g"
 
 	void setup() {
-		me = new User(id: 1, name: "firstname lastname", username: "firstname.lastname@address.com", password: "salasana")
+		me = new User(id: 1, name: "firstname lastname", username: "firstname.lastname@address.com")
 		me.save(validate: true, failOnError: true)
 		DataUnionSecret secret = new DataUnionSecret(
 			name: "name of the secret",

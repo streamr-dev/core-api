@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.CanvasCommunicationException
+
 import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
 import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener

@@ -2,10 +2,6 @@ package com.unifina.service
 
 import com.mashape.unirest.http.HttpResponse
 import com.mashape.unirest.http.Unirest
-import com.unifina.api.ApiException
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.ValidationException
 import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
 import com.unifina.domain.Permission
 import com.unifina.domain.User
@@ -16,9 +12,6 @@ import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.codehaus.groovy.grails.web.mapping.LinkGenerator
-
-import javax.servlet.http.HttpServletResponse
 
 class ApiService {
 
@@ -27,7 +20,6 @@ class ApiService {
 	private static final Logger log = Logger.getLogger(ApiService)
 
 	PermissionService permissionService
-	LinkGenerator grailsLinkGenerator
 
 	/**
 	 * List/(search for) all domain objects readable by user that satisfy given conditions. Also validates conditions.
@@ -46,24 +38,6 @@ class ApiService {
 		Closure searchCriteria = listParams.createListCriteria()
         User effectiveUser = listParams.grantedAccess ? apiUser : null
 		permissionService.get(domainClass, effectiveUser, listParams.operation, listParams.publicAccess, searchCriteria)
-	}
-
-	/**
-	 * Generate link to more results in API index() methods
-	 */
-	@GrailsCompileStatic
-	void addLinkHintToHeader(ListParams listParams, int numOfResults, Map params, HttpServletResponse response) {
-		if (numOfResults == listParams.max) {
-			Map paramMap = listParams.toMap() + [offset: listParams.offset + listParams.max]
-
-			String url = grailsLinkGenerator.link(
-				controller: params.controller,
-				action: params.action,
-				absolute: true,
-				params: paramMap.findAll { k, v -> v } // remove null valued entries
-			)
-			response.addHeader("Link", "<${url}>; rel=\"more\"")
-		}
 	}
 
 	/**

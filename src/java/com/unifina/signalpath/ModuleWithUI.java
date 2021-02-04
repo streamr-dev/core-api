@@ -4,9 +4,9 @@ import com.unifina.domain.Stream;
 import com.unifina.domain.Permission;
 import com.unifina.domain.User;
 import com.unifina.domain.Module;
+import com.unifina.service.CreateStreamCommand;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
-import com.unifina.service.UserService;
 import com.unifina.utils.IdGenerator;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
@@ -51,10 +51,6 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 			streamService = Holders.getApplicationContext().getBean(StreamService.class);
 		}
 		return streamService;
-	}
-
-	private UserService getUserService() {
-		return Holders.getApplicationContext().getBean(UserService.class);
 	}
 
 	public void pushToUiChannel(Map<String, Object> content) {
@@ -121,6 +117,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		if (options.getOption("uiResendLast")!=null) {
 			resendLast = options.getOption("uiResendLast").getInt();
 		}
+
 	}
 
 	public void ensureUiChannel() {
@@ -186,18 +183,18 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 				}
 			}
 
-			User user = getUser();
+			User user = User.getViaJava(getGlobals().getUserId());
 
 			// Else create a new Stream object for this UI channel
 			if (stream == null) {
 				// Initialize a new UI channel Stream
 				Map<String, Object> params = new LinkedHashMap<>();
-				params.put("name", getUiChannelName());
-				params.put("uiChannel", true);
-				params.put("uiChannelPath", getRuntimePath());
-				params.put("uiChannelCanvas", getRootSignalPath().getCanvas());
+				CreateStreamCommand cmd = new CreateStreamCommand();
+				cmd.setId(id);
+				cmd.setName(getUiChannelName());
+				cmd.setUiChannel(true);
 				log.warn("uiChannel stream " + id + " was not found. Creating a new stream with params: "+params);
-				stream = getStreamService().createStream(params, user, id);
+				stream = getStreamService().createStream(cmd, user, null, getRuntimePath(), getRootSignalPath().getCanvas());
 			}
 
 			// Fix for CORE-893: Guard against excessive memory use by setting stream.uiChannelCanvas to the instance already in memory
@@ -211,11 +208,6 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 			}
 
 			isNew = false;
-		}
-
-		private User getUser() {
-			Long userId = getGlobals().getUserId();
-			return getUserService().getUserById(userId);
 		}
 
 		public boolean isInitialized() {

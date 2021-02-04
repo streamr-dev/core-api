@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
+
 import com.unifina.domain.Category
 import com.unifina.domain.Product
 import com.unifina.domain.User
@@ -22,14 +22,13 @@ class ProductImageServiceSpec extends Specification {
 	void setup() {
 		service.imageResizer = Stub(ImageResizer)
 		service.fileUploadProvider = Stub(FileUploadProvider) {
-			uploadFile(_, _) >> new URL("https://www.streamr.com/files/id-0")
+			uploadFile(_, _) >> new URL("https://streamr.network/files/id-0")
 		}
 		service.idGenerator = new FakeIdGenerator()
 
 		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
@@ -106,14 +105,14 @@ class ProductImageServiceSpec extends Specification {
 		def fileUploadProvider = service.fileUploadProvider = Mock(FileUploadProvider)
 		service.imageVerifier = Mock(ImageVerifier)
 		def bytes = new byte[256]
-		product.imageUrl = "https://www.streamr.com/files/2.png"
-		product.thumbnailUrl = "https://www.streamr.com/files/t.png"
+		product.imageUrl = "https://streamr.network/files/2.png"
+		product.thumbnailUrl = "https://streamr.network/files/t.png"
 
 		when:
 		service.replaceImage(product, bytes, filename)
 		then:
-		1 * fileUploadProvider.deleteFile("https://www.streamr.com/files/2.png")
-		1 * fileUploadProvider.deleteFile("https://www.streamr.com/files/t.png")
+		1 * fileUploadProvider.deleteFile("https://streamr.network/files/2.png")
+		1 * fileUploadProvider.deleteFile("https://streamr.network/files/t.png")
 	}
 
 	void "replaceImage() updates Product.imageUrl"() {
@@ -124,7 +123,7 @@ class ProductImageServiceSpec extends Specification {
 		when:
 		service.replaceImage(product, bytes, filename)
 		then:
-		Product.get("1").imageUrl == "https://www.streamr.com/files/id-0"
+		Product.get("1").imageUrl == "https://streamr.network/files/id-0"
 	}
 
 	void "replaceImage() updates Product.thumbnailUrl"() {
@@ -135,6 +134,6 @@ class ProductImageServiceSpec extends Specification {
 		when:
 		service.replaceImage(product, bytes, filename)
 		then:
-		Product.get("1").thumbnailUrl == "https://www.streamr.com/files/id-0"
+		Product.get("1").thumbnailUrl == "https://streamr.network/files/id-0"
 	}
 }

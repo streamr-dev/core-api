@@ -1,31 +1,19 @@
 const assert = require('chai').assert
-const initStreamrApi = require('./streamr-api-clients')
+const Streamr = require('./streamr-api-clients')
 const StreamrClient = require('streamr-client')
-const URL = 'http://localhost/api/v1/'
-const LOGGING_ENABLED = false
-const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
+const getStreamrClient = require('./test-utilities.js').getStreamrClient
 
 describe('POST /api/v1/streams/{id}/permissions', function() {
 
 	this.timeout(200 * 1000)
 
 	let stream
-	let mySessionToken
+	const me = StreamrClient.generateEthereumAccount()
 
 	before(async () => {
-		const me = StreamrClient.generateEthereumAccount()
-		mySessionToken = await new StreamrClient({
-			restUrl: URL,
-			auth: {
-				privateKey: me.privateKey,
-			}
-		}).session.getSessionToken()
-		stream = await Streamr.api.v1.streams
-			.create({
-				name: `permissions-api.test.js-${Date.now()}`
-			})
-			.withSessionToken(mySessionToken)
-			.execute()
+		stream = await getStreamrClient(me).createStream({
+			name: `permissions-api.test.js-${Date.now()}`
+		})
 	})
 
 	describe('race conditions', () => {
@@ -49,7 +37,7 @@ describe('POST /api/v1/streams/{id}/permissions', function() {
 				const responses = await Promise.all(operations.map((operation) => {
 					return Streamr.api.v1.streams
 						.grant(stream.id, StreamrClient.generateEthereumAccount().address, operation)
-						.withSessionToken(mySessionToken)
+						.withAuthenticatedUser(me)
 						.call()
 				}))
 				// All response statuses must be 200
@@ -63,7 +51,7 @@ describe('POST /api/v1/streams/{id}/permissions', function() {
 				const responses = await Promise.all(operations.map((operation) => {
 					return Streamr.api.v1.streams
 						.grant(stream.id, `race-condition-${i}@foobar.invalid`, 'stream_get')
-						.withSessionToken(mySessionToken)
+						.withAuthenticatedUser(me)
 						.call()
 				}))
 				// All response statuses must be 200

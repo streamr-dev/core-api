@@ -2,7 +2,6 @@ package com.unifina.service
 
 import com.streamr.client.StreamrClient
 import com.streamr.client.options.StreamrClientOptions
-import com.unifina.api.NotFoundException
 import com.unifina.domain.*
 import groovy.json.JsonBuilder
 import spock.lang.Specification
@@ -20,7 +19,6 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		me = new User(
 			name: "First Lastname",
 			username: "first@last.com",
-			password: "salasana",
 		)
 		me.save(validate: true, failOnError: true)
 
@@ -40,6 +38,13 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		streamrClientMock.getStream(joinPartStream.id) >> joinPartStream
 		streamrClientMock.getOptions() >> Mock(StreamrClientOptions)
 		service.streamrClientService.getInstanceForThisEngineNode() >> streamrClientMock
+
+		Product product = new Product(
+			beneficiaryAddress: contractAddress,
+			dataUnionVersion: 1,
+			owner: me
+		)
+		product.save(failOnError: true, validate: false)
 
 		service.ethereumService = Mock(EthereumService)
 		service.permissionService = Mock(PermissionService)

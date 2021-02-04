@@ -1,7 +1,6 @@
 package com.unifina.service
 
 import com.unifina.BeanMockingSpecification
-import com.unifina.api.*
 import com.unifina.domain.*
 import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.UiChannelIterator
@@ -39,15 +38,13 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		service.permissionService.check(_, _, _) >> true
 		service.dashboardService = mockBean(DashboardService, Mock(DashboardService))
 		service.streamService = mockBean(StreamService, Mock(StreamService))
-		service.streamService.createStream(_,_,_) >> new Stream()
+		service.streamService.createStream(_,_,_,_,_) >> new Stream()
 		mockBean(ModuleService, new ModuleService())
 		service.signalPathService = mockBean(SignalPathService, new SignalPathService())
 
 		moduleWithUi = new Module(implementingClass: Heatmap.name).save(validate: false)
 
 		me = new User(username: "me@me.com").save(validate: false)
-		def userService = mockBean(UserService, new UserService())
-		userService.getUserById(_) >> me
 
 		myFirstCanvas = new Canvas(
 			name: "my_canvas_1",
@@ -688,8 +685,8 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		def link = service.getCanvasURL(myFirstCanvas)
 
 		then:
-		1 * service.grailsLinkGenerator.link([controller: 'canvas', action: 'editor', id: myFirstCanvas.id, absolute: true]) >> "https://www.streamr.com/canvas/editor/1"
-		link == "https://www.streamr.com/canvas/editor/1"
+		1 * service.grailsLinkGenerator.link([controller: 'canvas', action: 'editor', id: myFirstCanvas.id, absolute: true]) >> "https://streamr.network/canvas/editor/1"
+		link == "https://streamr.network/canvas/editor/1"
 	}
 
 	private uiChannelIdsFromMap(Map signalPathMap) {

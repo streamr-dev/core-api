@@ -1,7 +1,5 @@
 package com.unifina.service
 
-import com.unifina.api.ChallengeVerificationFailedException
-import com.unifina.security.Challenge
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin

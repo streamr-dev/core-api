@@ -8,8 +8,6 @@ class UrlMappings {
 		// API v1 url mappings
 		"/api/v1/signups"(method: "POST", controller: "authApi", action: "signup")
 		"/api/v1/users"(method: "POST", controller: "authApi", action: "register")
-		"/api/v1/passwords/tokens"(method: "POST", controller: "authApi", action: "forgotPassword")
-		"/api/v1/passwords"(method: "POST", controller: "authApi", action: "resetPassword")
 
 		"/api/v1/canvases"(resources: "canvasApi", excludes: ["create", "edit"])
 		"/api/v1/canvases/$id/start"(controller: "canvasApi", action: "start")
@@ -20,22 +18,19 @@ class UrlMappings {
 		"/api/v1/canvases/$canvasId/modules/$moduleId"(controller: "canvasApi", action: "module") // for internal use
 		"/api/v1/canvases/downloadCsv"(method: "GET", controller: "canvasApi", action: "downloadCsv")
 
-		"/api/v1/streams"(resources: "streamApi", excludes: ["create", "edit"])
+		"/api/v1/streams"(method: "GET", controller: "streamApi", action: "index")
+		"/api/v1/streams"(method: "POST", controller: "streamApi", action: "save")
+		"/api/v1/streams/$id"(method: "GET", controller: "streamApi", action: "show")
+		"/api/v1/streams/$id"(method: "PUT", controller: "streamApi", action: "update")
+		"/api/v1/streams/$id"(method: "DELETE", controller: "streamApi", action: "delete")
 		"/api/v1/streams/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
 		"/api/v1/streams/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Stream }
 		"/api/v1/streams/$id/fields"(method: "POST", controller: "streamApi", action: "setFields")
-		"/api/v1/streams/$id/detectFields"(method: "POST", controller: "streamApi", action: "detectFields")
-		"/api/v1/streams/$id/detectFields"(method: "GET", controller: "streamApi", action: "detectFields")
-		"/api/v1/streams/$id/range"(controller: "streamApi", action: "range")
-		"/api/v1/streams/$id/dataFiles"(controller: "streamApi", action: "dataFiles")
 		"/api/v1/streams/$id/validation"(method: "GET", controller: "streamApi", action: "validation")
 		"/api/v1/streams/$id/publishers"(controller: "streamApi", action: "publishers")
 		"/api/v1/streams/$id/publisher/$address"(controller: "streamApi", action: "publisher")
 		"/api/v1/streams/$id/subscribers"(controller: "streamApi", action: "subscribers")
 		"/api/v1/streams/$id/subscriber/$address"(controller: "streamApi", action: "subscriber")
-		"/api/v1/streams/$id/status"(controller: "streamApi", action: "status")
-		"/api/v1/streams/$resourceId/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
-		"/api/v1/streams/$streamId/keys/$keyId"(method: "PUT", controller: "keyApi", action: "updateStreamKey")
 
 		"/api/v1/storageNodes/$storageNodeAddress/streams"(method: "GET", controller: "storageNodeApi", action: "findStreamsByStorageNode")
 		"/api/v1/streams/$streamId/storageNodes"(method: "GET", controller: "storageNodeApi", action: "findStorageNodesByStream")
@@ -60,10 +55,7 @@ class UrlMappings {
 		"/api/v1/users/me"(method: "PUT", controller: "userApi", action: "update")
 		"/api/v1/users/me"(method: "DELETE", controller: "userApi", action: "delete")
 
-		"/api/v1/users/me/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = User }
-		"/api/v1/users/me/keys/$keyId"(method: "PUT", controller: "keyApi", action: "updateUserKey")
 		"/api/v1/users/me/products"(method: "GET", controller: "productApi", action: "index") { operation = Permission.Operation.PRODUCT_SHARE }
-		"/api/v1/users/me/changePassword"(method: "POST", controller: "userApi", action: "changePassword")
 		"/api/v1/users/me/image"(method: "POST", controller: "userApi", action: "uploadAvatarImage")
 		"/api/v1/users/me/balance"(method: "GET", controller: "userApi", action: "getCurrentUserBalance")
 
@@ -87,8 +79,6 @@ class UrlMappings {
 		"/api/v1/products/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Product }
 		"/api/v1/products/remove/$username"(method: "DELETE", controller: "removeUsersProducts", action: "index")
 		"/api/v1/products/$id/related"(method: "GET", controller: "productApi", action: "related")
-		"/api/v1/products/stale"(method: "GET", controller: "productApi", action: "staleProducts")
-		"/api/v1/products/staleEmail"(method: "GET", controller: "productApi", action: "emailStaleProductOwners")
 
 		"/api/v1/subscriptions"(resources: "subscriptionApi")
 

@@ -1,17 +1,15 @@
 package com.unifina.controller
 
-import com.unifina.ControllerSpecification
 import com.unifina.domain.IntegrationKey
-import com.unifina.domain.Key
 import com.unifina.domain.User
-import com.unifina.security.Challenge
+import com.unifina.service.Challenge
 import com.unifina.service.EthereumIntegrationKeyService
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(IntegrationKeyApiController)
-@Mock([Key, User, IntegrationKey])
+@Mock([User, IntegrationKey])
 class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 	User me
@@ -20,10 +18,6 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 	def setup() {
 		me = new User().save(failOnError: true, validate: false)
 		someoneElse = new User().save(failOnError: true, validate: false)
-
-		Key key = new Key(name: "key", user: me)
-		key.id = "myApiKey"
-		key.save(failOnError: true, validate: true)
 
 		new IntegrationKey(
 			name: "my-integration-key-1",

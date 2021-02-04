@@ -1,6 +1,6 @@
 package com.unifina.controller
 
-import com.unifina.api.ApiException
+import com.unifina.service.ApiException
 import grails.test.mixin.TestFor
 import grails.util.Holders
 import spock.lang.Specification
@@ -9,7 +9,7 @@ import spock.lang.Specification
 class OembedApiControllerSpec extends Specification {
 
     void "index returns a right kind of json with a valid request"() {
-		def url = "https://www.streamr.com/canvas/embed/sghBX0pOR-alVJ09ltnG1QQ_pr9qi4SaWw55El3LV9ig"
+		def url = "https://streamr.network/canvas/embed/sghBX0pOR-alVJ09ltnG1QQ_pr9qi4SaWw55El3LV9ig"
 		def encodedUrl = URLEncoder.encode(url, "UTF-8")
 		when:
 		request.method = "GET"
@@ -32,7 +32,7 @@ class OembedApiControllerSpec extends Specification {
     }
 
     void "index accepts maxwidth and maxheight as params"() {
-		def url = "https://www.streamr.com/canvas/embed/sghBX0pOR-alVJ09ltnG1QQ_pr9qi4SaWw55El3LV9ig"
+		def url = "https://streamr.network/canvas/embed/sghBX0pOR-alVJ09ltnG1QQ_pr9qi4SaWw55El3LV9ig"
 		def encodedUrl = URLEncoder.encode(url, "UTF-8")
 		when:
 		request.method = "GET"
@@ -51,7 +51,7 @@ class OembedApiControllerSpec extends Specification {
     }
 
 	void "index accepts the url in http"() {
-		def url = "http://www.streamr.com/canvas/embed/a"
+		def url = "http://streamr.network/canvas/embed/a"
 		def encodedUrl = URLEncoder.encode(url, "UTF-8")
 
 		when:
@@ -64,7 +64,7 @@ class OembedApiControllerSpec extends Specification {
 	}
 
 	void "index accepts the without www"() {
-		def url = "https://streamr.com/canvas/embed/a"
+		def url = "https://streamr.network/canvas/embed/a"
 		def encodedUrl = URLEncoder.encode(url, "UTF-8")
 
 		when:
@@ -113,7 +113,7 @@ class OembedApiControllerSpec extends Specification {
 	}
 
 	void "index works with format json"() {
-		def url = "https://streamr.com/canvas/embed/a"
+		def url = "https://streamr.network/canvas/embed/a"
 		def encodedUrl = URLEncoder.encode(url, "UTF-8")
 		when:
 		request.method = "GET"
@@ -125,7 +125,7 @@ class OembedApiControllerSpec extends Specification {
 	}
 
 	void "index works with format JSON"() {
-		def url = "https://streamr.com/canvas/embed/a"
+		def url = "https://streamr.network/canvas/embed/a"
 		def encodedUrl = URLEncoder.encode(url, "UTF-8")
 		when:
 		request.method = "GET"
@@ -137,7 +137,7 @@ class OembedApiControllerSpec extends Specification {
 	}
 
 	void "index fails with an invalid format"() {
-		def url = "https://streamr.com/canvas/embed/a"
+		def url = "https://streamr.network/canvas/embed/a"
 		def encodedUrl = URLEncoder.encode(url, "UTF-8")
 		when:
 		request.method = "GET"

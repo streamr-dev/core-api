@@ -1,13 +1,9 @@
 package com.unifina.service
 
-import com.unifina.api.*
 import com.unifina.domain.IntegrationKey
-import com.unifina.domain.Permission
 import com.unifina.domain.SignupMethod
-import com.unifina.domain.Stream
 import com.unifina.domain.User
 import com.unifina.security.StringEncryptor
-import com.unifina.utils.AlphanumericStringGenerator
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import groovy.transform.CompileStatic
@@ -43,7 +39,9 @@ class EthereumIntegrationKeyService {
 
 		try {
 			String address = "0x" + getAddress(privateKey)
-			String encryptedPrivateKey = encryptor.encrypt(privateKey, user.id.byteValue())
+			final byte[] salt = new byte[1]
+			salt[0] = user.id.byteValue()
+			String encryptedPrivateKey = encryptor.encrypt(privateKey, salt)
 
 			assertUnique(address)
 
@@ -57,8 +55,6 @@ class EthereumIntegrationKeyService {
 					address   : address
 				] as JSON).toString()
 			).save(flush: false, failOnError: true)
-
-			createUserInboxStream(user, address)
 
 			subscriptionService.afterIntegrationKeyCreated(key)
 			return key
@@ -89,25 +85,20 @@ class EthereumIntegrationKeyService {
 			] as JSON).toString()
 		).save(flush: false)
 
-		createUserInboxStream(user, address)
-
 		subscriptionService.afterIntegrationKeyCreated(integrationKey)
 		return integrationKey
 	}
 
 	@GrailsCompileStatic
 	void delete(String integrationKeyId, User currentUser) {
-		if (currentUser.isEthereumUser()) {
-			int nbKeys = IntegrationKey.countByUserAndService(currentUser, IntegrationKey.Service.ETHEREUM_ID)
-			if (nbKeys <= 1) {
-				throw new CannotRemoveEthereumKeyException("Cannot remove only Ethereum key.")
-			}
+		int nbKeys = IntegrationKey.countByUserAndService(currentUser, IntegrationKey.Service.ETHEREUM_ID)
+		if (nbKeys <= 1) {
+			throw new CannotRemoveEthereumKeyException("Cannot remove only Ethereum key.")
 		}
 
 		IntegrationKey account = IntegrationKey.findByIdAndUser(integrationKeyId, currentUser)
 		if (account) {
 			subscriptionService.beforeIntegrationKeyRemoved(account)
-			deleteInboxStream(account.idInService)
 			account.delete(flush: true)
 		}
 	}
@@ -121,10 +112,15 @@ class EthereumIntegrationKeyService {
 		IntegrationKey.findAllByServiceAndUser(IntegrationKey.Service.ETHEREUM, user)
 	}
 
-    User getEthereumUser(String address) {
+	User getEthereumUser(String address) {
+		if (address == null) {
+			return null
+		}
 		IntegrationKey key = IntegrationKey.createCriteria().get {
 			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
-			ilike("idInService", address) // ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
+			// ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems
+			// are in use (checksum-case, lower-case at least)
+			ilike("idInService", address)
 		}
 		if (key == null) {
 			return null
@@ -142,13 +138,11 @@ class EthereumIntegrationKeyService {
 
 	User createEthereumUser(String address, SignupMethod signupMethod) {
 		User user = userService.createUser([
-			username       : address,
-			password       : AlphanumericStringGenerator.getRandomAlphanumericString(32),
-			name           : "Anonymous User",
-			enabled        : true,
-			accountLocked  : false,
-			passwordExpired: false,
-			signupMethod   : signupMethod
+			username     : address,
+			name         : "Anonymous User",
+			enabled      : true,
+			accountLocked: false,
+			signupMethod : signupMethod
 		])
 		new IntegrationKey(
 			name: address,
@@ -159,32 +153,7 @@ class EthereumIntegrationKeyService {
 				address: address
 			] as JSON).toString()
 		).save(failOnError: true, flush: false)
-		createUserInboxStream(user, address)
 		return user
-	}
-
-	private void createUserInboxStream(User user, String address) {
-		Stream existing = Stream.get(address)
-		if (existing != null && existing.inbox) {
-			// The inbox stream already exists.
-			return
-		}
-		Stream inboxStream = new Stream()
-		inboxStream.id = address.toLowerCase()
-		inboxStream.name = address.toLowerCase()
-		inboxStream.inbox = true
-		inboxStream.autoConfigure = false
-
-		inboxStream.save(failOnError: true, flush: false)
-		permissionService.systemGrantAll(user, inboxStream)
-	}
-
-	private void deleteInboxStream(String address) {
-		Stream stream = Stream.get(address)
-		if (stream && stream.inbox) {
-			Permission.findAllByStream(Stream.get(address))*.delete(flush: true)
-			stream.delete(flush: true)
-		}
 	}
 
 	@CompileStatic
@@ -197,11 +166,10 @@ class EthereumIntegrationKeyService {
 	}
 
 	@CompileStatic
-	private static String getAddress(String privateKey) {
+	public static String getAddress(String privateKey) {
 		BigInteger pk = new BigInteger(privateKey, 16)
 		ECKey key = ECKey.fromPrivate(pk)
 		String publicKey = Hex.encodeHexString(key.getAddress())
-
 		return publicKey
 	}
 

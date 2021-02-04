@@ -6,13 +6,14 @@ import groovy.transform.CompileStatic
 
 @Entity
 class Stream implements Comparable {
-	public final static String DEFAULT_NAME = "Untitled Stream"
 	public final static Integer DEFAULT_STORAGE_DAYS = 365
 	public final static Integer DEFAULT_INACTIVITY_THRESHOLD_HOURS = 48
+
 	String id
 	Integer partitions = 1
 
-	String name = DEFAULT_NAME
+	String name
+
 	String config
 	String description
 
@@ -25,8 +26,6 @@ class Stream implements Comparable {
 	Boolean uiChannel = false
 	String uiChannelPath
 	Canvas uiChannelCanvas
-
-	Boolean inbox = false
 
 	Boolean requireSignedData = false
 	// Stream requires data to be encrypted
@@ -67,7 +66,6 @@ class Stream implements Comparable {
 		uiChannel defaultValue: "false"
 		uiChannelPath index: "ui_channel_path_idx"
 		config type: 'text'
-		inbox defaultValue: "false"
 		requireSignedData defaultValue: "false"
 		requireEncryptedData defaultValue: "false"
 		autoConfigure defaultValue: "true"
@@ -90,7 +88,6 @@ class Stream implements Comparable {
 			config: config == null || config.empty ? config : JSON.parse(config),
 			description: description,
 			uiChannel: uiChannel,
-			inbox: inbox,
 			dateCreated: dateCreated,
 			lastUpdated: lastUpdated,
 			requireSignedData: requireSignedData,
@@ -109,7 +106,6 @@ class Stream implements Comparable {
 			name: name,
 			description: description,
 			uiChannel: uiChannel,
-			inbox: inbox,
 			dateCreated: dateCreated,
 			lastUpdated: lastUpdated,
 			requireSignedData: requireSignedData,
@@ -148,7 +144,17 @@ class Stream implements Comparable {
 		return obj instanceof Stream && obj.id == this.id
 	}
 
-	Map<String, Object> getStreamConfigAsMap() {
+	static Map<String, Object> normalizeConfig(Map<String, Object> config) {
+		if (config == null) {
+			config = new HashMap<String,Object>()
+		}
+		if (!config.fields) {
+			config.fields = []
+		}
+		return config
+	}
+
+	static Map<String, Object> getStreamConfigAsMap(String config) {
 		if (config!=null)
 			return ((Map)JSON.parse(config));
 		else return [:]

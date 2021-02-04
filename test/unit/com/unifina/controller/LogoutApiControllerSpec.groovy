@@ -1,8 +1,8 @@
 package com.unifina.controller
 
-import com.unifina.ControllerSpecification
 import com.unifina.domain.User
 import com.unifina.service.SessionService
+import com.unifina.service.EthereumIntegrationKeyService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
@@ -14,11 +14,13 @@ import grails.test.mixin.TestFor
 class LogoutApiControllerSpec extends ControllerSpecification {
 
 	SessionService sessionService
+	EthereumIntegrationKeyService ethereumIntegrationKeyService
 	User me
 
 	def setup() {
 		me = new User().save(failOnError: true, validate: false)
 		sessionService = controller.sessionService = mockBean(SessionService, Mock(SessionService))
+		ethereumIntegrationKeyService = mockBean(EthereumIntegrationKeyService, Mock(EthereumIntegrationKeyService))
 	}
 
 	def "logout invalidates session token"() {

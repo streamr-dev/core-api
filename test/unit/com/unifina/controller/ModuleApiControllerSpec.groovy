@@ -1,14 +1,12 @@
 package com.unifina.controller
 
-import com.unifina.ControllerSpecification
-import com.unifina.domain.Key
 import com.unifina.domain.Module
 import com.unifina.domain.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(ModuleApiController)
-@Mock([User, Module, Key])
+@Mock([User, Module])
 class ModuleApiControllerSpec extends ControllerSpecification {
 
 	User me
@@ -17,10 +15,6 @@ class ModuleApiControllerSpec extends ControllerSpecification {
 	def setup() {
 		me = new User(id: 1).save(validate: false)
 		module = new Module().save(validate: false)
-
-		def key = new Key(name: "key", user: me)
-		key.id = "myApiKey"
-		key.save(failOnError: true, validate: true)
 
 		assert User.count() == 1
 		assert Module.count() == 1

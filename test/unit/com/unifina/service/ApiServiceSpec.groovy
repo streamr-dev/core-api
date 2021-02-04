@@ -1,8 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.ValidationException
+
 import com.unifina.domain.Dashboard
 import com.unifina.domain.Permission
 import com.unifina.domain.User
@@ -87,24 +85,6 @@ class ApiServiceSpec extends Specification {
 		service.list(Dashboard, listParams, me)
 		then:
 		thrown(ValidationException)
-	}
-
-	void "addLinkHintToHeader() does nothing if offset != max"() {
-		def response = Mock(HttpServletResponse)
-		when:
-		service.addLinkHintToHeader(new DashboardListParams(), 99, [:], response)
-		then:
-		0 * response._
-	}
-
-	void "addLinkHintToHeader() adds link header"() {
-		def response = Mock(HttpServletResponse)
-		def params = new DashboardListParams(offset: 150, name: "dashboard", publicAccess: true)
-
-		when:
-		service.addLinkHintToHeader(params, 1000, [action: "index", controller: "dashboardApi"], response)
-		then:
-		1 * response.addHeader("Link", '<'+ Holders.grailsApplication.config.grails.serverURL+'/api/v1/dashboards?max=1000&offset=1150&grantedAccess=true&publicAccess=true&name=dashboard>; rel="more"')
 	}
 
 	void "getByIdAndThrowIfNotFound() throws NotFoundException if domain object cannot be found"() {

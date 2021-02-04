@@ -1,59 +1,17 @@
 package com.unifina.service
 
-
-import com.streamr.client.protocol.message_layer.StreamMessage
-import com.unifina.domain.ExampleType
-import com.unifina.domain.Dashboard
-import com.unifina.domain.DashboardItem
-import com.unifina.domain.Stream
-import com.unifina.domain.IntegrationKey
-import com.unifina.domain.Key
-import com.unifina.domain.Permission
-import com.unifina.domain.User
-import com.unifina.domain.Canvas
-import com.unifina.utils.TestUtils
+import com.unifina.domain.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
-import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
 @TestFor(StreamService)
-@Mock([Canvas, Dashboard, DashboardItem, Stream, User, Key, IntegrationKey, Permission, PermissionService])
+@Mock([Stream, User, IntegrationKey, Permission, PermissionService])
 class StreamServiceSpec extends Specification {
-
-	DashboardService dashboardService = Mock(DashboardService)
-
 	User me = new User(username: "me")
 
 	def setup() {
-		// Setup application context
-		def applicationContext = Stub(ApplicationContext) {
-			getBean(DashboardService) >> dashboardService
-		}
-
-		// Setup grailsApplication
-		def grailsApplication = new DefaultGrailsApplication()
-		grailsApplication.setMainContext(applicationContext)
-
-		service.grailsApplication = grailsApplication
 		me.save(validate: false, failOnError: true)
-	}
-
-	def "getStream for inbox stream is case-insensitive"() {
-		Stream s = new Stream()
-		s.id = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
-		s.inbox = true
-		s.name = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
-		s.save(validate: false)
-
-		when:
-		Stream queried1 = service.getStream(s.id)
-		Stream queried2 = service.getStream("0x" + s.id.substring(2).toUpperCase())
-
-		then:
-		queried1.id == s.id
-		queried2.id == s.id
 	}
 
 	def "add example shared streams"() {
@@ -80,26 +38,26 @@ class StreamServiceSpec extends Specification {
 		1 * service.permissionService.systemGrant(me, s1, Permission.Operation.STREAM_SUBSCRIBE)
 	}
 
-	void "createStream replaces empty name with default value"() {
+	void "createStream replaces empty name with stream id"() {
 		when:
-		Stream s = service.createStream([name: ""], me)
+		Stream s = service.createStream(new CreateStreamCommand(id: "foobar"), me, null)
 
 		then:
-		s.name == "Untitled Stream"
+		s.name == "foobar"
 	}
 
 	void "createStream results in persisted Stream"() {
 		when:
-		service.createStream([name: "name"], me)
+		service.createStream(new CreateStreamCommand(id: "foobar"), me, null)
 
 		then:
 		Stream.count() == 1
-		Stream.list().first().name == "name"
+		Stream.list().first().id == "foobar"
 	}
 
 	void "createStream results in all permissions for Stream"() {
 		when:
-		def stream = service.createStream([name: "name"], me)
+		def stream = service.createStream(new CreateStreamCommand(name: "name"), me, null)
 
 		then:
 		Permission.findAllByStream(stream)*.toMap() == [
@@ -114,18 +72,12 @@ class StreamServiceSpec extends Specification {
 
 	void "createStream uses its params"() {
 		when:
-		def params = [
-				name       : "Test stream",
+		def params = new CreateStreamCommand(
+				name: "Test stream",
 				description: "Test stream",
-				config     : [
-						fields: [
-								[name: "profit", type: "number"],
-								[name: "keyword", type: "string"]
-						]
-				],
-				requireSignedData: "true"
-		]
-		service.createStream(params, me)
+				requireSignedData: true
+		)
+		service.createStream(params, me, null)
 
 		then: "stream is created"
 		Stream.count() == 1
@@ -253,133 +205,5 @@ class StreamServiceSpec extends Specification {
 		result1 && result1b
 		2 * service.permissionService.check(user2, stream, Permission.Operation.STREAM_SUBSCRIBE) >> false
 		!result2 && !result2b
-	}
-
-	void "getInboxStreams() returns all inbox streams of the users"() {
-		User user1 = new User(id: 1, username: "u1").save(failOnError: true, validate: false)
-		IntegrationKey key1 = new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57").save(failOnError: true, validate: false)
-		User user2 = new User(id: 2, username: "u2").save(failOnError: true, validate: false)
-		IntegrationKey key2 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
-			idInService: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
-		IntegrationKey key3 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
-			idInService: "0xfff1ae3f5efe8a01eca8c25933c32702cf4b1121").save(failOnError: true, validate: false)
-		User user3 = new User(id: 3, username: "u3").save(failOnError: true, validate: false)
-
-		Stream s1 = new Stream(name: key1.idInService, inbox: true)
-		s1.id = key1.idInService
-		s1.save(failOnError: true, validate: false)
-		Stream s2 = new Stream(name: key1.idInService, inbox: true)
-		s2.id = key2.idInService
-		s2.save(failOnError: true, validate: false)
-		Stream s3 = new Stream(name: key1.idInService, inbox: true)
-		s3.id = key3.idInService
-		s3.save(failOnError: true, validate: false)
-
-		Set<Stream> expectedResults = [s1, s2, s3]
-		when:
-		Set<Stream> results = service.getInboxStreams([user1, user2, user3])
-		then:
-		results == expectedResults
-	}
-
-	void "status ok and has recent messages"() {
-		setup:
-		service.cassandraService = Mock(CassandraService)
-		Stream s = new Stream([name: "Stream 1", inactivityThresholdHours: 48])
-		s.id = "s1"
-
-		Date now = newDate(2019, 1, 15, 11, 12, 06)
-		Date timestamp = newDate(2019, 1, 14, 11, 12, 06)
-		long expected = timestamp.getTime()
-		StreamMessage msg = TestUtils.buildMsg("s1", 0, timestamp)
-
-		when:
-		StreamService.StreamStatus status = service.status(s, now)
-
-		then:
-		1 * service.cassandraService.getLatestFromAllPartitions(s) >> msg
-		status.ok == true
-		status.date.getTime() == expected
-	}
-
-	void "status not ok, no messages in stream"() {
-		setup:
-		service.cassandraService = Mock(CassandraService)
-		Stream s = new Stream([name: "Stream 1", inactivityThresholdHours: 48])
-		s.id = "s1"
-
-		when:
-		StreamService.StreamStatus status = service.status(s, new Date())
-
-		then:
-		1 * service.cassandraService.getLatestFromAllPartitions(s) >> null
-		status.ok == false
-		status.date == null
-	}
-
-	void "status stream has messages, but stream is stale"() {
-		setup:
-		service.cassandraService = Mock(CassandraService)
-		Stream s = new Stream([name: "Stream 1", inactivityThresholdHours: 48])
-		s.id = "s1"
-
-		Date timestamp = newDate(2019, 1, 10, 12, 12, 06)
-		long expected = timestamp.getTime()
-		StreamMessage msg = TestUtils.buildMsg("s1", 0, timestamp)
-		Date now = newDate(2019, 1, 15, 0, 0, 0)
-
-		when:
-		StreamService.StreamStatus status = service.status(s, now)
-
-		then:
-		1 * service.cassandraService.getLatestFromAllPartitions(s) >> msg
-		status.ok == false
-		status.date.getTime() == expected
-	}
-
-	void "status inactivity threshold hours is zero and stream has messages"() {
-		setup:
-		service.cassandraService = Mock(CassandraService)
-		Stream s = new Stream([name: "Stream 1", inactivityThresholdHours: 0])
-		s.id = "s1"
-
-		Date timestamp = new Date()
-		long expected = timestamp.getTime()
-		StreamMessage msg = TestUtils.buildMsg("s1", 0, timestamp)
-
-		when:
-		StreamService.StreamStatus status = service.status(s, new Date())
-
-		then:
-		1 * service.cassandraService.getLatestFromAllPartitions(s) >> msg
-		status.ok == true
-		status.date.getTime() == expected
-	}
-
-	void "status inactivity threshold hours is zero and stream has no messages"() {
-		setup:
-		service.cassandraService = Mock(CassandraService)
-		Stream s = new Stream([name: "Stream 1", inactivityThresholdHours: 0])
-		s.id = "s1"
-
-		when:
-		StreamService.StreamStatus status = service.status(s, new Date())
-
-		then:
-		1 * service.cassandraService.getLatestFromAllPartitions(s) >> null
-		status.ok == true
-		status.date == null
-	}
-
-	Date newDate(int year, int month, int date, int hour, int minute, int second) {
-		Calendar cal = Calendar.getInstance()
-		cal.set(Calendar.YEAR, year)
-		cal.set(Calendar.MONTH, month - 1)
-		cal.set(Calendar.DATE, date)
-		cal.set(Calendar.HOUR_OF_DAY, hour)
-		cal.set(Calendar.MINUTE, minute)
-		cal.set(Calendar.SECOND, second)
-		return cal.getTime()
 	}
 }

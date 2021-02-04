@@ -3,8 +3,6 @@ package com.unifina.service
 import com.streamr.client.StreamrClient
 import com.streamr.client.options.StreamrClientOptions
 import com.unifina.BeanMockingSpecification
-import com.unifina.api.ApiException
-import com.unifina.api.NotFoundException
 import com.unifina.domain.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -35,10 +33,14 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		streamrClientMock.getOptions() >> Mock(StreamrClientOptions)
 		service.streamrClientService.getInstanceForThisEngineNode() >> streamrClientMock
 
+		Product mockProduct = new Product()
+		mockProduct.dataUnionVersion = 1
+		ProductService productService = mockBean(ProductService)
+		productService.findByBeneficiaryAddress(_) >> mockProduct
+
 		me = new User(
 			name: "First Lastname",
 			username: "first@last.com",
-			password: "salasana",
 		)
 		me.id = 1
 		me.save(validate: true, failOnError: true)
@@ -135,7 +137,6 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
@@ -200,7 +201,6 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
@@ -265,7 +265,6 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
@@ -334,7 +333,6 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
@@ -401,7 +399,6 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
@@ -474,7 +471,6 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
@@ -542,7 +538,6 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)

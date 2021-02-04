@@ -1,7 +1,6 @@
 package com.unifina.controller
 
-import com.unifina.api.*
-import com.unifina.service.CanvasUnreachableException
+import com.unifina.service.*
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 
@@ -18,7 +17,6 @@ class ErrorController {
 		InvalidSessionTokenException: { InvalidSessionTokenException e -> new ApiError(401, "INVALID_SESSION_TOKEN_ERROR", e.message)},
 		ChallengeVerificationFailedException: { ChallengeVerificationFailedException e -> new ApiError(401, "CHALLENGE_VERIFICATION_FAILED_ERROR", e.message)},
 		DisabledUserException: {DisabledUserException e -> new ApiError(401, "DISABLED_USER_EXCEPTION", e.message)},
-		InvalidUsernameAndPasswordException: { InvalidUsernameAndPasswordException e -> new ApiError(401, "INVALID_USERNAME_PASSWORD_ERROR", e.message)},
 		InvalidAPIKeyException: { InvalidAPIKeyException e -> new ApiError(401, "INVALID_API_KEY_ERROR", e.message)},
 		BadRequestException: { BadRequestException e -> new ApiError(400, "PARAMETER_MISSING", e.message)},
 		FieldCannotBeUpdatedException: { FieldCannotBeUpdatedException e -> new ApiError(422, "FIELD_CANNOT_BE_UPDATED", e.message)}
@@ -70,7 +68,11 @@ class ErrorController {
 
 		// Log internal errors
 		if (apiError.statusCode >= 500 && apiError.statusCode < 600) {
-			log.error("Unexpected error occurred on request to ${request?.getMethod()} ${request?.getRequestURL()}, returning status code 500", exception)
+			String uri = request.getHeader("X-Request-URI")
+			if (!uri) {
+				uri =  request.getRequestURL().toString()
+			}
+			log.error("Unexpected error occurred on request to ${request.getMethod()} ${uri}, returning status code 500", exception)
 		}
 
 		def extraHeaders = apiError.getHeaders()

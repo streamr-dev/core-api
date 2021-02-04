@@ -1,9 +1,9 @@
 package com.unifina.controller
 
-import com.unifina.api.NotPermittedException
-import com.unifina.api.ValidationException
 import com.unifina.domain.*
+import com.unifina.service.NotPermittedException
 import com.unifina.service.SubscriptionService
+import com.unifina.service.ValidationException
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -17,7 +17,7 @@ class SubscriptionApiControllerSpec extends Specification {
 	User devOpsUser
 
 	void setup() {
-		devOpsUser = new User(name: "me@streamr.com").save(failOnError: true, validate: false)
+		devOpsUser = new User(name: "me@streamr.network").save(failOnError: true, validate: false)
 		def devopsRole = new Role(authority: "ROLE_DEV_OPS").save(failOnError: true)
 		new UserRole(user: devOpsUser, role: devopsRole).save(failOnError: true)
 	}
@@ -41,7 +41,6 @@ class SubscriptionApiControllerSpec extends Specification {
 		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
-			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
