@@ -5155,7 +5155,6 @@
         "name",
         "description",
         "category",
-        "streams",
         "ownerAddress",
         "beneficiaryAddress",
         "pricePerSecond",
