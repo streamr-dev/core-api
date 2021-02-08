@@ -15,6 +15,7 @@ enum AssigmentEvent {
 @GrailsCompileStatic
 class StorageNodeService {
 
+	StreamService streamService
 	StreamrClientService streamrClientService
 
 	List<Stream> findStreamsByStorageNode(EthereumAddress storageNodeAddress) {
@@ -63,15 +64,15 @@ class StorageNodeService {
 	}
 
 	private notifyStorageNode(EthereumAddress storageNodeAddress, String streamId, AssigmentEvent eventType) {
-		StreamrClient client = streamrClientService.getInstanceForThisEngineNode()
-		com.streamr.client.rest.Stream stream = client.getStream(StorageNodeService.createAssignmentStreamId())
 		Map<String,Object> message = new LinkedHashMap([
 			event: eventType.name(),
 			stream: [
-				id: stream.getId(),
-				partitions: stream.getPartitions()
+				id: streamId,
+				partitions: streamService.getStream(streamId).partitions
 			]
 		])
-		client.publish(stream, message)
+		StreamrClient client = streamrClientService.getInstanceForThisEngineNode()
+		com.streamr.client.rest.Stream assignmentStream = client.getStream(StorageNodeService.createAssignmentStreamId())
+		client.publish(assignmentStream, message)
 	}
 }
