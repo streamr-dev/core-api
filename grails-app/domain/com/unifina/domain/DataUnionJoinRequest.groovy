@@ -38,24 +38,24 @@ class DataUnionJoinRequest {
 	Date dateCreated
 	Date lastUpdated
 
-    static constraints = {
+	static constraints = {
 		memberAddress(validator: Product.isEthereumAddress)
 		contractAddress(validator: Product.isEthereumAddress)
-    }
+	}
 	static mapping = {
 		id generator: IdGenerator.name
-		state enumType: "ordinal", index: 'state_idx'
+		state enumType: "ordinal", defaultValue: State.PENDING.ordinal(), index: 'state_idx'
 	}
 
 	@GrailsCompileStatic
 	Map toMap() {
 		return [
-		    id: id,
-			memberAddress: memberAddress,
+			id             : id,
+			memberAddress  : memberAddress,
 			contractAddress: contractAddress,
-			state: state?.toString(),
-			dateCreated: dateCreated,
-			lastUpdated: lastUpdated,
+			state          : state?.toString(),
+			dateCreated    : dateCreated,
+			lastUpdated    : lastUpdated,
 		]
 	}
 }
