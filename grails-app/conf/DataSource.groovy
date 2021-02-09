@@ -20,7 +20,7 @@ environments {
 			formatSql = true
 			username = System.getProperty('streamr.database.user', 'root')
 			password = System.getProperty('streamr.database.password', 'password')
-			url = "jdbc:mysql://${System.getProperty('streamr.database.host', '127.0.0.1:3306')}/${System.getProperty('streamr.database.name', 'core_dev')}?useLegacyDatetimeCode=false&verifyServerCertificate=false&useSSL=true&requireSSL=true"
+			url = "jdbc:mysql://${System.getProperty('streamr.database.host', '127.0.0.1:3306')}/${System.getProperty('streamr.database.name', 'core_dev')}?useLegacyDatetimeCode=false&verifyServerCertificate=false&useSSL=true&requireSSL=true&enabledTLSProtocols=TLSv1.1"
 		}
 	}
 	test {
@@ -29,7 +29,7 @@ environments {
 			formatSql = true
 			username = System.getProperty('streamr.database.user', 'root')
 			password = System.getProperty('streamr.database.password', 'password')
-			url = "jdbc:mysql://${System.getProperty('streamr.database.host', '127.0.0.1:3306')}/${System.getProperty('streamr.database.name', 'core_test')}?useLegacyDatetimeCode=false&verifyServerCertificate=false&useSSL=true&requireSSL=true"
+			url = "jdbc:mysql://${System.getProperty('streamr.database.host', '127.0.0.1:3306')}/${System.getProperty('streamr.database.name', 'core_test')}?useLegacyDatetimeCode=false&verifyServerCertificate=false&useSSL=true&requireSSL=true&enabledTLSProtocols=TLSv1.1"
 		}
 	}
 	production {
@@ -38,7 +38,7 @@ environments {
 		dataSource {
 			username = System.getProperty('streamr.database.user') ?: "streamr-prod"
 			password = System.getProperty('streamr.database.password')
-			url = "jdbc:mysql://${System.getProperty('streamr.database.host') ?: "mysql"}/${System.getProperty('streamr.database.name', 'streamr_prod')}?useLegacyDatetimeCode=false&verifyServerCertificate=false&useSSL=true&requireSSL=true"
+			url = "jdbc:mysql://${System.getProperty('streamr.database.host') ?: "mysql"}/${System.getProperty('streamr.database.name', 'streamr_prod')}?useLegacyDatetimeCode=false&verifyServerCertificate=false&useSSL=true&requireSSL=true&enabledTLSProtocols=TLSv1.1"
 		}
 	}
 }
