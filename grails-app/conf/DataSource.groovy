@@ -14,31 +14,31 @@ hibernate {
 }
 // environment specific settings
 environments {
-    development {
-        dataSource {
+	development {
+		dataSource {
 			logSql = Boolean.parseBoolean(System.getProperty('logSql') ?: 'false')
 			formatSql = true
 			username = System.getProperty('streamr.database.user', 'root')
 			password = System.getProperty('streamr.database.password', 'password')
-			url = "jdbc:mysql://${System.getProperty('streamr.database.host', '127.0.0.1:3306')}/${System.getProperty('streamr.database.name', 'core_dev')}?useLegacyDatetimeCode=false"
-        }
-    }
-    test {
-        dataSource {
+			url = "jdbc:mysql://${System.getProperty('streamr.database.host', '127.0.0.1:3306')}/${System.getProperty('streamr.database.name', 'core_dev')}?useLegacyDatetimeCode=false&verifyServerCertificate=false&useSSL=true&requireSSL=true"
+		}
+	}
+	test {
+		dataSource {
 			//logSql = true
 			formatSql = true
 			username = System.getProperty('streamr.database.user', 'root')
 			password = System.getProperty('streamr.database.password', 'password')
-			url = "jdbc:mysql://${System.getProperty('streamr.database.host', '127.0.0.1:3306')}/${System.getProperty('streamr.database.name', 'core_test')}?useLegacyDatetimeCode=false"
-        }
-    }
-    production {
+			url = "jdbc:mysql://${System.getProperty('streamr.database.host', '127.0.0.1:3306')}/${System.getProperty('streamr.database.name', 'core_test')}?useLegacyDatetimeCode=false&verifyServerCertificate=false&useSSL=true&requireSSL=true"
+		}
+	}
+	production {
 		// The core is only deployed in production for on-site customer installations. (Our cloud deployment uses streamr-webapp)
 		// The settings come from system properties.
 		dataSource {
 			username = System.getProperty('streamr.database.user') ?: "streamr-prod"
 			password = System.getProperty('streamr.database.password')
-			url = "jdbc:mysql://${System.getProperty('streamr.database.host') ?: "mysql"}/${System.getProperty('streamr.database.name', 'streamr_prod')}?useLegacyDatetimeCode=false"
+			url = "jdbc:mysql://${System.getProperty('streamr.database.host') ?: "mysql"}/${System.getProperty('streamr.database.name', 'streamr_prod')}?useLegacyDatetimeCode=false&verifyServerCertificate=false&useSSL=true&requireSSL=true"
 		}
-    }
+	}
 }
