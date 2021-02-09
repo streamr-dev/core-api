@@ -18,4 +18,13 @@ class EthereumAddressSpec extends Specification {
 		address1.equals(address2)
 		address1.hashCode() == address2.hashCode()
 	}
+
+	void "fromPrivateKey"() {
+		when:
+		EthereumAddress address1 = EthereumAddress.fromPrivateKey('0x0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF')
+		EthereumAddress address2 = EthereumAddress.fromPrivateKey('0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF')
+		then:
+		address1.toString() == "0xFCAd0B19bB29D4674531d6f115237E16AfCE377c"
+		address2.toString() == "0xFCAd0B19bB29D4674531d6f115237E16AfCE377c"
+	}
 }

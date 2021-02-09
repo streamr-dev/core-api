@@ -4,12 +4,14 @@ import org.web3j.crypto.Keys
 import com.unifina.service.ValidationException
 import grails.compiler.GrailsCompileStatic
 import groovy.transform.EqualsAndHashCode
-import org.apache.commons.codec.binary.Hex
-import org.ethereum.crypto.ECKey
+import org.web3j.crypto.Sign
+import org.web3j.utils.Numeric
 
 @GrailsCompileStatic
 @EqualsAndHashCode
 class EthereumAddress {
+	private static final String PREFIX = "0x"
+
 	private String value
 
 	EthereumAddress(String value) {
@@ -24,9 +26,12 @@ class EthereumAddress {
 	}
 
 	static EthereumAddress fromPrivateKey(String privateKey) {
+		if (privateKey.startsWith(PREFIX)) {
+			privateKey = privateKey.substring(PREFIX.length())
+		}
 		BigInteger pk = new BigInteger(privateKey, 16)
-		ECKey key = ECKey.fromPrivate(pk)
-		String publicKey = "0x" + Hex.encodeHexString(key.getAddress())
-		return new EthereumAddress(publicKey)
+		BigInteger publicKey = Sign.publicKeyFromPrivate(pk);
+		String address = Keys.getAddress(publicKey);
+		return new EthereumAddress(Numeric.prependHexPrefix(address));
 	}
 }
