@@ -69,6 +69,8 @@ test-engine-stop: ## Kill processes started by test-engine-start
 
 .PHONY: idea
 idea: ## Generate IntelliJ IDEA project files
+	cp .idea/engine-and-editor.iml.copy .idea/engine-and-editor.iml
+	cp .idea/engine-and-editor-grailsPlugins.iml.copy .idea/engine-and-editor-grailsPlugins.iml
 	$(grails) idea-print-project-settings
 
 .PHONY: compile
