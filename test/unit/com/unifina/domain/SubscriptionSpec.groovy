@@ -11,7 +11,7 @@ class SubscriptionSpec extends BeanMockingSpecification {
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
 	void setup() {
-		subscription = new PaidSubscription(address: "0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00")
+		subscription = new SubscriptionPaid(address: "0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00")
 		ethereumIntegrationKeyService = mockBean(EthereumIntegrationKeyService, Mock(EthereumIntegrationKeyService))
 	}
 

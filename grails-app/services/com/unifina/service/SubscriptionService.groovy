@@ -18,8 +18,8 @@ class SubscriptionService {
 		List<IntegrationKey> integrationKeys = IntegrationKey.findAllByUserAndService(user, IntegrationKey.Service.ETHEREUM_ID)
 		def addresses = integrationKeys*.idInService
 		List<Subscription> subscriptions = new ArrayList<>()
-		subscriptions.addAll(PaidSubscription.findAllByAddressInList(addresses))
-		subscriptions.addAll(FreeSubscription.findAllByUser(user))
+		subscriptions.addAll(SubscriptionPaid.findAllByAddressInList(addresses))
+		subscriptions.addAll(SubscriptionFree.findAllByUser(user))
 		return subscriptions
 	}
 
@@ -27,9 +27,9 @@ class SubscriptionService {
 	 * Should be invoked after marketplace smart contract event `Subscribed` has been emitted.
 	 */
 	Subscription onSubscribed(Product product, String address, Date endsAt) {
-		Subscription subscription = PaidSubscription.findByProductAndAddress(product, address)
+		Subscription subscription = SubscriptionPaid.findByProductAndAddress(product, address)
 		if (subscription == null) {
-			subscription = new PaidSubscription(product: product, address: address)
+			subscription = new SubscriptionPaid(product: product, address: address)
 		}
 		return updateSubscriptionAndLinkedPermissions(subscription, endsAt)
 	}
@@ -38,10 +38,10 @@ class SubscriptionService {
 	 * Subscribe to user to (free) Product
 	 */
 	Subscription subscribeToFreeProduct(Product product, User user, Date endsAt) {
-		FreeProductService.verifyThatProductIsFree(product)
-		Subscription subscription = FreeSubscription.findByProductAndUser(product, user)
+		ProductFreeService.verifyThatProductIsFree(product)
+		Subscription subscription = SubscriptionFree.findByProductAndUser(product, user)
 		if (subscription == null) {
-			subscription = new FreeSubscription(product: product, user: user)
+			subscription = new SubscriptionFree(product: product, user: user)
 		}
 		return updateSubscriptionAndLinkedPermissions(subscription, endsAt)
 	}
@@ -50,7 +50,7 @@ class SubscriptionService {
 	 * Should be invoked before an `IntegrationKey` is removed
 	 */
 	void beforeIntegrationKeyRemoved(IntegrationKey key) {
-		List<Subscription> subscriptions = PaidSubscription.findAllByAddress(key.idInService) as List<Subscription>
+		List<Subscription> subscriptions = SubscriptionPaid.findAllByAddress(key.idInService) as List<Subscription>
 		subscriptions.each {
 			deletePermissions(it)
 		}
@@ -60,7 +60,7 @@ class SubscriptionService {
 	 * Should be invoked after an `IntegrationKey` is added
 	 */
 	void afterIntegrationKeyCreated(IntegrationKey key) {
-		List<Subscription> subscriptions = PaidSubscription.findAllByAddress(key.idInService) as List<Subscription>
+		List<Subscription> subscriptions = SubscriptionPaid.findAllByAddress(key.idInService) as List<Subscription>
 		subscriptions.each {
 			createPermissions(it)
 		}

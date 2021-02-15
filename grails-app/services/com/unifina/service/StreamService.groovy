@@ -2,10 +2,8 @@ package com.unifina.service
 
 import com.unifina.data.StreamPartitioner
 import com.unifina.domain.*
-import com.unifina.task.DelayedDeleteStreamTask
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.JSONUtil
-import grails.converters.JSON
 import grails.validation.Validateable
 import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
@@ -86,13 +84,6 @@ class StreamService {
 
 	void deleteStream(Stream stream) {
 		stream.delete(flush: true)
-	}
-
-	void deleteStreamsDelayed(List<Stream> streams, long delayMs=30*60*1000) {
-		Map config = DelayedDeleteStreamTask.getConfig(streams)
-		Task task = new Task(DelayedDeleteStreamTask.class.getName(), (config as JSON).toString(), "stream-delete", UUID.randomUUID().toString())
-		task.runAfter = new Date(System.currentTimeMillis() + delayMs)
-		task.save(flush: false, failOnError: true)
 	}
 
 	Set<String> getStreamEthereumPublishers(Stream stream) {

@@ -64,13 +64,13 @@ class SubscriptionApiControllerSpec extends Specification {
 			pricePerSecond: 0
 		)
 
-		def s1 = new PaidSubscription(
+		def s1 = new SubscriptionPaid(
 			address: "0x0",
 			endsAt: new Date(2018, 3, 29, 11, 00, 00),
 			product: p1
 		)
 
-		def s2 = new PaidSubscription(
+		def s2 = new SubscriptionPaid(
 			address: "0xA",
 			endsAt: new Date(2018, 3, 29, 15, 00, 00),
 			product: p2
