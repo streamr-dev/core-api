@@ -208,12 +208,17 @@ class Permission {
 			]
 		}
 
-		static boolean validateOperation(String val) {
-			if (val == null) {
+		/**
+		 * Method expects input in upper case.
+		 *
+		 * @return {@code true} if a valid operation and {@code false} otherwise.
+		 */
+		static boolean validateOperation(final String op) {
+			if (op == null) {
 				return false
 			}
 			try {
-				Operation.valueOf(val)
+				Operation.valueOf(op)
 			} catch (IllegalArgumentException e) {
 				return false
 			}
