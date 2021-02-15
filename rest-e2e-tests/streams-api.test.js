@@ -8,99 +8,99 @@ const StreamrClient = require('streamr-client')
 
 describe('Streams API', () => {
 
-	let streamId
-	const streamOwner = StreamrClient.generateEthereumAccount()
-	const anonymousUser = StreamrClient.generateEthereumAccount()
-	const ensDomainOwner = testUsers.ensDomainOwner
+    let streamId
+    const streamOwner = StreamrClient.generateEthereumAccount()
+    const anonymousUser = StreamrClient.generateEthereumAccount()
+    const ensDomainOwner = testUsers.ensDomainOwner
 
     before(async () => {
         const response = await getStreamrClient(streamOwner).createStream({
-            name: 'stream-id-' + Date.now()
+            name: 'stream-id-' + Date.now(),
         })
         streamId = response.id
-	})
+    })
 
-	describe('POST /api/v1/streams', function() {
+    describe('POST /api/v1/streams', function () {
 
-		it('happy path', async function() {
-			const assertValidResponse = (json, properties, expectedId) => {
-				assert.equal(json.name, properties.name)
-				assert.equal(json.description, properties.description)
-				assert.deepEqual(json.config, properties.config)
-				assert.equal(json.partitions, properties.partitions)
-				assert.equal(json.uiChannel, properties.uiChannel)
-				assert.equal(json.autoConfigure, properties.autoConfigure)
-				assert.equal(json.storageDays, properties.storageDays)
-				assert.equal(json.inactivityThresholdHours, properties.inactivityThresholdHours)
-				if (expectedId !== undefined) {
-					assert.equal(json.id, expectedId)
-				}
-			}
-			const properties = {
-				name: 'Mock name',
-				description: "Mock description",
-				config: {
-				   fields: [
-					  {
-						 name: 'mock-field',
-						 type: 'string'
-					  }
-				   ]
-				},
-				partitions: 12,
-				autoConfigure: false,
-				storageDays: 66,
-				inactivityThresholdHours: 4,
-				uiChannel: false
-			}
-			const createResponse = await getStreamrClient(streamOwner).createStream(properties)
-			assertValidResponse(createResponse, properties)
-			const streamId = createResponse.id
-			const fetchResponse = await getStreamrClient(streamOwner).getStream(streamId)
-			assertValidResponse(fetchResponse, properties, streamId)
-		});
+        it('happy path', async function () {
+            const assertValidResponse = (json, properties, expectedId) => {
+                assert.equal(json.name, properties.name)
+                assert.equal(json.description, properties.description)
+                assert.deepEqual(json.config, properties.config)
+                assert.equal(json.partitions, properties.partitions)
+                assert.equal(json.uiChannel, properties.uiChannel)
+                assert.equal(json.autoConfigure, properties.autoConfigure)
+                assert.equal(json.storageDays, properties.storageDays)
+                assert.equal(json.inactivityThresholdHours, properties.inactivityThresholdHours)
+                if (expectedId !== undefined) {
+                    assert.equal(json.id, expectedId)
+                }
+            }
+            const properties = {
+                name: 'Mock name',
+                description: 'Mock description',
+                config: {
+                    fields: [
+                        {
+                            name: 'mock-field',
+                            type: 'string',
+                        },
+                    ],
+                },
+                partitions: 12,
+                autoConfigure: false,
+                storageDays: 66,
+                inactivityThresholdHours: 4,
+                uiChannel: false,
+            }
+            const createResponse = await getStreamrClient(streamOwner).createStream(properties)
+            assertValidResponse(createResponse, properties)
+            const streamId = createResponse.id
+            const fetchResponse = await getStreamrClient(streamOwner).getStream(streamId)
+            assertValidResponse(fetchResponse, properties, streamId)
+        })
 
-		it('invalid properties', async function() {
-			const request = getStreamrClient(streamOwner).createStream({
-				partitions: 999
-			})
-			await assertStreamrClientResponseError(request, 422)
-		})
+        it('invalid properties', async function () {
+            const request = getStreamrClient(streamOwner).createStream({
+                partitions: 999,
+            })
+            await assertStreamrClientResponseError(request, 422)
+        })
 
-		it('create with owned domain id', async function() {
-			const streamId = 'testdomain1.eth/foo/bar' + Date.now()
-			const properties = {
-				id: streamId
-			}
-			const response = await getStreamrClient(ensDomainOwner).createStream(properties)
-			assert.equal(response.id, streamId)
-		})
+        it('create with owned domain id', async function () {
+            const streamId = 'testdomain1.eth/foo/bar' + Date.now()
+            const properties = {
+                id: streamId,
+            }
+            const response = await getStreamrClient(ensDomainOwner).createStream(properties)
+            assert.equal(response.id, streamId)
+        })
 
-		it('create with integration key id', async function() {
-			const streamId = streamOwner.address + '/foo/bar' + Date.now()
-			const properties = {
-				id: streamId
-			}
-			const response = await getStreamrClient(streamOwner).createStream(properties)
-			assert.equal(response.id, streamId)
-		})
+        it('create with integration key id', async function () {
+            const streamId = streamOwner.address + '/foo/bar' + Date.now()
+            const properties = {
+                id: streamId,
+            }
+            const response = await getStreamrClient(streamOwner).createStream(properties)
+            assert.equal(response.id, streamId)
+        })
 
-		it('create with invalid id', async function() {
-			const streamId = 'foobar.eth/loremipsum'
-			const properties = {
-				id: streamId
-			}
-			const request = getStreamrClient(streamOwner).createStream(properties)
-			await assertStreamrClientResponseError(request, 422)
-		})
+        it('create with invalid id', async function () {
+            const streamId = 'foobar.eth/loremipsum'
+            const properties = {
+                id: streamId,
+            }
+            const request = getStreamrClient(streamOwner).createStream(properties)
+            await assertStreamrClientResponseError(request, 422)
+        })
 
-	})
+    })
 
     describe('GET /api/v1/streams/:id', () => {
         it('works with uri-encoded ids', async () => {
             const id = streamOwner.address + '/streams-api.test.js/stream-' + Date.now()
             await getStreamrClient(streamOwner).createStream({
-                id
+                id,
             })
             const json = await getStreamrClient(streamOwner).getStream(id)
             assert.equal(json.id, id)
@@ -129,7 +129,7 @@ describe('Streams API', () => {
             assert.equal(response.status, 200)
         })
         it('responds with status 401 when wrong token even if endpoint does not require authentication', async () => {
-            const sessionToken = 'wrong-token';
+            const sessionToken = 'wrong-token'
             const response = await Streamr.api.v1.streams.permissions
                 .getOwnPermissions(streamId)
                 .withHeader('Authorization', `Bearer ${sessionToken}`)
@@ -173,12 +173,12 @@ describe('Streams API', () => {
                 .setFields(streamId, [
                     {
                         name: 'text',
-                        type: 'string'
+                        type: 'string',
                     },
                     {
                         name: 'user',
-                        type: 'map'
-                    }
+                        type: 'map',
+                    },
                 ])
                 .call()
 
@@ -190,12 +190,12 @@ describe('Streams API', () => {
                 .setFields('non-existing-stream', [
                     {
                         name: 'text',
-                        type: 'string'
+                        type: 'string',
                     },
                     {
                         name: 'user',
-                        type: 'map'
-                    }
+                        type: 'map',
+                    },
                 ])
                 .withAuthenticatedUser(streamOwner)
                 .call()
@@ -208,12 +208,12 @@ describe('Streams API', () => {
                 .setFields(streamId, [
                     {
                         name: 'text',
-                        type: 'string'
+                        type: 'string',
                     },
                     {
                         name: 'user',
-                        type: 'map'
-                    }
+                        type: 'map',
+                    },
                 ])
                 .withAuthenticatedUser(anonymousUser)
                 .call()
@@ -229,12 +229,12 @@ describe('Streams API', () => {
                     .setFields(streamId, [
                         {
                             name: 'text',
-                            type: 'string'
+                            type: 'string',
                         },
                         {
                             name: 'user',
-                            type: 'map'
-                        }
+                            type: 'map',
+                        },
                     ])
                     .withAuthenticatedUser(streamOwner)
                     .call()
@@ -249,12 +249,12 @@ describe('Streams API', () => {
                 assert.deepEqual(json.config.fields, [
                     {
                         name: 'text',
-                        type: 'string'
+                        type: 'string',
                     },
                     {
                         name: 'user',
-                        type: 'map'
-                    }
+                        type: 'map',
+                    },
                 ])
             })
         })
