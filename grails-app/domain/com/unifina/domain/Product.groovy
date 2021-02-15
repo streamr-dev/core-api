@@ -152,7 +152,6 @@ class Product {
 			imageUrl: imageUrl,
 			thumbnailUrl: thumbnailUrl,
 			category: category?.id,
-			streams: [],
 			state: state.toString(),
 			previewStream: previewStream?.id,
 			previewConfigJson: previewConfigJson,
