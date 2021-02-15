@@ -5,9 +5,9 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
-@TestFor(FreeProductService)
+@TestFor(ProductFreeService)
 @Mock([Category, Product, Stream])
-class FreeProductServiceSpec extends Specification {
+class ProductFreeServiceSpec extends Specification {
 	Stream s1, s2, s3
 	Product freeProduct
 
