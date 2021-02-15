@@ -5,7 +5,7 @@ import grails.persistence.Entity
 
 @GrailsCompileStatic
 @Entity
-class FreeSubscription extends Subscription {
+class SubscriptionFree extends Subscription {
 	User user
 
 	static constraints = {
