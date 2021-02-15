@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile
 
 class ProductApiController {
 	ApiService apiService
-	FreeProductService freeProductService
+	ProductFreeService productFreeService
 	ProductService productService
 	ProductImageService productImageService
 	MailService mailService
@@ -47,14 +47,14 @@ class ProductApiController {
 
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def save(CreateProductCommand command) {
+	def save(ProductCreateCommand command) {
 		Product product = productService.create(command, loggedInUser())
 		render(product.toMap() as JSON)
 	}
 
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def update(String id, UpdateProductCommand command) {
+	def update(String id, ProductUpdateCommand command) {
 		Product product = productService.update(id, command, loggedInUser())
 		boolean isProductOwner = permissionService.check(loggedInUser(), product, Permission.Operation.PRODUCT_SHARE)
 		render(product.toMap(isProductOwner) as JSON)
@@ -88,7 +88,7 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def deployFree(String id) {
 		Product product = productService.findById(id, loggedInUser(), Permission.Operation.PRODUCT_SHARE)
-		freeProductService.deployFreeProduct(product)
+		productFreeService.deployFreeProduct(product)
 		render(product.toMap() as JSON)
 	}
 
@@ -96,7 +96,7 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def undeployFree(String id) {
 		Product product = productService.findById(id, loggedInUser(), Permission.Operation.PRODUCT_SHARE)
-		freeProductService.undeployFreeProduct(product)
+		productFreeService.undeployFreeProduct(product)
 		render(product.toMap() as JSON)
 	}
 

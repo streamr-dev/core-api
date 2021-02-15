@@ -108,7 +108,7 @@ class ProductApiControllerSpec extends Specification {
 			controller.save()
 		}
 		then:
-		1 * productService.create(_ as CreateProductCommand, user) >> product
+		1 * productService.create(_ as ProductCreateCommand, user) >> product
 	}
 
 	void "save() returns 200 and renders a product"() {
@@ -141,7 +141,7 @@ class ProductApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
-		1 * productService.update("product-id", _ as UpdateProductCommand, user) >> product
+		1 * productService.update("product-id", _ as ProductUpdateCommand, user) >> product
 		1 * controller.permissionService.check(_, _, Permission.Operation.PRODUCT_SHARE) >> false
 	}
 
@@ -444,7 +444,7 @@ class ProductApiControllerSpec extends Specification {
 
 	void "deployFree() invokes productService#findById (with SHARE permission requirement)"() {
 		def productService = controller.productService = Mock(ProductService)
-		controller.freeProductService = Stub(FreeProductService)
+		controller.productFreeService = Stub(ProductFreeService)
 		def user = new User()
 
 		params.id = "product-id"
@@ -462,7 +462,7 @@ class ProductApiControllerSpec extends Specification {
 		controller.productService = Stub(ProductService) {
 			findById(_, _, _) >> product
 		}
-		def freeProductService = controller.freeProductService = Mock(FreeProductService)
+		def freeProductService = controller.productFreeService = Mock(ProductFreeService)
 
 		params.id = "product-id"
 		request.method = "POST"
@@ -479,7 +479,7 @@ class ProductApiControllerSpec extends Specification {
 		controller.productService = Stub(ProductService) {
 			findById(_, _, _) >> product
 		}
-		controller.freeProductService = Stub(FreeProductService)
+		controller.productFreeService = Stub(ProductFreeService)
 
 		params.id = "product-id"
 		request.method = "POST"
@@ -495,7 +495,7 @@ class ProductApiControllerSpec extends Specification {
 
 	void "undeployFree() invokes productService#findById (with SHARE permission requirement)"() {
 		def productService = controller.productService = Mock(ProductService)
-		controller.freeProductService = Stub(FreeProductService)
+		controller.productFreeService = Stub(ProductFreeService)
 		def user = new User()
 
 		params.id = "product-id"
@@ -513,7 +513,7 @@ class ProductApiControllerSpec extends Specification {
 		controller.productService = Stub(ProductService) {
 			findById(_, _, _) >> product
 		}
-		def freeProductService = controller.freeProductService = Mock(FreeProductService)
+		def freeProductService = controller.productFreeService = Mock(ProductFreeService)
 
 		params.id = "product-id"
 		request.method = "POST"
@@ -530,7 +530,7 @@ class ProductApiControllerSpec extends Specification {
 		controller.productService = Stub(ProductService) {
 			findById(_, _, _) >> product
 		}
-		controller.freeProductService = Stub(FreeProductService)
+		controller.productFreeService = Stub(ProductFreeService)
 
 		params.id = "product-id"
 		request.method = "POST"

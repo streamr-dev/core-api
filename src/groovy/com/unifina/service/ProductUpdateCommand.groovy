@@ -1,13 +1,12 @@
 package com.unifina.service
 
-
 import com.unifina.domain.*
 import grails.compiler.GrailsCompileStatic
 import grails.validation.Validateable
 import groovy.json.JsonBuilder
 
 @Validateable
-class UpdateProductCommand {
+class ProductUpdateCommand {
 	String name
 	String description
 
