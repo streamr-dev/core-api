@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.unifina.domain.Dashboard
 import com.unifina.domain.Permission
 import com.unifina.domain.User
@@ -8,19 +7,17 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
-import grails.util.Holders
 import spock.lang.Specification
 
-import javax.servlet.http.HttpServletResponse
-
-@TestMixin(ControllerUnitTestMixin) // "as JSON" converter
+@TestMixin(ControllerUnitTestMixin)
+// "as JSON" converter
 @TestFor(ApiService)
 @Mock(Dashboard)
 class ApiServiceSpec extends Specification {
 
 	void "list() returns streams with share permission"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
-		ListParams listParams = new DashboardListParams(operation: Permission.Operation.DASHBOARD_SHARE, publicAccess: true)
+		ListParams listParams = new DashboardListParams(operation: Permission.Operation.DASHBOARD_SHARE.toString(), publicAccess: true)
 		User me = new User(username: "me@me.com")
 
 		when:
@@ -94,11 +91,11 @@ class ApiServiceSpec extends Specification {
 		then:
 		def e = thrown(NotFoundException)
 		e.asApiError().toMap() == [
-			id: "dashboard-id",
+			id     : "dashboard-id",
 			message: "Dashboard with id dashboard-id not found",
-			code: "NOT_FOUND",
-			fault: "id",
-			type: "Dashboard"
+			code   : "NOT_FOUND",
+			fault  : "id",
+			type   : "Dashboard"
 		]
 	}
 
@@ -120,11 +117,11 @@ class ApiServiceSpec extends Specification {
 		then:
 		def e = thrown(NotFoundException)
 		e.asApiError().toMap() == [
-		    id: "dashboard-id",
+			id     : "dashboard-id",
 			message: "Dashboard with id dashboard-id not found",
-			code: "NOT_FOUND",
-			fault: "id",
-			type: "Dashboard"
+			code   : "NOT_FOUND",
+			fault  : "id",
+			type   : "Dashboard"
 		]
 	}
 

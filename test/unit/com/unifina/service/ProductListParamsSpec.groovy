@@ -189,20 +189,20 @@ class ProductListParamsSpec extends Specification {
 		when:
 		ProductListParams params = new ProductListParams()
 		then:
-		params.operation == Permission.Operation.PRODUCT_GET
+		params.operationToEnum() == Permission.Operation.PRODUCT_GET
 	}
 
 	void "map constructor sets operation"() {
 		when:
 		ProductListParams params = new ProductListParams([:])
 		then:
-		params.operation == Permission.Operation.PRODUCT_GET
+		params.operationToEnum() == Permission.Operation.PRODUCT_GET
 	}
 
 	void "map constructor allows operation override"() {
 		when:
-		ProductListParams params = new ProductListParams([operation: Permission.Operation.PRODUCT_SHARE])
+		ProductListParams params = new ProductListParams([operation: Permission.Operation.PRODUCT_SHARE.toString()])
 		then:
-		params.operation == Permission.Operation.PRODUCT_SHARE
+		params.operationToEnum() == Permission.Operation.PRODUCT_SHARE
 	}
 }

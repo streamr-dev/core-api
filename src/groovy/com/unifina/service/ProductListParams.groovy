@@ -17,7 +17,7 @@ class ProductListParams extends ListParams {
 
 	ProductListParams() {
 		super()
-		operation = Permission.Operation.PRODUCT_GET
+		operation = Permission.Operation.PRODUCT_GET.toString()
 	}
 
 	static constraints = {
