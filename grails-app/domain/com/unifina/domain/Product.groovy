@@ -50,7 +50,7 @@ class Product {
 
 	static hasMany = [
 		permissions: Permission,
-		streams: Stream
+		streams    : Stream
 	]
 
 	enum Type {
@@ -76,26 +76,28 @@ class Product {
 		imageUrl(nullable: true)
 		thumbnailUrl(nullable: true)
 		category(nullable: true)
-		type(nullable: false)
+		state(enumType: "string")
+		type(nullable: false, enumType: "ordinal")
 		previewStream(nullable: true, validator: { Stream s, p -> s == null || s in p.streams })
 		previewConfigJson(nullable: true)
 		pendingChanges(nullable: true)
 		ownerAddress(nullable: true, validator: isEthereumAddressOrIsNull)
 		beneficiaryAddress(nullable: true, validator: isEthereumAddressOrIsNull)
 		pricePerSecond(min: 0L)
+		priceCurrency(enumType: "string")
 		minimumSubscriptionInSeconds(min: 0L)
 		blockNumber(min: 0L)
 		blockIndex(min: 0L)
 		owner(nullable: false)
 		contact(nullable: true)
 		termsOfUse(nullable: true)
-		dataUnionVersion(nullable: true, validator: { Integer d, p -> (p.type == Type.DATAUNION) ? ((d == 1) || (d == 2) || (d == null)) : (d == null)})
+		dataUnionVersion(nullable: true, validator: { Integer d, p -> (p.type == Type.DATAUNION) ? ((d == 1) || (d == 2) || (d == null)) : (d == null) })
 	}
 
 	static mapping = {
 		id generator: HexIdGenerator.name // Note: doesn't apply in unit tests
 		description type: 'text'
-		type enumType: "identity", defaultValue: Type.NORMAL, index: 'type_idx'
+		type enumType: "ordinal", defaultValue: Type.NORMAL.ordinal(), index: 'type_idx'
 		previewConfigJson type: 'text'
 		pendingChanges type: 'text'
 		imageUrl length: 2048
@@ -109,28 +111,28 @@ class Product {
 	@GrailsCompileStatic
 	Map toMap(boolean isOwner = false) {
 		def map = [
-		    id: id,
-			type: type.toString(),
-			name: name,
-			description: description,
-			imageUrl: imageUrl,
-			thumbnailUrl: thumbnailUrl,
-			category: category?.id,
-			streams: streams*.id,
-			state: state.toString(),
-			previewStream: previewStream?.id,
-			previewConfigJson: previewConfigJson,
-			created: dateCreated,
-			updated: lastUpdated,
-			ownerAddress: ownerAddress,
-			beneficiaryAddress: beneficiaryAddress,
-			pricePerSecond: pricePerSecond.toString(),
-			isFree: this.isFree(),
-			priceCurrency: priceCurrency.toString(),
+			id                          : id,
+			type                        : type.toString(),
+			name                        : name,
+			description                 : description,
+			imageUrl                    : imageUrl,
+			thumbnailUrl                : thumbnailUrl,
+			category                    : category?.id,
+			streams                     : streams*.id,
+			state                       : state.toString(),
+			previewStream               : previewStream?.id,
+			previewConfigJson           : previewConfigJson,
+			created                     : dateCreated,
+			updated                     : lastUpdated,
+			ownerAddress                : ownerAddress,
+			beneficiaryAddress          : beneficiaryAddress,
+			pricePerSecond              : pricePerSecond.toString(),
+			isFree                      : this.isFree(),
+			priceCurrency               : priceCurrency.toString(),
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
-			owner: owner.name,
-			contact: contact?.toMap(),
-			termsOfUse: termsOfUse?.toMap(),
+			owner                       : owner.name,
+			contact                     : contact?.toMap(),
+			termsOfUse                  : termsOfUse?.toMap(),
 		]
 		if (isOwner && pendingChanges != null) {
 			JsonSlurper slurper = new JsonSlurper()
@@ -145,26 +147,25 @@ class Product {
 	@GrailsCompileStatic
 	Map toSummaryMap() {
 		def map = [
-			id: id,
-			type: type.toString(),
-			name: name,
-			description: description,
-			imageUrl: imageUrl,
-			thumbnailUrl: thumbnailUrl,
-			category: category?.id,
-			streams: [],
-			state: state.toString(),
-			previewStream: previewStream?.id,
-			previewConfigJson: previewConfigJson,
-			created: dateCreated,
-			updated: lastUpdated,
-			ownerAddress: ownerAddress,
-			beneficiaryAddress: beneficiaryAddress,
-			pricePerSecond: pricePerSecond.toString(),
-			isFree: this.isFree(),
-			priceCurrency: priceCurrency.toString(),
+			id                          : id,
+			type                        : type.toString(),
+			name                        : name,
+			description                 : description,
+			imageUrl                    : imageUrl,
+			thumbnailUrl                : thumbnailUrl,
+			category                    : category?.id,
+			state                       : state.toString(),
+			previewStream               : previewStream?.id,
+			previewConfigJson           : previewConfigJson,
+			created                     : dateCreated,
+			updated                     : lastUpdated,
+			ownerAddress                : ownerAddress,
+			beneficiaryAddress          : beneficiaryAddress,
+			pricePerSecond              : pricePerSecond.toString(),
+			isFree                      : this.isFree(),
+			priceCurrency               : priceCurrency.toString(),
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
-			owner: owner.name
+			owner                       : owner.name
 		]
 		if (type == Type.DATAUNION) {
 			map.put("dataUnionVersion", dataUnionVersion)

@@ -24,7 +24,7 @@ class IntegrationKey implements Serializable {
 		json type: 'text'
 		user lazy: false
 		idInService(index: "id_in_service_and_service_idx")
-		service(index: "id_in_service_and_service_idx")
+		service(enumType: "string", index: "id_in_service_and_service_idx")
 	}
 
 	static constraints = {
