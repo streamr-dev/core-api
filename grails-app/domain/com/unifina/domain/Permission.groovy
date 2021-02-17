@@ -10,7 +10,7 @@ import groovy.transform.EqualsAndHashCode
  * EqualsAndHashCode are used in PermissionService to build a Set in a special case of UI Channels.
  * @see com.unifina.service.PermissionService#getPermissionsTo(Object r, Userish u)
  */
-@EqualsAndHashCode(includes="anonymous,user,invite,canvas,dashboard,stream,product,operation,subscription,endsAt,parent")
+@EqualsAndHashCode(includes = "anonymous,user,invite,canvas,dashboard,stream,product,operation,subscription,endsAt,parent")
 @Entity
 class Permission {
 
@@ -177,6 +177,7 @@ class Permission {
 				STREAM_SHARE,
 			]
 		}
+
 		static List<Permission.Operation> canvasOperations() {
 			return [
 				CANVAS_GET,
@@ -187,6 +188,7 @@ class Permission {
 				CANVAS_SHARE,
 			]
 		}
+
 		static List<Permission.Operation> dashboardOperations() {
 			return [
 				DASHBOARD_GET,
@@ -196,6 +198,7 @@ class Permission {
 				DASHBOARD_SHARE,
 			]
 		}
+
 		static List<Permission.Operation> productOperations() {
 			return [
 				PRODUCT_GET,
@@ -203,6 +206,23 @@ class Permission {
 				PRODUCT_DELETE,
 				PRODUCT_SHARE,
 			]
+		}
+
+		/**
+		 * Method expects input in upper case.
+		 *
+		 * @return {@code true} if a valid operation and {@code false} otherwise.
+		 */
+		static boolean validateOperation(final String op) {
+			if (op == null) {
+				return false
+			}
+			try {
+				Operation.valueOf(op)
+			} catch (IllegalArgumentException e) {
+				return false
+			}
+			return true
 		}
 	}
 
@@ -240,19 +260,19 @@ class Permission {
 	 * Client-side representation of Permission object
 	 * Resource type/id is not indicated because API caller will have it in the URL
 	 * @return map to be shown to the API callers
-     */
+	 */
 	Map toMap() {
 		if (anonymous) {
 			return [
-					id: id,
-					anonymous: true,
-					operation: operation.id
+				id       : id,
+				anonymous: true,
+				operation: operation.id
 			]
 		} else if (user || invite) {
 			return [
-					id: id,
-					user: user?.username ?: invite?.email,
-					operation: operation.id
+				id       : id,
+				user     : user?.username ?: invite?.email,
+				operation: operation.id
 			]
 		} else {
 			throw new IllegalStateException("Invalid Permission! Must relate to one of: anonymous, user, invite")
@@ -261,7 +281,7 @@ class Permission {
 
 	Map toInternalMap() {
 		Map map = [
-			operation: operation.toString(),
+			operation   : operation.toString(),
 			subscription: subscription?.id
 		]
 		if (anonymous) {

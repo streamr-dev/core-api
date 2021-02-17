@@ -36,8 +36,8 @@ class ApiService {
 			throw new ValidationException(listParams.errors)
 		}
 		Closure searchCriteria = listParams.createListCriteria()
-        User effectiveUser = listParams.grantedAccess ? apiUser : null
-		permissionService.get(domainClass, effectiveUser, listParams.operation, listParams.publicAccess, searchCriteria)
+		User effectiveUser = listParams.grantedAccess ? apiUser : null
+		permissionService.get(domainClass, effectiveUser, listParams.operationToEnum(), listParams.publicAccess, searchCriteria)
 	}
 
 	/**
@@ -45,7 +45,7 @@ class ApiService {
 	 */
 	@GrailsCompileStatic
 	<T> T authorizedGetById(Class<T> domainClass, String id, Userish currentUser, Permission.Operation operation)
-			throws NotFoundException, NotPermittedException {
+		throws NotFoundException, NotPermittedException {
 		T domainObject = getByIdAndThrowIfNotFound(domainClass, id)
 		permissionService.verify(currentUser, domainObject, operation)
 		return domainObject
@@ -77,7 +77,7 @@ class ApiService {
 		HttpResponse<String> response = req.body((body as JSON).toString()).asString()
 
 		try {
-			if (response.getStatus()==204) {
+			if (response.getStatus() == 204) {
 				return [:]
 			} else if (response.getStatus() >= 200 && response.getStatus() < 300) {
 				Map responseBody = (JSONObject) JSON.parse(response.getBody())
@@ -88,12 +88,12 @@ class ApiService {
 				try {
 					responseBody = (JSONObject) JSON.parse(response.getBody())
 				} catch (Exception e) {
-					throw new UnexpectedApiResponseException("Got unexpected response from api call to $url: "+response.getBody())
+					throw new UnexpectedApiResponseException("Got unexpected response from api call to $url: " + response.getBody())
 				}
 				throw new ApiException(response.getStatus(), responseBody.code?.toString(), responseBody.message?.toString())
 			}
 		} catch (ConverterException e) {
-			log.error("request: Failed to parse JSON response: "+response.getBody())
+			log.error("request: Failed to parse JSON response: " + response.getBody())
 			throw new RuntimeException("Failed to parse JSON response", e)
 		}
 	}

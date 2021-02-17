@@ -15,7 +15,17 @@ abstract class ListParams {
 	Integer offset = 0
 	Boolean grantedAccess = true
 	Boolean publicAccess = false
-	Permission.Operation operation
+	String operation
+
+	Permission.Operation operationToEnum() {
+		if (operation != null) {
+			operation = operation.toUpperCase()
+		}
+		if (Permission.Operation.validateOperation(operation)) {
+			return Permission.Operation.valueOf(operation)
+		}
+		return null
+	}
 
 	static constraints = {
 		search(nullable: true, blank: false)
@@ -28,6 +38,7 @@ abstract class ListParams {
 	}
 
 	protected abstract List<String> getSearchFields()
+
 	protected abstract Closure additionalCriteria()
 
 	Closure createListCriteria() {
@@ -53,13 +64,13 @@ abstract class ListParams {
 	@CompileStatic
 	Map<String, Object> toMap() {
 		return [
-		    search: search,
-			sortBy: sortBy,
-			order: sortBy != null ? order : null,
-			max: max,
-			offset: offset,
+			search       : search,
+			sortBy       : sortBy,
+			order        : sortBy != null ? order : null,
+			max          : max,
+			offset       : offset,
 			grantedAccess: grantedAccess,
-			publicAccess: publicAccess
+			publicAccess : publicAccess
 		] as Map<String, Object>
 	}
 }

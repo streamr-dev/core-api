@@ -25,7 +25,7 @@ class StreamrApiRequest {
     }
 
     withAuthenticatedUser(authenticatedUser) {
-        this.authenticatedUser = authenticatedUser;
+        this.authenticatedUser = authenticatedUser
         return this
     }
 
@@ -55,8 +55,8 @@ class StreamrApiRequest {
     }
 
     withHeader(key, value) {
-		this.headers = { ...this.headers }
-		this.headers[key] = value
+        this.headers = {...this.headers}
+        this.headers[key] = value
         return this
     }
 
@@ -71,8 +71,8 @@ class StreamrApiRequest {
         const apiUrl = url.resolve(this.baseUrl, this.relativePath) + this.queryParams
 
         let headers = {
-			'Accept': 'application/json',
-			...this.headers
+            'Accept': 'application/json',
+            ...this.headers,
         }
         if (this.body && this.contentType) {
             headers['Content-type'] = this.contentType
@@ -91,14 +91,14 @@ class StreamrApiRequest {
                     .join('\n'),
                 typeof this.body === 'string' ? '\n\n' + JSON.stringify(JSON.parse(this.body), null, 4) : '\n\n' + JSON.stringify(this.body, null, 4),
                 //this.body ? '\n\n' + JSON.stringify(JSON.parse(this.body), null, 4) : '',
-                '\n\n'
+                '\n\n',
             )
         }
 
         return fetch(apiUrl, {
             method: this.methodId,
             body: this.body,
-            headers: headers
+            headers: headers,
         })
     }
 
@@ -272,6 +272,13 @@ class Streams {
             .method('DELETE')
             .endpoint('streams', streamId, 'permissions', permissionId)
     }
+
+    list(queryParams) {
+        return new StreamrApiRequest(this.options)
+            .method('GET')
+            .endpoint('streams')
+            .withQueryParams(queryParams)
+    }
 }
 
 class Canvases {
@@ -309,7 +316,7 @@ class Canvases {
             .method('POST')
             .endpoint('canvases', id, path, 'request')
             .withBody({
-                type: 'json'
+                type: 'json',
             })
     }
 }
@@ -374,7 +381,7 @@ class DataUnions {
         return new StreamrApiRequest(this.options)
             .method('PUT')
             .endpoint('dataunions', contractAddress, 'joinRequests', id)
-            .withBody({ state: 'ACCEPTED'})
+            .withBody({state: 'ACCEPTED'})
     }
 }
 
@@ -423,8 +430,8 @@ class NotFound {
 
 const LOGGING_ENABLED = process.env.LOGGING_ENABLED || false
 const options = {
-	baseUrl: 'http://localhost/api/v1/',
-	logging: LOGGING_ENABLED
+    baseUrl: 'http://localhost/api/v1/',
+    logging: LOGGING_ENABLED,
 }
 module.exports = {
     api: {
@@ -438,6 +445,6 @@ module.exports = {
             dataunions: new DataUnions(options),
             storagenodes: new StorageNodes(options),
             not_found: new NotFound(options),
-        }
-    }
+        },
+    },
 }

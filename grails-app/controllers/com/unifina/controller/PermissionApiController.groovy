@@ -101,18 +101,6 @@ class NewPermissionCommand {
 	String user
 	String operation
 
-	private static boolean validateOperation(String val) {
-		if (val == null) {
-			return false
-		}
-		try {
-			Operation.valueOf(val)
-		} catch (IllegalArgumentException e) {
-			return false
-		}
-		return true
-	}
-
 	def beforeValidate() {
 		if (operation != null) {
 			operation = operation.toUpperCase()
@@ -128,7 +116,7 @@ class NewPermissionCommand {
 		anonymous(nullable: true)
 		user(nullable: true, validator: UsernameValidator.validateUsernameOrNull)
 		operation(validator: { String val, NewPermissionCommand cmd ->
-			boolean validOperation = validateOperation(val)
+			boolean validOperation = Operation.validateOperation(val)
 			if (!validOperation) {
 				return false
 			}
