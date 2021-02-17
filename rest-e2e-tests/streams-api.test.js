@@ -96,6 +96,24 @@ describe('Streams API', () => {
 
     })
 
+    describe('GET /api/v1/streams', () => {
+        it('finds stream by permission name in uppercase/lowercase', async () => {
+            const queryParams = {
+                operation: 'stream_DELETE',
+                noConfig: true,
+                grantedAccess: true,
+            }
+            const response = await Streamr.api.v1.streams
+                .list(queryParams)
+                .withAuthenticatedUser(streamOwner)
+                .call()
+            const json = await response.json()
+            assert.equal(response.status, 200)
+            const result = json.filter(stream => stream.id == streamId)
+            assert.equal(result.length, 1, 'response should contain a single stream')
+        })
+    })
+
     describe('GET /api/v1/streams/:id', () => {
         it('works with uri-encoded ids', async () => {
             const id = streamOwner.address + '/streams-api.test.js/stream-' + Date.now()
