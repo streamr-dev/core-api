@@ -51,7 +51,7 @@ class Canvas {
 
 	static hasMany = [
 		dashboardItems: DashboardItem,
-		permissions: Permission
+		permissions   : Permission
 	]
 
 	static constraints = {
@@ -70,24 +70,24 @@ class Canvas {
 		adhoc defaultValue: false
 		runner index: 'runner_idx'
 		dashboardItems cascade: 'all-delete-orphan'
-		exampleType enumType: "identity", defaultValue: ExampleType.NOT_SET, index: 'example_type_idx'
+		exampleType enumType: "ordinal", defaultValue: ExampleType.NOT_SET.ordinal(), index: "example_type_idx"
 	}
 
 	@CompileStatic
 	Map toMap() {
 		Map map = (Map) JSON.parse(json)
 		return [
-			id: id,
-			name: name,
-			created: dateCreated,
-			updated: lastUpdated,
-			adhoc: adhoc,
-			state: state.toString(),
-			hasExports: hasExports,
-			serialized: serialization != null,
-			modules: map?.modules,
-			settings: map?.settings,
-			uiChannel: map?.uiChannel,
+			id         : id,
+			name       : name,
+			created    : dateCreated,
+			updated    : lastUpdated,
+			adhoc      : adhoc,
+			state      : state.toString(),
+			hasExports : hasExports,
+			serialized : serialization != null,
+			modules    : map?.modules,
+			settings   : map?.settings,
+			uiChannel  : map?.uiChannel,
 			startedById: startedBy?.id,
 		]
 	}

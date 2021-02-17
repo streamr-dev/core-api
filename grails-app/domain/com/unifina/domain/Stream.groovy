@@ -41,20 +41,21 @@ class Stream implements Comparable {
 
 	static hasMany = [
 		permissions: Permission,
-		products: Product
+		products   : Product
 	]
-	static mappedBy = [products: 'streams'] // defines which field in Product maps back to Streams - need to define this explicitly because there is also previewStream
+	static mappedBy = [products: 'streams']
+	// defines which field in Product maps back to Streams - need to define this explicitly because there is also previewStream
 	static belongsTo = Product
 
 	static constraints = {
 		partitions(nullable: false, min: 1, max: 100)
-		name(blank:false)
-		config(nullable:true)
-		description(nullable:true)
-		firstHistoricalDay(nullable:true)
-		lastHistoricalDay(nullable:true)
-		uiChannelPath(nullable:true)
-		uiChannelCanvas(nullable:true)
+		name(blank: false)
+		config(nullable: true)
+		description(nullable: true)
+		firstHistoricalDay(nullable: true)
+		lastHistoricalDay(nullable: true)
+		uiChannelPath(nullable: true)
+		uiChannelCanvas(nullable: true)
 		autoConfigure(nullable: false)
 		storageDays(nullable: false, min: 0)
 		inactivityThresholdHours(nullable: false, min: 0)
@@ -70,7 +71,7 @@ class Stream implements Comparable {
 		requireEncryptedData defaultValue: "false"
 		autoConfigure defaultValue: "true"
 		storageDays defaultValue: DEFAULT_STORAGE_DAYS
-		exampleType enumType: "identity", defaultValue: ExampleType.NOT_SET, index: 'example_type_idx'
+		exampleType enumType: "ordinal", defaultValue: ExampleType.NOT_SET.ordinal(), index: "example_type_idx"
 	}
 
 	@Override
@@ -82,18 +83,18 @@ class Stream implements Comparable {
 	@CompileStatic
 	Map toMap() {
 		[
-			id: id,
-			partitions: partitions,
-			name: name,
-			config: config == null || config.empty ? config : JSON.parse(config),
-			description: description,
-			uiChannel: uiChannel,
-			dateCreated: dateCreated,
-			lastUpdated: lastUpdated,
-			requireSignedData: requireSignedData,
-			requireEncryptedData: requireEncryptedData,
-			autoConfigure: autoConfigure,
-			storageDays: storageDays,
+			id                      : id,
+			partitions              : partitions,
+			name                    : name,
+			config                  : config == null || config.empty ? config : JSON.parse(config),
+			description             : description,
+			uiChannel               : uiChannel,
+			dateCreated             : dateCreated,
+			lastUpdated             : lastUpdated,
+			requireSignedData       : requireSignedData,
+			requireEncryptedData    : requireEncryptedData,
+			autoConfigure           : autoConfigure,
+			storageDays             : storageDays,
 			inactivityThresholdHours: inactivityThresholdHours,
 		]
 	}
@@ -101,16 +102,16 @@ class Stream implements Comparable {
 	@CompileStatic
 	Map toSummaryMap() {
 		[
-			id: id,
-			partitions: partitions,
-			name: name,
-			description: description,
-			uiChannel: uiChannel,
-			dateCreated: dateCreated,
-			lastUpdated: lastUpdated,
-			requireSignedData: requireSignedData,
+			id                  : id,
+			partitions          : partitions,
+			name                : name,
+			description         : description,
+			uiChannel           : uiChannel,
+			dateCreated         : dateCreated,
+			lastUpdated         : lastUpdated,
+			requireSignedData   : requireSignedData,
 			requireEncryptedData: requireEncryptedData,
-			storageDays: storageDays,
+			storageDays         : storageDays,
 		]
 	}
 
@@ -120,11 +121,11 @@ class Stream implements Comparable {
 	@CompileStatic
 	Map toValidationMap() {
 		[
-			id: id,
-			partitions: partitions,
-			requireSignedData: requireSignedData,
+			id                  : id,
+			partitions          : partitions,
+			requireSignedData   : requireSignedData,
 			requireEncryptedData: requireEncryptedData,
-			storageDays: storageDays,
+			storageDays         : storageDays,
 		]
 	}
 
@@ -146,7 +147,7 @@ class Stream implements Comparable {
 
 	static Map<String, Object> normalizeConfig(Map<String, Object> config) {
 		if (config == null) {
-			config = new HashMap<String,Object>()
+			config = new HashMap<String, Object>()
 		}
 		if (!config.fields) {
 			config.fields = []
@@ -155,8 +156,8 @@ class Stream implements Comparable {
 	}
 
 	static Map<String, Object> getStreamConfigAsMap(String config) {
-		if (config!=null)
-			return ((Map)JSON.parse(config));
+		if (config != null)
+			return ((Map) JSON.parse(config));
 		else return [:]
 	}
 
@@ -190,7 +191,7 @@ class Stream implements Comparable {
 			throw new IllegalArgumentException("Unable to parse module if from null uiChannelPath.")
 		}
 		String[] components = uiChannelPath.split("/")
-		if (components.length >= 5 ) {
+		if (components.length >= 5) {
 			try {
 				return Integer.parseInt(components[4])
 			} catch (NumberFormatException e) {
