@@ -10,24 +10,24 @@ grails.project.test.reports.dir = "target/test-reports"
 grails.project.war.file = "target/ROOT.war" // "target/${appName}-${appVersion}.war"
 
 grails.project.fork = [
-	run: [
-		maxMemory: System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
-		minMemory: 256,
-		debug: false,
-		maxPerm: 512,
-		forkReserve:false,
-		jvmArgs: [
+	run : [
+		maxMemory  : System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
+		minMemory  : 256,
+		debug      : false,
+		maxPerm    : 512,
+		forkReserve: false,
+		jvmArgs    : [
 			"-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true"
 		]
 	],
 	test: [
-		maxMemory: System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
-		minMemory: 256,
-		debug: false,
-		maxPerm: 512,
-		forkReserve:false,
-		daemon:true,
-		jvmArgs: [
+		maxMemory  : System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
+		minMemory  : 256,
+		debug      : false,
+		maxPerm    : 512,
+		forkReserve: false,
+		daemon     : true,
+		jvmArgs    : [
 			"-Djava.awt.headless=true",
 			"-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true"
 		]
@@ -44,7 +44,8 @@ grails.project.dependency.resolution = {
 	}
 	log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
 	checksums true // Whether to verify checksums on resolve
-	legacyResolve false // whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
+	legacyResolve false
+	// whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
 
 	repositories {
 		// Fast local repos first
@@ -88,7 +89,8 @@ grails.project.dependency.resolution = {
 			excludes('org.springframework:spring-context:*')
 			excludes('org.springframework:spring-orm:*')
 		}
-		compile('org.springframework.security:spring-security-core:4.2.9.RELEASE') { // Needed for bcrypt and PBKDF2 password encoders
+		compile('org.springframework.security:spring-security-core:4.2.9.RELEASE') {
+			// Needed for bcrypt and PBKDF2 password encoders
 			excludes('org.springframework:spring-aop:*')
 			excludes('org.springframework:spring-beans:*')
 			excludes('org.springframework:spring-context:*')
@@ -98,8 +100,8 @@ grails.project.dependency.resolution = {
 		compile('org.springframework.security:spring-security-web:4.2.9.RELEASE') { // Needed for CORS plugin
 			excludes('org.springframework:spring-web:*')
 		}
-		compile('org.web3j:core:4.8.3') {
-			excludes "org.java-websocket:Java-WebSocket:1.3.8" // Version conflict with com.streamr:client
+		compile('org.web3j:core:4.8.4') {
+			excludes "org.java-websocket:Java-WebSocket:*" // Version conflict with com.streamr:client
 		}
 		compile('com.amazonaws:aws-java-sdk-s3:1.11.908')
 		compile('org.imgscalr:imgscalr-lib:4.2')
@@ -109,7 +111,9 @@ grails.project.dependency.resolution = {
 		compile('org.glassfish.jersey.media:jersey-media-json-jackson:2.27')
 		compile('com.fasterxml.jackson.core:jackson-databind:2.9.6')
 		compile('com.fasterxml.jackson.core:jackson-annotations:2.9.6')
-		compile('com.streamr:client:DU2-alpha.1')
+		compile('com.streamr:client:DU2-alpha.1') {
+			excludes "org.web3j:codegen:*"
+		}
 
 		compile('com.google.code.gson:gson:2.8.5')
 		runtime('mysql:mysql-connector-java:5.1.20')
