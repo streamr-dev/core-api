@@ -10,24 +10,24 @@ grails.project.test.reports.dir = "target/test-reports"
 grails.project.war.file = "target/ROOT.war" // "target/${appName}-${appVersion}.war"
 
 grails.project.fork = [
-	run : [
-		maxMemory  : System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
-		minMemory  : 256,
-		debug      : false,
-		maxPerm    : 512,
+	run: [
+		maxMemory: System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
+		minMemory: 256,
+		debug: false,
+		maxPerm: 512,
 		forkReserve: false,
-		jvmArgs    : [
+		jvmArgs: [
 			"-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true"
 		]
 	],
 	test: [
-		maxMemory  : System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
-		minMemory  : 256,
-		debug      : false,
-		maxPerm    : 512,
+		maxMemory: System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
+		minMemory: 256,
+		debug: false,
+		maxPerm: 512,
 		forkReserve: false,
-		daemon     : true,
-		jvmArgs    : [
+		daemon: true,
+		jvmArgs: [
 			"-Djava.awt.headless=true",
 			"-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true"
 		]
@@ -90,7 +90,7 @@ grails.project.dependency.resolution = {
 			excludes('org.springframework:spring-orm:*')
 		}
 		compile('org.springframework.security:spring-security-core:4.2.9.RELEASE') {
-			// Needed for bcrypt and PBKDF2 password encoders
+			// Needed for StringEncryptor
 			excludes('org.springframework:spring-aop:*')
 			excludes('org.springframework:spring-beans:*')
 			excludes('org.springframework:spring-context:*')
