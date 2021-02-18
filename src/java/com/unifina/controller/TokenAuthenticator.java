@@ -9,23 +9,14 @@ import grails.util.Holders;
 import javax.servlet.http.HttpServletRequest;
 
 public class TokenAuthenticator {
+	private static final String BEARER = "Bearer";
 	private final SessionService sessionService = Holders.getApplicationContext().getBean(SessionService.class);
 
-	private enum HeaderType {
-		BEARER
-	}
-
 	public static class AuthorizationHeader {
-		private final HeaderType headerType;
 		private final String headerValue;
 
-		public AuthorizationHeader(HeaderType headerType, String headerValue) {
-			this.headerType = headerType;
+		public AuthorizationHeader(String headerValue) {
 			this.headerValue = headerValue;
-		}
-
-		public HeaderType getHeaderType() {
-			return headerType;
 		}
 
 		public String getHeaderValue() {
@@ -33,7 +24,7 @@ public class TokenAuthenticator {
 		}
 
 		public String toString() {
-			return headerType + " " + headerValue;
+			return BEARER + " " + headerValue;
 		}
 	}
 
@@ -47,11 +38,7 @@ public class TokenAuthenticator {
 		if (header == null) {
 			return new AuthenticationResult(false, false);
 		}
-		if (header.getHeaderType().equals(HeaderType.BEARER)) {
-			AuthenticationResult res = getResultFromSessionToken(header.getHeaderValue());
-			return res;
-		}
-		return new AuthenticationResult(false, true);
+		return getResultFromSessionToken(header.getHeaderValue());
 	}
 
 	public static AuthorizationHeader getAuthorizationHeader(HttpServletRequest request) {
@@ -65,8 +52,8 @@ public class TokenAuthenticator {
 			if (parts.length != 2) {
 				throw new AuthenticationMalformedException();
 			}
-			if (parts[0].equalsIgnoreCase("bearer")) {
-				return new AuthorizationHeader(HeaderType.BEARER, parts[1]);
+			if (parts[0].equalsIgnoreCase(BEARER)) {
+				return new AuthorizationHeader(parts[1]);
 			} else {
 				throw new AuthenticationMalformedException();
 			}
@@ -77,7 +64,7 @@ public class TokenAuthenticator {
 	public String getSessionToken(HttpServletRequest request) {
 		try {
 			AuthorizationHeader header = parseAuthorizationHeader(request.getHeader("Authorization"));
-			if (header == null || !header.getHeaderType().equals(HeaderType.BEARER)) {
+			if (header == null) {
 				return null;
 			}
 			return header.getHeaderValue();
