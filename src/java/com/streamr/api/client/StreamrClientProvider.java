@@ -24,25 +24,26 @@ public class StreamrClientProvider implements StreamrClient {
 	}
 
 	/**
-	 * @param token is the value of HTTP Authorization header. For example: "token value-of-token".
+	 * @param bearer is the value of HTTP Authorization header. For example: "bearer value-of-session-token".
 	 */
 	@Override
-	public CanvasesPerNode canvasesPerNode(final String token, final String nodeIp) {
+	public CanvasesPerNode canvasesPerNode(final String bearer, final String nodeIp) {
 		final WebTarget target = webTarget.path(String.format("/nodes/%s/canvases", nodeIp));
-		final Response res = target.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, token).get();
+		final Response res = target.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, bearer).get();
 		final CanvasesPerNode result = res.readEntity(CanvasesPerNode.class);
 		return result;
 	}
 
 	/**
-	 * @param token is the value of HTTP Authorization header. For example: "token value-of-token".
+	 * @param bearer is the value of HTTP Authorization header. For example: "bearer value-of-session-token".
 	 */
 	@Override
-	public List<Map<String, Object>> shutdown(final String token, final String nodeIp) {
+	public List<Map<String, Object>> shutdown(final String bearer, final String nodeIp) {
 		final WebTarget target = webTarget.path(String.format("/nodes/%s/shutdown", nodeIp));
 		final Entity<String> input = Entity.json("");
-		final GenericType<List<Map<String, Object>>> resultType = new GenericType<List<Map<String, Object>>>() {};
-		final List<Map<String, Object>> res = target.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, token).post(input, resultType);
+		final GenericType<List<Map<String, Object>>> resultType = new GenericType<List<Map<String, Object>>>() {
+		};
+		final List<Map<String, Object>> res = target.request(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, bearer).post(input, resultType);
 		return res;
 	}
 }

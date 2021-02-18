@@ -3,7 +3,6 @@ package com.unifina
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 import grails.util.Holders
-import org.codehaus.groovy.grails.commons.spring.GrailsWebApplicationContext
 import spock.lang.Specification
 
 /**
@@ -17,7 +16,7 @@ class BeanMockingSpecification extends Specification {
 	/**
 	 * Slight hack: setup() and cleanup() can't be overridden, but it's great to have
 	 * cleanupMockBeans called automatically. So subclasses should override doCleanup() instead.
-     */
+	 */
 	def cleanup() {
 		doCleanup()
 		cleanupMockBeans()
@@ -37,7 +36,7 @@ class BeanMockingSpecification extends Specification {
 	}
 
 	protected <T> T mockBean(Class<T> clazz, T instance) {
-		String name = clazz.getName().substring(0,1).toLowerCase() + clazz.getName().substring(1)
+		String name = clazz.getName().substring(0, 1).toLowerCase() + clazz.getName().substring(1)
 		Holders.getApplicationContext().beanFactory.registerSingleton(name, instance)
 		registeredMockBeans << name
 		return instance

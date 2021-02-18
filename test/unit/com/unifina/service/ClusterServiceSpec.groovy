@@ -12,7 +12,7 @@ import spock.lang.Specification
 @Mock([Canvas, User])
 class ClusterServiceSpec extends Specification {
 	User me
-	String apiKey = "token myApiKey"
+	String bearer = "bearer session-token"
 
 	def setup() {
 		me = new User().save(failOnError: true, validate: false)
@@ -23,7 +23,7 @@ class ClusterServiceSpec extends Specification {
 
 	void "getCanvases dead"() {
 		setup:
-		CanvasesPerNode canvases1  = new CanvasesPerNode()
+		CanvasesPerNode canvases1 = new CanvasesPerNode()
 		canvases1.shouldBeRunning = new Canvas[1]
 		canvases1.shouldBeRunning[0] = new Canvas(
 			name: "Canvas #2",
@@ -34,7 +34,7 @@ class ClusterServiceSpec extends Specification {
 		canvases1.shouldBeRunning[0].id = "c2"
 		canvases1.shouldBeRunning[0].save(failOnError: true, validate: false)
 
-		CanvasesPerNode canvases2  = new CanvasesPerNode()
+		CanvasesPerNode canvases2 = new CanvasesPerNode()
 		canvases2.shouldBeRunning = new Canvas[1]
 		canvases2.shouldBeRunning[0] = new Canvas(
 			name: "Canvas #5",
@@ -46,11 +46,11 @@ class ClusterServiceSpec extends Specification {
 		canvases2.shouldBeRunning[0].save(failOnError: true, validate: false)
 
 		when:
-		def canvases = service.getCanvases(apiKey)
+		def canvases = service.getCanvases(bearer)
 
 		then:
-		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.5") >> canvases1
-		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.6") >> canvases2
+		1 * service.streamrClient.canvasesPerNode(bearer, "10.0.0.5") >> canvases1
+		1 * service.streamrClient.canvasesPerNode(bearer, "10.0.0.6") >> canvases2
 		0 * service.streamrClient._
 		canvases.ghost.size() == 0
 		canvases.dead.size() == 2
@@ -58,7 +58,7 @@ class ClusterServiceSpec extends Specification {
 
 	void "getCanvases ghost"() {
 		setup:
-		CanvasesPerNode canvases1  = new CanvasesPerNode()
+		CanvasesPerNode canvases1 = new CanvasesPerNode()
 
 		canvases1.shouldNotBeRunning = new Canvas[1]
 		canvases1.shouldNotBeRunning[0] = new Canvas(
@@ -70,7 +70,7 @@ class ClusterServiceSpec extends Specification {
 		canvases1.shouldNotBeRunning[0].id = "c2"
 		canvases1.shouldNotBeRunning[0].save(failOnError: true, validate: false)
 
-		CanvasesPerNode canvases2  = new CanvasesPerNode()
+		CanvasesPerNode canvases2 = new CanvasesPerNode()
 
 		canvases2.shouldNotBeRunning = new Canvas[1]
 		canvases2.shouldNotBeRunning[0] = new Canvas(
@@ -83,11 +83,11 @@ class ClusterServiceSpec extends Specification {
 		canvases2.shouldNotBeRunning[0].save(failOnError: true, validate: false)
 
 		when:
-		def canvases = service.getCanvases(apiKey)
+		def canvases = service.getCanvases(bearer)
 
 		then:
-		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.5") >> canvases1
-		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.6") >> canvases2
+		1 * service.streamrClient.canvasesPerNode(bearer, "10.0.0.5") >> canvases1
+		1 * service.streamrClient.canvasesPerNode(bearer, "10.0.0.6") >> canvases2
 		0 * service.streamrClient._
 		canvases.ghost.size() == 2
 		canvases.dead.size() == 0
@@ -95,7 +95,7 @@ class ClusterServiceSpec extends Specification {
 
 	void "getCanvases dead and ghost"() {
 		setup:
-		CanvasesPerNode canvases1  = new CanvasesPerNode()
+		CanvasesPerNode canvases1 = new CanvasesPerNode()
 		canvases1.shouldBeRunning = new Canvas[1]
 		canvases1.shouldBeRunning[0] = new Canvas(
 			name: "Canvas #2",
@@ -116,7 +116,7 @@ class ClusterServiceSpec extends Specification {
 		canvases1.shouldNotBeRunning[0].id = "c2"
 		canvases1.shouldNotBeRunning[0].save(failOnError: true, validate: false)
 
-		CanvasesPerNode canvases2  = new CanvasesPerNode()
+		CanvasesPerNode canvases2 = new CanvasesPerNode()
 		canvases2.shouldBeRunning = new Canvas[1]
 		canvases2.shouldBeRunning[0] = new Canvas(
 			name: "Canvas #5",
@@ -138,11 +138,11 @@ class ClusterServiceSpec extends Specification {
 		canvases2.shouldNotBeRunning[0].save(failOnError: true, validate: false)
 
 		when:
-		def canvases = service.getCanvases(apiKey)
+		def canvases = service.getCanvases(bearer)
 
 		then:
-		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.5") >> canvases1
-		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.6") >> canvases2
+		1 * service.streamrClient.canvasesPerNode(bearer, "10.0.0.5") >> canvases1
+		1 * service.streamrClient.canvasesPerNode(bearer, "10.0.0.6") >> canvases2
 		0 * service.streamrClient._
 		canvases.ghost.size() == 2
 		canvases.dead.size() == 2
@@ -175,27 +175,27 @@ class ClusterServiceSpec extends Specification {
 		shutdownResult2.add(result1)
 
 		when:
-		def result = service.shutdown(apiKey)
+		def result = service.shutdown(bearer)
 
 		then:
-		1 * service.streamrClient.shutdown(apiKey, "10.0.0.5") >> shutdownResult1
-		1 * service.streamrClient.shutdown(apiKey, "10.0.0.6") >> shutdownResult2
+		1 * service.streamrClient.shutdown(bearer, "10.0.0.5") >> shutdownResult1
+		1 * service.streamrClient.shutdown(bearer, "10.0.0.6") >> shutdownResult2
 		0 * service.streamrClient._
 		result.nodes.size() == 2
 	}
 
 	void "shutdown noop"() {
 		when:
-		def results = service.shutdown(apiKey)
+		def results = service.shutdown(bearer)
 
 		then:
-		1 * service.streamrClient.shutdown(apiKey, "10.0.0.5") >> new ArrayList<HashMap<String, Object>>()
-		1 * service.streamrClient.shutdown(apiKey, "10.0.0.6") >> new ArrayList<HashMap<String, Object>>()
+		1 * service.streamrClient.shutdown(bearer, "10.0.0.5") >> new ArrayList<HashMap<String, Object>>()
+		1 * service.streamrClient.shutdown(bearer, "10.0.0.6") >> new ArrayList<HashMap<String, Object>>()
 		0 * service.streamrClient._
 		results.nodes.size() == 0
 	}
 
-    void "repair and restart dead canvases"() {
+	void "repair and restart dead canvases"() {
 		setup:
 		service.canvasService = Mock(CanvasService)
 		CanvasesPerNode canvasesPerNode = new CanvasesPerNode()
@@ -208,21 +208,21 @@ class ClusterServiceSpec extends Specification {
 		c.save(failOnError: true)
 		canvasesPerNode.shouldBeRunning.add(new HashMap<String, Object>() {
 			{
-				put("name",  c.name)
+				put("name", c.name)
 				put("id", c.id)
 				put("startedById", u.id)
 			}
 		})
 
 		when:
-		def results = service.repair(apiKey)
+		def results = service.repair(bearer)
 
 		then:
-		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.5") >> canvasesPerNode
-		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.6") >> new CanvasesPerNode()
+		1 * service.streamrClient.canvasesPerNode(bearer, "10.0.0.5") >> canvasesPerNode
+		1 * service.streamrClient.canvasesPerNode(bearer, "10.0.0.6") >> new CanvasesPerNode()
 		0 * service.streamrClient._
 		1 * service.canvasService.startRemote(c, u, true, true)
 		0 * service.canvasService._
 		results.size() == 1
-    }
+	}
 }
