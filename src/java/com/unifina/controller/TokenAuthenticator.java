@@ -65,7 +65,7 @@ public class TokenAuthenticator {
 			if (parts.length != 2) {
 				throw new AuthenticationMalformedException();
 			}
-			if (parts[0].toLowerCase().equals("bearer")) {
+			if (parts[0].equalsIgnoreCase("bearer")) {
 				return new AuthorizationHeader(HeaderType.BEARER, parts[1]);
 			} else {
 				throw new AuthenticationMalformedException();
