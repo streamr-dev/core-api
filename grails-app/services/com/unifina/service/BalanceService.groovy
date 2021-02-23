@@ -1,11 +1,9 @@
 package com.unifina.service
 
-
 import com.unifina.domain.IntegrationKey
 import com.unifina.domain.User
 import com.unifina.signalpath.blockchain.EthereumModuleOptions
-import com.unifina.utils.MapTraversal
-import grails.util.Holders
+import com.unifina.utils.ApplicationConfig
 import org.web3j.exceptions.MessageDecodingException
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.http.HttpService
@@ -26,7 +24,7 @@ class BalanceService {
 		ethereumOptions = new EthereumModuleOptions()
 		final HttpService httpService = new HttpService(ethereumOptions.getRpcUrl())
 		web3j = Web3j.build(httpService)
-		dataCoinAddress = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.datacoinAddress");
+		dataCoinAddress = ApplicationConfig.getString("streamr.ethereum.datacoinAddress");
 		if (dataCoinAddress == null) {
 			throw new RuntimeException("No datacoin address found in config");
 		}

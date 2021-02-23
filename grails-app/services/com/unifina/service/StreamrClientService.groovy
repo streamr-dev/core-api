@@ -10,9 +10,8 @@ import com.streamr.client.options.StreamrClientOptions
 import com.unifina.domain.IntegrationKey
 import com.unifina.domain.SignupMethod
 import com.unifina.domain.User
-import com.unifina.utils.MapTraversal
 import com.unifina.utils.PrivateKeyGenerator
-import grails.util.Holders
+import com.unifina.utils.ApplicationConfig
 import org.apache.log4j.Logger
 
 import java.lang.reflect.Constructor
@@ -101,7 +100,7 @@ class StreamrClientService {
 		if (instanceForThisEngineNodeLock.tryLock(3L, TimeUnit.SECONDS)) {
 			try {
 				if (!instanceForThisEngineNode) {
-					String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
+					String nodePrivateKey = ApplicationConfig.getString("streamr.ethereum.nodePrivateKey")
 					log.debug("Creating StreamrClient instance for this Engine node. Using private key ${nodePrivateKey?.substring(0, 2)}...")
 
 					// Create a custom EthereumAuthenticationMethod which doesn't call the API, but instead uses the internal services to
@@ -123,8 +122,8 @@ class StreamrClientService {
 	}
 
 	private StreamrClient createInstance(AuthenticationMethod authenticationMethod) {
-		String websocketUrl = MapTraversal.getString(Holders.getConfig(), "streamr.api.websocket.url")
-		String restUrl = MapTraversal.getString(Holders.getConfig(), "streamr.api.http.url")
+		String websocketUrl = ApplicationConfig.getString("streamr.api.websocket.url")
+		String restUrl = ApplicationConfig.getString("streamr.api.http.url")
 		log.info(String.format("Creating StreamrClient instance. Websocket: %s, REST: %s", websocketUrl, restUrl))
 
 		StreamrClientOptions options = new StreamrClientOptions(
@@ -134,10 +133,10 @@ class StreamrClientService {
 			websocketUrl,
 			restUrl
 		)
-		options.setMainnetRpcUrl(MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.networks.local"))
-		options.setSidechainRpcUrl(MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.networks.sidechain"))
-		options.setDataUnionMainnetFactoryAddress(MapTraversal.getString(Holders.getConfig(), "streamr.dataunion.mainnet.factory.address"))
-		options.setDataUnionSidechainFactoryAddress(MapTraversal.getString(Holders.getConfig(), "streamr.dataunion.sidechain.factory.address"))
+		options.setMainnetRpcUrl(ApplicationConfig.getString("streamr.ethereum.networks.local"))
+		options.setSidechainRpcUrl(ApplicationConfig.getString("streamr.ethereum.networks.sidechain"))
+		options.setDataUnionMainnetFactoryAddress(ApplicationConfig.getString("streamr.dataunion.mainnet.factory.address"))
+		options.setDataUnionSidechainFactoryAddress(ApplicationConfig.getString("streamr.dataunion.sidechain.factory.address"))
 		return clientConstructor.newInstance(options)
 	}
 }

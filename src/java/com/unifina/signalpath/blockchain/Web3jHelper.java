@@ -2,6 +2,7 @@ package com.unifina.signalpath.blockchain;
 
 import com.unifina.utils.MapTraversal;
 import com.unifina.utils.ThreadUtil;
+import com.unifina.utils.ApplicationConfig;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
 import org.web3j.abi.EventValues;
@@ -288,7 +289,7 @@ public class Web3jHelper {
 	public static String getENSDomainOwner(String domain) throws BlockchainException {
 		Web3j web3j = Web3jHelper.getWeb3jConnectionFromConfig();
 		TransactionManager transactionManager = new ClientTransactionManager(web3j, null);
-		String ensContractAddress = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.ensRegistryContractAddress");
+		String ensContractAddress = ApplicationConfig.getString("streamr.ethereum.ensRegistryContractAddress");
 		ENS ensRegistry = ENS.load(ensContractAddress, web3j, transactionManager, new DefaultGasProvider());
 		byte[] nameHash = NameHash.nameHashAsBytes(domain);
 		String contractAddress = send(ensRegistry.owner(nameHash));
