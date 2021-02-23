@@ -1,18 +1,17 @@
-const assert = require('chai').assert
-const Streamr = require('./streamr-api-clients')
-const SchemaValidator = require('./schema-validator')
-const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
-const testUsers = require('./test-utilities.js').testUsers
+import { assert } from 'chai'
+import Streamr from './streamr-api-clients'
+import { SchemaValidator } from './schema-validator'
+import { assertResponseIsError, testUsers} from './test-utilities'
 const StreamrClient = require('streamr-client')
 
 const schemaValidator = new SchemaValidator()
 
-function assertIsSubscription(data) {
+function assertIsSubscription(data: any) {
     const errors = schemaValidator.validateSubscription(data)
     assert(errors.length === 0, schemaValidator.toMessages(errors))
 }
 
-async function createProductAndReturnId(productBody, user) {
+async function createProductAndReturnId(productBody: any, user: EthereumAccount) {
     const json = await Streamr.api.v1.products
         .create(productBody)
         .withAuthenticatedUser(user)
@@ -20,7 +19,7 @@ async function createProductAndReturnId(productBody, user) {
     return json.id
 }
 
-async function createSubscription(subscriptionBody, user) {
+async function createSubscription(subscriptionBody: any, user: EthereumAccount) {
     await Streamr.api.v1.subscriptions
         .create(subscriptionBody)
         .withAuthenticatedUser(user)
@@ -35,8 +34,8 @@ describe('Subscriptions API', () => {
 
     describe('POST /api/v1/subscriptions', () => {
 
-        let paidProductId
-        let freeProductId
+        let paidProductId: string
+        let freeProductId: string
 
         before(async () => {
             paidProductId = await createProductAndReturnId({
@@ -152,7 +151,7 @@ describe('Subscriptions API', () => {
     })
 
     describe('GET /api/v1/subscriptions', () => {
-        let productId
+        let productId: string
 
         before(async () => {
             productId = await createProductAndReturnId({
@@ -194,8 +193,8 @@ describe('Subscriptions API', () => {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response
-            let json
+            let response: any
+            let json: any
 
             before(async () => {
                 response = await Streamr.api.v1.subscriptions
@@ -211,8 +210,8 @@ describe('Subscriptions API', () => {
 
             it('responds with list of subscriptions', () => {
                 assert.isAtLeast(json.length, 1)
-                json.forEach(subscriptionData => assertIsSubscription(subscriptionData))
-                const picked = json.find(subscriptionData => subscriptionData.address === subscriber.address)
+                json.forEach((subscriptionData: any) => assertIsSubscription(subscriptionData))
+                const picked = json.find((subscriptionData: any) => subscriptionData.address === subscriber.address)
                 assert.isNotNull(picked)
                 assert.deepEqual(picked.endsAt, '2018-10-29T19:11:52Z')
                 assert.deepEqual(picked.product.id, productId)

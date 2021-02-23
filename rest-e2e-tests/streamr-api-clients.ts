@@ -1,60 +1,71 @@
-const fetch = require('node-fetch')
-const url = require('url')
-const querystring = require('querystring')
-const FormData = require('form-data')
-const getSessionToken = require('./test-utilities.js').getSessionToken
+import fetch from 'node-fetch'
+import url from 'url'
+import querystring from 'querystring'
+import FormData from 'form-data'
+import { getSessionToken } from './test-utilities'
 
 class StreamrApiRequest {
-    constructor(options) {
+
+    baseUrl: string
+    logging: boolean
+    authenticatedUser?: EthereumAccount
+    contentType?: string
+    queryParams: string
+    headers: any
+    relativePath?: string
+    methodId?: string
+    body?: any
+
+    constructor(options: any) {
         this.baseUrl = options.baseUrl
         this.logging = options.logging
-        this.authenticatedUser = null
-        this.contentType = null
+        this.authenticatedUser = undefined
+        this.contentType = undefined
         this.queryParams = ''
         this.headers = {}
     }
 
-    method(methodId) {
+    method(methodId: string) {
         this.methodId = methodId
         return this
     }
 
-    endpoint(...pathParts) {
+    endpoint(...pathParts: string[]) {
         this.relativePath = pathParts.map(part => encodeURIComponent(part)).join('/')
         return this
     }
 
-    withAuthenticatedUser(authenticatedUser) {
+    withAuthenticatedUser(authenticatedUser: EthereumAccount|undefined) {
         this.authenticatedUser = authenticatedUser
         return this
     }
 
-    withQueryParams(queryParams) {
+    withQueryParams(queryParams: any) {
         if (queryParams) {
             this.queryParams = '?' + querystring.stringify(queryParams)
         }
         return this
     }
 
-    withBody(body) {
+    withBody(body: any) {
         this.body = JSON.stringify(body)
         this.contentType = 'application/json'
         return this
     }
 
-    withFormData(formData) {
+    withFormData(formData: any) {
         this.body = formData
         this.headers = Object.assign(this.headers, formData.getHeaders())
         return this
     }
 
-    withRawBody(body) {
+    withRawBody(body: any) {
         this.body = body
-        this.contentType = null
+        this.contentType = undefined
         return this
     }
 
-    withHeader(key, value) {
+    withHeader(key: string, value: string) {
         this.headers = {...this.headers}
         this.headers[key] = value
         return this
@@ -117,7 +128,10 @@ class StreamrApiRequest {
 }
 
 class Categories {
-    constructor(options) {
+
+    options: any
+
+    constructor(options: any) {
         this.options = options
     }
 
@@ -129,77 +143,81 @@ class Categories {
 }
 
 class Products {
-    constructor(options) {
+
+    options: any
+    permissions: Permissions
+
+    constructor(options: any) {
         this.options = options
         this.permissions = new Permissions('products', options)
     }
 
-    list(queryParams) {
+    list(queryParams: any) {
         return new StreamrApiRequest(this.options)
             .method('GET')
             .endpoint('products')
             .withQueryParams(queryParams)
     }
 
-    get(id) {
+    get(id: string) {
         return new StreamrApiRequest(this.options)
             .method('GET')
             .endpoint('products', id)
     }
 
-    create(body) {
+    create(body: any) {
         return new StreamrApiRequest(this.options)
             .method('POST')
             .endpoint('products')
             .withBody(body)
     }
 
-    update(id, body) {
+    update(id: string, body: any) {
         return new StreamrApiRequest(this.options)
             .method('PUT')
             .endpoint('products', id)
             .withBody(body)
     }
 
-    setDeploying(id) {
+    setDeploying(id: string) {
         return new StreamrApiRequest(this.options)
             .method('POST')
             .endpoint('products', id, 'setDeploying')
     }
 
-    setDeployed(id, body) {
+    setDeployed(id: string, body: any) {
         return new StreamrApiRequest(this.options)
             .method('POST')
             .endpoint('products', id, 'setDeployed')
             .withBody(body)
     }
 
-    setUndeploying(id) {
+    setUndeploying(id: string) {
         return new StreamrApiRequest(this.options)
             .method('POST')
             .endpoint('products', id, 'setUndeploying')
     }
 
-    setUndeployed(id, body) {
+    setUndeployed(id: string, body: any) {
         return new StreamrApiRequest(this.options)
             .method('POST')
             .endpoint('products', id, 'setUndeployed')
             .withBody(body)
     }
 
-    deployFree(id) {
+    deployFree(id: string) {
         return new StreamrApiRequest(this.options)
             .method('POST')
             .endpoint('products', id, 'deployFree')
     }
 
-    undeployFree(id) {
+    undeployFree(id: string) {
         return new StreamrApiRequest(this.options)
             .method('POST')
             .endpoint('products', id, 'undeployFree')
     }
 
-    uploadImage(id, fileBytes) {
+    uploadImage(id: string, fileBytes: any) {
         const formData = new FormData()
         formData.append('file', fileBytes)
 
@@ -209,19 +227,19 @@ class Products {
             .withFormData(formData)
     }
 
-    listStreams(id) {
+    listStreams(id: string) {
         return new StreamrApiRequest(this.options)
             .method('GET')
             .endpoint('products', id, 'streams')
     }
 
-    addStream(id, streamId) {
+    addStream(id: string, streamId: string) {
         return new StreamrApiRequest(this.options)
             .method('PUT')
             .endpoint('products', id, 'streams', streamId)
     }
 
-    removeStream(id, streamId) {
+    removeStream(id: string, streamId: string) {
         return new StreamrApiRequest(this.options)
             .method('DELETE')
             .endpoint('products', id, 'streams', streamId)
@@ -229,19 +247,23 @@ class Products {
 }
 
 class Streams {
-    constructor(options) {
+
+    options: any
+    permissions: Permissions
+
+    constructor(options: any) {
         this.options = options
         this.permissions = new Permissions('streams', options)
     }
 
-    setFields(id, body) {
+    setFields(id: string, body: any) {
         return new StreamrApiRequest(this.options)
             .method('POST')
             .endpoint('streams', id, 'fields')
             .withBody(body)
     }
 
-    grantPublic(id, operation) {
+    grantPublic(id: string, operation: string) {
         return new StreamrApiRequest(this.options)
             .method('POST')
             .endpoint('streams', id, 'permissions')
@@ -251,7 +273,7 @@ class Streams {
             })
     }
 
-    grant(id, targetUser, operation) {
+    grant(id: string, targetUser: string, operation: string) {
         return new StreamrApiRequest(this.options)
             .method('POST')
             .endpoint('streams', id, 'permissions')
@@ -261,19 +283,19 @@ class Streams {
             })
     }
 
-    getOwnPermissions(id) {
+    getOwnPermissions(id: string) {
         return new StreamrApiRequest(this.options)
             .method('GET')
             .endpoint('streams', id, 'permissions', 'me')
     }
 
-    delete(streamId, permissionId) {
+    delete(streamId: string, permissionId: string) {
         return new StreamrApiRequest(this.options)
             .method('DELETE')
             .endpoint('streams', streamId, 'permissions', permissionId)
     }
 
-    list(queryParams) {
+    list(queryParams: any) {
         return new StreamrApiRequest(this.options)
             .method('GET')
             .endpoint('streams')
@@ -282,36 +304,39 @@ class Streams {
 }
 
 class Canvases {
-    constructor(options) {
+
+    options: any
+
+    constructor(options: any) {
         this.options = options
     }
 
-    create(body) {
+    create(body: any) {
         return new StreamrApiRequest(this.options)
             .method('POST')
             .endpoint('canvases')
             .withBody(body)
     }
 
-    get(id) {
+    get(id: string) {
         return new StreamrApiRequest(this.options)
             .method('GET')
             .endpoint('canvases', id)
     }
 
-    start(id) {
+    start(id: string) {
         return new StreamrApiRequest(this.options)
             .method('POST')
             .endpoint('canvases', id, 'start')
     }
 
-    stop(id) {
+    stop(id: string) {
         return new StreamrApiRequest(this.options)
             .method('POST')
             .endpoint('canvases', id, 'stop')
     }
 
-    getRuntimeState(id, path) {
+    getRuntimeState(id: string, path: string) {
         return new StreamrApiRequest(this.options)
             .method('POST')
             .endpoint('canvases', id, path, 'request')
@@ -322,11 +347,14 @@ class Canvases {
 }
 
 class Subscriptions {
-    constructor(options) {
+
+    options: any
+
+    constructor(options: any) {
         this.options = options
     }
 
-    create(body) {
+    create(body: any) {
         return new StreamrApiRequest(this.options)
             .method('POST')
             .endpoint('subscriptions')
@@ -341,11 +369,14 @@ class Subscriptions {
 }
 
 class IntegrationKeys {
-    constructor(options) {
+
+    options: any
+
+    constructor(options: any) {
         this.options = options
     }
 
-    create(body) {
+    create(body: any) {
         return new StreamrApiRequest(this.options)
             .method('POST')
             .endpoint('integration_keys')
@@ -354,12 +385,16 @@ class IntegrationKeys {
 }
 
 class Permissions {
-    constructor(resourcesName, options) {
+
+    resourcesName: string
+    options: any
+
+    constructor(resourcesName: string, options: any) {
         this.resourcesName = resourcesName
         this.options = options
     }
 
-    getOwnPermissions(id) {
+    getOwnPermissions(id: string) {
         return new StreamrApiRequest(this.options)
             .method('GET')
             .endpoint(this.resourcesName, id, 'permissions', 'me')
@@ -367,7 +402,10 @@ class Permissions {
 }
 
 class DataUnions {
-    constructor(options) {
+
+    options: any
+
+    constructor(options: any) {
         this.options = options
     }
 
@@ -377,7 +415,7 @@ class DataUnions {
             .endpoint('dataunions')
     }
 
-    approveJoinRequest(id, contractAddress) {
+    approveJoinRequest(id: string, contractAddress: string) {
         return new StreamrApiRequest(this.options)
             .method('PUT')
             .endpoint('dataunions', contractAddress, 'joinRequests', id)
@@ -386,30 +424,33 @@ class DataUnions {
 }
 
 class StorageNodes {
-    constructor(options) {
+
+    options: any
+
+    constructor(options: any) {
         this.options = options
     }
 
-    findStreamsByStorageNode(address) {
+    findStreamsByStorageNode(address: string) {
         return new StreamrApiRequest(this.options)
             .method('GET')
             .endpoint('storageNodes', address, 'streams')
     }
 
-    findStorageNodesByStream(id) {
+    findStorageNodesByStream(id: string) {
         return new StreamrApiRequest(this.options)
             .method('GET')
             .endpoint('streams', id, 'storageNodes')
     }
 
-    addStorageNodeToStream(storageNodeAddress, streamId) {
+    addStorageNodeToStream(storageNodeAddress: string, streamId: string) {
         return new StreamrApiRequest(this.options)
             .method('POST')
             .endpoint('streams', streamId, 'storageNodes')
             .withBody({address: storageNodeAddress})
     }
 
-    removeStorageNodeFromStream(storageNodeAddress, streamId) {
+    removeStorageNodeFromStream(storageNodeAddress: string, streamId: string) {
         return new StreamrApiRequest(this.options)
             .method('DELETE')
             .endpoint('streams', streamId, 'storageNodes', storageNodeAddress)
@@ -417,7 +458,10 @@ class StorageNodes {
 }
 
 class NotFound {
-    constructor(options) {
+
+    options: any
+
+    constructor(options: any) {
         this.options = options
     }
 
@@ -433,7 +477,7 @@ const options = {
     baseUrl: 'http://localhost/api/v1/',
     logging: LOGGING_ENABLED,
 }
-module.exports = {
+export default {
     api: {
         v1: {
             canvases: new Canvases(options),

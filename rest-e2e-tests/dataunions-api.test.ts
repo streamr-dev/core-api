@@ -1,15 +1,14 @@
-const assert = require('chai').assert
-const Streamr = require('./streamr-api-clients')
+import { assert } from 'chai'
+import Streamr from './streamr-api-clients'
 const StreamrClient = require('streamr-client')
-const getStreamrClient = require('./test-utilities.js').getStreamrClient
-const testUsers = require('./test-utilities.js').testUsers
+import { getStreamrClient, testUsers } from './test-utilities'
 
 const NODE_ADDRESS = '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c';  // address of streamr.ethereum.nodePrivateKey account
 const DATA_UNION_VERSION = 2;
 
-const createDataUnion = async (admin) => {
+const createDataUnion = async (admin: EthereumAccount) => {
 	const adminClient = getStreamrClient(admin);
-	dataUnion = await adminClient.deployDataUnion({
+	const dataUnion = await adminClient.deployDataUnion({
 		owner: admin.address,
 		adminFee: 0.1,
 		joinPartAgents: [NODE_ADDRESS]
@@ -17,7 +16,7 @@ const createDataUnion = async (admin) => {
 	return await dataUnion.deployed();
 };
 
-const createProduct = async (owner, beneficiaryAddress) => {
+const createProduct = async (owner: EthereumAccount, beneficiaryAddress: string) => {
 	const properties = {
 		beneficiaryAddress,
 		type: 'DATAUNION',
@@ -30,7 +29,7 @@ const createProduct = async (owner, beneficiaryAddress) => {
 	return json;
 };
 
-const createJoinRequest = async (joiner) => {
+const createJoinRequest = async (joiner: EthereumAccount, dataUnion: any) => {
 	const joinerClient = getStreamrClient(joiner);
 	const joinResponse = await joinerClient.joinDataUnion({
 		dataUnion,
@@ -54,15 +53,15 @@ describe('DataUnions API', () => {
 
 		this.timeout(60 * 1000);
 
-		let dataUnion;
+		let dataUnion: any;
 		const admin = testUsers.tokenHolder
 		const joiner = StreamrClient.generateEthereumAccount();
-		let joinRequestId;
+		let joinRequestId: string;
 
 		before(async () => {
 			dataUnion = await createDataUnion(admin)
 			await createProduct(admin, dataUnion.address)
-			joinRequestId = await createJoinRequest(joiner)
+			joinRequestId = await createJoinRequest(joiner, dataUnion)
 		});
 
 		it('happy path', async () => {

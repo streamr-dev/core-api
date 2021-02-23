@@ -1,5 +1,5 @@
-const assert = require('chai').assert
-const fetch = require('node-fetch')
+import { assert } from 'chai'
+import fetch from 'node-fetch'
 
 const URL = 'http://localhost/api/v1'
 const TIMEOUT = 5000
@@ -13,6 +13,7 @@ describe('CORS Requests', () => {
                 origin,
             },
             "method": "OPTIONS",
+            // @ts-expect-error
             "mode": "cors"
         })
     }

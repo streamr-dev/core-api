@@ -1,14 +1,11 @@
-const assert = require('chai').assert
-const Streamr = require('./streamr-api-clients')
-const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
-const assertStreamrClientResponseError = require('./test-utilities.js').assertStreamrClientResponseError
-const getStreamrClient = require('./test-utilities.js').getStreamrClient
-const testUsers = require('./test-utilities.js').testUsers
+import { assert } from 'chai'
+import Streamr from './streamr-api-clients'
+import { assertResponseIsError, assertStreamrClientResponseError, getStreamrClient, testUsers } from './test-utilities'
 const StreamrClient = require('streamr-client')
 
 describe('Streams API', () => {
 
-    let streamId
+    let streamId: string
     const streamOwner = StreamrClient.generateEthereumAccount()
     const anonymousUser = StreamrClient.generateEthereumAccount()
     const ensDomainOwner = testUsers.ensDomainOwner
@@ -23,7 +20,7 @@ describe('Streams API', () => {
     describe('POST /api/v1/streams', function () {
 
         it('happy path', async function () {
-            const assertValidResponse = (json, properties, expectedId) => {
+            const assertValidResponse = (json: any, properties: any, expectedId?: string) => {
                 assert.equal(json.name, properties.name)
                 assert.equal(json.description, properties.description)
                 assert.deepEqual(json.config, properties.config)
@@ -109,7 +106,7 @@ describe('Streams API', () => {
                 .call()
             const json = await response.json()
             assert.equal(response.status, 200)
-            const result = json.filter(stream => stream.id == streamId)
+            const result = json.filter((stream: any) => stream.id == streamId)
             assert.equal(result.length, 1, 'response should contain a single stream')
         })
     })
@@ -240,7 +237,7 @@ describe('Streams API', () => {
         })
 
         context('when called with valid body and permissions', () => {
-            let response
+            let response: any
 
             before(async () => {
                 response = await Streamr.api.v1.streams
