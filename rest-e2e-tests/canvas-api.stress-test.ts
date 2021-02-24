@@ -4,6 +4,7 @@ import { assert } from 'chai'
 const fs = require('fs')
 const Emitter = require('events')
 import Streamr from './streamr-api-clients'
+import { EthereumAccount } from './EthereumAccount'
 
 const REST_URL = 'http://localhost/api/v1'
 const WS_URL = 'ws://localhost/api/v1/ws'

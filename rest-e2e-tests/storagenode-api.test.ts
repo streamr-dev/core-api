@@ -3,6 +3,7 @@ import Streamr from './streamr-api-clients'
 import _ from 'lodash';
 const StreamrClient = require('streamr-client')
 import { getStreamrClient, assertEqualEthereumAddresses } from './test-utilities'
+import { EthereumAccount } from './EthereumAccount';
 
 const ETHEREUM_ADDRESS_PREFIX = '0x';
 const createMockEthereumAddress = () => {

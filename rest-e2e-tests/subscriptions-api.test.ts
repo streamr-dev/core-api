@@ -2,6 +2,7 @@ import { assert } from 'chai'
 import Streamr from './streamr-api-clients'
 import { SchemaValidator } from './schema-validator'
 import { assertResponseIsError, testUsers} from './test-utilities'
+import { EthereumAccount } from './EthereumAccount'
 const StreamrClient = require('streamr-client')
 
 const schemaValidator = new SchemaValidator()

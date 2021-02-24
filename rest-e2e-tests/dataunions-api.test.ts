@@ -2,6 +2,7 @@ import { assert } from 'chai'
 import Streamr from './streamr-api-clients'
 const StreamrClient = require('streamr-client')
 import { getStreamrClient, testUsers } from './test-utilities'
+import { EthereumAccount } from './EthereumAccount'
 
 const NODE_ADDRESS = '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c';  // address of streamr.ethereum.nodePrivateKey account
 const DATA_UNION_VERSION = 2;

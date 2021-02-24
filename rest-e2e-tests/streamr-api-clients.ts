@@ -3,6 +3,7 @@ import url from 'url'
 import querystring from 'querystring'
 import FormData from 'form-data'
 import { getSessionToken } from './test-utilities'
+import { EthereumAccount } from './EthereumAccount'
 
 class StreamrApiRequest {
 

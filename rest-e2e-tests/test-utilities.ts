@@ -2,6 +2,7 @@ import { assert } from 'chai'
 import _ from 'lodash';
 const StreamrClient = require('streamr-client')
 import { Wallet } from '@ethersproject/wallet'
+import { EthereumAccount } from './EthereumAccount';
 
 export const assertResponseIsError = async (response: any, statusCode: number, programmaticCode: string, includeInMessage?: string) => {
     const json = await response.json()
