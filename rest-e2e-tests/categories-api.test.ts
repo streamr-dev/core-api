@@ -1,13 +1,13 @@
-const assert = require('chai').assert
-const Streamr = require('./streamr-api-clients')
-const SchemaValidator = require('./schema-validator')
+import { assert } from 'chai'
+import Streamr from './streamr-api-clients'
+import { SchemaValidator } from './schema-validator'
 
 const schemaValidator = new SchemaValidator()
 
 describe('Categories API', () => {
     describe('GET /api/v1/categories', () => {
-        let response
-        let json
+        let response: any
+        let json: any
 
         before(async () => {
             response = await Streamr.api.v1.categories.list().call()
@@ -54,7 +54,7 @@ describe('Categories API', () => {
         })
 
         it('body passes schema validation', () => {
-            json.forEach((categoryData) => {
+            json.forEach((categoryData: any) => {
                 const errors = schemaValidator.validateCategory(categoryData)
                 assert(errors.length === 0, schemaValidator.toMessages(errors))
             })

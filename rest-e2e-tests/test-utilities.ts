@@ -1,8 +1,10 @@
-const assert = require('chai').assert
-const _ = require('lodash');
+import { assert } from 'chai'
+import _ from 'lodash';
 const StreamrClient = require('streamr-client')
+import { Wallet } from '@ethersproject/wallet'
+import { EthereumAccount } from './EthereumAccount';
 
-async function assertResponseIsError(response, statusCode, programmaticCode, includeInMessage) {
+export const assertResponseIsError = async (response: any, statusCode: number, programmaticCode: string, includeInMessage?: string) => {
     const json = await response.json()
     assert.equal(response.status, statusCode)
     assert.equal(json.code, programmaticCode)
@@ -11,22 +13,22 @@ async function assertResponseIsError(response, statusCode, programmaticCode, inc
     }
 }
 
-const assertStreamrClientResponseError = async (request, expectedStatusCode) => {
+export const assertStreamrClientResponseError = async (request: any, expectedStatusCode: number) => {
 	return request
 		.then(() => {
 			assert.fail('Should response with an error code')
 		})
-		.catch(e => {
+		.catch((e: any) => {
 			assert.equal(e.response.status, expectedStatusCode)
 		})
 }
 
-const assertEqualEthereumAddresses = (actual, expected) => {
-	const normalized = address => address ? address.toLowerCase : address
+export const assertEqualEthereumAddresses = (actual: string|undefined, expected: string) => {
+	const normalized = (address: string|undefined) => address ? address.toLowerCase : address
 	assert.equal(normalized(actual), normalized(expected))
 }
 
-const getStreamrClient = (user) => {
+export const getStreamrClient = (user: EthereumAccount) => {
 	return new StreamrClient({
 		auth: {
 			privateKey: user.privateKey
@@ -47,9 +49,9 @@ const getStreamrClient = (user) => {
 	})
 }
 
-const cachedSessionTokens = {}
+const cachedSessionTokens: any = {}
 
-async function getSessionToken(user) {
+export const getSessionToken = async (user: EthereumAccount) => {
 	const privateKey = user.privateKey
 	if (cachedSessionTokens[privateKey] === undefined) {
 		const client = getStreamrClient(user)
@@ -61,17 +63,11 @@ async function getSessionToken(user) {
 	}
 }
 
-const testUsers = _.mapValues({
+export const testUsers = _.mapValues({
 	devOpsUser: '0x628acb12df34bb30a0b2f95ec2e6a743b386c5d4f63aa9f338bec6f613160e78',     // user_id=6 in the test DB, has ROLE_DEV_OPS authority
 	tokenHolder: '0x5e98cce00cff5dea6b454889f359a4ec06b9fa6b88e9d69b86de8e1c81887da0',    // owns tokens in dev mainchain and sidechain
 	ensDomainOwner: '0xe5af7834455b7239881b85be89d905d6881dcb4751063897f12be1b0dd546bdb'  // owns testdomain1.eth ENS domain in dev mainchain
-}, privateKey => ( { privateKey } ))
-
-module.exports = {
-	assertResponseIsError,
-	assertStreamrClientResponseError,
-	assertEqualEthereumAddresses,
-	getSessionToken,
-	testUsers,
-	getStreamrClient
-}
+}, (privateKey: string) => ( { 
+	privateKey,
+	address: new Wallet(privateKey).address
+} ))
