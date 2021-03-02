@@ -1,31 +1,30 @@
-const assert = require('chai').assert
+import { assert } from 'chai'
 const fs = require('fs')
 const zlib = require('zlib')
-const Streamr = require('./streamr-api-clients')
-const SchemaValidator = require('./schema-validator')
-const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
-const getStreamrClient = require('./test-utilities.js').getStreamrClient
-const testUsers = require('./test-utilities.js').testUsers
+import Streamr from './streamr-api-clients'
+import { SchemaValidator } from './schema-validator'
+import { assertResponseIsError, getStreamrClient, testUsers } from './test-utilities'
+import { EthereumAccount } from './EthereumAccount'
 const StreamrClient = require('streamr-client')
 
 const schemaValidator = new SchemaValidator()
 
-function assertIsPermission(data) {
+function assertIsPermission(data: any) {
     const errors = schemaValidator.validatePermission(data)
     assert(errors.length === 0, schemaValidator.toMessages(errors))
 }
 
-function assertIsProduct(data) {
+function assertIsProduct(data: any) {
     const errors = schemaValidator.validateProduct(data)
     assert(errors.length === 0, schemaValidator.toMessages(errors))
 }
 
-function assertIsStream(data) {
+function assertIsStream(data: any) {
     const errors = schemaValidator.validateStream(data)
     assert(errors.length === 0, schemaValidator.toMessages(errors))
 }
 
-async function createProductAndReturnId(productBody, user) {
+async function createProductAndReturnId(productBody: any, user: EthereumAccount) {
     const json = await Streamr.api.v1.products
         .create(productBody)
         .withAuthenticatedUser(user)
@@ -33,17 +32,17 @@ async function createProductAndReturnId(productBody, user) {
     return json.id
 }
 
-async function createStreamAndReturnId(streamBody, user) {
+async function createStreamAndReturnId(streamBody: any, user: EthereumAccount) {
     const stream = await getStreamrClient(user).createStream(streamBody)
     return stream.id
 }
 
 describe('Products API', function() {
-    let genericProductBody
+    let genericProductBody: any
 
-    let streamId1
-    let streamId2
-	let streamId3
+    let streamId1: string
+    let streamId2: string
+	let streamId3: string
 	const productOwner = StreamrClient.generateEthereumAccount()
 	const otherUser = StreamrClient.generateEthereumAccount()
 	const devOpsUser = testUsers.devOpsUser
@@ -164,7 +163,7 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response
+            let response: any
 
             before(async () => {
                 response = await Streamr.api.v1.products
@@ -245,7 +244,7 @@ describe('Products API', function() {
 
     describe('GET /api/v1/products/:id', () => {
 
-        let createdProductId
+        let createdProductId: string
 
         before(async () => {
             createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
@@ -270,8 +269,8 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response
-            let json
+            let response: any
+            let json: any
 
             before(async () => {
                 response = await Streamr.api.v1.products
@@ -321,7 +320,7 @@ describe('Products API', function() {
             },
         }
 
-        let createdProductId
+        let createdProductId: string
 
         before(async () => {
             createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
@@ -364,8 +363,8 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response
-            let json
+            let response: any
+            let json: any
 
             before(async () => {
                 response = await Streamr.api.v1.products
@@ -430,7 +429,7 @@ describe('Products API', function() {
 
     describe('POST /api/v1/products/:id/setDeploying', () => {
 
-        let createdProductId
+        let createdProductId: string
 
         before(async () => {
             createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
@@ -464,8 +463,8 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response
-            let json
+            let response: any
+            let json: any
 
             before(async () => {
                 response = await Streamr.api.v1.products
@@ -500,7 +499,7 @@ describe('Products API', function() {
             blockIndex: 80
         }
 
-        let createdProductId
+        let createdProductId: string
 
         before(async () => {
             createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
@@ -562,8 +561,8 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response
-            let json
+            let response: any
+            let json: any
 
             before(async () => {
                 response = await Streamr.api.v1.products
@@ -636,7 +635,7 @@ describe('Products API', function() {
 
     describe('POST /api/v1/products/:id/setUndeploying', () => {
 
-        let createdProductId
+        let createdProductId: string
 
         before(async () => {
             createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
@@ -678,8 +677,8 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response
-            let json
+            let response: any
+            let json: any
 
             before(async () => {
                 await Streamr.api.v1.products
@@ -723,7 +722,7 @@ describe('Products API', function() {
             blockIndex: 80
         }
 
-        let createdProductId
+        let createdProductId: string
 
         before(async () => {
             createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
@@ -775,8 +774,8 @@ describe('Products API', function() {
         })
 
         context('given Product in DEPLOYED state and having DevOps permission', () => {
-            let response
-            let json
+            let response: any
+            let json: any
 
             before(async () => {
                 await Streamr.api.v1.products
@@ -865,12 +864,12 @@ describe('Products API', function() {
 
             assert.equal(response.status, 200)
             assert.isAtLeast(json.length, 4)
-            json.forEach(productData => assertIsProduct(productData))
+            json.forEach((productData: any) => assertIsProduct(productData))
         })
     })
 
     describe('GET /api/v1/products/:id/streams', () => {
-        let createdProductId
+        let createdProductId: string
 
         before(async () => {
             createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
@@ -897,8 +896,8 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response
-            let json
+            let response: any
+            let json: any
 
             before(async () => {
                 response = await Streamr.api.v1.products
@@ -914,21 +913,21 @@ describe('Products API', function() {
             })
 
             it('Streams have expected ids', () => {
-                assert.sameMembers(json.map(stream => stream.id), [streamId1, streamId2])
+                assert.sameMembers(json.map((stream: any) => stream.id), [streamId1, streamId2])
             })
 
             it('Streams have expected names', () => {
-                assert.sameMembers(json.map(stream => stream.name), ['stream-1', 'stream-2'])
+                assert.sameMembers(json.map((stream: any) => stream.name), ['stream-1', 'stream-2'])
             })
 
             it('responds with list of Streams', () => {
-                json.forEach(stream => assertIsStream(stream))
+                json.forEach((stream: any) => assertIsStream(stream))
             })
         })
     })
 
     describe('POST /api/v1/products/:id/images', () => {
-        let createdProductId
+        let createdProductId: string
 
         before(async () => {
             createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
@@ -1001,8 +1000,8 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response
-            let json
+            let response: any
+            let json: any
 
             before(async () => {
                 response = await Streamr.api.v1.products
@@ -1060,7 +1059,7 @@ describe('Products API', function() {
     })
 
     describe('PUT /api/v1/products/:id/streams/:streamId', () => {
-        let createdProductId
+        let createdProductId: string
 
         before(async () => {
             createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
@@ -1111,7 +1110,7 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response
+            let response: any
 
             before(async () => {
                 response = await Streamr.api.v1.products
@@ -1130,13 +1129,13 @@ describe('Products API', function() {
                     .withAuthenticatedUser(productOwner)
                     .call()
                 const json = await response.json()
-                assert.include(json.map(stream => stream.id), streamId3)
+                assert.include(json.map((stream: any) => stream.id), streamId3)
             })
         })
     })
 
     describe('DELETE /api/v1/products/:id/streams/:streamId', () => {
-        let createdProductId
+        let createdProductId: string
 
         before(async () => {
             createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
@@ -1171,7 +1170,7 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response
+            let response: any
 
             before(async () => {
                 response = await Streamr.api.v1.products
@@ -1190,7 +1189,7 @@ describe('Products API', function() {
                     .withAuthenticatedUser(productOwner)
                     .call()
                 const json = await response.json()
-                assert.deepEqual(json.map(stream => stream.id), [streamId2])
+                assert.deepEqual(json.map((stream: any) => stream.id), [streamId2])
             })
         })
 
@@ -1204,15 +1203,15 @@ describe('Products API', function() {
     })
 
     describe('GET /api/v1/products/:id/permissions/me', () => {
-        let createdProductId
+        let createdProductId: string
 
         before(async () => {
             createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
         })
 
         context('when called with valid params, body, and headers', () => {
-            let response
-            let json
+            let response: any
+            let json: any
 
             before(async () => {
                 response = await Streamr.api.v1.products.permissions
@@ -1229,14 +1228,14 @@ describe('Products API', function() {
 
             it('responds with expected Permissions', () => {
                 assert.equal(json.length, 4)
-                json.forEach(p => assertIsPermission(p))
-                assert.deepEqual(json.map(p => p.operation), ['product_get', 'product_edit', 'product_delete', 'product_share'])
+                json.forEach((p: any) => assertIsPermission(p))
+                assert.deepEqual(json.map((p: any) => p.operation), ['product_get', 'product_edit', 'product_delete', 'product_share'])
             })
         })
     })
 
     describe('GET /api/v1/products/:id/deployFree', () => {
-        let freeProductId
+        let freeProductId: string
 
         before(async () => {
             const freeProductBody = {
@@ -1292,8 +1291,8 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response
-            let json
+            let response: any
+            let json: any
 
             before(async () => {
                 response = await Streamr.api.v1.products
@@ -1327,7 +1326,7 @@ describe('Products API', function() {
     })
 
     describe('GET /api/v1/products/:id/undeployFree', () => {
-        let freeProductId
+        let freeProductId: string
 
         before(async () => {
             const freeProductBody = {
@@ -1391,8 +1390,8 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response
-            let json
+            let response: any
+            let json: any
 
             before(async () => {
                 // Deploy 1st

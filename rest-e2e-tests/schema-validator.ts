@@ -1,11 +1,14 @@
-const Ajv = require('ajv')
-const categorySchema = require('./schemas/category.json')
-const permissionSchema = require('./schemas/permission.json')
-const productSchema = require('./schemas/product.json')
-const streamSchema = require('./schemas/stream.json')
-const subscriptionSchema = require('./schemas/subscription.json')
+import Ajv from 'ajv'
+import categorySchema from './schemas/category.json'
+import permissionSchema from './schemas/permission.json'
+import productSchema from './schemas/product.json'
+import streamSchema from './schemas/stream.json'
+import subscriptionSchema from './schemas/subscription.json'
 
-class SchemaValidator {
+export class SchemaValidator {
+
+    ajv: Ajv.Ajv
+
     constructor() {
         this.ajv = new Ajv({
             allErrors: true,
@@ -19,29 +22,28 @@ class SchemaValidator {
         })
     }
 
-    validateCategory(data) {
+    validateCategory(data: any) {
+        // @ts-expect-error
         return this.ajv.validate('Category', data) ? [] : [... this.ajv.errors]
     }
 
-    validatePermission(data) {
+    validatePermission(data: any) {
         return this.ajv.validate('Permission', data) ? [] : [... this.ajv.errors]
     }
 
-    validateProduct(data) {
+    validateProduct(data: any) {
         return this.ajv.validate('Product', data) ? [] : [... this.ajv.errors]
     }
 
-    validateStream(data) {
+    validateStream(data: any) {
         return this.ajv.validate('Stream', data) ? [] : [... this.ajv.errors]
     }
 
-    validateSubscription(data) {
+    validateSubscription(data: any) {
         return this.ajv.validate('Subscription', data) ? [] : [... this.ajv.errors]
     }
 
-    toMessages(errors) {
+    toMessages(errors: any) {
         return this.ajv.errorsText(errors)
     }
 }
-
-module.exports = SchemaValidator

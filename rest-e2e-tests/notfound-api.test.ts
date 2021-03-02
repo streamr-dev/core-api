@@ -1,13 +1,13 @@
-const assert = require('chai').assert
+import { assert } from 'chai'
 const StreamrClient = require('streamr-client')
-const Streamr = require('./streamr-api-clients')
+import Streamr from './streamr-api-clients'
 
 describe('REST API', function() {
 
     const testUser = StreamrClient.generateEthereumAccount()
 
     describe('GET /api/v1/page-not-found', function() {
-        const assertContentLengthIsZero = async function (response) {
+        const assertContentLengthIsZero = async function (response: any) {
             const body = await response.text()
             const bodyLenBytes = body.length
             assert.equal(bodyLenBytes, 0)

@@ -1,5 +1,5 @@
-const assert = require('chai').assert
-const fetch = require('node-fetch')
+import { assert } from 'chai'
+import fetch from 'node-fetch'
 
 const URL = 'http://localhost/api/v1'
 const API_KEY = 'tester1-api-key'
@@ -7,7 +7,7 @@ const TIMEOUT = 10000
 
 describe('Login API', () => {
 
-    function loginWithApiKey(apiKey) {
+    function loginWithApiKey(apiKey: string) {
         return fetch(`${URL}/login/apikey`, {
             method: 'POST',
             headers: {
@@ -19,7 +19,7 @@ describe('Login API', () => {
         })
     }
 
-    function getUserDetails(sessionToken) {
+    function getUserDetails(sessionToken: string) {
         return fetch(`${URL}/users/me`, {
             method: 'GET',
             headers: {
@@ -29,12 +29,12 @@ describe('Login API', () => {
         })
     }
 
-    function getStreamPermissions(streamId, sessionToken) {
-        const headers = {
+    function getStreamPermissions(streamId: string, sessionToken?: string) {
+        const headers: any = {
             'Content-Type': 'application/json',
         }
         if (sessionToken) {
-            headers.Authorization = 'Bearer '+sessionToken
+            headers.Authorization = 'Bearer ' + sessionToken
         }
         return fetch(`${URL}/streams/${streamId}/permissions/me`, {
             method: 'GET',
@@ -42,8 +42,8 @@ describe('Login API', () => {
         })
     }
 
-    function sleep(ms) {
-        return new Promise(resolve => setTimeout(() => resolve(), ms))
+    function sleep(ms: number) {
+        return new Promise(resolve => setTimeout(() => resolve(undefined), ms))
     }
 
     describe('POST /api/v1/login/apikey', () => {
