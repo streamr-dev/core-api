@@ -164,8 +164,8 @@ streamr.cps.maxConnTotal = 400
 streamr.cps.maxConnPerRoute = 200
 
 // Data Union 2.0
-streamr.dataunion.mainnet.factory.address = System.getProperty("streamr.dataunion.mainnet.factory.address") ? System.getProperty("streamr.dataunion.mainnet.factory.address") : "0x5E959e5d5F3813bE5c6CeA996a286F734cc9593b"
-streamr.dataunion.sidechain.factory.address = System.getProperty("streamr.dataunion.sidechain.factory.address") ? System.getProperty("streamr.dataunion.sidechain.factory.address") : "0x4081B7e107E59af8E82756F96C751174590989FE"
+streamr.dataunion.mainnet.factory.address = System.getProperty("streamr.dataunion.mainnet.factory.address") ? System.getProperty("streamr.dataunion.mainnet.factory.address") : "0x4bbcBeFBEC587f6C4AF9AF9B48847caEa1Fe81dA"
+streamr.dataunion.sidechain.factory.address = System.getProperty("streamr.dataunion.sidechain.factory.address") ? System.getProperty("streamr.dataunion.sidechain.factory.address") : "0x4A4c4759eb3b7ABee079f832850cD3D0dC48D927"
 
 /**
  * Streamr cluster config
