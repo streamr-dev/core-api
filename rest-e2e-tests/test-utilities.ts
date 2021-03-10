@@ -37,7 +37,7 @@ export const getStreamrClient = (user: EthereumAccount) => {
 		restUrl: 'http://localhost/api/v1',
 		tokenAddress: '0xbAA81A0179015bE47Ad439566374F2Bae098686F',
 		tokenAddressSidechain: '0x73Be21733CC5D08e1a14Ea9a399fb27DB3BEf8fF',
-		factoryMainnetAddress: '0x5E959e5d5F3813bE5c6CeA996a286F734cc9593b',
+		factoryMainnetAddress: '0x4bbcBeFBEC587f6C4AF9AF9B48847caEa1Fe81dA',
 		sidechain: {
 			url: 'http://localhost:8546'
 		},
