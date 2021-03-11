@@ -5,11 +5,11 @@ import com.streamr.client.dataunion.DataUnion
 import com.streamr.client.dataunion.DataUnionClient
 import com.streamr.client.dataunion.EthereumTransactionReceipt
 import com.unifina.domain.*
+import com.unifina.utils.ApplicationConfig
 import com.unifina.utils.ThreadUtil
+import grails.util.Holders
 import groovy.json.JsonSlurper
 import org.apache.log4j.Logger
-import com.unifina.utils.ApplicationConfig
-import grails.util.Holders
 
 class DataUnionJoinRequestService {
 
@@ -102,7 +102,9 @@ class DataUnionJoinRequestService {
 		log.debug(String.format("entering findStreams(%s)", c))
 		List<Product> products = Product.createCriteria().list {
 			eq("type", Product.Type.DATAUNION)
-			ilike("beneficiaryAddress", c.contractAddress) // ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
+			// ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems
+			// are in use (checksum-case, lower-case at least)
+			ilike("beneficiaryAddress", c.contractAddress)
 		}
 		Set<Stream> streams = new HashSet<>()
 		for (Product p : products) {
@@ -180,7 +182,9 @@ class DataUnionJoinRequestService {
 		if (cmd.secret) {
 			// Find DataUnionSecret by contractAddress
 			DataUnionSecret secret = DataUnionSecret.createCriteria().get {
-				ilike("contractAddress", contractAddress)	// ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
+				// ilike = case-insensitive like: Ethereum addresses are case-insensitive but different
+				// case systems are in use (checksum-case, lower-case at least)
+				ilike("contractAddress", contractAddress)
 				eq("secret", cmd.secret)
 			}
 			if (secret) {
@@ -246,7 +250,10 @@ class DataUnionJoinRequestService {
 			permissionService.systemRevoke(c.user, s, Permission.Operation.STREAM_GET)
 			permissionService.systemRevoke(c.user, s, Permission.Operation.STREAM_PUBLISH)
 		}
-		sendMessage(c, "part")
+		int version = getVersion(c.contractAddress)
+		if (version == 1) {
+			sendMessage(c, "part")
+		}
 		c.delete()
 	}
 
