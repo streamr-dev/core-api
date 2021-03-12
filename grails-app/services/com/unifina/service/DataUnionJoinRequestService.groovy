@@ -53,6 +53,7 @@ class DataUnionJoinRequestService {
 			return
 		}
 
+		// Grant the member publish permission to streams in the Data Union
 		for (Stream s : findStreams(c)) {
 			if (permissionService.check(c.user, s, Permission.Operation.STREAM_PUBLISH)) {
 				log.debug(String.format("user %s already has write permission to %s (%s), skipping grant", c.user.username, s.name, s.id))
@@ -63,10 +64,13 @@ class DataUnionJoinRequestService {
 			}
 		}
 
+		// Join the member. Depends on DU version
 		int version = getVersion(c.contractAddress)
 		if (version == 1) {
+			// Send a join message to the joinPartStream
 			sendMessage(c, "join")
 		} else if (version == 2) {
+			// Add the member by calling the sidechain DU directly
 			DataUnionClient client = getClient()
 			DataUnion du = client.dataUnionFromMainnetAddress(c.contractAddress)
 			EthereumTransactionReceipt transactionReceipt = du.addMembers(c.memberAddress)
@@ -76,7 +80,7 @@ class DataUnionJoinRequestService {
 			throw new IllegalArgumentException("Invalid DataUnion version: " + version)
 		}
 
-		// Check that member status is now active
+		// Check that member status becomes active within a timeout
 		final int timeout = 10 * 1000 // ms
 		final int interval = 1000 // ms
 		int timeSpent
@@ -89,7 +93,7 @@ class DataUnionJoinRequestService {
 			}
 		}
 		if (timeSpent >= timeout) {
-			throw new DataUnionJoinRequestException("Member status did not become active within ${timeout} ms")
+			throw new DataUnionJoinRequestException("Member ${c.memberAddress} status in Data Union ${c.contractAddress} did not become active within ${timeout} ms")
 		}
 
 		log.debug("exiting onApproveJoinRequest")
