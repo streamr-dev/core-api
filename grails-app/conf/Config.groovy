@@ -232,7 +232,6 @@ streamr.ethereum.datacoinAddress = System.getProperty("streamr.ethereum.datacoin
  * -Dstreamr.ethereum.networks.someNetwork=http://some-network-rpc-url
  * -Dstreamr.ethereum.networks.anotherNetwork=http://some-network-rpc-url
  */
-streamr.ethereum.defaultNetwork = System.getProperty("streamr.ethereum.defaultNetwork") ?: streamr.ethereum.networks.keySet().first()
 streamr.ethereum.networks = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.networks.", System.getProperties()) ?: [
 	local: "http://localhost:8545",
 	sidechain: "http://localhost:8546",
@@ -243,7 +242,7 @@ streamr.ethereum.wss = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.
 ]
 // Ethereum identity of this instance. Don't use this silly development private key for anything.
 streamr.ethereum.nodePrivateKey = "".equals(System.getProperty("streamr.ethereum.nodePrivateKey", "")) ? "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF" : System.getProperty("streamr.ethereum.nodePrivateKey")
-
+streamr.ethereum.defaultNetwork = System.getProperty("streamr.ethereum.defaultNetwork") ?: streamr.ethereum.networks.keySet().first()
 
 // Data Union 2.0
 streamr.dataunion.sidechainName = System.getProperty("streamr.dataunion.sidechainName") ?: "sidechain"
