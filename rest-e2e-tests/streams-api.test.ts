@@ -91,6 +91,50 @@ describe('Streams API', () => {
             await assertStreamrClientResponseError(request, 422)
         })
 
+        it('create stream with duplicate id', async function () {
+            const now = Date.now()
+            const streamId = 'testdomain1.eth/foobar/test/' + now
+            const properties = {
+                id: streamId,
+                name: 'Hello world!',
+            }
+            const response = await getStreamrClient(ensDomainOwner).createStream(properties)
+            assert.equal(response.id, streamId)
+            const errorResponse = getStreamrClient(ensDomainOwner).createStream(properties)
+            await assertStreamrClientResponseError(errorResponse, 400)
+        })
+
+        it('create stream with too long id', async function () {
+            let streamId = 'testdomain1.eth/foobar/' + Date.now() + '/'
+            while (streamId.length < 256) {
+                streamId = streamId + 'x'
+            }
+            const properties = {
+                id: streamId,
+            }
+            const response = getStreamrClient(ensDomainOwner).createStream(properties)
+            await assertStreamrClientResponseError(response, 422)
+        })
+
+        it('create stream with too long description', async function () {
+            let streamId = 'testdomain1.eth/foobar/' + Date.now()
+            const properties = {
+                id: streamId,
+                description: 'x'.repeat(256),
+            }
+            const response = getStreamrClient(ensDomainOwner).createStream(properties)
+            await assertStreamrClientResponseError(response, 422)
+        })
+
+        it('create stream with too long name', async function () {
+            let streamId = 'testdomain1.eth/foobar/' + Date.now()
+            const properties = {
+                id: streamId,
+                name: 'x'.repeat(256),
+            }
+            const response = getStreamrClient(ensDomainOwner).createStream(properties)
+            await assertStreamrClientResponseError(response, 422)
+        })
     })
 
     describe('GET /api/v1/streams', () => {
