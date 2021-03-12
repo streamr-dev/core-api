@@ -47,55 +47,56 @@ class DataUnionJoinRequestService {
 	}
 
 	private void onApproveJoinRequest(DataUnionJoinRequest c) {
+		log.debug("onApproveJoinRequest: approved JoinRequest for address ${c.memberAddress} to data union ${c.contractAddress}")
+		if (isMemberActive(c.contractAddress, c.memberAddress)) {
+			log.debug("onApproveJoinRequest: Member ${c.memberAddress} is already active. Skipping.")
+			return
+		}
+
+		// Grant the member publish permission to streams in the Data Union
+		for (Stream s : findStreams(c)) {
+			if (permissionService.check(c.user, s, Permission.Operation.STREAM_PUBLISH)) {
+				log.debug(String.format("user %s already has write permission to %s (%s), skipping grant", c.user.username, s.name, s.id))
+			} else {
+				log.debug(String.format("granting write permission to %s (%s) for %s", s.name, s.id, c.user.username))
+				permissionService.systemGrant(c.user, s, Permission.Operation.STREAM_GET)
+				permissionService.systemGrant(c.user, s, Permission.Operation.STREAM_PUBLISH)
+			}
+		}
+
+		// Join the member. Depends on DU version
 		int version = getVersion(c.contractAddress)
 		if (version == 1) {
-			// Query DUS for join status
-			if (isMemberActive(c.contractAddress, c.memberAddress)) {
-				log.debug("onApproveJoinRequest: Member ${c.memberAddress} has already joined. Skip sending join message.")
-				return
-			}
-			log.debug("onApproveJoinRequest: approved JoinRequest for address ${c.memberAddress} to data union ${c.contractAddress}")
-			for (Stream s : findStreams(c)) {
-				if (permissionService.check(c.user, s, Permission.Operation.STREAM_PUBLISH)) {
-					log.debug(String.format("user %s already has write permission to %s (%s), skipping grant", c.user.username, s.name, s.id))
-				} else {
-					log.debug(String.format("granting write permission to %s (%s) for %s", s.name, s.id, c.user.username))
-					permissionService.systemGrant(c.user, s, Permission.Operation.STREAM_GET)
-					permissionService.systemGrant(c.user, s, Permission.Operation.STREAM_PUBLISH)
-				}
-			}
+			// Send a join message to the joinPartStream
 			sendMessage(c, "join")
-			final int timeout = 10 * 1000 // ms
-			final int interval = 1000 // ms
-			int timeSpent
-			for (timeSpent = 0; timeSpent < timeout; timeSpent += interval) {
-				ThreadUtil.sleep(interval);
-				if (isMemberActive(c.contractAddress, c.memberAddress)) {
-					break
-				}
-			}
-			if (timeSpent >= timeout) {
-				throw new DataUnionJoinRequestException("DUS error on registering join request")
-			}
-			log.debug("exiting onApproveJoinRequest")
 		} else if (version == 2) {
-			log.info("Join request approve: member=" + c.memberAddress + ", contract=" + c.contractAddress)
-			if (!isMemberActive(c.contractAddress, c.memberAddress)) {
-				DataUnionClient client = getClient()
-				DataUnion du = client.dataUnionFromMainnetAddress(c.contractAddress)
-				EthereumTransactionReceipt transactionReceipt = du.addMembers(c.memberAddress)
-				log.debug("transaction=" + transactionReceipt.getTransactionHash())
-				client.waitForSidechainTx(transactionReceipt.getTransactionHash(), JOIN_REQUEST_TRANSACTION_POLL_INTERVAL, JOIN_REQUEST_TRANSACTION_TIMEOUT)
-				boolean active = isMemberActive(c.contractAddress, c.memberAddress)
-				if (!active) {
-					throw new DataUnionJoinRequestException("Error on registering join request")
-				}
-			} else {
-				log.info("Already approved");
-			}
+			// Add the member by calling the sidechain DU directly
+			DataUnionClient client = getClient()
+			DataUnion du = client.dataUnionFromMainnetAddress(c.contractAddress)
+			EthereumTransactionReceipt transactionReceipt = du.addMembers(c.memberAddress)
+			log.debug("transaction=" + transactionReceipt.getTransactionHash())
+			client.waitForSidechainTx(transactionReceipt.getTransactionHash(), JOIN_REQUEST_TRANSACTION_POLL_INTERVAL, JOIN_REQUEST_TRANSACTION_TIMEOUT)
 		} else {
 			throw new IllegalArgumentException("Invalid DataUnion version: " + version)
 		}
+
+		// Check that member status becomes active within a timeout
+		final int timeout = 10 * 1000 // ms
+		final int interval = 1000 // ms
+		int timeSpent
+		for (timeSpent = 0; timeSpent < timeout; timeSpent += interval) {
+			if (timeSpent > 0) {
+				ThreadUtil.sleep(interval);
+			}
+			if (isMemberActive(c.contractAddress, c.memberAddress)) {
+				break
+			}
+		}
+		if (timeSpent >= timeout) {
+			throw new DataUnionJoinRequestException("Member ${c.memberAddress} status in Data Union ${c.contractAddress} did not become active within ${timeout} ms")
+		}
+
+		log.debug("exiting onApproveJoinRequest")
 	}
 
 	protected Set<Stream> findStreams(DataUnionJoinRequest c) {
