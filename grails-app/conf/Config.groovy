@@ -163,10 +163,6 @@ streamr.cps.maxConnTotal = 400
 // Maximum number of connections per route
 streamr.cps.maxConnPerRoute = 200
 
-// Data Union 2.0
-streamr.dataunion.mainnet.factory.address = System.getProperty("streamr.dataunion.mainnet.factory.address") ? System.getProperty("streamr.dataunion.mainnet.factory.address") : "0x4bbcBeFBEC587f6C4AF9AF9B48847caEa1Fe81dA"
-streamr.dataunion.sidechain.factory.address = System.getProperty("streamr.dataunion.sidechain.factory.address") ? System.getProperty("streamr.dataunion.sidechain.factory.address") : "0x4A4c4759eb3b7ABee079f832850cD3D0dC48D927"
-
 /**
  * Streamr cluster config
  */
@@ -247,6 +243,11 @@ streamr.ethereum.wss = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.
 // Ethereum identity of this instance. Don't use this silly development private key for anything.
 streamr.ethereum.nodePrivateKey = "".equals(System.getProperty("streamr.ethereum.nodePrivateKey", "")) ? "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF" : System.getProperty("streamr.ethereum.nodePrivateKey")
 streamr.ethereum.defaultNetwork = System.getProperty("streamr.ethereum.defaultNetwork") ?: streamr.ethereum.networks.keySet().first()
+
+// Data Union 2.0
+streamr.dataunion.sidechainName = System.getProperty("streamr.dataunion.sidechainName") ?: "sidechain"
+streamr.dataunion.mainnet.factory.address = System.getProperty("streamr.dataunion.mainnet.factory.address") ? System.getProperty("streamr.dataunion.mainnet.factory.address") : "0x4bbcBeFBEC587f6C4AF9AF9B48847caEa1Fe81dA"
+streamr.dataunion.sidechain.factory.address = System.getProperty("streamr.dataunion.sidechain.factory.address") ? System.getProperty("streamr.dataunion.sidechain.factory.address") : "0x4A4c4759eb3b7ABee079f832850cD3D0dC48D927"
 
 environments {
 	development {

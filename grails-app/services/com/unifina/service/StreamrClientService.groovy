@@ -133,8 +133,8 @@ class StreamrClientService {
 			websocketUrl,
 			restUrl
 		)
-		options.setMainnetRpcUrl(ApplicationConfig.getString("streamr.ethereum.networks.local"))
-		options.setSidechainRpcUrl(ApplicationConfig.getString("streamr.ethereum.networks.sidechain"))
+		options.setMainnetRpcUrl(ApplicationConfig.getString("streamr.ethereum.networks.${ApplicationConfig.getString("streamr.ethereum.defaultNetwork")}"))
+		options.setSidechainRpcUrl(ApplicationConfig.getString("streamr.ethereum.networks.${ApplicationConfig.getString("streamr.dataunion.sidechainName")}"))
 		options.setDataUnionMainnetFactoryAddress(ApplicationConfig.getString("streamr.dataunion.mainnet.factory.address"))
 		options.setDataUnionSidechainFactoryAddress(ApplicationConfig.getString("streamr.dataunion.sidechain.factory.address"))
 		return clientConstructor.newInstance(options)
