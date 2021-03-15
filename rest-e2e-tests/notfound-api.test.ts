@@ -1,19 +1,20 @@
 import { assert } from 'chai'
-const StreamrClient = require('streamr-client')
+import { StreamrClient } from 'streamr-client'
 import Streamr from './streamr-api-clients'
+import { Response } from 'node-fetch'
 
 describe('REST API', function() {
 
     const testUser = StreamrClient.generateEthereumAccount()
 
     describe('GET /api/v1/page-not-found', function() {
-        const assertContentLengthIsZero = async function (response: any) {
+        const assertContentLengthIsZero = async function (response: Response) {
             const body = await response.text()
             const bodyLenBytes = body.length
             assert.equal(bodyLenBytes, 0)
 
             const cl = response.headers.get('Content-Length')
-            assert.equal(cl, 0)
+            assert.equal(cl, '0')
         }
         it('anonymous access responds with 404', async () => {
             const response = await Streamr.api.v1.not_found.notFound().call()

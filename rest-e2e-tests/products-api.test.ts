@@ -5,7 +5,8 @@ import Streamr from './streamr-api-clients'
 import { SchemaValidator } from './schema-validator'
 import { assertResponseIsError, getStreamrClient, testUsers } from './test-utilities'
 import { EthereumAccount } from './EthereumAccount'
-const StreamrClient = require('streamr-client')
+import { StreamrClient } from 'streamr-client'
+import { Response } from 'node-fetch'
 
 const schemaValidator = new SchemaValidator()
 
@@ -163,7 +164,7 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response: any
+            let response: Response
 
             before(async () => {
                 response = await Streamr.api.v1.products
@@ -269,7 +270,7 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response: any
+            let response: Response
             let json: any
 
             before(async () => {
@@ -363,7 +364,7 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response: any
+            let response: Response
             let json: any
 
             before(async () => {
@@ -463,7 +464,7 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response: any
+            let response: Response
             let json: any
 
             before(async () => {
@@ -561,7 +562,7 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response: any
+            let response: Response
             let json: any
 
             before(async () => {
@@ -677,7 +678,7 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response: any
+            let response: Response
             let json: any
 
             before(async () => {
@@ -774,7 +775,7 @@ describe('Products API', function() {
         })
 
         context('given Product in DEPLOYED state and having DevOps permission', () => {
-            let response: any
+            let response: Response
             let json: any
 
             before(async () => {
@@ -896,7 +897,7 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response: any
+            let response: Response
             let json: any
 
             before(async () => {
@@ -1000,7 +1001,7 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response: any
+            let response: Response
             let json: any
 
             before(async () => {
@@ -1110,7 +1111,7 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response: any
+            let response: Response
 
             before(async () => {
                 response = await Streamr.api.v1.products
@@ -1170,7 +1171,7 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response: any
+            let response: Response
 
             before(async () => {
                 response = await Streamr.api.v1.products
@@ -1210,7 +1211,7 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, and headers', () => {
-            let response: any
+            let response: Response
             let json: any
 
             before(async () => {
@@ -1291,7 +1292,7 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response: any
+            let response: Response
             let json: any
 
             before(async () => {
@@ -1390,7 +1391,7 @@ describe('Products API', function() {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response: any
+            let response: Response
             let json: any
 
             before(async () => {

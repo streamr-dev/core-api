@@ -3,7 +3,8 @@ import Streamr from './streamr-api-clients'
 import { SchemaValidator } from './schema-validator'
 import { assertResponseIsError, testUsers} from './test-utilities'
 import { EthereumAccount } from './EthereumAccount'
-const StreamrClient = require('streamr-client')
+import { StreamrClient } from 'streamr-client'
+import { Response } from 'node-fetch'
 
 const schemaValidator = new SchemaValidator()
 
@@ -194,7 +195,7 @@ describe('Subscriptions API', () => {
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
-            let response: any
+            let response: Response
             let json: any
 
             before(async () => {

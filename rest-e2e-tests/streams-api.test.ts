@@ -1,7 +1,8 @@
 import { assert } from 'chai'
 import Streamr from './streamr-api-clients'
 import { assertResponseIsError, assertStreamrClientResponseError, getStreamrClient, testUsers } from './test-utilities'
-const StreamrClient = require('streamr-client')
+import { StreamrClient } from 'streamr-client'
+import { Response } from 'node-fetch'
 
 describe('Streams API', () => {
 
@@ -40,7 +41,7 @@ describe('Streams API', () => {
                     fields: [
                         {
                             name: 'mock-field',
-                            type: 'string',
+                            type: <const> 'string',
                         },
                     ],
                 },
@@ -281,7 +282,7 @@ describe('Streams API', () => {
         })
 
         context('when called with valid body and permissions', () => {
-            let response: any
+            let response: Response
 
             before(async () => {
                 response = await Streamr.api.v1.streams

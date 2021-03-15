@@ -1,7 +1,7 @@
 import { assert } from 'chai'
 import Streamr from './streamr-api-clients'
 import _ from 'lodash';
-const StreamrClient = require('streamr-client')
+import { StreamrClient } from 'streamr-client'
 import { getStreamrClient, assertEqualEthereumAddresses } from './test-utilities'
 import { EthereumAccount } from './EthereumAccount';
 

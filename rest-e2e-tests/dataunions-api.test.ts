@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import Streamr from './streamr-api-clients'
-const StreamrClient = require('streamr-client')
+import { StreamrClient } from 'streamr-client'
 import { getStreamrClient, testUsers } from './test-utilities'
 import { EthereumAccount } from './EthereumAccount'
 
@@ -9,12 +9,10 @@ const DATA_UNION_VERSION = 2;
 
 const createDataUnion = async (admin: EthereumAccount) => {
 	const adminClient = getStreamrClient(admin);
-	const dataUnion = await adminClient.deployDataUnion({
-		owner: admin.address,
+	return await adminClient.deployDataUnion({
 		adminFee: 0.1,
 		joinPartAgents: [NODE_ADDRESS]
 	});
-	return await dataUnion.deployed();
 };
 
 const createProduct = async (owner: EthereumAccount, beneficiaryAddress: string) => {
@@ -30,12 +28,9 @@ const createProduct = async (owner: EthereumAccount, beneficiaryAddress: string)
 	return json;
 };
 
-const createJoinRequest = async (joiner: EthereumAccount, dataUnion: any) => {
+const createJoinRequest = async (joiner: EthereumAccount, dataUnionAddress: string) => {
 	const joinerClient = getStreamrClient(joiner);
-	const joinResponse = await joinerClient.joinDataUnion({
-		dataUnion,
-		member: joiner.address
-	});
+	const joinResponse = await joinerClient.getDataUnion(dataUnionAddress).join();
 	return joinResponse.id
 };
 
@@ -54,24 +49,18 @@ describe('DataUnions API', () => {
 
 		this.timeout(60 * 1000);
 
-		let dataUnion: any;
-		const admin = testUsers.tokenHolder
-		const joiner = StreamrClient.generateEthereumAccount();
-		let joinRequestId: string;
-
-		before(async () => {
-			dataUnion = await createDataUnion(admin)
-			await createProduct(admin, dataUnion.address)
-			joinRequestId = await createJoinRequest(joiner, dataUnion)
-		});
-
 		it('happy path', async () => {
+			const admin = testUsers.tokenHolder
+			const dataUnionAddress = (await createDataUnion(admin)).getAddress()
+			await createProduct(admin, dataUnionAddress)
+			const joiner = StreamrClient.generateEthereumAccount();
+			const joinRequestId = await createJoinRequest(joiner, dataUnionAddress)
 			const response = await Streamr.api.v1.dataunions
-				.approveJoinRequest(joinRequestId, dataUnion.address)
+				.approveJoinRequest(joinRequestId, dataUnionAddress)
 				.withAuthenticatedUser(admin)
 				.call();
 			assert.equal(response.status, 200);
-			await getStreamrClient(admin).hasJoined(joiner.address, { dataUnion })
+			await getStreamrClient().getDataUnion(dataUnionAddress).isMember(joiner.address)
 		});
 
 	})
