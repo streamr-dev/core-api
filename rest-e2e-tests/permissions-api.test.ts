@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import Streamr from './streamr-api-clients'
-const StreamrClient = require('streamr-client')
+import { StreamrClient, Stream, StreamPermision } from 'streamr-client'
 import { getSessionToken, getStreamrClient } from './test-utilities'
 
 describe('Permissions API', () => {
@@ -13,7 +13,7 @@ describe('Permissions API', () => {
     })
 
     describe('POST /api/v1/streams/{id}/permissions', () => {
-        let stream: any
+        let stream: Stream
 
         before(async () => {
             stream = await getStreamrClient(me).createStream({
@@ -55,7 +55,7 @@ describe('Permissions API', () => {
     })
 
     describe('DELETE /api/v1/streams/{streamId}/permissions/{permissionId}', function() {
-        let stream: any
+        let stream: Stream
 
         before(async function() {
             stream = await getStreamrClient(me).createStream({
@@ -85,7 +85,7 @@ describe('Permissions API', () => {
                 .call()
             const ownPermissions = await ownPermissionsResponse.json()
             assert.equal(ownPermissionsResponse.status, 200)
-            const sharePermission = ownPermissions.filter((permission: any) => permission.operation === 'stream_share')[0]
+            const sharePermission = ownPermissions.filter((permission: StreamPermision) => permission.operation === 'stream_share')[0]
 
             const response = await Streamr.api.v1.streams
                 .delete(stream.id, sharePermission.id)
@@ -101,9 +101,9 @@ describe('Permissions API', () => {
                 .call()
             const ownPermissions = await ownPermissionsResponse.json()
             assert.equal(ownPermissionsResponse.status, 200)
-            const permissionsToDelete = ownPermissions.filter((permission: any) => permission.operation !== 'stream_share')
+            const permissionsToDelete = ownPermissions.filter((permission: StreamPermision) => permission.operation !== 'stream_share')
 
-            permissionsToDelete.forEach(async function(permission: any) {
+            permissionsToDelete.forEach(async function(permission: StreamPermision) {
                 const response = await Streamr.api.v1.streams
                     .delete(stream.id, permission.id)
                     .withAuthenticatedUser(me)
