@@ -12,6 +12,9 @@ const WS_URL = 'ws://localhost/api/v1/ws'
 const TIMEOUT = 130 * 1000
 const NUM_MESSAGES = 50
 const WAIT_TIME = 15000
+// DEV storage node ("broker-node-storage-1" on streamr-docker-dev environment)
+const DEV_STORAGE_NODE_ADDRESS = '0xde1112f631486CfC759A50196853011528bC5FA0'
+const DEV_STORAGE_NODE_URL = 'http://10.200.10.1:8891'
 
 const pollCondition = async (condition: () => Promise<any>, timeout = TIMEOUT, interval = 100) => {
     let timeElapsed = 0
@@ -30,6 +33,10 @@ async function createStreamrClient(user: EthereumAccount) {
         restUrl: REST_URL,
         auth: {
             privateKey: user.privateKey,
+        },
+        storageNode: {
+            address: DEV_STORAGE_NODE_ADDRESS,
+            url: DEV_STORAGE_NODE_URL,
         },
     })
     await client.connect()
@@ -82,6 +89,10 @@ describe('Canvas API', function() {
 
         canvas = await canvasResponse.json()
         assert.equal(canvasResponse.status, 200, JSON.stringify(canvas))
+
+        const table = canvas.modules.find(({ name }: any) => name === 'Table')
+        const uiChannelStream = await streamrClient.getStream(table.uiChannel.id)
+        await uiChannelStream.addToStorageNode(DEV_STORAGE_NODE_ADDRESS)
     })
 
     after(async () => {
