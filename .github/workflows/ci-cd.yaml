@@ -172,23 +172,23 @@ jobs:
     name: ${{ matrix.config-name }} ${{ matrix.test-name }}
     needs:
       - test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     strategy:
       fail-fast: false
       matrix:
         test-name:
           - stream-cleartext-unsigned
-          - stream-cleartext-signed
-          - stream-encrypted-shared-signed
-          - stream-encrypted-shared-rotating-signed
-          - stream-encrypted-exchanged-rotating-signed
+#          - stream-cleartext-signed
+#          - stream-encrypted-shared-signed
+#          - stream-encrypted-shared-rotating-signed
+#          - stream-encrypted-exchanged-rotating-signed
         config-name:
           - default
           - js-only
           - java-only
-          - realtime-only
-          - js-realtime-only
-          - java-realtime-only
+#         - realtime-only
+#          - js-realtime-only
+#          - java-realtime-only
     env:
       NUM_MESSAGES: 20
       TEST_NAME: ${{ matrix.test-name }}
@@ -203,10 +203,6 @@ jobs:
         uses: streamr-dev/streamr-docker-dev-action@v1.0.0-alpha.3
         with:
           services-to-start: "mysql redis engine-and-editor cassandra parity-node0 parity-sidechain-node0 bridge broker-node-storage-1 nginx smtp"
-      - name: npm ci
-        run: npm ci
-      - name: npm link
-        run: cd dist && npm link
       - uses: actions/checkout@v2.3.4
         with:
           repository: streamr-dev/streamr-client-testing
@@ -219,7 +215,6 @@ jobs:
         run: |
           ## npm install is used because package-lock.json could be from a previous client version.
           npm install
-          npm link streamr-client
           ./gradlew fatjar
       - uses: nick-invision/retry@v2.4.0
         name: run-client-testing
