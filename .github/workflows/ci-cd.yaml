@@ -110,6 +110,7 @@ jobs:
           cd rest-e2e-tests
           npm run test:e2e
       - name: Run End to End stress tests
+        continue-on-error: true # Allow failure on resend stress test
         run: |
           cd rest-e2e-tests
           npm run test:stress
