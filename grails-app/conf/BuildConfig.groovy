@@ -77,7 +77,7 @@ grails.project.dependency.resolution = {
 		compile('com.udojava:EvalEx:1.6')
 		compile('com.mashape.unirest:unirest-java:1.4.9')
 		compile('org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.1')
-		compile('org.antlr:ST4:4.1')
+		compile('org.antlr:ST4:4.0.8')
 		compile('biz.paluch.redis:lettuce:3.5.0.Final') {
 			excludes('com.google.guava:guava:*')
 		}
