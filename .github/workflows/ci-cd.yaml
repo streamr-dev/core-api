@@ -213,8 +213,7 @@ jobs:
       - name: setup-client-testing
         working-directory: streamr-client-testing
         run: |
-          ## npm install is used because package-lock.json could be from a previous client version.
-          npm install
+          npm ci
           ./gradlew fatjar
       - uses: nick-invision/retry@v2.4.0
         name: run-client-testing
