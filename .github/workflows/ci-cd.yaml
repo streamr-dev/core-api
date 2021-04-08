@@ -116,6 +116,7 @@ jobs:
 
   build-docker:
     name: Build Docker and push to Docker Hub
+    if: github.event_name != 'pull_request'
     needs:
       - test
       - e2e
@@ -130,7 +131,6 @@ jobs:
           tags: |
             type=sha
             type=ref,event=branch
-            type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=dev
