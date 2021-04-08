@@ -171,6 +171,8 @@ db-rollback-1:
 .PHONY: docker-build-dev
 docker-build-dev: ## Build Docker dev container
 	docker build \
+		--no-cache \
+		--progress=plain \
 		--build-arg GRAILS_WAR_ENV=test \
 		--tag streamr/engine-and-editor:dev .
 
