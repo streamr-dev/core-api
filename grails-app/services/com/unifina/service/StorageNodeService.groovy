@@ -12,6 +12,36 @@ enum AssigmentEvent {
 	STREAM_REMOVED
 }
 
+class NotifyStorageNodeTask extends Thread {
+	EthereumAddress storageNodeAddress
+	String streamId
+	AssigmentEvent eventType
+	StreamService streamService
+	StreamrClientService streamrClientService
+
+	NotifyStorageNodeTask(EthereumAddress storageNodeAddress, String streamId, AssigmentEvent eventType, StreamService streamService, StreamrClientService streamrClientService) {
+		super("NotifyStorageNodeTask-" + System.currentTimeMillis())
+		this.storageNodeAddress = storageNodeAddress
+		this.streamId = streamId
+		this.eventType = eventType
+		this.streamService = streamService;
+		this.streamrClientService = streamrClientService
+	}
+
+	void run() {
+		Map<String,Object> message = new LinkedHashMap([
+			event: eventType.name(),
+			stream: [
+				id: streamId,
+				partitions: streamService.getStream(streamId).partitions
+			]
+		])
+		StreamrClient client = streamrClientService.getInstanceForThisEngineNode()
+		com.streamr.client.rest.Stream assignmentStream = client.getStream(StorageNodeService.createAssignmentStreamId())
+		client.publish(assignmentStream, message)
+	}
+}
+
 @GrailsCompileStatic
 class StorageNodeService {
 
@@ -41,7 +71,7 @@ class StorageNodeService {
 				storageNodeAddress: storageNodeAddress.toString()
 			)
 			StreamStorageNode saved = instance.save(validate: true)
-			notifyStorageNode(storageNodeAddress, streamId, AssigmentEvent.STREAM_ADDED)
+			new NotifyStorageNodeTask(storageNodeAddress, streamId, AssigmentEvent.STREAM_ADDED, streamService, streamrClientService).start()
 			return saved;
 		} else {
 			throw new DuplicateNotAllowedException("StorageNode", storageNodeAddress.toString())
@@ -52,7 +82,7 @@ class StorageNodeService {
 		StreamStorageNode instance = StreamStorageNode.findByStorageNodeAddressAndStreamId(storageNodeAddress.toString(), streamId)
 		if (instance != null) {
 			instance.delete()
-			notifyStorageNode(storageNodeAddress, streamId, AssigmentEvent.STREAM_REMOVED)
+			new NotifyStorageNodeTask(storageNodeAddress, streamId, AssigmentEvent.STREAM_REMOVED, streamService, streamrClientService).start()
 		} else {
 			throw new NotFoundException("StorageNode", storageNodeAddress.toString())
 		}
@@ -61,18 +91,5 @@ class StorageNodeService {
 	public static String createAssignmentStreamId() {
 		EthereumAddress nodeAddress = EthereumAddress.fromPrivateKey(ApplicationConfig.getString("streamr.ethereum.nodePrivateKey"))
 		return nodeAddress.toString() + "/storage-node-assignments"
-	}
-
-	private notifyStorageNode(EthereumAddress storageNodeAddress, String streamId, AssigmentEvent eventType) {
-		Map<String,Object> message = new LinkedHashMap([
-			event: eventType.name(),
-			stream: [
-				id: streamId,
-				partitions: streamService.getStream(streamId).partitions
-			]
-		])
-		StreamrClient client = streamrClientService.getInstanceForThisEngineNode()
-		com.streamr.client.rest.Stream assignmentStream = client.getStream(StorageNodeService.createAssignmentStreamId())
-		client.publish(assignmentStream, message)
 	}
 }
