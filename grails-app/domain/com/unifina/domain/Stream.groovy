@@ -204,4 +204,8 @@ class Stream implements Comparable {
 		}
 		throw new IllegalArgumentException("UI Channel path doesn't contain module id.")
 	}
+
+	public Integer getPartitions() {
+		return this.partitions
+	}
 }
