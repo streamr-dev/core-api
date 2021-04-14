@@ -7,11 +7,6 @@ import com.unifina.domain.EthereumAddress
 import com.unifina.utils.ApplicationConfig
 import grails.compiler.GrailsCompileStatic
 
-enum AssigmentEvent {
-	STREAM_ADDED,
-	STREAM_REMOVED
-}
-
 @GrailsCompileStatic
 class StorageNodeService {
 
@@ -41,7 +36,7 @@ class StorageNodeService {
 				storageNodeAddress: storageNodeAddress.toString()
 			)
 			StreamStorageNode saved = instance.save(validate: true)
-			notifyStorageNode(storageNodeAddress, streamId, AssigmentEvent.STREAM_ADDED)
+			new NotifyStorageNodeTask(storageNodeAddress, streamId, NotifyStorageNodeTask.AssigmentEvent.STREAM_ADDED, streamService, streamrClientService).start()
 			return saved;
 		} else {
 			throw new DuplicateNotAllowedException("StorageNode", storageNodeAddress.toString())
@@ -52,7 +47,7 @@ class StorageNodeService {
 		StreamStorageNode instance = StreamStorageNode.findByStorageNodeAddressAndStreamId(storageNodeAddress.toString(), streamId)
 		if (instance != null) {
 			instance.delete()
-			notifyStorageNode(storageNodeAddress, streamId, AssigmentEvent.STREAM_REMOVED)
+			new NotifyStorageNodeTask(storageNodeAddress, streamId, NotifyStorageNodeTask.AssigmentEvent.STREAM_REMOVED, streamService, streamrClientService).start()
 		} else {
 			throw new NotFoundException("StorageNode", storageNodeAddress.toString())
 		}
@@ -61,18 +56,5 @@ class StorageNodeService {
 	public static String createAssignmentStreamId() {
 		EthereumAddress nodeAddress = EthereumAddress.fromPrivateKey(ApplicationConfig.getString("streamr.ethereum.nodePrivateKey"))
 		return nodeAddress.toString() + "/storage-node-assignments"
-	}
-
-	private notifyStorageNode(EthereumAddress storageNodeAddress, String streamId, AssigmentEvent eventType) {
-		Map<String,Object> message = new LinkedHashMap([
-			event: eventType.name(),
-			stream: [
-				id: streamId,
-				partitions: streamService.getStream(streamId).partitions
-			]
-		])
-		StreamrClient client = streamrClientService.getInstanceForThisEngineNode()
-		com.streamr.client.rest.Stream assignmentStream = client.getStream(StorageNodeService.createAssignmentStreamId())
-		client.publish(assignmentStream, message)
 	}
 }
