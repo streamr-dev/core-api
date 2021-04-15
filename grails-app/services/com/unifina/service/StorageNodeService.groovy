@@ -1,12 +1,17 @@
 package com.unifina.service
 
+import com.streamr.client.StreamrClient
 import com.unifina.domain.Stream
 import com.unifina.domain.StreamStorageNode
 import com.unifina.domain.EthereumAddress
+import com.unifina.utils.ApplicationConfig
 import grails.compiler.GrailsCompileStatic
 
 @GrailsCompileStatic
 class StorageNodeService {
+
+	StreamService streamService
+	StreamrClientService streamrClientService
 
 	List<Stream> findStreamsByStorageNode(EthereumAddress storageNodeAddress) {
 		List<StreamStorageNode> items = StreamStorageNode.findAllByStorageNodeAddress(storageNodeAddress.toString())
@@ -30,7 +35,9 @@ class StorageNodeService {
 				streamId: streamId,
 				storageNodeAddress: storageNodeAddress.toString()
 			)
-			return instance.save(validate: true)
+			StreamStorageNode saved = instance.save(validate: true)
+			new NotifyStorageNodeTask(storageNodeAddress, streamId, NotifyStorageNodeTask.AssigmentEvent.STREAM_ADDED, streamService, streamrClientService).start()
+			return saved;
 		} else {
 			throw new DuplicateNotAllowedException("StorageNode", storageNodeAddress.toString())
 		}
@@ -40,8 +47,14 @@ class StorageNodeService {
 		StreamStorageNode instance = StreamStorageNode.findByStorageNodeAddressAndStreamId(storageNodeAddress.toString(), streamId)
 		if (instance != null) {
 			instance.delete()
+			new NotifyStorageNodeTask(storageNodeAddress, streamId, NotifyStorageNodeTask.AssigmentEvent.STREAM_REMOVED, streamService, streamrClientService).start()
 		} else {
 			throw new NotFoundException("StorageNode", storageNodeAddress.toString())
 		}
+	}
+
+	public static String createAssignmentStreamId() {
+		EthereumAddress nodeAddress = EthereumAddress.fromPrivateKey(ApplicationConfig.getString("streamr.ethereum.nodePrivateKey"))
+		return nodeAddress.toString() + "/storage-node-assignments"
 	}
 }

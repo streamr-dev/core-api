@@ -1,4 +1,4 @@
-FROM streamr/grails-builder:v0.0.3 AS builder
+FROM streamr/grails-builder:v0.0.6 AS builder
 # GRAILS_WAR_ENV argument must be 'prod' or 'test'. Default is 'prod'.
 ARG GRAILS_WAR_ENV
 ENV GRAILS_WAR_ENV=${GRAILS_WAR_ENV:-prod}
@@ -7,14 +7,16 @@ WORKDIR /src/engine-and-editor
 RUN grails -non-interactive -plain-output $GRAILS_WAR_ENV war
 
 
-FROM tomcat:7.0.106-jdk8-openjdk-buster
+FROM tomcat:7.0.106-jdk8-openjdk-slim-buster
 # bash is required by wait_for_it.sh script and provided by base image
 # curl is required for container healthcheck
 # mysql-client is required by entrypoint.sh
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get -y --no-install-recommends install \
 	curl \
-	default-mysql-client
+	default-mysql-client \
+	&& apt-get clean \
+	&& rm -rf /var/lib/apt/lists/*
 COPY src/conf/tomcat-server.xml /usr/local/tomcat/conf/server.xml
 COPY scripts/wait-for-it.sh scripts/entrypoint.sh /usr/local/tomcat/bin/
 COPY --from=builder /src/engine-and-editor/target/ROOT.war /usr/local/tomcat/webapps/streamr-core.war
@@ -41,8 +43,8 @@ ENV ETHEREUM_NETWORKS_LOCAL http://10.200.10.1:8545
 ENV ETHEREUM_NETWORKS_SIDECHAIN http://10.200.10.1:8546
 ENV ETHEREUM_SERVER_URL http://10.200.10.1:8545
 ENV STREAMR_ENCRYPTION_PASSWORD password
-ENV DATAUNION_MAINNET_FACTORY_ADDRESS 0x5E959e5d5F3813bE5c6CeA996a286F734cc9593b
-ENV DATAUNION_SIDECHAIN_FACTORY_ADDRESS 0x4081B7e107E59af8E82756F96C751174590989FE
+ENV DATAUNION_MAINNET_FACTORY_ADDRESS 0x4bbcBeFBEC587f6C4AF9AF9B48847caEa1Fe81dA
+ENV DATAUNION_SIDECHAIN_FACTORY_ADDRESS 0x4A4c4759eb3b7ABee079f832850cD3D0dC48D927
 
 # Flags to pass to the JVM
 ENV JAVA_OPTS \

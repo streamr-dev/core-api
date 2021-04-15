@@ -89,7 +89,7 @@ factory-reset: ## Run streamr-docker-dev factory-reset
 wipe: ## Run streamr-docker-dev stop and wipe
 	streamr-docker-dev wipe
 
-services := mysql redis cassandra parity-node0 parity-sidechain-node0 bridge data-union-server broker-node-storage-1 nginx smtp platform
+services := mysql redis cassandra parity-node0 parity-sidechain-node0 bridge data-union-server broker-node-no-storage-1 broker-node-storage-1 nginx smtp platform
 .PHONY: start
 start: ## Run streamr-docker-dev start ...
 	streamr-docker-dev start $(services)
@@ -171,6 +171,8 @@ db-rollback-1:
 .PHONY: docker-build-dev
 docker-build-dev: ## Build Docker dev container
 	docker build \
+		--no-cache \
+		--progress=plain \
 		--build-arg GRAILS_WAR_ENV=test \
 		--tag streamr/engine-and-editor:dev .
 

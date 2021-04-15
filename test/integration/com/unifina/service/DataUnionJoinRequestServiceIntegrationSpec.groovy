@@ -9,7 +9,7 @@ import spock.lang.Specification
 // This is an integration test because Grails doesn't support criteria queries in unit tests
 class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 	DataUnionJoinRequestService service = new DataUnionJoinRequestService()
-    User me
+	User me
 	com.streamr.client.rest.Stream joinPartStream
 	Category category
 	final String contractAddress = "0x0000000000000000000000000000000000000000"
@@ -171,7 +171,7 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		notFoundStats.statusCode = 404
 		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
 		okStats.statusCode = 200
-		okStats.body =  new JsonBuilder([
+		okStats.body = new JsonBuilder([
 			active: true,
 		]).toString()
 
@@ -217,11 +217,12 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 
 	void "delete test"() {
 		setup:
+		final String contractAddress = "0x0000000000000000000000000000000000000001"
 		Stream s1 = new Stream(name: "stream-1")
 		Stream s2 = new Stream(name: "stream-2")
 		Stream s3 = new Stream(name: "stream-3")
 		Stream s4 = new Stream(name: "stream-4")
-		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i+1}" } // assign ids
+		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i + 1}" } // assign ids
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: true)
 
 		Product product = new Product(
@@ -237,6 +238,7 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 			blockIndex: 30,
 			owner: me,
 			type: Product.Type.DATAUNION,
+			dataUnionVersion: 2,
 		)
 		product.save(failOnError: true, validate: true)
 
@@ -252,8 +254,6 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		when:
 		service.delete(contractAddress, r.id)
 		then:
-		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		1 * streamrClientMock.publish(_, [type: "part", addresses: [r.memberAddress]])
 		1 * service.permissionService.systemRevoke(me, s1, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemRevoke(me, s1, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemRevoke(me, s2, Permission.Operation.STREAM_PUBLISH)

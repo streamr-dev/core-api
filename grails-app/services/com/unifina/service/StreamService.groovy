@@ -8,6 +8,8 @@ import grails.validation.Validateable
 import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import org.hibernate.exception.ConstraintViolationException
+import org.hibernate.exception.DataException
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.validation.FieldError
 
@@ -18,7 +20,7 @@ class CreateStreamCommand {
 	String id
 	String name
 	String description
-	Map<String,Object> config
+	Map<String, Object> config
 	Integer partitions = 1
 	Boolean uiChannel = false
 	Boolean requireSignedData = false
@@ -73,7 +75,34 @@ class StreamService {
 		}
 
 		try {
-			stream.save(flush:true, failOnError: true)
+			stream.save(flush: true, failOnError: true)
+		} catch (final ConstraintViolationException | DataException e) {
+			final Throwable cause = e.getCause()
+			if (cause == null) {
+				log.error(e)
+				return
+			}
+			final String message = cause.getMessage()
+			final String errorPrefix = "Data truncation: Data too long for column"
+			if (message.startsWith(errorPrefix)) {
+				final List<String> names = new ArrayList<>()
+				names.add("id")
+				names.add("description")
+				names.add("name")
+				names.add("uiChannelPath")
+				names.add("uiChannelCanvas")
+				boolean isLogged = true
+				for (String name : names) {
+					final boolean doNotLogThisError = message.contains("'" + name + "'")
+					if (doNotLogThisError) {
+						isLogged = false
+						break
+					}
+				}
+				if (isLogged) {
+					log.error(e)
+				}
+			}
 		} catch (DataIntegrityViolationException e) {
 			// the failed integrity is most likely stream.id (the only reference field that can be set manually by the user)
 			throw new DuplicateNotAllowedException("Stream", stream.id)
@@ -102,7 +131,8 @@ class StreamService {
 
 	boolean isStreamEthereumPublisher(Stream stream, String ethereumAddress) {
 		IntegrationKey key = IntegrationKey.createCriteria().get {
-			ilike("idInService", ethereumAddress) // ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
+			ilike("idInService", ethereumAddress)
+			// ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
 		}
 		if (key == null || key.user == null) {
 			return false
@@ -142,4 +172,5 @@ class StreamService {
 			permissionService.systemGrant(user, example, Permission.Operation.STREAM_SUBSCRIBE)
 		}
 	}
+
 }

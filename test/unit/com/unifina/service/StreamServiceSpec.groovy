@@ -21,12 +21,16 @@ class StreamServiceSpec extends Specification {
 		Stream s0 = new Stream(
 			name: "example stream",
 			exampleType: ExampleType.SHARE
-		).save(failOnError: true)
+		)
+		s0.id = "stream-0"
+		s0.save(failOnError: true)
 		streams << s0
 		Stream s1 = new Stream(
 			name: "example 2 stream",
 			exampleType: ExampleType.SHARE
-		).save(failOnError: true)
+		)
+		s1.id = "stream-1"
+		s1.save(failOnError: true)
 		streams << s1
 
 		when:
@@ -73,9 +77,9 @@ class StreamServiceSpec extends Specification {
 	void "createStream uses its params"() {
 		when:
 		def params = new CreateStreamCommand(
-				name: "Test stream",
-				description: "Test stream",
-				requireSignedData: true
+			name: "Test stream",
+			description: "Test stream",
+			requireSignedData: true
 		)
 		service.createStream(params, me, null)
 

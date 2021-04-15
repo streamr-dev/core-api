@@ -1,14 +1,12 @@
-const assert = require('chai').assert
-const Streamr = require('./streamr-api-clients')
-const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
-const assertStreamrClientResponseError = require('./test-utilities.js').assertStreamrClientResponseError
-const getStreamrClient = require('./test-utilities.js').getStreamrClient
-const testUsers = require('./test-utilities.js').testUsers
-const StreamrClient = require('streamr-client')
+import { assert } from 'chai'
+import Streamr from './streamr-api-clients'
+import { assertResponseIsError, assertStreamrClientResponseError, getStreamrClient, testUsers } from './test-utilities'
+import { StreamrClient } from 'streamr-client'
+import { Response } from 'node-fetch'
 
 describe('Streams API', () => {
 
-    let streamId
+    let streamId: string
     const streamOwner = StreamrClient.generateEthereumAccount()
     const anonymousUser = StreamrClient.generateEthereumAccount()
     const ensDomainOwner = testUsers.ensDomainOwner
@@ -23,7 +21,7 @@ describe('Streams API', () => {
     describe('POST /api/v1/streams', function () {
 
         it('happy path', async function () {
-            const assertValidResponse = (json, properties, expectedId) => {
+            const assertValidResponse = (json: any, properties: any, expectedId?: string) => {
                 assert.equal(json.name, properties.name)
                 assert.equal(json.description, properties.description)
                 assert.deepEqual(json.config, properties.config)
@@ -43,7 +41,7 @@ describe('Streams API', () => {
                     fields: [
                         {
                             name: 'mock-field',
-                            type: 'string',
+                            type: <const> 'string',
                         },
                     ],
                 },
@@ -94,6 +92,50 @@ describe('Streams API', () => {
             await assertStreamrClientResponseError(request, 422)
         })
 
+        it('create stream with duplicate id', async function () {
+            const now = Date.now()
+            const streamId = 'testdomain1.eth/foobar/test/' + now
+            const properties = {
+                id: streamId,
+                name: 'Hello world!',
+            }
+            const response = await getStreamrClient(ensDomainOwner).createStream(properties)
+            assert.equal(response.id, streamId)
+            const errorResponse = getStreamrClient(ensDomainOwner).createStream(properties)
+            await assertStreamrClientResponseError(errorResponse, 400)
+        })
+
+        it('create stream with too long id', async function () {
+            let streamId = 'testdomain1.eth/foobar/' + Date.now() + '/'
+            while (streamId.length < 256) {
+                streamId = streamId + 'x'
+            }
+            const properties = {
+                id: streamId,
+            }
+            const response = getStreamrClient(ensDomainOwner).createStream(properties)
+            await assertStreamrClientResponseError(response, 422)
+        })
+
+        it('create stream with too long description', async function () {
+            let streamId = 'testdomain1.eth/foobar/' + Date.now()
+            const properties = {
+                id: streamId,
+                description: 'x'.repeat(256),
+            }
+            const response = getStreamrClient(ensDomainOwner).createStream(properties)
+            await assertStreamrClientResponseError(response, 422)
+        })
+
+        it('create stream with too long name', async function () {
+            let streamId = 'testdomain1.eth/foobar/' + Date.now()
+            const properties = {
+                id: streamId,
+                name: 'x'.repeat(256),
+            }
+            const response = getStreamrClient(ensDomainOwner).createStream(properties)
+            await assertStreamrClientResponseError(response, 422)
+        })
     })
 
     describe('GET /api/v1/streams', () => {
@@ -109,7 +151,7 @@ describe('Streams API', () => {
                 .call()
             const json = await response.json()
             assert.equal(response.status, 200)
-            const result = json.filter(stream => stream.id == streamId)
+            const result = json.filter((stream: any) => stream.id == streamId)
             assert.equal(result.length, 1, 'response should contain a single stream')
         })
     })
@@ -240,7 +282,7 @@ describe('Streams API', () => {
         })
 
         context('when called with valid body and permissions', () => {
-            let response
+            let response: Response
 
             before(async () => {
                 response = await Streamr.api.v1.streams

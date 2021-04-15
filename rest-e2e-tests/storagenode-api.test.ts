@@ -1,9 +1,9 @@
-const assert = require('chai').assert
-const Streamr = require('./streamr-api-clients')
-const _ = require('lodash');
-const StreamrClient = require('streamr-client')
-const getStreamrClient = require('./test-utilities.js').getStreamrClient
-const assertEqualEthereumAddresses = require('./test-utilities.js').assertEqualEthereumAddresses
+import { assert } from 'chai'
+import Streamr from './streamr-api-clients'
+import _ from 'lodash';
+import { StreamrClient } from 'streamr-client'
+import { getStreamrClient, assertEqualEthereumAddresses } from './test-utilities'
+import { EthereumAccount } from './EthereumAccount';
 
 const ETHEREUM_ADDRESS_PREFIX = '0x';
 const createMockEthereumAddress = () => {
@@ -11,33 +11,33 @@ const createMockEthereumAddress = () => {
 	const LENGTH = 40;
 	return ETHEREUM_ADDRESS_PREFIX + PREFIX + _.padStart(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16), (LENGTH - PREFIX.length), '0');
 };
-const createStream = async (user) => {
+const createStream = async (user: EthereumAccount ) => {
 	const stream = await getStreamrClient(user).createStream();
 	return stream.id;
 };
-const findStreamsByStorageNode = (storageNodeAddress) => {
+const findStreamsByStorageNode = (storageNodeAddress: string) => {
 	return Streamr.api.v1.storagenodes
 		.findStreamsByStorageNode(storageNodeAddress)
 		.call();
 };
-const findStorageNodesByStream = (streamId) => {
+const findStorageNodesByStream = (streamId: string) => {
 	return Streamr.api.v1.storagenodes
 		.findStorageNodesByStream(streamId)
 		.call();
 };
-const addStorageNodeToStream = async (storageNodeAddress, streamId, user) => {
+const addStorageNodeToStream = async (storageNodeAddress: string, streamId: string, user: EthereumAccount|undefined) => {
 	return Streamr.api.v1.storagenodes
 		.addStorageNodeToStream(storageNodeAddress, streamId)
 		.withAuthenticatedUser(user)
 		.call();
 };
-const removeStorageNodeFromStream = async (storageNodeAddress, streamId, user) => {
+const removeStorageNodeFromStream = async (storageNodeAddress: string, streamId: string, user: EthereumAccount|undefined) => {
 	return Streamr.api.v1.storagenodes
 		.removeStorageNodeFromStream(storageNodeAddress, streamId)
 		.withAuthenticatedUser(user)
 		.call();
 };
-const getStorageNodeCount = async (streamId) => {
+const getStorageNodeCount = async (streamId: string) => {
 	const response = await findStorageNodesByStream(streamId);
 	const json = await response.json()
 	return json.length;
@@ -49,8 +49,8 @@ describe('Storage Node API', () => {
 	const otherUser = StreamrClient.generateEthereumAccount()
 
 	describe('GET /storageNodes/:address/stream', () => {
-		let storageNodeAddress;
-		let streamId;
+		let storageNodeAddress: string;
+		let streamId: string;
 
 		before(async () => {
 			storageNodeAddress = createMockEthereumAddress();
@@ -87,8 +87,8 @@ describe('Storage Node API', () => {
 	});
 
 	describe('GET /streams/:streamId/storageNodes', () => {
-		let storageNodeAddress;
-		let streamId;
+		let storageNodeAddress: string;
+		let streamId: string;
 
 		before(async () => {
 			storageNodeAddress = createMockEthereumAddress();
@@ -110,8 +110,8 @@ describe('Storage Node API', () => {
 	});
 
 	describe('POST /streams/:streamId/storageNodes', () => {
-		let storageNodeAddress;
-		let streamId;
+		let storageNodeAddress: string;
+		let streamId: string;
 
 		before(async () => {
 			storageNodeAddress = createMockEthereumAddress();
@@ -149,8 +149,8 @@ describe('Storage Node API', () => {
 	});
 
 	describe('DELETE /streams/:streamId/storageNodes/:address', () => {
-		let storageNodeAddress;
-		let streamId;
+		let storageNodeAddress: string;
+		let streamId: string;
 
 		before(async () => {
 			storageNodeAddress = createMockEthereumAddress();

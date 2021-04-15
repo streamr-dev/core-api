@@ -1,13 +1,13 @@
-const assert = require('chai').assert
-const Streamr = require('./streamr-api-clients')
-const StreamrClient = require('streamr-client')
-const getStreamrClient = require('./test-utilities.js').getStreamrClient
+import { assert } from 'chai'
+import Streamr from './streamr-api-clients'
+import { StreamrClient, Stream } from 'streamr-client'
+import { getStreamrClient } from './test-utilities'
 
 describe('POST /api/v1/streams/{id}/permissions', function() {
 
 	this.timeout(200 * 1000)
 
-	let stream
+	let stream: Stream
 	const me = StreamrClient.generateEthereumAccount()
 
 	before(async () => {

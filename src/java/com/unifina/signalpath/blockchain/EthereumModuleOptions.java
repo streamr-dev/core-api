@@ -3,6 +3,7 @@ package com.unifina.signalpath.blockchain;
 import com.unifina.signalpath.ModuleOption;
 import com.unifina.signalpath.ModuleOptions;
 import com.unifina.utils.MapTraversal;
+import com.unifina.utils.ApplicationConfig;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
 import org.web3j.protocol.Web3j;
@@ -15,7 +16,7 @@ import java.util.Map;
 public class EthereumModuleOptions implements Serializable {
 	private static final Logger log = Logger.getLogger(EthereumModuleOptions.class);
 
-	private String network = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.defaultNetwork");
+	private String network = ApplicationConfig.getString("streamr.ethereum.defaultNetwork");
 	private double gasPriceWei = 20e9; // 20 Gwei
 	private int gasLimit = 6000000;
 
@@ -98,7 +99,7 @@ public class EthereumModuleOptions implements Serializable {
 	}
 
 	public String getRpcUrl() {
-		String url = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.networks." + network);
+		String url = ApplicationConfig.getString("streamr.ethereum.networks." + network);
 		if (url == null) {
 			throw new RuntimeException("No rpcUrl found for Ethereum network " + network);
 		}
@@ -106,7 +107,7 @@ public class EthereumModuleOptions implements Serializable {
 	}
 
 	public String getWebsocketRpcUri() {
-		String url = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.wss." + network);
+		String url = ApplicationConfig.getString("streamr.ethereum.wss." + network);
 		if (url == null) {
 			log.warn("No websockets URI found for Ethereum network " + network);
 		}

@@ -1,17 +1,22 @@
-const sleep = require('sleep-promise')
-const StreamrClient = require('streamr-client')
-const assert = require('chai').assert
+import sleep from 'sleep-promise'
+import { StreamrClient, Stream, Subscription } from 'streamr-client'
+import { assert } from 'chai'
 const fs = require('fs')
 const Emitter = require('events')
-const Streamr = require('./streamr-api-clients')
+import Streamr from './streamr-api-clients'
+import { EthereumAccount } from './EthereumAccount'
+import { Response } from 'node-fetch'
 
 const REST_URL = 'http://localhost/api/v1'
 const WS_URL = 'ws://localhost/api/v1/ws'
 const TIMEOUT = 130 * 1000
 const NUM_MESSAGES = 50
 const WAIT_TIME = 15000
+// DEV storage node ("broker-node-storage-1" on streamr-docker-dev environment)
+const DEV_STORAGE_NODE_ADDRESS = '0xde1112f631486CfC759A50196853011528bC5FA0'
+const DEV_STORAGE_NODE_URL = 'http://10.200.10.1:8891'
 
-const pollCondition = async (condition, timeout = TIMEOUT, interval = 100) => {
+const pollCondition = async (condition: () => Promise<any>, timeout = TIMEOUT, interval = 100) => {
     let timeElapsed = 0
     let result
     while (!result && timeElapsed < timeout) {
@@ -22,12 +27,16 @@ const pollCondition = async (condition, timeout = TIMEOUT, interval = 100) => {
     return result
 }
 
-async function createStreamrClient(user) {
+async function createStreamrClient(user: EthereumAccount) {
     const client = new StreamrClient({
         url: WS_URL,
         restUrl: REST_URL,
         auth: {
             privateKey: user.privateKey,
+        },
+        storageNode: {
+            address: DEV_STORAGE_NODE_ADDRESS,
+            url: DEV_STORAGE_NODE_URL,
         },
     })
     await client.connect()
@@ -39,9 +48,9 @@ const freshUser = StreamrClient.generateEthereumAccount()
 // The tests should be run sequentially
 describe('Canvas API', function() {
 
-    let streamrClient
-    let stream
-	let canvas
+    let streamrClient: StreamrClient
+    let stream: Stream
+	let canvas: any
 
     // sets timeout on before and all test cases in this suite
     this.timeout(TIMEOUT)
@@ -80,6 +89,10 @@ describe('Canvas API', function() {
 
         canvas = await canvasResponse.json()
         assert.equal(canvasResponse.status, 200, JSON.stringify(canvas))
+
+        const table = canvas.modules.find(({ name }: any) => name === 'Table')
+        const uiChannelStream = await streamrClient.getStream(table.uiChannel.id)
+        await uiChannelStream.addToStorageNode(DEV_STORAGE_NODE_ADDRESS)
     })
 
     after(async () => {
@@ -104,25 +117,23 @@ describe('Canvas API', function() {
     })
 
     describe('Canvases receive data', () => {
-        let messages = []
-        let subscription
+        let messages: any[] = []
+        let subscription: Subscription
 
-        before((done) => {
-            const table = canvas.modules.find(({ name }) => name === 'Table')
-            subscription = streamrClient.subscribe({
+        before(async () => {
+            const table = canvas.modules.find(({ name }: any) => name === 'Table')
+            subscription = await streamrClient.subscribe({
                 stream: table.uiChannel.id,
-            }, (msg) => {
+            }, (msg: any) => {
                 messages.push(msg)
             })
-            subscription.once('error', (error) => {
+            subscription.once('error', (error: Error) => {
                 throw error
             })
-            subscription.once('subscribed', () => done())
         })
 
-        after((done) => {
-            subscription.once('unsubscribed', done)
-            streamrClient.unsubscribe(subscription)
+        after(async () => {
+            await streamrClient.unsubscribe(subscription)
         })
 
         before('Produce data to stream', async () => {
@@ -145,8 +156,8 @@ describe('Canvas API', function() {
 
         describe('POST /api/v1/canvases/:canvasId/modules/:moduleId/request', () => {
             it('Shows correct output values on the Stream module', async () => {
-                let response
-                let json
+                let response: Response|undefined
+                let json: any
                 await pollCondition(async () => {
                     response = await Streamr.api.v1.canvases
                         .getRuntimeState(canvas.id, 'modules/0')
@@ -157,7 +168,7 @@ describe('Canvas API', function() {
                     return json.json.outputs[0].value === NUM_MESSAGES
                 })
 
-                assert.equal(response.status, 200, JSON.stringify(json))
+                assert.equal(response!.status, 200, JSON.stringify(json))
                 assert.equal(json.json.name, 'Stream', 'Unexpected name on module!')
                 assert.equal(json.json.outputs[0].name, 'numero', 'Unexpected name on output!')
                 assert.equal(json.json.outputs[0].value, NUM_MESSAGES, 'Stream module did not output the correct values')
@@ -165,8 +176,8 @@ describe('Canvas API', function() {
             })
 
             it('Shows correct state on the Sum module', async () => {
-                let response
-                let json
+                let response: Response|undefined
+                let json: any
                 await pollCondition(async () => {
                     response = await Streamr.api.v1.canvases
                         .getRuntimeState(canvas.id, 'modules/1')
@@ -177,7 +188,7 @@ describe('Canvas API', function() {
                     return json.json.inputs[0].value === NUM_MESSAGES * 2
                 })
 
-                assert.equal(response.status, 200, JSON.stringify(json))
+                assert.equal(response!.status, 200, JSON.stringify(json))
                 assert.equal(json.json.name, 'Sum', 'Unexpected name on module!')
                 assert.equal(json.json.inputs[0].name, 'in', 'Unexpected name on input!')
                 assert.equal(json.json.inputs[0].value, NUM_MESSAGES * 2, 'Sum module did not receive the correct values!')
@@ -203,14 +214,11 @@ describe('Canvas API', function() {
     })
 
     function TestRestartingCanvas() {
-        const messages = []
-        let resentMessages
-        let subscription
+        let resentMessages: any[] = []
+        let subscription: Subscription
         const messageEmitter = new Emitter()
 
         before('cycle start/stop, subscribe, start', async () => {
-            let done
-            const p = new Promise((resolve, reject) => done = (err) => err ? reject(err) : resolve())
             const r1 = await Streamr.api.v1.canvases
                 .start(canvas.id)
                 .withAuthenticatedUser(freshUser)
@@ -222,52 +230,42 @@ describe('Canvas API', function() {
                 .call()
             assert.equal(r2.status, 200, 'Canvas stop failed')
 
-            const table = canvas.modules.find(({ name }) => name === 'Table')
-            subscription = streamrClient.subscribe({
-                stream: table.uiChannel.id,
+            const table = canvas.modules.find(({ name }: any) => name === 'Table')
+            const resendRequestTimestamp = Date.now()
+            subscription = await streamrClient.subscribe({
+                streamId: table.uiChannel.id,
                 resend: {
                     last: table.options.uiResendLast.value,
                 },
-            }, (msg) => {
-                messages.push(msg)
+            }, (msg: any, meta: any) => {
+                const timestamp = meta.messageId.timestamp
+                if (timestamp < resendRequestTimestamp) {
+                    resentMessages.push(msg)
+                }
                 messageEmitter.emit('message', msg)
             })
 
-            subscription.once('resent', () => {
-                resentMessages = messages.slice()
-            })
-
-            subscription.once('error', (error) => {
+            subscription.once('error', (error: Error) => {
                 throw error
             })
 
-            subscription.once('no_resend', () => {
-                throw new Error('should not have no_resend')
-            })
+            // restart for second time
+            const r3 = await Streamr.api.v1.canvases
+                .start(canvas.id)
+                .withAuthenticatedUser(freshUser)
+                .call()
+            assert.equal(r3.status, 200, 'Canvas restart failed')
 
-            // wait for subscription before starting again
-            subscription.once('subscribed', async () => {
-                // restart for second time
-                const r3 = await Streamr.api.v1.canvases
-                    .start(canvas.id)
-                    .withAuthenticatedUser(freshUser)
-                    .call()
-                assert.equal(r3.status, 200, 'Canvas restart failed')
-
-                // reduce flakiness by allowing the subscriptions of the canvas some time to get set up
-                await sleep(5000)
-                done()
-            })
-            return p
+            // reduce flakiness by allowing the subscriptions of the canvas some time to get set up
+            await sleep(5000)
         })
 
         afterEach(() => {
             messageEmitter.removeAllListeners('message')
         })
 
-        after((done) => {
-            subscription.once('unsubscribed', done)
-            streamrClient.unsubscribe(subscription)
+        after(async () => {
+            await streamrClient.unsubscribe(subscription)
         })
 
         after(async () => {
@@ -277,27 +275,16 @@ describe('Canvas API', function() {
                 .call()
         })
 
-        it('gets uiResendLast resent messages', (done) => {
-            const table = canvas.modules.find(({ name }) => name === 'Table')
-            if (!resentMessages) {
-                // wait for resent if no resent event yet
-                subscription.once('resent', () => {
-                    assert.equal(resentMessages && resentMessages.length, table.options.uiResendLast.value,
-                        `Resent messages (waited): ${resentMessages.map((msg) => JSON.stringify(msg))}`)
-                    done()
-                })
-                return
-            }
-
-            assert.equal(resentMessages && resentMessages.length, table.options.uiResendLast.value,
-                `Resent messages (didn't wait): ${resentMessages.map((msg) => JSON.stringify(msg))}`)
-            done()
+        it('gets uiResendLast resent messages', () => {
+            const table = canvas.modules.find(({ name }: any) => name === 'Table')
+            assert.equal(resentMessages.length, table.options.uiResendLast.value,
+                `Resent messages: ${resentMessages.map((msg: any) => JSON.stringify(msg))}`)
         })
 
         it('can get new messages', (done) => {
             const expected = `${NUM_MESSAGES + 1}.0`
 
-            const onMessage = (msg) => {
+            const onMessage = (msg: any) => {
                 // check for message we just published
                 if (msg && msg.nr && msg.nr[1] === expected) {
                     // success, got message before timeout
@@ -328,11 +315,12 @@ describe('Canvas API', function() {
 
 
 function TestClockTable() {
-    let streamrClient
-    let canvas
-    let subscription
+    let streamrClient: StreamrClient
+    let canvas: any
+    let subscription: Subscription
 
     // sets timeout on before and all test cases in this suite
+    // @ts-expect-error
     this.timeout(80000)
 
     before(async () => {
@@ -352,12 +340,14 @@ function TestClockTable() {
         assert.equal(canvasResponse.status, 200)
     })
 
-    it('starts sending uiChannel messages', (done) => {
-        const table = canvas.modules.find(({ name }) => name === 'Table')
-        const messages = []
-        subscription = streamrClient.subscribe({
+    it('starts sending uiChannel messages', async () => {
+        let done: any
+        const p = new Promise((resolve, reject) => done = (err: any) => err ? reject(err) : resolve(undefined))
+        const table = canvas.modules.find(({ name }: any) => name === 'Table')
+        const messages: any[] = []
+        subscription = await streamrClient.subscribe({
             stream: table.uiChannel.id,
-        }, (msg) => {
+        }, (msg: any) => {
             messages.push(msg)
             if (msg.nr) {
                 // end after first new row message
@@ -370,7 +360,7 @@ function TestClockTable() {
             done()
         })
 
-        subscription.once('error', (error) => {
+        subscription.once('error', (error: Error) => {
             throw error
         })
 
@@ -381,6 +371,8 @@ function TestClockTable() {
             .then((r1) => {
                 assert.equal(r1.status, 200)
             })
+
+        return p
     })
 
     after(async () => {

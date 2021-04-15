@@ -48,17 +48,21 @@ class Stream implements Comparable {
 	static belongsTo = Product
 
 	static constraints = {
+		id(nullable: false, unique: true)
 		partitions(nullable: false, min: 1, max: 100)
-		name(blank: false)
-		config(nullable: true)
-		description(nullable: true)
+		name(blank: false, maxSize: 255)
+		config(nullable: true, maxSize: 100000)
+		description(nullable: true, maxSize: 255)
 		firstHistoricalDay(nullable: true)
 		lastHistoricalDay(nullable: true)
-		uiChannelPath(nullable: true)
+		uiChannelPath(nullable: true, maxSize: 1024)
 		uiChannelCanvas(nullable: true)
+		requireSignedData(nullable: false)
+		requireEncryptedData(nullable: false)
 		autoConfigure(nullable: false)
-		storageDays(nullable: false, min: 0)
-		inactivityThresholdHours(nullable: false, min: 0)
+		storageDays(nullable: false, min: 0, max: Integer.MAX_VALUE)
+		inactivityThresholdHours(nullable: false, min: 0, max: Integer.MAX_VALUE)
+		exampleType(nullable: false)
 	}
 
 	static mapping = {
@@ -199,5 +203,9 @@ class Stream implements Comparable {
 			}
 		}
 		throw new IllegalArgumentException("UI Channel path doesn't contain module id.")
+	}
+
+	public Integer getPartitions() {
+		return this.partitions
 	}
 }
