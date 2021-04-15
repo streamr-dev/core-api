@@ -47,7 +47,7 @@ class StreamrClientService {
 
 	/**
 	 * Returns a StreamrClient instance, authenticated with one of the provided user's
-	 * API keys. This method fetches from the centralized database an API key to be
+	 * integration keys. This method fetches from the centralized database an integration key to be
 	 * used with the StreamrClient.
 	 *
 	 * Whoever calls this should take care of closing the client when it is no longer needed.

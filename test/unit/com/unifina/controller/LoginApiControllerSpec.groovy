@@ -6,33 +6,22 @@ import com.unifina.service.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-
 /**
  * See the API for {@link grails.test.mixin.web.ControllerUnitTestMixin} for usage instructions
  */
 @TestFor(LoginApiController)
 @Mock([User])
 class LoginApiControllerSpec extends ControllerSpecification {
-	private static final String USER_API_KEY = "myApiKey"
-	private static final String USER_ACCOUNT_ADDRESS = "0xa0f7f3ff8a0965d0d46e5f1f963102fc6bed45ec"
-
 	ChallengeService challengeService
 	SessionService sessionService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
-	UserService userService
-	DateFormat df
-    User me
+	User me
 
 	def setup() {
 		me = new User().save(failOnError: true, validate: false)
-		df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
-		df.setTimeZone(TimeZone.getTimeZone("UTC"))
 		challengeService = controller.challengeService = Mock(ChallengeService)
 		sessionService = controller.sessionService = Mock(SessionService)
 		ethereumIntegrationKeyService = controller.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
-		userService = controller.userService = Mock(UserService)
 	}
 
 	void "should generate challenge"() {
@@ -133,68 +122,5 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		1 * challengeService.checkValidChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address)
 		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(address, SignupMethod.API) >> user
 		thrown DisabledUserException
-	}
-
-	def "apikey-based login should pass"() {
-		User user = new User(
-			username: "username",
-		).save(failOnError: true, validate: false)
-
-		SessionToken token = new SessionToken(64, user, 3)
-
-		when:
-		request.method = "POST"
-		request.JSON = [
-			apiKey: USER_API_KEY
-		]
-		authenticatedAs(me) { controller.apikey() }
-
-		then:
-		1 * ethereumIntegrationKeyService.getEthereumUser(USER_ACCOUNT_ADDRESS) >> user
-		1 * sessionService.generateToken(user) >> token
-		response.status == 200
-		response.json == token.toMap()
-	}
-
-	def "apikey-based login should fail"() {
-		when:
-		request.method = "POST"
-		request.JSON = [
-			apiKey: "invalid-mock-key"
-		]
-		authenticatedAs(me) { controller.apikey() }
-
-		then:
-		1 * ethereumIntegrationKeyService.getEthereumUser(_) >> null
-		thrown InvalidAPIKeyException
-	}
-
-	def "apikey-based login should fail if disabled user"() {
-		User user = new User(
-			enabled: false,
-		).save(failOnError: true, validate: false)
-
-		when:
-		request.method = "POST"
-		request.JSON = [
-			apiKey: USER_API_KEY
-		]
-		authenticatedAs(me) { controller.apikey() }
-
-		then:
-		1 * ethereumIntegrationKeyService.getEthereumUser(USER_ACCOUNT_ADDRESS) >> user
-		thrown DisabledUserException
-	}
-
-	def "apikey-based login should return 400 if no api key provided"() {
-		when:
-		request.method = "POST"
-		request.JSON = [
-			wrongfield: "apiKey"
-		]
-		authenticatedAs(me) { controller.apikey() }
-
-		then:
-		thrown InvalidArgumentsException
 	}
 }

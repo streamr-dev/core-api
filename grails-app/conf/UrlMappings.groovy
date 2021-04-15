@@ -61,14 +61,16 @@ class UrlMappings {
 
 		"/api/v1/integration_keys"(resources: "integrationKeyApi")
 
-		"/api/v1/canvases/($path**)/request"(controller: "canvasApi", action: "runtimeRequest") // for internal use, runtime requests to canvases
-		"/api/v1/dashboards/($path**)/request"(controller: "dashboardApi", action: "runtimeRequest") // for internal use, runtime requests to canvases via dashboards
+		// for internal use, runtime requests to canvases
+		"/api/v1/canvases/($path**)/request"(controller: "canvasApi", action: "runtimeRequest")
+		// for internal use, runtime requests to canvases via dashboards
+		"/api/v1/dashboards/($path**)/request"(controller: "dashboardApi", action: "runtimeRequest")
 
 		"/api/v1/oembed"(controller: "oembedApi", action: "index")
 
 		"/api/v1/login/challenge/$address"(method: "POST", controller: "loginApi", action: "challenge")
-		"/api/v1/login/$action"(method: "POST", controller: "loginApi")
-		"/api/v1/logout"(method: "POST",  controller: "logoutApi", action: "logout")
+		"/api/v1/login/response"(method: "POST", controller: "loginApi", action: "response")
+		"/api/v1/logout"(method: "POST", controller: "logoutApi", action: "logout")
 
 		"/api/v1/categories"(resources: "categoryApi")
 

@@ -1,8 +1,5 @@
 package com.unifina.controller
 
-import com.unifina.controller.StreamrApi
-import com.unifina.controller.AuthenticationResult
-import com.unifina.controller.TokenAuthenticator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -16,7 +13,6 @@ import java.lang.reflect.Method
  */
 class RESTAPIFilters {
 	GrailsApplication grailsApplication
-
 	private Map<String, StreamrApi> apiAnnotationCache = new HashMap<String, StreamrApi>()
 
 	@CompileStatic

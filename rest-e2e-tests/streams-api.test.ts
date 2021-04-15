@@ -196,11 +196,11 @@ describe('Streams API', () => {
                 .call()
             assert.equal(response.status, 401)
         })
-        it('responds with status 401 when wrong API key even if endpoint does not require authentication', async () => {
-            const apiKey = 'wrong-api-key'
+        it('responds with status 401 when wrong session token even if endpoint does not require authentication', async () => {
+            const bearer = 'wrong-session-token'
             const response = await Streamr.api.v1.streams.permissions
                 .getOwnPermissions(streamId)
-                .withHeader('Authorization', `Token ${apiKey}`)
+                .withHeader('Authorization', `Bearer ${bearer}`)
                 .call()
             assert.equal(response.status, 401)
         })

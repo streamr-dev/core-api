@@ -4,33 +4,19 @@ import com.unifina.domain.User;
 import com.unifina.domain.Userish;
 import com.unifina.service.InvalidSessionTokenException;
 import com.unifina.service.SessionService;
-import com.unifina.service.EthereumIntegrationKeyService;
-import com.unifina.security.ApiKeyConverter;
 import grails.util.Holders;
 
 import javax.servlet.http.HttpServletRequest;
 
 public class TokenAuthenticator {
-	SessionService sessionService = Holders.getApplicationContext().getBean(SessionService.class);
-	EthereumIntegrationKeyService ethereumIntegrationKeyService = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService.class);
-
-	private enum HeaderType {
-		TOKEN,
-		BEARER
-	}
+	private static final String BEARER = "Bearer";
+	private final SessionService sessionService = Holders.getApplicationContext().getBean(SessionService.class);
 
 	public static class AuthorizationHeader {
+		private final String headerValue;
 
-		private HeaderType headerType;
-		private String headerValue;
-
-		public AuthorizationHeader(HeaderType headerType, String headerValue) {
-			this.headerType = headerType;
+		public AuthorizationHeader(String headerValue) {
 			this.headerValue = headerValue;
-		}
-
-		public HeaderType getHeaderType() {
-			return headerType;
 		}
 
 		public String getHeaderValue() {
@@ -38,9 +24,10 @@ public class TokenAuthenticator {
 		}
 
 		public String toString() {
-			return headerType + " " + headerValue;
+			return BEARER + " " + headerValue;
 		}
 	}
+
 	public AuthenticationResult authenticate(HttpServletRequest request) {
 		AuthorizationHeader header;
 		try {
@@ -51,14 +38,7 @@ public class TokenAuthenticator {
 		if (header == null) {
 			return new AuthenticationResult(false, false);
 		}
-		if (header.getHeaderType().equals(HeaderType.TOKEN)) {
-			AuthenticationResult res = getResultFromApiKey(header.getHeaderValue());
-			return res;
-		} else if (header.getHeaderType().equals(HeaderType.BEARER)) {
-			AuthenticationResult res = getResultFromSessionToken(header.getHeaderValue());
-			return res;
-		}
-		return new AuthenticationResult(false, true);
+		return getResultFromSessionToken(header.getHeaderValue());
 	}
 
 	public static AuthorizationHeader getAuthorizationHeader(HttpServletRequest request) {
@@ -72,10 +52,8 @@ public class TokenAuthenticator {
 			if (parts.length != 2) {
 				throw new AuthenticationMalformedException();
 			}
-			if (parts[0].toLowerCase().equals("token")) {
-				return new AuthorizationHeader(HeaderType.TOKEN, parts[1]);
-			} else if (parts[0].toLowerCase().equals("bearer")) {
-				return new AuthorizationHeader(HeaderType.BEARER, parts[1]);
+			if (parts[0].equalsIgnoreCase(BEARER)) {
+				return new AuthorizationHeader(parts[1]);
 			} else {
 				throw new AuthenticationMalformedException();
 			}
@@ -86,7 +64,7 @@ public class TokenAuthenticator {
 	public String getSessionToken(HttpServletRequest request) {
 		try {
 			AuthorizationHeader header = parseAuthorizationHeader(request.getHeader("Authorization"));
-			if (header == null || !header.getHeaderType().equals(HeaderType.BEARER)) {
+			if (header == null) {
 				return null;
 			}
 			return header.getHeaderValue();
@@ -104,28 +82,14 @@ public class TokenAuthenticator {
 			if (userish instanceof User) {
 				return new AuthenticationResult((User) userish);
 			} else {
-				throw new InvalidSessionTokenException("Invalid token: "+token);
+				throw new InvalidSessionTokenException("Invalid token: " + token);
 			}
 		} catch (InvalidSessionTokenException e) {
 			return new AuthenticationResult(false, true);
 		}
 	}
 
-	public AuthenticationResult getResultFromApiKey(String apiKey) {
-		if (apiKey == null) {
-			return new AuthenticationResult(false, true);
-		}
-		String privateKey = ApiKeyConverter.createEthereumPrivateKey(apiKey);
-		String address = "0x" + EthereumIntegrationKeyService.getAddress(privateKey);
-		User user = ethereumIntegrationKeyService.getEthereumUser(address);
-		if (user != null) {
-			return new AuthenticationResult(user);
-		}
-		return new AuthenticationResult(false, true);
-	}
-
 	private static class AuthenticationMalformedException extends RuntimeException {
 	}
-
 }
 

@@ -13,11 +13,11 @@ class ClusterService {
 	GrailsApplication grailsApplication
 
 	@CompileStatic
-	Canvases getCanvases(String token) {
+	Canvases getCanvases(String bearer) {
 		List<Map<String, Object>> dead = new ArrayList<Map<String, Object>>()
 		List<Map<String, Object>> ghost = new ArrayList<Map<String, Object>>()
 		for (String ip : getStreamrNodes()) {
-			CanvasesPerNode canvases = streamrClient.canvasesPerNode(token, ip)
+			CanvasesPerNode canvases = streamrClient.canvasesPerNode(bearer, ip)
 			if (canvases.shouldBeRunning != null) {
 				dead.addAll(canvases.shouldBeRunning)
 			}
@@ -29,18 +29,18 @@ class ClusterService {
 	}
 
 	@CompileStatic
-	Nodes shutdown(String token) {
+	Nodes shutdown(String bearer) {
 		List<Map<String, Object>> nodeResults = new ArrayList<Map<String, Object>>()
 		for (String ip : getStreamrNodes()) {
-			List<Map<String, Object>> result = streamrClient.shutdown(token, ip)
+			List<Map<String, Object>> result = streamrClient.shutdown(bearer, ip)
 			nodeResults.addAll(result)
 		}
 		return new Nodes(nodes: nodeResults)
 	}
 
 	@CompileStatic
-    List<Map<String, Object>> repair(String token) {
-		Canvases canvases = getCanvases(token)
+	List<Map<String, Object>> repair(String bearer) {
+		Canvases canvases = getCanvases(bearer)
 		for (Map<String, Object> canvas : canvases.dead) {
 			String id = canvas.get("id")
 			String startedById = canvas.get("startedById")
@@ -54,7 +54,7 @@ class ClusterService {
 			canvasService.startRemote(c, u, forceReset, resetOnError)
 		}
 		return canvases.dead
-    }
+	}
 
 	static class Canvases {
 		List<Map<String, Object>> dead = new ArrayList<Map<String, Object>>()

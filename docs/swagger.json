@@ -618,46 +618,6 @@
         }
       }
     },
-    "/login/apikey": {
-      "post": {
-        "summary": "Log in with API key verification",
-        "description": "Verifies that an API key belongs to the user. If it does, generates a session token for the user.",
-        "tags": [
-          "login"
-        ],
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "description": "API Key",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/APIKey"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A session token and its expiration",
-            "schema": {
-              "$ref": "#/definitions/SessionToken"
-            }
-          },
-          "400": {
-            "description": "API key-based login failed",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "INVALID_API_KEY",
-                "message": "API key-based login failed"
-              }
-            }
-          }
-        }
-      }
-    },
     "/categories": {
       "get": {
         "summary": "List categories",
@@ -5413,19 +5373,6 @@
           "type": "string",
           "description": "The Ethereum address corresponding to the public key",
           "example": "0xa50E97f6a98dD992D9eCb8207c2Aa58F54970729"
-        }
-      }
-    },
-    "APIKey": {
-      "type": "object",
-      "required": [
-        "apiKey"
-      ],
-      "properties": {
-        "apiKey": {
-          "type": "string",
-          "description": "User's API Key",
-          "example": "QaSEO3mlSaTGd3ZOSnwHUgK3ecU7pOvQw-WPkZcR-6TBv"
         }
       }
     },

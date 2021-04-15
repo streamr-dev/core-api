@@ -13,14 +13,14 @@ import javax.ws.rs.core.HttpHeaders
 @Mock([RESTAPIFilters, Canvas, User])
 class ClusterApiControllerSpec extends Specification {
 	User me
-	String apiKey = "token myApiKey"
+	String bearer = "bearer my-session-token"
 
-    def setup() {
+	def setup() {
 		me = new User().save(failOnError: true, validate: false)
 		controller.clusterService = Mock(ClusterService)
 	}
 
-    void "test dead canvases"() {
+	void "test dead canvases"() {
 		setup:
 		ClusterService.Canvases canvases = new ClusterService.Canvases()
 		canvases.dead.add(new Canvas(
@@ -39,19 +39,19 @@ class ClusterApiControllerSpec extends Specification {
 		))
 
 		when:
-		request.addHeader(HttpHeaders.AUTHORIZATION, apiKey)
+		request.addHeader(HttpHeaders.AUTHORIZATION, bearer)
 		request.method = "GET"
 		withFilters(action: "index") {
 			controller.canvases()
 		}
 
 		then:
-		1 * controller.clusterService.getCanvases(apiKey) >> canvases
+		1 * controller.clusterService.getCanvases(bearer) >> canvases
 		0 * controller.clusterService._
 		response.status == 200
 		response.json.ghost.size() == 0
 		response.json.dead.size() == 2
-    }
+	}
 
 	void "test ghost canvases"() {
 		setup:
@@ -72,14 +72,14 @@ class ClusterApiControllerSpec extends Specification {
 		))
 
 		when:
-		request.addHeader(HttpHeaders.AUTHORIZATION, apiKey)
+		request.addHeader(HttpHeaders.AUTHORIZATION, bearer)
 		request.method = "GET"
 		withFilters(action: "index") {
 			controller.canvases()
 		}
 
 		then:
-		1 * controller.clusterService.getCanvases(apiKey) >> canvases
+		1 * controller.clusterService.getCanvases(bearer) >> canvases
 		0 * controller.clusterService._
 		response.status == 200
 		response.json.ghost.size() == 2
@@ -119,14 +119,14 @@ class ClusterApiControllerSpec extends Specification {
 		))
 
 		when:
-		request.addHeader(HttpHeaders.AUTHORIZATION, apiKey)
+		request.addHeader(HttpHeaders.AUTHORIZATION, bearer)
 		request.method = "GET"
 		withFilters(action: "index") {
 			controller.canvases()
 		}
 
 		then:
-		1 * controller.clusterService.getCanvases(apiKey) >> canvases
+		1 * controller.clusterService.getCanvases(bearer) >> canvases
 		0 * controller.clusterService._
 		response.status == 200
 		response.json.ghost.size() == 2
@@ -159,14 +159,14 @@ class ClusterApiControllerSpec extends Specification {
 		result.nodes.add(result2)
 
 		when:
-		request.addHeader(HttpHeaders.AUTHORIZATION, apiKey)
+		request.addHeader(HttpHeaders.AUTHORIZATION, bearer)
 		request.method = "POST"
 		withFilters(action: "shutdown") {
 			controller.shutdown()
 		}
 
 		then:
-		1 * controller.clusterService.shutdown(apiKey) >> result
+		1 * controller.clusterService.shutdown(bearer) >> result
 		0 * controller.clusterService._
 		response.status == 200
 		response.json.nodeResults.size() == 2
@@ -174,14 +174,14 @@ class ClusterApiControllerSpec extends Specification {
 
 	void "test shutdown noop"() {
 		when:
-		request.addHeader(HttpHeaders.AUTHORIZATION, apiKey)
+		request.addHeader(HttpHeaders.AUTHORIZATION, bearer)
 		request.method = "POST"
 		withFilters(action: "shutdown") {
 			controller.shutdown()
 		}
 
 		then:
-		1 * controller.clusterService.shutdown(apiKey) >> new ClusterService.Nodes()
+		1 * controller.clusterService.shutdown(bearer) >> new ClusterService.Nodes()
 		0 * controller.clusterService._
 		response.status == 200
 		response.json.nodeResults.size() == 0
@@ -189,14 +189,14 @@ class ClusterApiControllerSpec extends Specification {
 
 	void "test repair"() {
 		when:
-		request.addHeader(HttpHeaders.AUTHORIZATION, apiKey)
+		request.addHeader(HttpHeaders.AUTHORIZATION, bearer)
 		request.method = "POST"
 		withFilters(action: "repair") {
 			controller.repair()
 		}
 
 		then:
-		1 * controller.clusterService.repair(apiKey) >> new ArrayList<Canvas>()
+		1 * controller.clusterService.repair(bearer) >> new ArrayList<Canvas>()
 		0 * controller.clusterService._
 		response.status == 200
 		response.json.restartedNodes.size() == 0
