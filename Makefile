@@ -20,7 +20,7 @@ grails := grails -plain-output
 # Testing recipes
 
 .PHONY: all
-all: clean test-unit test-integration start-wait test-engine-start test-e2e test-engine-stop
+all: clean test-unit test-integration start-wait test-e2e test-stress
 
 .PHONY: test
 test: test-unit test-integration test-e2e ## Run unit, integration and end to end tests
@@ -46,25 +46,6 @@ test-e2e:
 test-stress:
 	$(MAKE) -C rest-e2e-tests test/stress
 
-rest_srv_test_log := rest-srv-test.log
-rest_srv_test_pid := rest-srv-test.pid
-rest_srv_tail_pid := rest-srv-tail.pid
-
-.PHONY: test-engine-start
-test-engine-start: ## Run Grails test app
-	export AWS_PROFILE=automation-user-streamr-dev
-	nohup grails test run-app --non-interactive > $(rest_srv_test_log) &
-	echo $$! > $(rest_srv_test_pid)
-	tail -f $(rest_srv_test_log) &
-	echo $$! > $(rest_srv_tail_pid)
-
-.PHONY: test-engine-stop
-test-engine-stop: ## Kill processes started by test-engine-start
-	kill $(shell cat $(rest_srv_test_pid))
-	rm -rf $(rest_srv_test_pid)
-	kill $(shell cat $(rest_srv_tail_pid))
-	rm -rf $(rest_srv_tail_pid)
-
 # Development recipes
 
 .PHONY: idea
@@ -81,6 +62,14 @@ compile: ## Compile code
 dependency-report: ## Generate Grails dependency report to stdout and dependencies.txt
 	$(grails) dependency-report | tee dependencies.txt
 
+.PHONY: run
+run:
+	$(grails) run-app
+
+.PHONY: run-test
+run-test:
+	$(grails) test run-app
+
 .PHONY: factory-reset
 factory-reset: ## Run streamr-docker-dev factory-reset
 	streamr-docker-dev factory-reset
@@ -93,11 +82,12 @@ services := mysql redis cassandra parity-node0 parity-sidechain-node0 bridge dat
 .PHONY: start
 start: ## Run streamr-docker-dev start ...
 	streamr-docker-dev start $(services)
+	streamr-docker-dev stop engine-and-editor
 
-.NOTPARALLEL: start-wait
 .PHONY: start-wait
 start-wait: ## Run streamr-docker-dev start ... --wait
 	streamr-docker-dev start $(services) --wait
+	streamr-docker-dev stop engine-and-editor
 
 .PHONY: stop
 stop: ## Run streamr-docker-dev stop
@@ -116,7 +106,7 @@ update: ## Run streamr-docker-dev update
 	streamr-docker-dev update
 
 shell-%: ## Run docker shell. Example: 'make shell-redis'
-	streamr-docker-dev  shell $*
+	streamr-docker-dev shell $*
 
 .SILENT: db-diff
 .PHONY: db-diff
@@ -178,15 +168,11 @@ docker-build-dev: ## Build Docker dev container
 
 .PHONY: docker-push-dev
 docker-push-dev: docker-build-dev ## Push Docker dev container to registry
-	docker push streamr/engine-and-editor:dev
+	docker push docker.io/streamr/engine-and-editor:dev
 
 .PHONY: docker-run-dev
 docker-run-dev: ## Run Docker dev container locally
 	docker run -i -t -d --rm -p 8081:8081/tcp streamr/engine-and-editor:dev
-
-.PHONY: docker-login
-docker-login: ## Login with Docker
-	docker login -u TODO_DOCKER_USER -p TODO_DOCKER_PASS
 
 # Auxiliary recipes
 
@@ -196,7 +182,6 @@ clean: ## Remove all files created by this Makefile
 	rm -rf target
 	rm -rf .slcache
 	rm -rf "$$HOME/.grails"
-	rm -rf $(rest_srv_test_log)
 	$(grails) clean-all
 	mkdir -p "$$HOME/.grails/scripts"
 
