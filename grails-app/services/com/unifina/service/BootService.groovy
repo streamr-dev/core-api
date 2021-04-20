@@ -1,16 +1,9 @@
 package com.unifina.service
 
-import com.unifina.domain.HostConfig
-import com.unifina.domain.Role
-import com.unifina.domain.Stream
-import com.unifina.domain.User
-import com.unifina.domain.SignupMethod
-import com.unifina.domain.EthereumAddress
-import com.unifina.domain.Permission
+import com.unifina.domain.*
 import com.unifina.security.MyPolicy
 import com.unifina.security.MySecurityManager
 import com.unifina.utils.ApplicationConfig
-import grails.util.Environment
 import grails.util.Holders
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.plugins.GrailsPluginManager
@@ -34,10 +27,6 @@ class BootService {
 
 	private static final Logger log = Logger.getLogger(BootService.class)
 
-	boolean isFullEnvironment() {
-		return Environment.getCurrent()!=Environment.TEST || System.getProperty("grails.test.phase") == "functional"
-	}
-
 	def onInit() {
 		// Do not remove these!
 		Policy.setPolicy(new MyPolicy())
@@ -52,18 +41,14 @@ class BootService {
 		 * classes in the core plugin, an exception will be thrown.
 		 */
 		GrailsPluginManager pm = Holders.pluginManager
-		for ( plugin in pm.getAllPlugins() ) {
-			for ( wp in plugin.getWatchedResourcePatterns() ) {
-				if ( "plugins" == wp.getDirectory()?.getName() && "groovy" == wp.getExtension() )
+		for (plugin in pm.getAllPlugins()) {
+			for (wp in plugin.getWatchedResourcePatterns()) {
+				if ("plugins" == wp.getDirectory()?.getName() && "groovy" == wp.getExtension())
 					wp.extension = "groovyXX";
 			}
 		}
 
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
-
-		def config = grailsApplication.config
-		def flatConfig = grailsApplication.flatConfig
-
 
 		// Create user roles if not present
 		def userRole = Role.findByAuthority('ROLE_USER') ?: new Role(authority: 'ROLE_USER').save(failOnError: true)
@@ -71,31 +56,6 @@ class BootService {
 		def liveRole = Role.findByAuthority('ROLE_LIVE') ?: new Role(authority: 'ROLE_LIVE').save(failOnError: true)
 
 		createStorageNodeAssignmentsStream()
-
-		/**
-		 * Start a number of taskWorkers, specified by system property or config
-		 */
-		if (isFullEnvironment()) {
-			String ip = nodeService.getIPAddress()
-			log.info("Using IP address: $ip")
-
-			HostConfig taskWorkerConfig = HostConfig.findByHostAndParameter(ip.toString(),"task.workers")
-
-			int workerCount
-			if (System.getProperty("task.workers")!=null)
-				workerCount = Integer.parseInt(System.getProperty("task.workers"))
-			else if (taskWorkerConfig!=null)
-				workerCount = Integer.parseInt(taskWorkerConfig.value)
-			else workerCount = config.unifina.task.workers ?: 0
-
-			for (int i=0; i<workerCount; i++) {
-				taskService.startTaskWorker()
-			}
-			log.info("onInit: started $workerCount task workers")
-		}
-		else {
-			log.info("onInit: Task workers and listeners not started due to reduced environment: "+Environment.getCurrent()+", grails.test.phase: "+System.getProperty("grails.test.phase"))
-		}
 	}
 
 	def createStorageNodeAssignmentsStream() {
