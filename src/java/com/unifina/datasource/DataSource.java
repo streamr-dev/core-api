@@ -7,7 +7,6 @@ import com.unifina.data.EventQueueMetrics;
 import com.unifina.feed.MessageRouter;
 import com.unifina.feed.StreamMessageSource;
 import com.unifina.feed.StreamPropagationRoot;
-import com.unifina.serialization.SerializationRequest;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.SignalPath;
 import com.unifina.signalpath.utils.ConfigurableStreamModule;
@@ -19,7 +18,7 @@ import java.util.*;
 /**
  * DataSource wires together SignalPaths and streams of messages and other Events.
  * There are two types: HistoricalDataSource and RealtimeDataSource.
- *
+ * <p>
  * The DataSource is started with DataSource#start(), which starts the event loop
  * and blocks until done.
  */
@@ -108,32 +107,32 @@ public abstract class DataSource {
 		final StreamMessageSource streamMessageSource;
 		try {
 			streamMessageSource = createStreamMessageSource(
-				propagationRootByStreamPartition.keySet(), // All the subscribed StreamPartitions
-				new StreamMessageSource.StreamMessageConsumer() {
-					@Override
-					public void accept(StreamMessage streamMessage) {
-						// Consult the router to find consumers who need to receive this StreamMessage
-						router.route(streamMessage)
-							.forEach(routedConsumer ->
-								// Enqueue an event for each consumer registered with the router
-								DataSource.this.enqueue(new Event<>(
-									streamMessage,
-									streamMessage.getTimestampAsDate(),
-									streamMessage.getSequenceNumber(),
-									routedConsumer
-								)));
-					}
+					propagationRootByStreamPartition.keySet(), // All the subscribed StreamPartitions
+					new StreamMessageSource.StreamMessageConsumer() {
+						@Override
+						public void accept(StreamMessage streamMessage) {
+							// Consult the router to find consumers who need to receive this StreamMessage
+							router.route(streamMessage)
+									.forEach(routedConsumer ->
+											// Enqueue an event for each consumer registered with the router
+											DataSource.this.enqueue(new Event<>(
+													streamMessage,
+													streamMessage.getTimestampAsDate(),
+													streamMessage.getSequenceNumber(),
+													routedConsumer
+											)));
+						}
 
-					@Override
-					public void done() {
-						// Enqueue an end event, which when processed, aborts the event queue.
-						DataSource.this.enqueue(new Event<>(
-							null,
-							globals.getEndDate() != null ? globals.getEndDate() : new Date(),
-							(nul) -> abort()
-						));
-					}
-				});
+						@Override
+						public void done() {
+							// Enqueue an end event, which when processed, aborts the event queue.
+							DataSource.this.enqueue(new Event<>(
+									null,
+									globals.getEndDate() != null ? globals.getEndDate() : new Date(),
+									(nul) -> abort()
+							));
+						}
+					});
 		} catch (Exception e) {
 			throw new RuntimeException("Error while creating StreamMessageSource", e);
 		}
@@ -141,23 +140,18 @@ public abstract class DataSource {
 		try {
 			// Enqueue a start event to set the start time
 			enqueue(new Event<>(
-				null,
-				globals.getStartDate() != null ? globals.getStartDate() : new Date(),
-				(nul) -> {
-					running = true;
-					log.info("Event queue running.");
-				}
+					null,
+					globals.getStartDate() != null ? globals.getStartDate() : new Date(),
+					(nul) -> {
+						running = true;
+						log.info("Event queue running.");
+					}
 			));
 			eventQueue.start();
 		} catch (Exception e) {
 			throw new RuntimeException("Error while processing event queue", e);
 		} finally {
 			running = false;
-
-			// Final serialization of SignalPaths is dispatched explicitly, as event queue is now stopped.
-			for (SignalPath signalPath : getSerializableSignalPaths()) {
-				SerializationRequest.makeFeedEvent(signalPath).dispatch();
-			}
 
 			for (IStopListener it : stopListeners) {
 				try {
