@@ -12,7 +12,7 @@ import grails.test.mixin.TestFor
 import java.security.AccessControlException
 
 @TestFor(SignalPathService)
-@Mock([User, Role, UserRole, Canvas, Serialization])
+@Mock([User, Role, UserRole, Canvas])
 class SignalPathServiceSpec extends BeanMockingSpecification {
 
 	User me
@@ -31,21 +31,11 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 		new UserRole(user: admin, role: role).save(failOnError: true)
 
 		c1 = new Canvas(
-				name: "canvas-1",
-				serialization: new Serialization(bytes: new byte[512], date: new Date()),
-				runner: "runnerId"
+			name: "canvas-1",
+			runner: "runnerId"
 		)
 		c1.save(failOnError: true)
-		assert c1.serialization.id != null
 		canvasService = mockBean(CanvasService, Mock(CanvasService))
-	}
-
-	def "clearState() clears serialized state"() {
-		when:
-		service.clearState(c1)
-
-		then:
-		Canvas.findById(c1.id).serialization == null
 	}
 
 	def "stopLocalRunner() sets state to STOPPED if runner is not found"() {
@@ -182,14 +172,14 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 		sp3.setCanvas(c3)
 
 		service.runnersById = [
-		    "runner-id-1": new SignalPathRunner(sp1, new Globals([:], someoneElse)),
+			"runner-id-1": new SignalPathRunner(sp1, new Globals([:], someoneElse)),
 			"runner-id-2": new SignalPathRunner(sp2, new Globals([:], me)),
 			"runner-id-3": new SignalPathRunner(sp3, new Globals([:], someoneElse)),
 		]
 
 		expect:
 		service.getUsersOfRunningCanvases() == [
-		    "canvas-1": someoneElse,
+			"canvas-1": someoneElse,
 			"canvas-2": me,
 			"canvas-3": someoneElse
 		]

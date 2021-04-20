@@ -5,7 +5,6 @@ import com.unifina.domain.Module;
 import com.unifina.domain.Stream;
 import com.unifina.service.CanvasService;
 import com.unifina.service.ModuleService;
-import com.unifina.service.SerializationService;
 import com.unifina.signalpath.custom.ModuleExceptionMessage;
 import com.unifina.signalpath.utils.ConfigurableStreamModule;
 import com.unifina.utils.Globals;
@@ -60,7 +59,9 @@ public class SignalPath extends ModuleWithUI {
 	// TODO: remove backwards compatibility eventually
 	@Override
 	public Input getInput(String name) {
-		if (name.equals("signalPath") || name.equals("streamlet")) { name = "canvas"; }
+		if (name.equals("signalPath") || name.equals("streamlet")) {
+			name = "canvas";
+		}
 		return super.getInput(name);
 	}
 
@@ -180,8 +181,7 @@ public class SignalPath extends ModuleWithUI {
 				it.regenerateId();
 				if (getInput(it.getName()) == null) {
 					addInput(it);
-				}
-				else {
+				} else {
 					int counter = 2;
 					while (getInput(it.getName() + counter) != null) {
 						counter++;
@@ -199,8 +199,7 @@ public class SignalPath extends ModuleWithUI {
 				it.regenerateId();
 				if (getOutput(it.getName()) == null) {
 					addOutput(it);
-				}
-				else {
+				} else {
 					int counter = 2;
 					while (getOutput(it.getName() + counter) != null) {
 						counter++;
@@ -371,7 +370,7 @@ public class SignalPath extends ModuleWithUI {
 
 	/**
 	 * Sends a notification to this SignalPath's UI channel.
-     */
+	 */
 	public void showNotification(@NotNull String notification) {
 		pushToUiChannel(new NotificationMessage(notification));
 	}
@@ -392,23 +391,16 @@ public class SignalPath extends ModuleWithUI {
 		}
 	}
 
-	@Override
-	public void afterDeserialization(SerializationService serializationService) {
-		super.afterDeserialization(serializationService);
-		for (AbstractSignalPathModule module : mods) {
-			module.afterDeserialization(serializationService);
-		}
-	}
-
 	/**
 	 * Get streams on this canvas, NOT including subcanvases
+	 *
 	 * @return Streams on this canvas
 	 */
 	public Set<Stream> getStreams() {
 		return mods.stream()
-			.filter(mod -> mod instanceof ConfigurableStreamModule)
-			.map(mod -> ((ConfigurableStreamModule)mod).getStream())
-			.collect(toSet());
+				.filter(mod -> mod instanceof ConfigurableStreamModule)
+				.map(mod -> ((ConfigurableStreamModule) mod).getStream())
+				.collect(toSet());
 	}
 
 	static class InputConnection {
@@ -460,8 +452,7 @@ public class SignalPath extends ModuleWithUI {
 	public AbstractSignalPathModule resolveRuntimeRequestRecipient(RuntimeRequest request, RuntimeRequest.PathReader path) {
 		if (path.isEmpty()) {
 			return super.resolveRuntimeRequestRecipient(request, path);
-		}
-		else {
+		} else {
 			Integer moduleId = path.readModuleId();
 			AbstractSignalPathModule module = modulesByHash.get(moduleId);
 			if (module == null) {

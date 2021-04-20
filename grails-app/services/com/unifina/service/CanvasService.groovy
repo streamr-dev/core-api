@@ -3,7 +3,6 @@ package com.unifina.service
 import com.google.gson.Gson
 import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
 import com.unifina.domain.*
-import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.ModuleWithUI
 import com.unifina.signalpath.UiChannelIterator
@@ -81,9 +80,6 @@ class CanvasService {
 		canvas.name = command.name
 		canvas.state = Canvas.State.STOPPED
 		canvas.adhoc = command.isAdhoc()
-		// clear serialization
-		canvas.serialization?.delete()
-		canvas.serialization = null
 		boolean isNewCanvas = canvas.id == null
 		canvas.save(flush: false, failOnError: true)
 		if (isNewCanvas) {
@@ -138,10 +134,6 @@ class CanvasService {
 
 		try {
 			signalPathService.startLocal(canvas, signalPathContext, asUser)
-		} catch (SerializationException ex) {
-			log.error("De-serialization failure caused by (BELOW)", ex.cause)
-			String msg = "Could not load (deserialize) previous state of canvas $canvas.id."
-			throw new ApiException(500, "LOADING_PREVIOUS_STATE_FAILED", msg)
 		} catch (InvalidStreamConfigException e) {
 			throw new BadRequestException(e.getMessage())
 		}
@@ -240,7 +232,6 @@ class CanvasService {
 					c.runner = null
 					c.server = null
 					c.requestUrl = null
-					c.serialization = null
 					c.startedBy = null
 					c.state = Canvas.State.STOPPED
 					c.exampleType = ExampleType.NOT_SET

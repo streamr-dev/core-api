@@ -1,6 +1,5 @@
 package com.unifina.signalpath.time;
 
-import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
 
 import java.text.ParseException;
@@ -18,7 +17,7 @@ public class DateConversion extends AbstractSignalPathModule {
 	Input<Object> dateIn = new Input<>(this, "date", "Date Double String");
 
 	StringOutput dateOut = new StringOutput(this, "date");
-	TimeSeriesOutput tsOut = new TimeSeriesOutput(this,"ts");
+	TimeSeriesOutput tsOut = new TimeSeriesOutput(this, "ts");
 	StringOutput wdOut = new StringOutput(this, "dayOfWeek");
 	TimeSeriesOutput yearsOut = new TimeSeriesOutput(this, "years");
 	TimeSeriesOutput monthsOut = new TimeSeriesOutput(this, "months");
@@ -58,7 +57,7 @@ public class DateConversion extends AbstractSignalPathModule {
 
 	@Override
 	public void sendOutput() {
-		if(pattern.getValue() != null && !df.toPattern().equals(pattern.getValue())){
+		if (pattern.getValue() != null && !df.toPattern().equals(pattern.getValue())) {
 			df.applyPattern(pattern.getValue());
 		}
 
@@ -74,17 +73,17 @@ public class DateConversion extends AbstractSignalPathModule {
 
 		cal.setTime(date);
 
-		tsOut.send((double)date.getTime());
+		tsOut.send((double) date.getTime());
 		wdOut.send(cal.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.US));
 		yearsOut.send(cal.get(Calendar.YEAR));
-		monthsOut.send(cal.get(Calendar.MONTH)+1);
+		monthsOut.send(cal.get(Calendar.MONTH) + 1);
 		daysOut.send(cal.get(Calendar.DAY_OF_MONTH));
 		hoursOut.send(cal.get(Calendar.HOUR_OF_DAY));
 		minutesOut.send(cal.get(Calendar.MINUTE));
 		secondsOut.send(cal.get(Calendar.SECOND));
 		msOut.send(cal.get(Calendar.MILLISECOND));
 
-		if(dateOut.isConnected()){
+		if (dateOut.isConnected()) {
 			dateOut.send(df.format(date));
 		}
 	}
@@ -93,12 +92,6 @@ public class DateConversion extends AbstractSignalPathModule {
 	public void clearState() {
 		df = null;
 		cal = null;
-		ensureState();
-	}
-
-	@Override
-	public void afterDeserialization(SerializationService serializationService) {
-		super.afterDeserialization(serializationService);
 		ensureState();
 	}
 

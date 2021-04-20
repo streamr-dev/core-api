@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.unifina.domain.Canvas;
 import com.unifina.domain.User;
 import com.unifina.service.CanvasService;
-import com.unifina.service.SerializationService;
 import com.unifina.service.SignalPathService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
@@ -200,11 +199,12 @@ public class ForEach extends AbstractSignalPathModule {
 			// URLDecode twice, see forEachModule.js
 			try {
 				key = URLDecoder.decode(URLDecoder.decode(key, "UTF-8"), "UTF-8");
-			} catch (UnsupportedEncodingException e) {}
+			} catch (UnsupportedEncodingException e) {
+			}
 
 			SubSignalPath ssp = keyToSignalPath.get(key);
 			if (ssp == null) {
-				throw new IllegalArgumentException("Subcanvas not found: "+key);
+				throw new IllegalArgumentException("Subcanvas not found: " + key);
 			} else {
 				return ssp.getSignalPath().resolveRuntimeRequestRecipient(request, path);
 			}
@@ -233,14 +233,6 @@ public class ForEach extends AbstractSignalPathModule {
 		super.afterSerialization();
 		for (SubSignalPath subSignalPath : keyToSignalPath.values()) {
 			subSignalPath.getSignalPath().afterSerialization();
-		}
-	}
-
-	@Override
-	public void afterDeserialization(SerializationService serializationService) {
-		super.afterDeserialization(serializationService);
-		for (SubSignalPath subSignalPath : keyToSignalPath.values()) {
-			subSignalPath.getSignalPath().afterDeserialization(serializationService);
 		}
 	}
 
@@ -310,7 +302,7 @@ public class ForEach extends AbstractSignalPathModule {
 
 		@Override
 		protected RuntimeRequest.PathWriter getRuntimePath(RuntimeRequest.PathWriter writer) {
-			return parent.getRuntimePath(writer).write("/keys/"+key);
+			return parent.getRuntimePath(writer).write("/keys/" + key);
 		}
 	}
 }
