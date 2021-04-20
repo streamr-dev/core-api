@@ -202,13 +202,6 @@ cors.headers = ['Access-Control-Allow-Headers': 'origin, authorization, accept, 
 unifina.reports.recipient = "henri.pihkala@streamr.network"
 
 /**
- * Task config
- */
-// How many task worker threads to launch on startup
-unifina.task.workers = 1
-unifina.task.messageQueue = "streamr-tasks"
-
-/**
  * Node IP address config. Autodetected if not set.
  */
 streamr.engine.node.ip = System.getProperty("streamr.engine.node.ip")
@@ -231,11 +224,11 @@ streamr.ethereum.datacoinAddress = System.getProperty("streamr.ethereum.datacoin
  * -Dstreamr.ethereum.networks.anotherNetwork=http://some-network-rpc-url
  */
 streamr.ethereum.networks = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.networks.", System.getProperties()) ?: [
-	local    : "http://localhost:8545",
+	local: "http://localhost:8545",
 	sidechain: "http://localhost:8546",
 ]
 streamr.ethereum.wss = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.wss.", System.getProperties()) ?: [
-	local    : "ws://localhost:8545",
+	local: "ws://localhost:8545",
 	sidechain: "ws://localhost:8546",
 ]
 // Ethereum identity of this instance. Don't use this silly development private key for anything.
