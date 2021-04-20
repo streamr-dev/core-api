@@ -1,10 +1,8 @@
 package com.unifina.signalpath.custom;
 
 import com.unifina.security.UserJavaClassLoader;
-import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
-import grails.util.Holders;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -81,28 +79,28 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	}
 
 	protected List<String> getImports() {
-		return Arrays.asList(new String[] {
-			"com.unifina.signalpath.custom.*",
-			"com.unifina.signalpath.*",
-			"com.unifina.utils.*",
-			"java.text.SimpleDateFormat",
-			"java.lang.*",
-			"java.math.*",
-			"java.util.*",
-			"org.apache.commons.codec.binary.Hex",
-			"org.apache.commons.codec.DecoderException",
-			"javax.crypto.*",
-			"javax.crypto.spec.*",
-			"javax.imageio.ImageIO",
-			"java.awt.*",
-			"java.io.InputStream",
-			"java.io.OutputStream",
-			"java.io.IOException",
-			"java.io.ByteArrayInputStream",
-			"java.io.ByteArrayOutputStream",
-			"java.security.MessageDigest",
-			"com.google.common.io.ByteStreams",
-			"java.security.spec.*"
+		return Arrays.asList(new String[]{
+				"com.unifina.signalpath.custom.*",
+				"com.unifina.signalpath.*",
+				"com.unifina.utils.*",
+				"java.text.SimpleDateFormat",
+				"java.lang.*",
+				"java.math.*",
+				"java.util.*",
+				"org.apache.commons.codec.binary.Hex",
+				"org.apache.commons.codec.DecoderException",
+				"javax.crypto.*",
+				"javax.crypto.spec.*",
+				"javax.imageio.ImageIO",
+				"java.awt.*",
+				"java.io.InputStream",
+				"java.io.OutputStream",
+				"java.io.IOException",
+				"java.io.ByteArrayInputStream",
+				"java.io.ByteArrayOutputStream",
+				"java.security.MessageDigest",
+				"com.google.common.io.ByteStreams",
+				"java.security.spec.*"
 		});
 	}
 
@@ -117,13 +115,15 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	}
 
 	protected abstract String getHeader();
+
 	protected abstract String getDefaultCode();
+
 	protected abstract String getFooter();
 
 	@Override
-	public Map<String,Object> getConfiguration() {
-		Map<String,Object> config = super.getConfiguration();
-		config.put("code", (code==null ? getDefaultCode() : code));
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
+		config.put("code", (code == null ? getDefaultCode() : code));
 		return config;
 	}
 
@@ -138,8 +138,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 				fullCode = combineCode(className);
 				Class<AbstractCustomModule> clazz = compileAndRegister(className, fullCode);
 				instance = setUpCustomModule(clazz, config);
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				if (e instanceof ModuleException) {
 					throw (ModuleException) e;
 				}
@@ -168,7 +167,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 			List<ModuleExceptionMessage> msgs = new ArrayList<>();
 
 			for (Diagnostic d : classLoader.getDiagnostics()) {
-				long line = d.getLineNumber()- StringUtils.countMatches(makeImportString(), "\n")-StringUtils.countMatches(getHeader(), "\n");
+				long line = d.getLineNumber() - StringUtils.countMatches(makeImportString(), "\n") - StringUtils.countMatches(getHeader(), "\n");
 
 				sb.append("Line ");
 				sb.append(line);
@@ -222,8 +221,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 		storedCustomModuleState = instance.getStoredState();
 		storedEndpointFields = StoredEndpointFields.clearAndCollect(instance);
 
-		// Note: instance.beforeSerialization() invoked indirectly
-		serializedInstance = serializationService().serialize(instance);
 	}
 
 	@Override
@@ -231,19 +228,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 		super.afterSerialization();
 		// Need to restore values after serialization
 		restoreInstanceAfterSerialization();
-	}
-
-	@Override
-	public void afterDeserialization(SerializationService serializationService) {
-		super.afterDeserialization(serializationService);
-		try {
-			compileAndRegister(className, fullCode);
-			instance = (AbstractCustomModule) serializationService.deserialize(serializedInstance, classLoader);
-			// Need to restore values after deserialization
-			restoreInstanceAfterSerialization();
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("Exception " + e);
-		}
 	}
 
 	/**
@@ -266,9 +250,5 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 		for (Output out : getOutputs()) {
 			out.setOwner(newOwner);
 		}
-	}
-
-	private SerializationService serializationService() {
-		return Holders.getApplicationContext().getBean(SerializationService.class);
 	}
 }

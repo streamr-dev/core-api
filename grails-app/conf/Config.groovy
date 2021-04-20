@@ -231,11 +231,11 @@ streamr.ethereum.datacoinAddress = System.getProperty("streamr.ethereum.datacoin
  * -Dstreamr.ethereum.networks.anotherNetwork=http://some-network-rpc-url
  */
 streamr.ethereum.networks = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.networks.", System.getProperties()) ?: [
-	local: "http://localhost:8545",
+	local    : "http://localhost:8545",
 	sidechain: "http://localhost:8546",
 ]
 streamr.ethereum.wss = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.wss.", System.getProperties()) ?: [
-	local: "ws://localhost:8545",
+	local    : "ws://localhost:8545",
 	sidechain: "ws://localhost:8546",
 ]
 // Ethereum identity of this instance. Don't use this silly development private key for anything.

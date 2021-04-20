@@ -42,7 +42,6 @@ class Canvas {
 	String server
 	String requestUrl
 
-	Serialization serialization
 	// startedBy is set to user who started the canvas.
 	User startedBy
 
@@ -58,7 +57,6 @@ class Canvas {
 		runner(nullable: true)
 		server(nullable: true)
 		requestUrl(nullable: true)
-		serialization(nullable: true, unique: true)
 		startedBy(nullable: true)
 	}
 
@@ -82,7 +80,6 @@ class Canvas {
 			adhoc      : adhoc,
 			state      : state.toString(),
 			hasExports : hasExports,
-			serialized : serialization != null,
 			modules    : map?.modules,
 			settings   : map?.settings,
 			uiChannel  : map?.uiChannel,

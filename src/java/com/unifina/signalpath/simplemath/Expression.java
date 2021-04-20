@@ -1,6 +1,5 @@
 package com.unifina.signalpath.simplemath;
 
-import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
 import org.apache.log4j.Logger;
 
@@ -51,19 +50,14 @@ public class Expression extends AbstractSignalPathModule {
 			double value = expression.eval().doubleValue();
 			out.send(value);
 		} catch (RuntimeException e) {
-			log.error("Exception while evaluating expression! Param: "+expressionParam+", Variables: "+variables+", Expression: "+expression);
+			log.error("Exception while evaluating expression! Param: " + expressionParam + ", Variables: " + variables + ", Expression: " + expression);
 			// Null-safe error sending
 			error.send(e.getMessage() != null ? e.getMessage() : e.toString());
 		}
 	}
 
 	@Override
-	public void clearState() {}
-
-	@Override
-	public void afterDeserialization(SerializationService serializationService) {
-		super.afterDeserialization(serializationService);
-		initExpressionAndVariables();
+	public void clearState() {
 	}
 
 	private void initExpressionAndVariables() throws com.udojava.evalex.Expression.ExpressionException {

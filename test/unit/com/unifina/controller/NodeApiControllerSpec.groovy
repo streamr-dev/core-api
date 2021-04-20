@@ -1,6 +1,5 @@
 package com.unifina.controller
 
-
 import com.unifina.domain.Canvas
 import com.unifina.domain.User
 import com.unifina.service.*
@@ -56,10 +55,10 @@ class NodeApiControllerSpec extends Specification {
 
 	void "shutdown must stop all TaskWorkers, stop local Canvases and start them remotely"() {
 		def canvases = [
-				new Canvas(state: Canvas.State.RUNNING),
-				new Canvas(state: Canvas.State.RUNNING)
+			new Canvas(state: Canvas.State.RUNNING),
+			new Canvas(state: Canvas.State.RUNNING)
 		]
-		canvases*.save(validate:false)
+		canvases*.save(validate: false)
 
 		controller.taskService = Mock(TaskService)
 		controller.signalPathService = Mock(SignalPathService)
@@ -85,11 +84,11 @@ class NodeApiControllerSpec extends Specification {
 
 	void "shutdown must not create start tasks for adhoc canvases"() {
 		def canvases = [
-				new Canvas(state: Canvas.State.RUNNING),
-				new Canvas(state: Canvas.State.RUNNING),
-				new Canvas(state: Canvas.State.RUNNING, adhoc: true)
+			new Canvas(state: Canvas.State.RUNNING),
+			new Canvas(state: Canvas.State.RUNNING),
+			new Canvas(state: Canvas.State.RUNNING, adhoc: true)
 		]
-		canvases*.save(validate:false)
+		canvases*.save(validate: false)
 
 		controller.taskService = Mock(TaskService)
 		controller.signalPathService = Mock(SignalPathService)
@@ -124,8 +123,8 @@ class NodeApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json == [
-			ok: [],
-		    shouldBeRunning: [],
+			ok                : [],
+			shouldBeRunning   : [],
 			shouldNotBeRunning: []
 		]
 	}
@@ -140,7 +139,7 @@ class NodeApiControllerSpec extends Specification {
 			new Canvas(name: "Canvas #5", state: Canvas.State.STOPPED, server: "10.0.0.5"),
 			new Canvas(name: "Canvas #6", state: Canvas.State.RUNNING, server: "10.0.0.6"),
 		]
-		canvases.eachWithIndex { Canvas c, int index -> c.id = "canvas-${index+1}" }
+		canvases.eachWithIndex { Canvas c, int index -> c.id = "canvas-${index + 1}" }
 		canvases*.save(failOnError: true, validate: false)
 
 		def unsavedCanvas = new Canvas(name: "unsaved canvas")
@@ -195,54 +194,13 @@ class NodeApiControllerSpec extends Specification {
 		response.json == [:]
 	}
 
-	void "canvasSizes uses serializationService#serialize to determine canvas size"() {
-		setup: "setup Canvases"
-		def canvases = [
-			new Canvas(name: "Canvas #1", state: Canvas.State.RUNNING, server: "10.0.0.5"),
-			new Canvas(name: "Canvas #2", state: Canvas.State.RUNNING, server: "10.0.0.5")
-		]
-		canvases.eachWithIndex { Canvas c, int index -> c.id = "canvas-${index+1}" }
-		canvases*.save(failOnError: true, validate: false)
-
-		and: "setup SignalPaths"
-		def runningCanvas1 = new SignalPath()
-		def runningCanvas2 = new SignalPath()
-		runningCanvas1.canvas = canvases[0]
-		runningCanvas2.canvas = canvases[1]
-
-		controller.signalPathService = Stub(SignalPathService) {
-			getRunningSignalPaths() >> ([
-				runningCanvas1,
-				runningCanvas2,
-			] as Set<SignalPath>)
-		}
-
-		def serializationService = controller.serializationService = Mock(SerializationService)
-
-		when:
-		request.method = "GET"
-		controller.canvasSizes()
-
-		then:
-		1 * serializationService.serialize(runningCanvas1) >> new byte[256]
-		1 * serializationService.serialize(runningCanvas2) >> new byte[666]
-		0 * serializationService._
-
-		and:
-		response.status == 200
-		response.json == [
-		    "canvas-1": 256,
-			"canvas-2": 666
-		]
-	}
-
 	void "shutdownNode invokes shutdown() if given ipAddress is of current machine"() {
 		def canvases = [
 			new Canvas(state: Canvas.State.RUNNING,),
 			new Canvas(state: Canvas.State.RUNNING,),
 			new Canvas(state: Canvas.State.RUNNING, adhoc: true)
 		]
-		canvases*.save(validate:false)
+		canvases*.save(validate: false)
 
 		controller.taskService = Mock(TaskService)
 		controller.signalPathService = Mock(SignalPathService)

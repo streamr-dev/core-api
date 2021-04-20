@@ -1,11 +1,12 @@
 package com.unifina.service
 
-
 import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
 import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
-import com.unifina.domain.*
-import com.unifina.serialization.SerializationException
+import com.unifina.domain.Canvas
+import com.unifina.domain.Permission
+import com.unifina.domain.Stream
+import com.unifina.domain.User
 import com.unifina.signalpath.*
 import com.unifina.utils.Globals
 import grails.compiler.GrailsCompileStatic
@@ -24,10 +25,9 @@ import java.util.concurrent.TimeoutException
 
 class SignalPathService {
 
-    static transactional = false
+	static transactional = false
 
 	LinkGenerator grailsLinkGenerator
-	SerializationService serializationService
 	PermissionService permissionService
 	ApiService apiService
 	NodeService nodeService
@@ -42,7 +42,7 @@ class SignalPathService {
 	 * SignalPaths or subclasses of SignalPath).
 	 *
 	 * If connectionsReady==true, instance.connectionsReady() is called.
-     */
+	 */
 	@CompileStatic
 	SignalPath mapToSignalPath(Map config, boolean connectionsReady, Globals globals, SignalPath instance = new SignalPath(true)) {
 		instance.globals = globals
@@ -57,12 +57,12 @@ class SignalPathService {
 
 	@CompileStatic
 	private static Map signalPathToMap(SignalPath sp) {
-		return  [
-			name: sp.name,
-			modules: sp.modules.collect { AbstractSignalPathModule it -> it.getConfiguration() },
-			settings: sp.globals.signalPathContext,
+		return [
+			name      : sp.name,
+			modules   : sp.modules.collect { AbstractSignalPathModule it -> it.getConfiguration() },
+			settings  : sp.globals.signalPathContext,
 			hasExports: sp.hasExports(),
-			uiChannel: sp.getUiChannel().toMap()
+			uiChannel : sp.getUiChannel().toMap()
 		]
 	}
 
@@ -78,14 +78,15 @@ class SignalPathService {
 
 	@Transactional
 	void deleteReferences(SignalPath signalPath, boolean delayed) {
-		CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService) // Cannot use dependency injection because of circular dependency! Do not turn into instance variable.
+		CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService)
+		// Cannot use dependency injection because of circular dependency! Do not turn into instance variable.
 		canvasService.deleteCanvas(signalPath.canvas, User.load(signalPath.globals.userId), delayed)
 	}
 
 	/**
 	 * @throws SerializationException if de-serialization fails when resuming from existing state
-     */
-	void startLocal(Canvas canvas, Map signalPathContext, User asUser) throws SerializationException {
+	 */
+	void startLocal(Canvas canvas, Map signalPathContext, User asUser) {
 		Globals globals = new Globals(
 			signalPathContext,
 			asUser,
@@ -93,14 +94,7 @@ class SignalPathService {
 		)
 		SignalPath sp
 
-		// Instantiate the SignalPath
-		if (canvas.serialization == null || canvas.adhoc) {
-			log.info("Creating new signalPath connections (canvasId=$canvas.id)")
-			sp = mapToSignalPath(canvas.toSignalPathConfig(), false, globals, new SignalPath(true))
-		} else {
-			log.info("De-serializing existing signalPath (canvasId=$canvas.id)")
-			sp = (SignalPath) serializationService.deserialize(canvas.serialization.bytes)
-		}
+		sp = mapToSignalPath(canvas.toSignalPathConfig(), false, globals, new SignalPath(true))
 
 		// require read access to all streams when starting
 		// can be problematic when collaborating on shared canvas; though even then it makes sense to force
@@ -153,7 +147,7 @@ class SignalPathService {
 		if (!runner.getRunning()) {
 			if (runner.thrownOnStartUp) { // failed because of error
 				throw runner.thrownOnStartUp
-			} else {					  // failed because of timeout
+			} else {                      // failed because of timeout
 				runner.abort()
 				def msg = "Timed out while waiting for canvas $canvas.id to start."
 				throw new CanvasCommunicationException(msg)
@@ -219,7 +213,7 @@ class SignalPathService {
 	@NotTransactional
 	@CompileStatic
 	Map stopRemote(Canvas canvas, User user, AuthorizationHeader authorizationHeader) {
-		return runtimeRequest(buildRuntimeRequest([type:"stopRequest"], "canvases/$canvas.id", user, authorizationHeader))
+		return runtimeRequest(buildRuntimeRequest([type: "stopRequest"], "canvases/$canvas.id", user, authorizationHeader))
 	}
 
 	@CompileStatic
@@ -234,7 +228,8 @@ class SignalPathService {
 		RuntimeRequest.PathReader pathReader = RuntimeRequest.getPathReader(path)
 
 		// All runtime requests require at least read permission
-		CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService) // Cannot use dependency injection because of circular dependency! Do not turn into instance variable.
+		CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService)
+		// Cannot use dependency injection because of circular dependency! Do not turn into instance variable.
 		Canvas canvas
 		if (user?.isAdmin()) {
 			canvas = Canvas.get(pathReader.readCanvasId())
@@ -309,48 +304,10 @@ class SignalPathService {
 
 	@Transactional
 	def saveState(SignalPath sp) {
-		long startTime = System.currentTimeMillis()
-		Canvas canvas = Canvas.get(sp.canvas.id)
-
-		try {
-			boolean isFirst = (canvas.serialization == null)
-			Serialization serialization = isFirst ? new Serialization(canvas: canvas) : canvas.serialization
-
-			// Serialize
-			byte[] bytes = serializationService.serialize(sp)
-			boolean notTooBig = bytes.length <= serializationService.serializationMaxBytes()
-
-			if (notTooBig) {
-                serialization.bytes = serializationService.serialize(sp)
-                serialization.date = sp.globals.time
-                serialization.save(failOnError: true, flush: false)
-                canvas.serialization = serialization
-
-                if (isFirst) {
-                    Canvas.executeUpdate("update Canvas c set c.serialization = ? where c.id = ?", [serialization, canvas.id])
-                }
-			}
-
-			long timeTaken = System.currentTimeMillis() - startTime
-			String stats = "(size: ${bytes.length} bytes, processing time: ${timeTaken} ms)"
-			if (notTooBig) {
-				log.info("Canvas " + canvas.id + " serialized " + stats)
-			} else {
-				log.info("Canvas " + canvas.id + " serialization skipped because too large " + stats)
-			}
-		} catch (SerializationException ex) {
-			log.error("Serialization of canvas " + canvas.id + " failed.")
-			throw ex
-		} finally {
-			// Save memory by removing reference to the bytes to get them gc'ed
-			canvas.serialization?.bytes = null
-		}
 	}
 
 	@Transactional
 	def clearState(Canvas canvas) {
-		canvas.serialization?.delete()
-		canvas.serialization = null
 		canvas.save(failOnError: true)
 		log.info("Canvas $canvas.id serialized state cleared.")
 	}

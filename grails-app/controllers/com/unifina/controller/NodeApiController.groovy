@@ -17,7 +17,6 @@ class NodeApiController {
 	CanvasService canvasService
 	LinkGenerator grailsLinkGenerator
 	SignalPathService signalPathService
-	SerializationService serializationService
 	TaskService taskService
 	NodeService nodeService
 
@@ -41,7 +40,7 @@ class NodeApiController {
 		Map<String, Object> config = Holders.getFlatConfig()
 
 		// Clean up the config from values that the JSON marshaller won't support by calling toString() on them
-		config.keySet().each {String key->
+		config.keySet().each { String key ->
 			def value = config.get(key)
 			if (!(value instanceof Number
 				|| value instanceof String
@@ -70,8 +69,8 @@ class NodeApiController {
 			.collect { canvasById.get(it) }
 
 		render([
-			ok: areAndShouldBeRunning*.toMap(),
-			shouldBeRunning: areNotButShouldBeRunning*.toMap(),
+			ok                : areAndShouldBeRunning*.toMap(),
+			shouldBeRunning   : areNotButShouldBeRunning*.toMap(),
 			shouldNotBeRunning: areButShouldNotBeRunning*.toMap()
 		] as JSON)
 	}
@@ -80,8 +79,6 @@ class NodeApiController {
 	def canvasSizes() {
 		def sizePerCanvas = new ValueSortedMap(true)
 		signalPathService.runningSignalPaths.each { SignalPath sp ->
-			long bytes = serializationService.serialize(sp).length
-			sizePerCanvas[sp.canvas.id] = bytes
 		}
 		render(sizePerCanvas as JSON)
 	}

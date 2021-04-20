@@ -2,11 +2,10 @@ package com.unifina.signalpath;
 
 import com.unifina.data.Event;
 import com.unifina.datasource.IDayListener;
-import com.unifina.domain.Permission;
 import com.unifina.domain.Module;
+import com.unifina.domain.Permission;
 import com.unifina.security.permission.ConnectionTraversalPermission;
 import com.unifina.service.PermissionService;
-import com.unifina.service.SerializationService;
 import com.unifina.utils.Globals;
 import com.unifina.utils.HibernateHelper;
 import com.unifina.utils.MapTraversal;
@@ -96,49 +95,48 @@ public abstract class AbstractSignalPathModule implements IDayListener, Serializ
 		 * Execute in a privileged block so that also user defined
 		 * untrusted modules can benefit from auto-initialization of IO.
 		 */
-        AccessController.doPrivileged(
-	        new PrivilegedAction<Object>() {
-	            public Object run() {
+		AccessController.doPrivileged(
+				new PrivilegedAction<Object>() {
+					public Object run() {
 
-					// Loop through class hierarchy and collect declared fields
-					List<Field> fieldList = new ArrayList<>();
-					Class clazz = AbstractSignalPathModule.this.getClass();
-					do {
-						fieldList.addAll(Arrays.asList(clazz.getDeclaredFields()));
-						clazz = clazz.getSuperclass();
-					} while (clazz != null);
+						// Loop through class hierarchy and collect declared fields
+						List<Field> fieldList = new ArrayList<>();
+						Class clazz = AbstractSignalPathModule.this.getClass();
+						do {
+							fieldList.addAll(Arrays.asList(clazz.getDeclaredFields()));
+							clazz = clazz.getSuperclass();
+						} while (clazz != null);
 
-					Field[] fields = fieldList.toArray(new Field[fieldList.size()]);
+						Field[] fields = fieldList.toArray(new Field[fieldList.size()]);
 
-	    			// Sort by field name
-	    			Arrays.sort(fields, new Comparator<Field>() {
-						@Override
-						public int compare(Field o1, Field o2) {
-							return o1.getName().compareTo(o2.getName());
+						// Sort by field name
+						Arrays.sort(fields, new Comparator<Field>() {
+							@Override
+							public int compare(Field o1, Field o2) {
+								return o1.getName().compareTo(o2.getName());
+							}
+						});
+
+						for (Field f : fields) {
+							try {
+								// This is required to avoid java.lang.IllegalAccessException and requires privileges
+								f.setAccessible(true);
+								Object obj = f.get(AbstractSignalPathModule.this);
+								if (Input.class.isInstance(obj) && !inputs.contains(obj) && f.getAnnotation(ExcludeInAutodetection.class) == null) {
+									addInput((Input) obj);
+								} else if (Output.class.isInstance(obj) && !outputs.contains(obj) && f.getAnnotation(ExcludeInAutodetection.class) == null) {
+									addOutput((Output) obj);
+								}
+							} catch (Exception e) {
+								log.error("Could not get field: " + f + ", class: " + AbstractSignalPathModule.this.getClass() + " due to exception: " + e);
+							} finally {
+								// Set the field back to non-accessible
+								f.setAccessible(false);
+							}
 						}
-	    			});
-
-	    			for (Field f : fields) {
-	    				try {
-	    					// This is required to avoid java.lang.IllegalAccessException and requires privileges
-	    					f.setAccessible(true);
-	    					Object obj = f.get(AbstractSignalPathModule.this);
-	    					if (Input.class.isInstance(obj) && !inputs.contains(obj) && f.getAnnotation(ExcludeInAutodetection.class) == null) {
-								addInput((Input) obj);
-							}
-	    					else if (Output.class.isInstance(obj) && !outputs.contains(obj) && f.getAnnotation(ExcludeInAutodetection.class) == null) {
-								addOutput((Output) obj);
-							}
-	    				} catch (Exception e) {
-	    					log.error("Could not get field: "+f+", class: "+AbstractSignalPathModule.this.getClass()+" due to exception: "+e);
-	    				} finally {
-	    					// Set the field back to non-accessible
-	    					f.setAccessible(false);
-	    				}
-	    			}
-					return null;
-				}
-			});
+						return null;
+					}
+				});
 	}
 
 	/**
@@ -146,7 +144,8 @@ public abstract class AbstractSignalPathModule implements IDayListener, Serializ
 	 * gets called after the module is set up, ie. after the connections
 	 * have been made. The default implementation does nothing.
 	 */
-	public void initialize() { }
+	public void initialize() {
+	}
 
 	public void addInput(Input input) {
 		addInput(input, input.getName());
@@ -177,7 +176,7 @@ public abstract class AbstractSignalPathModule implements IDayListener, Serializ
 
 	public void removeInput(Input input) {
 		if (!inputs.contains(input)) {
-			throw new IllegalArgumentException("Unable to remove input: input not found: "+input);
+			throw new IllegalArgumentException("Unable to remove input: input not found: " + input);
 		}
 
 		inputs.remove(input);
@@ -215,7 +214,7 @@ public abstract class AbstractSignalPathModule implements IDayListener, Serializ
 
 	public void removeOutput(Output output) {
 		if (!outputs.contains(output)) {
-			throw new IllegalArgumentException("Unable to remove output: output not found: "+output);
+			throw new IllegalArgumentException("Unable to remove output: output not found: " + output);
 		}
 
 		outputs.remove(output);
@@ -327,7 +326,7 @@ public abstract class AbstractSignalPathModule implements IDayListener, Serializ
 
 	/**
 	 * Writes this module's configuration to a Map.
-     */
+	 */
 	@SuppressWarnings("rawtypes")
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> map = new LinkedHashMap<>();
@@ -359,7 +358,7 @@ public abstract class AbstractSignalPathModule implements IDayListener, Serializ
 
 	/**
 	 * Reads this module's configuration from a Map.
-     */
+	 */
 	private void setConfiguration(Map<String, Object> config) {
 		// Only load the domain object from config if it's unset.
 		if (config.containsKey("id") && getDomainObject() == null) {
@@ -444,9 +443,10 @@ public abstract class AbstractSignalPathModule implements IDayListener, Serializ
 
 	/**
 	 * Reads configuration for inputs and outputs from the given Map.
+	 *
 	 * @param config
 	 * @param ignoreNotFound
-     */
+	 */
 	private void setIOConfiguration(Map<String, Object> config, boolean ignoreNotFound) {
 		// Set IO config automatically
 		if (config.get("params") != null) {
@@ -504,7 +504,7 @@ public abstract class AbstractSignalPathModule implements IDayListener, Serializ
 			AccessController.checkPermission(new ConnectionTraversalPermission());
 		}
 		this.domainObject = domainObject;
-		if (name==null) {
+		if (name == null) {
 			setName(domainObject.getName());
 		}
 	}
@@ -526,7 +526,7 @@ public abstract class AbstractSignalPathModule implements IDayListener, Serializ
 
 	/**
 	 * Returns the topmost SignalPath in the hierarchy where this module is contained.
-     */
+	 */
 	public SignalPath getRootSignalPath() {
 		SignalPath parentSignalPath = getParentSignalPath();
 		if (parentSignalPath != null) {
@@ -598,7 +598,7 @@ public abstract class AbstractSignalPathModule implements IDayListener, Serializ
 
 	/**
 	 * Can be overridden to dig RuntimeRequest recipients from within this module. The default implementation returns "this".
-     */
+	 */
 	public AbstractSignalPathModule resolveRuntimeRequestRecipient(RuntimeRequest request, RuntimeRequest.PathReader path) {
 		return this;
 	}
@@ -607,15 +607,15 @@ public abstract class AbstractSignalPathModule implements IDayListener, Serializ
 	 * Returns the runtime path that can be used to address this module by eg. RuntimeRequests.
 	 * The default implementation appends /modules/:hash to the parent SignalPath's path.
 	 * If the parent SignalPath is null, null is returned.
-	 *
+	 * <p>
 	 * The implementation should be in sync with resolveRuntimeRequestRecipient.
-     */
+	 */
 	public String getRuntimePath() {
 		return getRuntimePath(new RuntimeRequest.PathWriter()).toString();
 	}
 
 	protected RuntimeRequest.PathWriter getRuntimePath(RuntimeRequest.PathWriter writer) {
-		if (parentSignalPath!=null) {
+		if (parentSignalPath != null) {
 			return parentSignalPath.getRuntimePath(writer).writeModuleId(getHash());
 		} else {
 			return writer;
@@ -639,8 +639,7 @@ public abstract class AbstractSignalPathModule implements IDayListener, Serializ
 		// By default all modules support runtime parameter changes, ping requests and json requests
 		if (request.getType().equals("ping")) {
 			response.setSuccess(true);
-		}
-		else if (request.getType().equals("paramChange")) {
+		} else if (request.getType().equals("paramChange")) {
 
 			Parameter param = (Parameter) getInput(request.get("param").toString());
 			try {
@@ -672,8 +671,7 @@ public abstract class AbstractSignalPathModule implements IDayListener, Serializ
 				log.error("Error making runtime parameter change!", e);
 				getParentSignalPath().pushToUiChannel(new ErrorMessage("Parameter change failed!"));
 			}
-		}
-		else if (request.getType().equals("json")) {
+		} else if (request.getType().equals("json")) {
 			response.put("json", this.getConfiguration());
 			response.setSuccess(true);
 		}
@@ -693,7 +691,7 @@ public abstract class AbstractSignalPathModule implements IDayListener, Serializ
 		item.put("type", type);
 		item.put("value", value);
 
-		Map<String, Object> options = (Map<String, Object>)config.get("options");
+		Map<String, Object> options = (Map<String, Object>) config.get("options");
 		options.put(name, item);
 
 		return item;
@@ -720,9 +718,6 @@ public abstract class AbstractSignalPathModule implements IDayListener, Serializ
 	/**
 	 * Override to handle steps after deserialization
 	 */
-	public void afterDeserialization(SerializationService serializationService) {
-	}
-
 	public Globals getGlobals() {
 		return globals;
 	}

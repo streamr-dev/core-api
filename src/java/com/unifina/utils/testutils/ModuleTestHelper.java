@@ -1,17 +1,12 @@
 package com.unifina.utils.testutils;
 
 import com.unifina.datasource.ITimeListener;
-import com.unifina.serialization.Serializer;
-import com.unifina.serialization.SerializerImpl;
-import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.DU;
 import com.unifina.utils.Globals;
 import groovy.json.JsonBuilder;
 import groovy.lang.Closure;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -20,14 +15,13 @@ import static com.unifina.feed.TimePropagationRoot.isTimeToTick;
 
 /**
  * A utility class for unit testing subclasses that inherit from <code>AbstractSignalPathModule</code>.
- *
+ * <p>
  * Given an instance of the subclass, and a list of input values and expected output values, this test verifies that the
  * inherited class fulfils its contract, in other words, it
- *
- * 	- produces output values that match with expected output
- * 	- implements clearState() properly
- * 	- properly serializes and deserializes without affecting results
- *
+ * <p>
+ * - produces output values that match with expected output
+ * - implements clearState() properly
+ * - properly serializes and deserializes without affecting results
  */
 public class ModuleTestHelper {
 
@@ -152,8 +146,8 @@ public class ModuleTestHelper {
 		/**
 		 * Serialization+deserialization changes module instance, and old references go stale.
 		 * Test Specification must listen to instance changes and update their references
-		 *   if they make direct calls to the module in the middle of the test (e.g. in Stub'd methods)
-         */
+		 * if they make direct calls to the module in the middle of the test (e.g. in Stub'd methods)
+		 */
 		public Builder onModuleInstanceChange(Closure<?> moduleInstanceChanged) {
 			testHelper.moduleInstanceChanged = moduleInstanceChanged;
 			return this;
@@ -162,7 +156,7 @@ public class ModuleTestHelper {
 		/**
 		 * By default, test all SerializationModes (NONE, SERIALIZE and SERIALIZE_DESERIALIZE).
 		 * This can be changed by calling this method with a subset of those SerializationModes.
-         */
+		 */
 		public Builder serializationModes(Set<SerializationMode> serializationModes) {
 			testHelper.selectedSerializationModes = serializationModes;
 			return this;
@@ -241,12 +235,11 @@ public class ModuleTestHelper {
 	public enum SerializationMode {
 		NONE, CLEAR, SERIALIZE, SERIALIZE_DESERIALIZE
 	}
+
 	private SerializationMode serializationMode = SerializationMode.NONE;
-	private SerializationService dummySerializationService = new SerializationService();
 
-	private Serializer serializer = new SerializerImpl();
-
-	private ModuleTestHelper() {}
+	private ModuleTestHelper() {
+	}
 
 	// By default, test all serialization modes
 	private Set<SerializationMode> selectedSerializationModes = new HashSet<>(Arrays.asList(SerializationMode.values()));
@@ -305,23 +298,20 @@ public class ModuleTestHelper {
 			if (isTimedMode() && ticks.containsKey(i)) {
 				Date time = ticks.get(i);
 				if (isTimeToTick(time.getTime() / 1000, ((ITimeListener) module).tickRateInSec())) {
-					((ITimeListener)module).setTime(time);
+					((ITimeListener) module).setTime(time);
 				}
 				module.getGlobals().time = time;
 			}
 
 			// Set input values
 			if (i < inputValueCount) {
-				serializeAndDeserializeModule();
 				feedInputs(i);
 			}
 
 			// Activate module
-			serializeAndDeserializeModule();
 			activateModule(i);
 
 			// Test outputs
-			serializeAndDeserializeModule();
 			if (shouldValidateOutput(i, skip)) {
 				validateOutput(outputIndex, i);
 				++outputIndex;
@@ -381,7 +371,7 @@ public class ModuleTestHelper {
 			Object expected = entry.getValue().get(outputIndex);
 
 			if (expected instanceof Double) {
-				expected = DU.clean((Double)expected);
+				expected = DU.clean((Double) expected);
 			}
 
 			// Possible failures:
@@ -396,7 +386,7 @@ public class ModuleTestHelper {
 		}
 	}
 
-	private void throwException(String outputName, int i, int outputIndex, Object value, Object target)  {
+	private void throwException(String outputName, int i, int outputIndex, Object value, Object target) {
 		String msg = "%s: mismatch at %d (inputIndex %d), was '%s' expected '%s'";
 		throw new TestHelperException(String.format(msg, outputName, outputIndex, i, value, target), this);
 	}
@@ -466,29 +456,6 @@ public class ModuleTestHelper {
 		return ticks != null;
 	}
 
-	private void serializeAndDeserializeModule() throws IOException, ClassNotFoundException {
-		if (serializationMode != SerializationMode.NONE) {
-			// Globals is transient, we need to restore it after deserialization
-			Globals globalsTempHolder = module.getGlobals();
-
-			module.beforeSerialization();
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			serializer.serialize(module, out);
-			module.afterSerialization();
-
-			if (serializationMode == SerializationMode.SERIALIZE_DESERIALIZE) {
-				ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-				module = (AbstractSignalPathModule) serializer.deserialize(in);
-				module.setGlobals(globalsTempHolder);
-				if (module.getParentSignalPath() != null) {
-					module.getParentSignalPath().setGlobals(globalsTempHolder);
-				}
-				module.afterDeserialization(dummySerializationService);
-				moduleInstanceChanged.call(module);
-			}
-		}
-	}
-
 	private void clearModuleAndCollectorsAndChannels() {
 		module.getGlobals().time = null;
 		module.clear();
@@ -550,9 +517,9 @@ public class ModuleTestHelper {
 			int outputListSize = entry.getValue().size();
 			if (outputListSize != outputValueCount) {
 				String msg = String.format("List for output '%s' not of expected size (%d != %d).",
-					entry.getKey(),
-					outputListSize,
-					outputValueCount);
+						entry.getKey(),
+						outputListSize,
+						outputValueCount);
 				throw new IllegalArgumentException(msg);
 			}
 		}
@@ -574,7 +541,9 @@ public class ModuleTestHelper {
 		module.setGlobals(overrideGlobalsClosure.call(module.getGlobals()));
 	}
 
-	/** create dummy outputs for each tested input */
+	/**
+	 * create dummy outputs for each tested input
+	 */
 	private void initAndAttachOutputsToModuleInputs() {
 		for (String inputName : inputValuesByName.keySet()) {
 			Input input = getInputByEffectiveName(inputName);
@@ -606,7 +575,9 @@ public class ModuleTestHelper {
 		return null;
 	}
 
-	/** create (one-input dummy) Collector modules for each tested output */
+	/**
+	 * create (one-input dummy) Collector modules for each tested output
+	 */
 	private void connectCollectorsToModule(AbstractSignalPathModule module) {
 		for (String outputName : outputValuesByName.keySet()) {
 			Output output = getOutputByEffectiveName(outputName);
@@ -618,6 +589,7 @@ public class ModuleTestHelper {
 			collector.attachToOutput(output);
 		}
 	}
+
 	public static class Collector extends AbstractSignalPathModule {
 		Input<Object> input = new Input<>(this, "input", "Object");
 
@@ -631,18 +603,22 @@ public class ModuleTestHelper {
 		}
 
 		@Override
-		public void sendOutput() { }
+		public void sendOutput() {
+		}
 
 		@Override
-		public void clearState() { }
+		public void clearState() {
+		}
 	}
 
 	public static class PlaceholderModule extends AbstractSignalPathModule {
 		@Override
-		public void sendOutput() { }
+		public void sendOutput() {
+		}
 
 		@Override
-		public void clearState() { }
+		public void clearState() {
+		}
 	}
 
 }

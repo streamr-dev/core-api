@@ -1,7 +1,9 @@
 package com.unifina.signalpath.utils;
 
-import com.unifina.service.SerializationService;
-import com.unifina.signalpath.*;
+import com.unifina.signalpath.Input;
+import com.unifina.signalpath.ModuleOption;
+import com.unifina.signalpath.ModuleOptions;
+import com.unifina.signalpath.ModuleWithUI;
 import com.unifina.signalpath.time.TimezoneParameter;
 import com.unifina.signalpath.variadic.InputInstantiator;
 import com.unifina.signalpath.variadic.VariadicInput;
@@ -122,7 +124,7 @@ public class ExportCSV extends ModuleWithUI {
 
 		ModuleOption writeHeaderOption = options.getOption("writeHeader");
 		if (writeHeaderOption != null) {
-			 writeHeader = writeHeaderOption.getBoolean();
+			writeHeader = writeHeaderOption.getBoolean();
 		}
 		ModuleOption includeTimestampsOption = options.getOption("includeTimestamps");
 		if (includeTimestampsOption != null) {
@@ -140,13 +142,6 @@ public class ExportCSV extends ModuleWithUI {
 		options.addIfMissing(ModuleOption.createBoolean("includeTimestamps", includeTimestamps));
 		options.addIfMissing(timeFormat.asModuleOption());
 		return config;
-	}
-
-	@Override
-	public void afterDeserialization(SerializationService serializationService) {
-		super.afterDeserialization(serializationService);
-		openCsvWriter();
-		timeFormatter = timeFormat.getTimeFormatter(tz.getValue());
 	}
 
 	private void openCsvWriter() {
@@ -214,9 +209,9 @@ public class ExportCSV extends ModuleWithUI {
 
 		private ModuleOption asModuleOption() {
 			return ModuleOption.createString("timeFormat", name()).
-				addPossibleValue("ms since Unix Epoch", TimeFormat.MILLISECONDS_SINCE_EPOCH.name()).
-				addPossibleValue("ISO 8601 local", TimeFormat.ISO_8601_LOCAL.name()).
-				addPossibleValue("ISO 8601 UTC", TimeFormat.ISO_8601_UTC.name());
+					addPossibleValue("ms since Unix Epoch", TimeFormat.MILLISECONDS_SINCE_EPOCH.name()).
+					addPossibleValue("ISO 8601 local", TimeFormat.ISO_8601_LOCAL.name()).
+					addPossibleValue("ISO 8601 UTC", TimeFormat.ISO_8601_UTC.name());
 		}
 
 		private static TimeFormat fromModuleOptions(ModuleOptions options) {
