@@ -106,9 +106,9 @@ class CanvasService {
 	}
 
 	/**
-	 * Deletes a Canvas along with any resources (DashboardItems, Streams) pointing to it.
+	 * Deletes a Canvas along with any resources (Streams) pointing to it.
 	 * It can be deleted after a delay to allow resource consumers to finish up.
-     */
+	 */
 	@Transactional
 	void deleteCanvas(Canvas canvas, User user, boolean delayed = false) {
 		if (delayed) {
@@ -147,11 +147,11 @@ class CanvasService {
 		}
 	}
 
-	void startRemote(Canvas canvas, User user, boolean forceReset=false, boolean resetOnError=true) {
+	void startRemote(Canvas canvas, User user, boolean forceReset = false, boolean resetOnError = true) {
 		taskService.createTask(CanvasStartTask, CanvasStartTask.getConfig(canvas, forceReset, resetOnError), "canvas-start", user)
 	}
 
-	@Transactional(noRollbackFor=[CanvasUnreachableException])
+	@Transactional(noRollbackFor = [CanvasUnreachableException])
 	void stop(Canvas canvas, User user, AuthorizationHeader authorizationHeader) {
 		log.info("Stop canvas: id=" + canvas.id)
 		if (canvas.state != Canvas.State.RUNNING) {
@@ -172,7 +172,7 @@ class CanvasService {
 	/**
 	 * Gets a canvas by id, authorizing the given user for the given Operation.
 	 * Throws an exception if authorization fails.
-     */
+	 */
 	@CompileStatic
 	Canvas authorizedGetById(String id, User user, Permission.Operation op) {
 		def canvas = Canvas.get(id)
@@ -202,7 +202,7 @@ class CanvasService {
 
 		if (!canvas) {
 			throw new NotFoundException("Canvas", canvasId)
-		} else if (!permissionService.check(user, canvas, op) && !hasModulePermissionViaDashboard(canvas, moduleId, dashboardId, user, op)) {
+		} else if (!permissionService.check(user, canvas, op)) {
 			throw new NotPermittedException(user?.username, "Canvas", canvasId, op.id)
 		} else {
 			Map canvasMap = canvas.toMap()
@@ -232,7 +232,7 @@ class CanvasService {
 	def addExampleCanvases(User user, List<Canvas> examples) {
 		for (final Canvas example : examples) {
 			switch (example.exampleType) {
-				// Create a copy of the example canvas for the user and grant read/write/share permissions.
+			// Create a copy of the example canvas for the user and grant read/write/share permissions.
 				case ExampleType.COPY:
 					Canvas c = new Canvas()
 					setProperties(c, example.properties)
@@ -252,9 +252,9 @@ class CanvasService {
 						settings: map?.getJSONObject("settings") == null ? [:] : map?.getJSONObject("settings"),
 						adhoc: false,
 					)
-					updateExisting(c, cmd, user,true)
+					updateExisting(c, cmd, user, true)
 					break
-				// Grant read permission to example canvas.
+					// Grant read permission to example canvas.
 				case ExampleType.SHARE:
 					permissionService.systemGrant(user, example, Permission.Operation.CANVAS_GET)
 					permissionService.systemGrant(user, example, Permission.Operation.CANVAS_INTERACT)
@@ -278,6 +278,7 @@ class CanvasService {
 			setPropertySafe(object, mc, key, value)
 		}
 	}
+
 	private static setPropertySafe(Object object, MetaClass mc, String key, Object value) {
 		try {
 			mc.setProperty(object, key, value)
@@ -288,19 +289,6 @@ class CanvasService {
 				throw e
 			}
 		}
-	}
-
-	private boolean hasModulePermissionViaDashboard(Canvas canvas, Integer moduleId, String dashboardId, User user, Permission.Operation op) {
-		if (!dashboardId) {
-			return false
-		}
-
-		// Throws if no access
-		Dashboard dashboard = dashboardService.authorizedGetById(dashboardId, user, op)
-		// Check that the dashboard actually contains the module
-		return dashboard?.items?.find { DashboardItem it ->
-			it.canvas.id == canvas.id && it.module == moduleId
-		} != null
 	}
 
 	private SignalPathService.ReconstructedResult constructNewSignalPathMap(Canvas canvas, SaveCanvasCommand command, User user, boolean resetUi) {

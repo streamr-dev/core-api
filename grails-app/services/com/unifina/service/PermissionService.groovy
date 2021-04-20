@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.unifina.domain.*
 import com.unifina.domain.Permission.Operation
 import grails.compiler.GrailsCompileStatic
@@ -116,7 +115,7 @@ class PermissionService {
 		// TODO: find a way to do this in a single query instead of filtering results
 		List<Permission> results = []
 		Date now = new Date()
-		for (Permission p: getPermissionsTo(resource, op)) {
+		for (Permission p : getPermissionsTo(resource, op)) {
 			if (p.endsAt == null || p.endsAt.after(now)) {
 				results.add(p)
 			}
@@ -176,9 +175,9 @@ class PermissionService {
 
 	// Maps canvas operations to stream operations
 	private final static LinkedHashMap<Operation, HashSet<Operation>> CANVAS_TO_STREAM = [
-		(Operation.CANVAS_GET): new HashSet<Operation>([Operation.STREAM_GET, Operation.STREAM_SUBSCRIBE]),
-		(Operation.CANVAS_EDIT): new HashSet<Operation>([Operation.STREAM_DELETE]),
-		(Operation.CANVAS_DELETE): new HashSet<Operation>([Operation.STREAM_DELETE]),
+		(Operation.CANVAS_GET)      : new HashSet<Operation>([Operation.STREAM_GET, Operation.STREAM_SUBSCRIBE]),
+		(Operation.CANVAS_EDIT)     : new HashSet<Operation>([Operation.STREAM_DELETE]),
+		(Operation.CANVAS_DELETE)   : new HashSet<Operation>([Operation.STREAM_DELETE]),
 		(Operation.CANVAS_STARTSTOP): new HashSet<Operation>([Operation.STREAM_PUBLISH]),
 	]
 
@@ -190,12 +189,6 @@ class PermissionService {
 				moduleId = stream.parseModuleID()
 			} catch (IllegalArgumentException e) {
 				return false
-			}
-			List<DashboardItem> matchedItems = DashboardItem.findAllByCanvasAndModule(canvas, moduleId)
-			for (DashboardItem item : matchedItems) {
-				if (check(userish, item.dashboard, Operation.DASHBOARD_GET)) {
-					return true
-				}
 			}
 		}
 		return false
@@ -218,7 +211,7 @@ class PermissionService {
 	 */
 	@Transactional(readOnly = true)
 	public <T> List<T> get(Class<T> resourceClass, Userish userish, Operation op, boolean includeAnonymous,
-						Closure resourceFilter = {}) {
+		Closure resourceFilter = {}) {
 		return store.get(resourceClass, userish, op, includeAnonymous, resourceFilter)
 	}
 
@@ -233,12 +226,12 @@ class PermissionService {
 	 *
 	 * @throws AccessControlException if grantor doesn't have SHARE permission on resource
 	 * @throws IllegalArgumentException if given invalid resource or target
-     */
+	 */
 	Permission grant(User grantor,
-                     Object resource,
-                     Userish target,
-                     Operation operation,
-                     boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
+		Object resource,
+		Userish target,
+		Operation operation,
+		boolean logIfDenied = true) throws AccessControlException, IllegalArgumentException {
 		Operation shareOp = Permission.Operation.shareOperation(resource)
 		if (!check(grantor, resource, shareOp)) {
 			throwAccessControlException(grantor, resource, logIfDenied)
@@ -266,8 +259,8 @@ class PermissionService {
 	 * @param target Userish that will receive the access
 	 * @param resource to be given permission on
 	 *
-     * @return granted permission
-     */
+	 * @return granted permission
+	 */
 	Permission systemGrant(Userish target, Object resource, Operation operation) {
 		return systemGrant(target, resource, operation, null, null)
 	}
@@ -307,9 +300,9 @@ class PermissionService {
 	 * @throws IllegalArgumentException if given invalid resource
 	 */
 	Permission grantAnonymousAccess(User grantor,
-                                    Object resource,
-                                    Operation operation,
-                                    boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
+		Object resource,
+		Operation operation,
+		boolean logIfDenied = true) throws AccessControlException, IllegalArgumentException {
 		Operation shareOp = Permission.Operation.shareOperation(resource)
 		if (!check(grantor, resource, shareOp)) {
 			throwAccessControlException(grantor, resource, logIfDenied)
@@ -344,12 +337,12 @@ class PermissionService {
 	 * @returns Permissions that were deleted
 	 *
 	 * @throws AccessControlException if revoker doesn't have *_share permission on resource
-     */
+	 */
 	List<Permission> revoke(User revoker,
-                            Object resource,
-                            Userish target,
-                            Operation operation,
-                            boolean logIfDenied = true) throws AccessControlException {
+		Object resource,
+		Userish target,
+		Operation operation,
+		boolean logIfDenied = true) throws AccessControlException {
 		if (operation == null) {
 			throw new IllegalArgumentException("Operation can't be null")
 		}
@@ -367,8 +360,8 @@ class PermissionService {
 	 * @param resource to be revoked from target
 	 * @param operation or access level to be revoked
 	 *
-     * @return Permissions that were deleted
-     */
+	 * @return Permissions that were deleted
+	 */
 	List<Permission> systemRevoke(Userish target, Object resource, Operation operation) {
 		if (operation == null) {
 			throw new IllegalArgumentException("Operation can't be null")
@@ -403,8 +396,8 @@ class PermissionService {
 	 *
 	 * @throws AccessControlException if revoker doesn't have SHARE permission on resource
 	 */
-	List<Permission> revoke(User revoker, Permission permission, boolean logIfDenied=true)
-			throws AccessControlException {
+	List<Permission> revoke(User revoker, Permission permission, boolean logIfDenied = true)
+		throws AccessControlException {
 		Object resource = getResourceFromPermission(permission)
 		Permission.Operation shareOp = Operation.shareOperation(resource)
 		if (!check(revoker, resource, shareOp)) {
@@ -430,8 +423,8 @@ class PermissionService {
 	 * Transfer all Permissions created for a SignupInvite to the corresponding User (based on email)
 	 *
 	 * @param user to transfer to
-     * @return List of Permissions transferred from SignupInvite to User
-     */
+	 * @return List of Permissions transferred from SignupInvite to User
+	 */
 	List<Permission> transferInvitePermissionsTo(User user) {
 		// { invite { eq "username", user.username } } won't do: some invite are null => NullPointerException
 		return store.findPermissionsToTransfer().findAll { Permission it ->
@@ -495,7 +488,7 @@ class PermissionService {
 					log.info("performRevoke: Trying to delete permission $perm.id")
 					Permission.withNewTransaction {
 						perm.delete(flush: false)
-						for (Permission childPerm: childPermissions) {
+						for (Permission childPerm : childPermissions) {
 							childPerm.delete(flush: false)
 						}
 					}
@@ -590,7 +583,7 @@ class PermissionService {
 			// send only one email for each read/get permission
 			String content = groovyPageRenderer.render([
 				template: "/emails/email_share_resource",
-				model: [
+				model   : [
 					sharer  : msg.sharer,
 					resource: msg.resourceType(),
 					name    : msg.resourceName(),

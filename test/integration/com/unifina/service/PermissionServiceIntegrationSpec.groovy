@@ -1,7 +1,6 @@
 package com.unifina.service
 
 import com.unifina.domain.*
-import com.unifina.utils.Webcomponent
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders
 
@@ -12,6 +11,7 @@ import java.security.AccessControlException
 	the behaviour of withCriteria differs in unit tests compared to a real database. Thus the tests were moved here so
 	that they pass (as they should).
  */
+
 class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	static transactional = false // Not ideal... but needed because of use of `withNewTransaction` in PermissionService
@@ -37,8 +37,6 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 	Stream uiChannelSecret
 	Dashboard vulPubDash
 	Dashboard vulSecretDash
-	DashboardItem pubItem
-	DashboardItem secretItem
 
 	SignupInvite invite
 
@@ -73,10 +71,10 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		).save(failOnError: true)
 
 		// Dashboards
-		dashAllowed = new Dashboard(name:"allowed").save(failOnError: true)
-		dashRestricted = new Dashboard(name:"restricted").save(failOnError: true)
-		dashOwned = new Dashboard(name:"owned").save(failOnError: true)
-		dashPublic = new Dashboard(name:"public").save(failOnError: true)
+		dashAllowed = new Dashboard(name: "allowed").save(failOnError: true)
+		dashRestricted = new Dashboard(name: "restricted").save(failOnError: true)
+		dashOwned = new Dashboard(name: "owned").save(failOnError: true)
+		dashPublic = new Dashboard(name: "public").save(failOnError: true)
 
 		service.systemGrantAll(anotherUser, dashAllowed)
 		service.systemGrantAll(me, dashOwned)
@@ -117,22 +115,6 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		vulSecretDash = new Dashboard(name: "vulnerability secret dashboard")
 		vulSecretDash.save(failOnError: true, validate: true)
 		service.systemGrant(me, vulPubDash, Permission.Operation.DASHBOARD_GET)
-		pubItem = new DashboardItem(
-			title: "dashboard public item title",
-			module: publicModuleID,
-			dashboard: vulPubDash,
-			canvas: vulCan,
-			webcomponent: Webcomponent.STREAMR_BUTTON,
-		)
-		pubItem.save(failOnError: true, validate: true)
-		secretItem = new DashboardItem(
-			title: "dashboard secret item title",
-			module: secretModuleID,
-			dashboard: vulSecretDash,
-			canvas: vulCan,
-			webcomponent: Webcomponent.STREAMR_BUTTON,
-		)
-		secretItem.save(failOnError: true, validate: true, flush: true)
 
 		// Sign-up invitations can also receive Permissions; they will later be converted to User permissions
 		invite = new SignupInvite(email: "him-permission-service-integration-spec@streamr.network", code: "sikritCode", sent: true, used: false).save(validate: false, flush: true)
@@ -176,8 +158,6 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 		uiChannelPublic?.delete(flush: true)
 		uiChannelSecret?.delete(flush: true)
-		pubItem?.delete(flush: true)
-		secretItem?.delete(flush: true)
 		vulPubDash?.delete(flush: true)
 		vulSecretDash?.delete(flush: true)
 		vulCan?.delete(flush: true)
@@ -248,7 +228,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 	void "get does not return expired permissions"() {
 		def p1 = service.systemGrant(someone, dashRestricted, Permission.Operation.DASHBOARD_GET)
 		def p2 = service.systemGrant(someone, dashOwned, Permission.Operation.DASHBOARD_GET)
-		p1.endsAt = new Date(System.currentTimeMillis() - 1000*60000)
+		p1.endsAt = new Date(System.currentTimeMillis() - 1000 * 60000)
 		p2.endsAt = new Date(0)
 		p1.save(failOnError: true)
 		p2.save(failOnError: true, flush: true)
@@ -336,35 +316,6 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		service.check(me, stream, Permission.Operation.STREAM_PUBLISH)
 		service.check(me, stream, Permission.Operation.STREAM_SUBSCRIBE)
 		service.check(me, stream, Permission.Operation.STREAM_DELETE)
-	}
-
-	void "getPermissionsTo(resource, userish) returns correct UI channel read permissions via associated dashboard"() {
-		service.systemGrantAll(me, dashboard)
-		def permissions = service.getPermissionsTo(uiChannelPublic, me)
-
-		expect:
-		permissions.size() == 2
-		service.check(me, uiChannelPublic, Permission.Operation.STREAM_GET)
-		service.check(me, uiChannelPublic, Permission.Operation.STREAM_SUBSCRIBE)
-	}
-
-
-	void "getPermissionsTo(resource, userish) handles public and secret transitive dashboard permissions"() {
-		when:
-		List<Permission> pubPerm = service.getPermissionsTo(uiChannelPublic, me)
-		List<Permission> secPerm = service.getPermissionsTo(uiChannelSecret, me)
-		then:
-		pubPerm.size() == 2
-		pubPerm.count { Permission p ->
-			p.operation == Permission.Operation.STREAM_GET
-		} == 1
-		pubPerm.count { Permission p ->
-			p.operation == Permission.Operation.STREAM_SUBSCRIBE
-		} == 1
-
-		service.check(me, uiChannelPublic, Permission.Operation.STREAM_GET)
-		service.check(me, uiChannelPublic, Permission.Operation.STREAM_SUBSCRIBE)
-		secPerm.size() == 0
 	}
 
 	void "getPermissionsTo with Operation returns all permissions for the given resource"() {
