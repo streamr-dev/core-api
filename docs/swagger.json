@@ -3922,30 +3922,6 @@
           }
         }
       }
-    },
-    "/module_categories": {
-      "get": {
-        "summary": "Get list of module categories and the modules within them",
-        "description": "Get list of module categories and the modules within them",
-        "tags": [
-          "modules"
-        ],
-        "parameters": [
-          {
-            "name": "modulesFirst",
-            "in": "query",
-            "description": "Order list of children by modules first",
-            "required": false,
-            "type": "boolean",
-            "default": false
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
     }
   },
   "definitions": {

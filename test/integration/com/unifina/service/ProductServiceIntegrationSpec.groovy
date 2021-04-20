@@ -9,10 +9,9 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 	Category category
 	Stream s1, s2, s3, s4
 	Product product
-	ModuleCategory mc
 	Module module
 	User troll
-    User user
+	User user
 	Product p1
 	Product p2
 	Subscription fs1
@@ -22,14 +21,11 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 		category = new Category(name: "Category")
 		category.id = "category-id"
 		category.save()
-		mc = new ModuleCategory(name: "module category")
-		mc.save(failOnError: true, validate: true)
 		module = new Module(
 			name: "module name",
 			alternativeNames: "alt names",
 			implementingClass: "x",
 			jsModule: "jsmodule",
-			category: mc,
 			type: "type"
 		)
 		module.save(failOnError: true, validate: true)
@@ -38,7 +34,7 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 		s2 = new Stream(name: "stream-2")
 		s3 = new Stream(name: "stream-3")
 		s4 = new Stream(name: "stream-4")
-		[s1, s2, s3, s4].eachWithIndex { Stream s, int i -> s.id = "stream-id-${i+1}" }
+		[s1, s2, s3, s4].eachWithIndex { Stream s, int i -> s.id = "stream-id-${i + 1}" }
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: true)
 
 		troll = new User(username: "sylvester", name: "sylvester stallone", email: "s@s.com")
@@ -110,7 +106,6 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 		Stream.get(s3.id) != null
 		Stream.get(s4.id) != null
 		Category.get(category.id) != null
-		ModuleCategory.get(mc.id) != null
 		Module.get(module.id) != null
 	}
 }

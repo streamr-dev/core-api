@@ -25,9 +25,7 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		category = new Category(name: "Category")
 		category.id = "category-id"
 		category.save(validate: true, failOnError: true)
-		ModuleCategory mc = new ModuleCategory(name: "module category")
-		mc.save(failOnError: true, validate: true)
-		Module module = new Module(name: "module name", alternativeNames: "alt names", implementingClass: "x", jsModule: "jsmodule", category: mc, type: "type")
+		Module module = new Module(name: "module name", alternativeNames: "alt names", implementingClass: "x", jsModule: "jsmodule", type: "type")
 		module.save(failOnError: true, validate: true)
 
 		joinPartStream = new com.streamr.client.rest.Stream("join part stream", "")

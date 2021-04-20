@@ -1,7 +1,6 @@
 package com.unifina.controller
 
 import com.unifina.domain.Module
-import com.unifina.domain.ModuleCategory
 import com.unifina.domain.User
 import com.unifina.service.ModuleService
 import com.unifina.service.NotFoundException
@@ -60,25 +59,12 @@ class ModuleApiController {
 			e = GrailsUtil.deepSanitize(e)
 			log.error("Exception while creating module!", e)
 			Map r = [
-				error: true,
-				message: e.message,
+				error       : true,
+				message     : e.message,
 				moduleErrors: moduleExceptions*.toMap()
 			]
 			render r as JSON
 		}
-	}
-
-	@StreamrApi
-	def jsonGetModuleTree() {
-		Boolean modulesFirst = params.boolean('modulesFirst') ?: false
-        User user = request.apiUser
-		def categories = ModuleCategory.findAllByParentIsNullAndHideIsNull([sort:"sortOrder"])
-		def result = []
-		categories.each { ModuleCategory category ->
-			def item = moduleTreeRecurse(category, modulesFirst)
-			result.add(item)
-		}
-		render result as JSON
 	}
 
 	@GrailsCompileStatic
@@ -101,40 +87,6 @@ class ModuleApiController {
 		iMap.put("type", domainObject.type)
 
 		return iMap
-	}
-
-	private Map moduleTreeRecurse(ModuleCategory category, boolean modulesFirst=false) {
-		def item = [:]
-		item.data = category.name
-		item.metadata = [canAdd:false, id:category.id]
-		item.children = []
-
-		List categoryChildren = []
-		List moduleChildren = []
-
-		category.subcategories.each { Object subcat ->
-			def subItem = moduleTreeRecurse(subcat, modulesFirst)
-			categoryChildren.add(subItem)
-		}
-
-		category.modules.each { Module module ->
-			if (module.hide == null || !module.hide) {
-				def moduleItem = [:]
-				moduleItem.data = module.name
-				moduleItem.metadata = [canAdd:true, id:module.id]
-				moduleChildren.add(moduleItem)
-			}
-		}
-
-		if (modulesFirst) {
-			item.children.addAll(moduleChildren)
-			item.children.addAll(categoryChildren)
-		} else {
-			item.children.addAll(categoryChildren)
-			item.children.addAll(moduleChildren)
-		}
-
-		return item
 	}
 
 	private void findModule(Long id, Closure action) {

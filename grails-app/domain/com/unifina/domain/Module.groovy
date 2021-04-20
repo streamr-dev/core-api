@@ -15,14 +15,12 @@ class Module implements Comparable {
 	String jsonHelp
 	String webcomponent
 
-	static belongsTo = [category: ModuleCategory]
-
-    static constraints = {
-		hide(nullable:true)
-		jsonHelp(nullable:true)
-		alternativeNames(nullable:true)
-		webcomponent(nullable:true)
-    }
+	static constraints = {
+		hide(nullable: true)
+		jsonHelp(nullable: true)
+		alternativeNames(nullable: true)
+		webcomponent(nullable: true)
+	}
 
 	static mapping = {
 		jsonHelp type: 'text'
@@ -38,7 +36,7 @@ class Module implements Comparable {
 	 */
 	int compareTo(o) {
 		int result = this.name.compareTo(o.name)
-		if (result==0)
+		if (result == 0)
 			result = this.id.compareTo(o.id)
 		return result
 	}
