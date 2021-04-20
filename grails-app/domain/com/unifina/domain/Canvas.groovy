@@ -50,8 +50,7 @@ class Canvas {
 	ExampleType exampleType = ExampleType.NOT_SET
 
 	static hasMany = [
-		dashboardItems: DashboardItem,
-		permissions   : Permission
+		permissions: Permission
 	]
 
 	static constraints = {
@@ -69,7 +68,6 @@ class Canvas {
 		hasExports defaultValue: false
 		adhoc defaultValue: false
 		runner index: 'runner_idx'
-		dashboardItems cascade: 'all-delete-orphan'
 		exampleType enumType: "ordinal", defaultValue: ExampleType.NOT_SET.ordinal(), index: "example_type_idx"
 	}
 
