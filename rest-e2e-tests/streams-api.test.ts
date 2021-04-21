@@ -1,8 +1,8 @@
-import { assert } from 'chai'
+import {assert} from 'chai'
 import Streamr from './streamr-api-clients'
-import { assertResponseIsError, assertStreamrClientResponseError, getStreamrClient, testUsers } from './test-utilities'
-import { StreamrClient } from 'streamr-client'
-import { Response } from 'node-fetch'
+import {assertResponseIsError, assertStreamrClientResponseError, getStreamrClient, testUsers} from './test-utilities'
+import {StreamrClient} from 'streamr-client'
+import {Response} from 'node-fetch'
 
 describe('Streams API', () => {
 
@@ -26,7 +26,6 @@ describe('Streams API', () => {
                 assert.equal(json.description, properties.description)
                 assert.deepEqual(json.config, properties.config)
                 assert.equal(json.partitions, properties.partitions)
-                assert.equal(json.uiChannel, properties.uiChannel)
                 assert.equal(json.autoConfigure, properties.autoConfigure)
                 assert.equal(json.storageDays, properties.storageDays)
                 assert.equal(json.inactivityThresholdHours, properties.inactivityThresholdHours)
@@ -41,7 +40,7 @@ describe('Streams API', () => {
                     fields: [
                         {
                             name: 'mock-field',
-                            type: <const> 'string',
+                            type: <const>'string',
                         },
                     ],
                 },

@@ -1,7 +1,10 @@
 package com.unifina.controller
 
 import com.unifina.domain.*
-import com.unifina.service.*
+import com.unifina.service.PermissionService
+import com.unifina.service.SignupCodeService
+import com.unifina.service.StreamService
+import com.unifina.service.UserService
 import com.unifina.signalpath.messaging.MockMailService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -15,7 +18,7 @@ class AuthApiControllerSpec extends Specification {
 	String username = "user@invite.to"
 
 	def messageSource = [
-	    getMessage: { error, locale ->
+		getMessage: { error, locale ->
 			return error.toString()
 		}
 	]
@@ -28,7 +31,6 @@ class AuthApiControllerSpec extends Specification {
 		controller.userService.grailsApplication = grailsApplication as GrailsApplication
 		controller.userService.permissionService = permissionService as PermissionService
 		controller.userService.messageSource = messageSource as MessageSource
-		controller.userService.canvasService = Mock(CanvasService)
 		controller.userService.streamService = Mock(StreamService)
 	}
 
@@ -153,7 +155,7 @@ class AuthApiControllerSpec extends Specification {
 	void "submitting registration with valid invite should create user"() {
 		setup:
 		// The roles created
-		["ROLE_USER","ROLE_LIVE","ROLE_ADMIN"].each {
+		["ROLE_USER", "ROLE_LIVE", "ROLE_ADMIN"].each {
 			def role = new Role()
 			role.authority = it
 			role.save()

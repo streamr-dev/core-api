@@ -8,7 +8,6 @@
     "partitions",
     "name",
     "description",
-    "uiChannel",
     "config",
     "dateCreated",
     "lastUpdated",
@@ -40,10 +39,6 @@
         "string"
       ],
       "maxLength": 255
-    },
-    "uiChannel": {
-      "description": "Is this a uiChannel stream?",
-      "type": "boolean"
     },
     "config": {
       "description": "Configuration of this stream",

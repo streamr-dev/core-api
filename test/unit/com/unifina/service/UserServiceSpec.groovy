@@ -1,13 +1,17 @@
 package com.unifina.service
 
-import com.unifina.domain.*
+
+import com.unifina.domain.Permission
+import com.unifina.domain.Role
+import com.unifina.domain.User
+import com.unifina.domain.UserRole
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.springframework.validation.FieldError
 import spock.lang.Specification
 
 @TestFor(UserService)
-@Mock([User, Role, UserRole, Module, Permission])
+@Mock([User, Role, UserRole, Permission])
 class UserServiceSpec extends Specification {
 
 	void createData() {
@@ -24,13 +28,12 @@ class UserServiceSpec extends Specification {
 	def setup() {
 		permissionService = service.permissionService = Mock(PermissionService)
 		service.streamService = Mock(StreamService)
-		service.canvasService = Mock(CanvasService)
 	}
 
 	def "the user is created when called"() {
 		when:
 		createData()
-		User user = service.createUser([username: "test@test.com", name:"test", enabled:true, accountLocked:false])
+		User user = service.createUser([username: "test@test.com", name: "test", enabled: true, accountLocked: false])
 
 		then:
 		User.count() == 1

@@ -22,7 +22,6 @@ class CreateStreamCommand {
 	String description
 	Map<String, Object> config
 	Integer partitions = 1
-	Boolean uiChannel = false
 	Boolean requireSignedData = false
 	Boolean requireEncryptedData = false
 	Boolean autoConfigure = true
@@ -38,27 +37,16 @@ class StreamService {
 		return Stream.get(id)
 	}
 
-	Stream getStreamByUiChannelPath(String uiChannelPath) {
-		return Stream.findByUiChannelPath(uiChannelPath)
-	}
-
 	Stream createStream(CreateStreamCommand cmd, User user, CustomStreamIDValidator customStreamIDValidator) {
-		return createStream(cmd, user, customStreamIDValidator, null, null)
-	}
-
-	Stream createStream(CreateStreamCommand cmd, User user, CustomStreamIDValidator customStreamIDValidator, String uiChannelPath, Canvas uiChannelCanvas) {
 		Stream stream = new Stream(
 			description: cmd.description,
 			config: JSONUtil.createGsonBuilder().toJson(Stream.normalizeConfig(cmd.config)),
 			partitions: cmd.partitions,
-			uiChannel: cmd.uiChannel,
 			requireSignedData: cmd.requireSignedData,
 			requireEncryptedData: cmd.requireEncryptedData,
 			autoConfigure: cmd.autoConfigure,
 			storageDays: cmd.storageDays,
 			inactivityThresholdHours: cmd.inactivityThresholdHours,
-			uiChannelPath: uiChannelPath,
-			uiChannelCanvas: uiChannelCanvas
 		)
 		if (cmd.id != null) {
 			if ((customStreamIDValidator != null) && (!customStreamIDValidator.validate(cmd.id, user))) {
@@ -89,8 +77,6 @@ class StreamService {
 				names.add("id")
 				names.add("description")
 				names.add("name")
-				names.add("uiChannelPath")
-				names.add("uiChannelCanvas")
 				boolean isLogged = true
 				for (String name : names) {
 					final boolean doNotLogThisError = message.contains("'" + name + "'")

@@ -1,7 +1,8 @@
 package com.unifina.service
 
-import com.unifina.domain.Dashboard
+import com.unifina.controller.StreamListParams
 import com.unifina.domain.Permission
+import com.unifina.domain.Stream
 import com.unifina.domain.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -10,23 +11,22 @@ import grails.test.mixin.web.ControllerUnitTestMixin
 import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin)
-// "as JSON" converter
 @TestFor(ApiService)
-@Mock(Dashboard)
+@Mock(Stream)
 class ApiServiceSpec extends Specification {
 
 	void "list() returns streams with share permission"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
-		ListParams listParams = new DashboardListParams(operation: Permission.Operation.DASHBOARD_SHARE.toString(), publicAccess: true)
+		ListParams listParams = new StreamListParams(operation: Permission.Operation.STREAM_SHARE.toString(), publicAccess: true)
 		User me = new User(username: "me@me.com")
 
 		when:
-		def list = service.list(Dashboard, listParams, me)
+		def list = service.list(Stream, listParams, me)
 
 		then:
 		list.size() == 3
-		1 * permissionService.get(Dashboard, me, Permission.Operation.DASHBOARD_SHARE, true, _) >> [
-			new Dashboard(), new Dashboard(), new Dashboard()
+		1 * permissionService.get(Stream, me, Permission.Operation.STREAM_SHARE, true, _) >> [
+			new Stream(), new Stream(), new Stream()
 		]
 	}
 
@@ -34,15 +34,15 @@ class ApiServiceSpec extends Specification {
 		def permissionService = service.permissionService = Mock(PermissionService)
 
 		User me = new User(username: "me@me.com")
-		ListParams listParams = new DashboardListParams(publicAccess: true)
+		ListParams listParams = new StreamListParams(publicAccess: true)
 
 		when:
-		def list = service.list(Dashboard, listParams, me)
+		def list = service.list(Stream, listParams, me)
 
 		then:
 		list.size() == 3
-		1 * permissionService.get(Dashboard, me, Permission.Operation.DASHBOARD_GET, true, _) >> [
-			new Dashboard(), new Dashboard(), new Dashboard()
+		1 * permissionService.get(Stream, me, Permission.Operation.STREAM_GET, true, _) >> [
+			new Stream(), new Stream(), new Stream()
 		]
 	}
 
@@ -50,13 +50,13 @@ class ApiServiceSpec extends Specification {
 		def permissionService = service.permissionService = Mock(PermissionService)
 
 		User me = new User(username: "me@me.com")
-		ListParams listParams = new DashboardListParams(publicAccess: true, grantedAccess: false)
+		ListParams listParams = new StreamListParams(publicAccess: true, grantedAccess: false)
 
 		when:
-		service.list(Dashboard, listParams, me)
+		service.list(Stream, listParams, me)
 
 		then:
-		1 * permissionService.get(Dashboard, null, _, _, _)
+		1 * permissionService.get(Stream, null, _, _, _)
 	}
 
 	void "list() invokes listParams#validate and listParams#createListCriteria and passes returned closure to permissionService#get"() {
@@ -66,7 +66,7 @@ class ApiServiceSpec extends Specification {
 		ListParams listParams = Mock(ListParams)
 
 		when:
-		service.list(Dashboard, listParams, me)
+		service.list(Stream, listParams, me)
 
 		then:
 		1 * permissionService.get(_, _, _, _, { it() == "see me?" })
@@ -76,83 +76,83 @@ class ApiServiceSpec extends Specification {
 
 	void "list() throws ValidationException if validation of listParams fails"() {
 		User me = new User(username: "me@me.com")
-		ListParams listParams = new DashboardListParams(order: null)
+		ListParams listParams = new StreamListParams(order: null)
 
 		when:
-		service.list(Dashboard, listParams, me)
+		service.list(Stream, listParams, me)
 		then:
 		thrown(ValidationException)
 	}
 
 	void "getByIdAndThrowIfNotFound() throws NotFoundException if domain object cannot be found"() {
 		when:
-		service.getByIdAndThrowIfNotFound(Dashboard, "dashboard-id")
+		service.getByIdAndThrowIfNotFound(Stream, "stream-id")
 
 		then:
 		def e = thrown(NotFoundException)
 		e.asApiError().toMap() == [
-			id     : "dashboard-id",
-			message: "Dashboard with id dashboard-id not found",
-			code   : "NOT_FOUND",
-			fault  : "id",
-			type   : "Dashboard"
+			id: "stream-id",
+			message: "Stream with id stream-id not found",
+			code: "NOT_FOUND",
+			fault: "id",
+			type: "Stream"
 		]
 	}
 
 	void "getByIdAndThrowIfNotFound() returns domain object if it exists"() {
-		Dashboard dashboard = new Dashboard(name: "dashboard")
-		dashboard.id = "dashboard-id"
-		dashboard.save(failOnError: true)
+		Stream stream = new Stream(name: "stream")
+		stream.id = "stream-id"
+		stream.save(failOnError: true)
 
 		expect:
-		service.getByIdAndThrowIfNotFound(Dashboard, "dashboard-id") == dashboard
+		service.getByIdAndThrowIfNotFound(Stream, "stream-id") == stream
 	}
 
 	void "authorizedGetById() throws NotFoundException if domain object cannot be found"() {
 		User me = new User(username: "me@me.com")
 
 		when:
-		service.authorizedGetById(Dashboard, "dashboard-id", me, Permission.Operation.DASHBOARD_EDIT)
+		service.authorizedGetById(Stream, "stream-id", me, Permission.Operation.STREAM_EDIT)
 
 		then:
 		def e = thrown(NotFoundException)
 		e.asApiError().toMap() == [
-			id     : "dashboard-id",
-			message: "Dashboard with id dashboard-id not found",
-			code   : "NOT_FOUND",
-			fault  : "id",
-			type   : "Dashboard"
+			id: "stream-id",
+			message: "Stream with id stream-id not found",
+			code: "NOT_FOUND",
+			fault: "id",
+			type: "Stream"
 		]
 	}
 
 	void "authorizedGetById() throws NotPermittedException if user does not have required permission"() {
 		User me = new User(username: "me@me.com")
-		Dashboard dashboard = new Dashboard(name: "dashboard")
-		dashboard.id = "dashboard-id"
-		dashboard.save(failOnError: true)
+		Stream stream = new Stream(name: "stream")
+		stream.id = "stream-id"
+		stream.save(failOnError: true)
 
 		service.permissionService = new PermissionService()
 
 		when:
-		service.authorizedGetById(Dashboard, "dashboard-id", me, Permission.Operation.DASHBOARD_EDIT)
+		service.authorizedGetById(Stream, "stream-id", me, Permission.Operation.STREAM_EDIT)
 
 		then:
 		def e = thrown(NotPermittedException)
-		e.message == "me@me.com does not have permission to dashboard_edit Dashboard (id dashboard-id)"
+		e.message == "me@me.com does not have permission to stream_edit Stream (id stream-id)"
 	}
 
 	void "authorizedGetById() returns domain object if it exists and user has required permission"() {
 		User me = new User(username: "me@me.com")
-		Dashboard dashboard = new Dashboard(name: "dashboard")
-		dashboard.id = "dashboard-id"
-		dashboard.save(failOnError: true)
+		Stream stream = new Stream(name: "stream")
+		stream.id = "stream-id"
+		stream.save(failOnError: true)
 
 		service.permissionService = Stub(PermissionService) // replace verify() with nop method
 
 		when:
-		def result = service.authorizedGetById(Dashboard, "dashboard-id", me, Permission.Operation.DASHBOARD_EDIT)
+		def result = service.authorizedGetById(Stream, "stream-id", me, Permission.Operation.STREAM_EDIT)
 
 		then:
-		result == dashboard
+		result == stream
 	}
 }

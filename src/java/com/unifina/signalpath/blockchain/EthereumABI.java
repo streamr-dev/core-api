@@ -2,7 +2,6 @@ package com.unifina.signalpath.blockchain;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import com.unifina.signalpath.Output;
 import org.apache.log4j.Logger;
 
 import java.io.Serializable;
@@ -66,10 +65,10 @@ public class EthereumABI implements Serializable {
 				log.debug("Found event " + e.name);
 				events.add(e);
 			} else {
-				throw new RuntimeException("Whoa! Found unknown item type in ABI: "+type);
+				throw new RuntimeException("Whoa! Found unknown item type in ABI: " + type);
 			}
 		}
-		if(constructor == null){
+		if (constructor == null) {
 			log.debug("No constructor found. Using empty one.");
 			constructor = new Function();
 		}
@@ -92,18 +91,23 @@ public class EthereumABI implements Serializable {
 	}
 
 	public List<Map<String, Object>> toList() {
-		Type type = new TypeToken<List<Map<String, Object>>>(){}.getType();
+		Type type = new TypeToken<List<Map<String, Object>>>() {
+		}.getType();
 		return new Gson().fromJson(json, type);
 	}
 
-	/** Ethereum contract input/output */
+	/**
+	 * Ethereum contract input/output
+	 */
 	public static class Slot implements Serializable {
 		public String name;
 		public String type;
 		public boolean indexed = false;
 	}
 
-	/** Ethereum contract member function */
+	/**
+	 * Ethereum contract member function
+	 */
 	public static class Function implements Serializable {
 		public String name = "";
 		public List<Slot> inputs = Collections.emptyList();
@@ -114,7 +118,7 @@ public class EthereumABI implements Serializable {
 
 	public static class Event implements Serializable {
 		public String name = null;
-		public List<Slot> inputs = Collections.emptyList();	 // "inputs" that receive value from Solidity contract
+		public List<Slot> inputs = Collections.emptyList();     // "inputs" that receive value from Solidity contract
 	}
 
 }

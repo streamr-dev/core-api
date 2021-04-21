@@ -10,7 +10,7 @@ import spock.lang.Unroll
 
 import static plastic.criteria.PlasticCriteria.mockCriteria
 
-@Mock(Product)
+@Mock([Product, User, Category])
 class ProductListParamsSpec extends Specification {
 
 	Category c1, c2, c3, c4

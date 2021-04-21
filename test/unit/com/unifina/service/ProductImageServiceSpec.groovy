@@ -1,13 +1,11 @@
 package com.unifina.service
 
-
 import com.unifina.domain.Category
 import com.unifina.domain.Product
 import com.unifina.domain.User
 import com.unifina.provider.FileUploadProvider
 import com.unifina.utils.ImageResizer
 import com.unifina.utils.ImageVerifier
-import com.unifina.utils.testutils.FakeIdGenerator
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -24,7 +22,6 @@ class ProductImageServiceSpec extends Specification {
 		service.fileUploadProvider = Stub(FileUploadProvider) {
 			uploadFile(_, _) >> new URL("https://streamr.network/files/id-0")
 		}
-		service.idGenerator = new FakeIdGenerator()
 
 		User user = new User(
 			username: "user@domain.com",

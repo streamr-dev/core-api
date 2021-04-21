@@ -16,114 +16,110 @@ import java.security.AccessControlException
 	If you get weird test failures, it may be due to spotty GORM and mocked criteria queries.
 	You might want to try PermissionServiceIntegrationSpec instead.
  */
+
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(PermissionService)
-@Mock([User, SignupInvite, Module, Permission, Dashboard, Canvas])
+@Mock([User, SignupInvite, Permission, Stream])
 class PermissionServiceSpec extends BeanMockingSpecification {
-
-	User me, anotherUser, stranger
-
-	Dashboard dashAllowed, dashRestricted, dashOwned, dashPublic
-	Permission dashReadPermission, dashAnonymousReadPermission
+	User me
+	User anotherUser
+	User stranger
+	Stream streamAllowed
+	Stream streamRestricted
+	Stream streamOwned
+	Stream streamPublic
+	Permission streamAnonymousReadPermission
 
 	StreamService streamService
 
-    def setup() {
+	def setup() {
 		// Users
-		me = new User(username: "me").save(validate:false)
-		anotherUser = new User(username: "him").save(validate:false)
-		stranger = new User(username: "stranger").save(validate:false)
+		me = new User(username: "me").save(validate: false)
+		anotherUser = new User(username: "him").save(validate: false)
+		stranger = new User(username: "stranger").save(validate: false)
 
-		// Dashboards
-		dashAllowed = new Dashboard(id: "allowed", name:"allowed").save(validate:false)
-		dashRestricted = new Dashboard(id: "restricted", name:"restricted").save(validate:false)
-		dashOwned = new Dashboard(id: "owned", name:"owned").save(validate:false)
-		dashPublic = new Dashboard(id: "public", name:"public").save(validate:false)
+		// Streams
+		streamAllowed = new Stream(name: "allowed")
+		streamAllowed.id = "allowed"
+		streamAllowed.save(validate: false)
+		streamRestricted = new Stream(name: "restricted")
+		streamRestricted.id = "restricted"
+		streamRestricted.save(validate: false)
+		streamOwned = new Stream(name: "owned")
+		streamOwned.id = "owned"
+		streamOwned.save(validate: false)
+		streamPublic = new Stream(name: "public")
+		streamPublic.id = "public"
+		streamPublic.save(validate: false)
 
-		service.systemGrantAll(anotherUser, dashAllowed)
-		service.systemGrantAll(me, dashOwned)
-		service.systemGrantAll(anotherUser, dashRestricted)
-		service.systemGrantAll(anotherUser, dashPublic)
-
-		Canvas canvas = new Canvas().save(validate: false, flush: true)
-		service.systemGrantAll(anotherUser, canvas)
+		service.systemGrantAll(anotherUser, streamAllowed)
+		service.systemGrantAll(me, streamOwned)
+		service.systemGrantAll(anotherUser, streamRestricted)
+		service.systemGrantAll(anotherUser, streamPublic)
 
 		// Set up the Permissions to the allowed resources
-		dashReadPermission = service.systemGrant(me, dashAllowed, Operation.DASHBOARD_GET)
-		dashAnonymousReadPermission = service.systemGrantAnonymousAccess(dashPublic, Operation.DASHBOARD_GET)
+		streamAnonymousReadPermission = service.systemGrantAnonymousAccess(streamPublic, Operation.STREAM_GET)
 
 		streamService = mockBean(StreamService, Mock(StreamService))
-    }
-
-	void "test setup"() {
-		expect:
-		User.count() == 3
-		Dashboard.count() == 4
-		Canvas.count() == 1
-		Permission.count() == 28
-
-		and: "anotherUser has an invitation"
 	}
 
-	void "access denied to non-permitted Dashboard"() {
+	void "access denied to non-permitted Stream"() {
 		expect:
-		!service.check(me, dashRestricted, Permission.Operation.DASHBOARD_GET)
+		!service.check(me, streamRestricted, Permission.Operation.STREAM_GET)
 	}
 
 	void "non-permitted third-parties have no access to resources"() {
 		expect:
-		!service.check(stranger, dashAllowed, Permission.Operation.DASHBOARD_GET)
-		!service.check(stranger, dashRestricted, Permission.Operation.DASHBOARD_GET)
-		!service.check(stranger, dashOwned, Permission.Operation.DASHBOARD_GET)
+		!service.check(stranger, streamAllowed, Permission.Operation.STREAM_GET)
+		!service.check(stranger, streamRestricted, Permission.Operation.STREAM_GET)
+		!service.check(stranger, streamOwned, Permission.Operation.STREAM_GET)
 	}
 
 	void "canRead returns false on bad inputs"() {
 		expect:
-		!service.check(null, dashAllowed, Permission.Operation.DASHBOARD_GET)
-		!service.check(me, new Dashboard(), Permission.Operation.DASHBOARD_GET)
-		!service.check(me, null, Permission.Operation.DASHBOARD_GET)
+		!service.check(null, streamAllowed, Permission.Operation.STREAM_GET)
+		!service.check(me, new Stream(), Permission.Operation.STREAM_GET)
+		!service.check(me, null, Permission.Operation.STREAM_GET)
 	}
 
 	void "getPermissionsTo(resource, userish) returns permissions for single user"() {
 		expect:
-		service.getPermissionsTo(dashOwned, me).size() == Operation.dashboardOperations().size()
-		service.getPermissionsTo(dashOwned, anotherUser) == []
-		service.getPermissionsTo(dashOwned, stranger) == []
-		service.getPermissionsTo(dashOwned, null) == []
-		service.getPermissionsTo(dashAllowed, me)[0].operation == Operation.DASHBOARD_GET
-		service.getPermissionsTo(dashAllowed, anotherUser).size() == 5
-		service.getPermissionsTo(dashAllowed, stranger) == []
-		service.getPermissionsTo(dashAllowed, null) == []
-		service.getPermissionsTo(dashRestricted, me) == []
-		service.getPermissionsTo(dashRestricted, anotherUser).size() == 5
-		service.getPermissionsTo(dashRestricted, stranger) == []
-		service.getPermissionsTo(dashRestricted, null) == []
-		service.getPermissionsTo(dashPublic, me)[0].operation == Operation.DASHBOARD_GET
-		service.getPermissionsTo(dashPublic, anotherUser).size() == 6
-		service.getPermissionsTo(dashPublic, stranger)[0].operation == Operation.DASHBOARD_GET
-		service.getPermissionsTo(dashPublic, null)[0].operation == Operation.DASHBOARD_GET
+		service.getPermissionsTo(streamOwned, anotherUser) == []
+		service.getPermissionsTo(streamOwned, stranger) == []
+		service.getPermissionsTo(streamOwned, null) == []
+		service.getPermissionsTo(streamAllowed, anotherUser).size() == Operation.streamOperations().size()
+		service.getPermissionsTo(streamAllowed, stranger) == []
+		service.getPermissionsTo(streamAllowed, null) == []
+		service.getPermissionsTo(streamRestricted, me) == []
+		service.getPermissionsTo(streamRestricted, anotherUser).size() == Operation.streamOperations().size()
+		service.getPermissionsTo(streamRestricted, stranger) == []
+		service.getPermissionsTo(streamRestricted, null) == []
+		service.getPermissionsTo(streamPublic, me)[0].operation == Operation.STREAM_GET
+		service.getPermissionsTo(streamPublic, anotherUser).size() == 1 + Operation.streamOperations().size()
+		service.getPermissionsTo(streamPublic, stranger)[0].operation == Operation.STREAM_GET
+		service.getPermissionsTo(streamPublic, null)[0].operation == Operation.STREAM_GET
 	}
 
 	void "get throws exceptions on invalid resource"() {
 		when:
-		service.get(java.lang.Object, me, Permission.Operation.DASHBOARD_GET)
+		service.get(java.lang.Object, me, Permission.Operation.STREAM_GET)
 		then:
 		thrown(IllegalArgumentException)
 
 		when:
-		service.get(null, me, Permission.Operation.DASHBOARD_GET)
+		service.get(null, me, Permission.Operation.STREAM_GET)
 		then:
 		thrown(NullPointerException)
 	}
 
 	void "grant and revoke throw for non-'share'-access users"() {
 		when:
-		service.grant(me, dashAllowed, stranger, Permission.Operation.DASHBOARD_GET)
+		service.grant(me, streamAllowed, stranger, Permission.Operation.STREAM_GET)
 		then:
 		thrown AccessControlException
 
 		when:
-		service.revoke(stranger, dashRestricted, me, Permission.Operation.DASHBOARD_GET)
+		service.revoke(stranger, streamRestricted, me, Permission.Operation.STREAM_GET)
 		then:
 		thrown AccessControlException
 	}
@@ -156,58 +152,58 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 
 	void "stranger can read public resources with anonymous read access"() {
 		expect: "... but not more than read"
-		service.check(stranger, dashPublic, Permission.Operation.DASHBOARD_GET)
-		!service.check(stranger, dashPublic, Permission.Operation.DASHBOARD_EDIT)
-		!service.check(stranger, dashPublic, Permission.Operation.DASHBOARD_SHARE)
+		service.check(stranger, streamPublic, Permission.Operation.STREAM_GET)
+		!service.check(stranger, streamPublic, Permission.Operation.STREAM_EDIT)
+		!service.check(stranger, streamPublic, Permission.Operation.STREAM_SHARE)
 	}
 
 	void "verify does not throw if permission exists"() {
 		when:
-		service.verify(stranger, dashPublic, Operation.DASHBOARD_GET)
+		service.verify(stranger, streamPublic, Operation.STREAM_GET)
 		then:
 		notThrown(NotPermittedException)
 	}
 
 	void "verify throws if permission does not exist"() {
 		when:
-		service.verify(stranger, dashPublic, Operation.DASHBOARD_EDIT)
+		service.verify(stranger, streamPublic, Operation.STREAM_EDIT)
 		then:
 		def e = thrown(NotPermittedException)
-		e.message == "stranger does not have permission to dashboard_edit Dashboard (id 4)"
+		e.message == "stranger does not have permission to stream_edit Stream (id public)"
 	}
 
 	void "systemRevokeAnonymousAccess() revokes anonymous access on a resource"() {
-		assert Permission.exists(dashAnonymousReadPermission.id)
-		assert service.check(null, dashPublic, Permission.Operation.DASHBOARD_GET)
+		assert Permission.exists(streamAnonymousReadPermission.id)
+		assert service.check(null, streamPublic, Permission.Operation.STREAM_GET)
 
 		when:
-		service.systemRevokeAnonymousAccess(dashPublic, Operation.DASHBOARD_GET)
+		service.systemRevokeAnonymousAccess(streamPublic, Operation.STREAM_GET)
 
 		then:
-		!Permission.exists(dashAnonymousReadPermission.id)
-		!service.check(null, dashPublic, Permission.Operation.DASHBOARD_GET)
+		!Permission.exists(streamAnonymousReadPermission.id)
+		!service.check(null, streamPublic, Permission.Operation.STREAM_GET)
 	}
 
 	void "check() returns false if permission with endsAt set in past"() {
-		def p = service.systemGrant(stranger, dashOwned, Operation.DASHBOARD_GET)
+		def p = service.systemGrant(stranger, streamOwned, Operation.STREAM_GET)
 		p.endsAt = new Date(0)
 		p.save(failOnError: true)
 
 		expect:
-		!service.check(stranger, dashOwned, Operation.DASHBOARD_GET)
+		!service.check(stranger, streamOwned, Operation.STREAM_GET)
 	}
 
 	void "check() returns true if permission with endsAt set in future"() {
-		def p = service.systemGrant(stranger, dashOwned, Operation.DASHBOARD_GET)
+		def p = service.systemGrant(stranger, streamOwned, Operation.STREAM_GET)
 		p.endsAt = new Date(System.currentTimeMillis() + 60000)
 		p.save(failOnError: true)
 
 		expect:
-		service.check(stranger, dashOwned, Operation.DASHBOARD_GET)
+		service.check(stranger, streamOwned, Operation.STREAM_GET)
 	}
 
 	void "cleanUpExpiredPermissions() deletes permissions that already ended"() {
-		User testUser = new User(username: "testUser").save(validate:false)
+		User testUser = new User(username: "testUser").save(validate: false)
 		Stream testStream = new Stream(name: "testStream")
 		testStream.id = "testStream"
 		testStream.save(validate: false)
@@ -234,10 +230,10 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.check(testUser, testStream, Permission.Operation.STREAM_EDIT)
 	}
 
-	def newCanvas = { String id ->
-		def c = new Canvas()
-		c.id = id
-		return c.save(validate: false)
+	Stream newStream(String id) {
+		Stream s = new Stream(name: "Stream " + id)
+		s.id = id
+		return s.save(validate: true, failOnError: true, flush: true)
 	}
 
 	void "save sends an email for read permission"() {
@@ -246,20 +242,21 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.groovyPageRenderer = Mock(PageRenderer)
 		User me = new User(id: 1, username: "me@me.net").save(validate: false)
 		User other = new User(id: 2, username: "permission@recipient.net").save(validate: false)
-		Canvas canvasOwned = newCanvas("own")
-		Resource res = new Resource(Canvas, canvasOwned.id)
+		Stream stream = newStream("own-id")
+		Resource res = new Resource(Stream, stream.id)
 		User apiUser = me
-		Operation op = Operation.CANVAS_GET
+		Operation op = Operation.STREAM_GET
 		String targetUsername = other.username
 		String sharer = me.username
 		String recipient = other.username
 		String subjectTemplate = "%USER% wants to share a %RESOURCE% with you via Streamr Core"
 		EmailMessage msg = new EmailMessage(sharer, recipient, subjectTemplate, res)
-		service.systemGrant(me, canvasOwned, Operation.CANVAS_SHARE)
+		service.systemGrant(me, stream, Operation.STREAM_SHARE)
 		when:
 		service.savePermissionAndSendShareResourceEmail(apiUser, op, targetUsername, msg)
 		then:
-		service.check(other, canvasOwned, Operation.CANVAS_GET)
+		service.check(other, stream, Operation.STREAM_GET)
+		1 * streamService.getStream(stream.id) >> stream
 		1 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
 		1 * service.mailService.sendMail { _ }
 	}
@@ -270,20 +267,21 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.groovyPageRenderer = Mock(PageRenderer)
 		User me = new User(id: 1, username: "me@me.net").save(validate: false)
 		User other = new User(id: 2, username: "permission@recipient.net").save(validate: false)
-		Canvas canvasOwned = newCanvas("own")
-		Resource res = new Resource(Canvas, canvasOwned.id)
+		Stream stream = newStream("own-id")
+		Resource res = new Resource(Stream, stream.id)
 		User apiUser = me
-		Operation op = Operation.CANVAS_EDIT
+		Operation op = Operation.STREAM_EDIT
 		String targetUsername = other.username
 		String sharer = me.username
 		String recipient = other.username
 		String subjectTemplate = "%USER% wants to share a %RESOURCE% with you via Streamr Core"
 		EmailMessage msg = new EmailMessage(sharer, recipient, subjectTemplate, res)
-		service.systemGrant(me, canvasOwned, Operation.CANVAS_SHARE)
+		service.systemGrant(me, stream, Operation.STREAM_SHARE)
 		when:
 		service.savePermissionAndSendShareResourceEmail(apiUser, op, targetUsername, msg)
 		then:
-		service.check(other, canvasOwned, Operation.CANVAS_EDIT)
+		1 * streamService.getStream(stream.id) >> stream
+		service.check(other, stream, Operation.STREAM_EDIT)
 		0 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
 		0 * service.mailService.sendMail { _ }
 	}
@@ -294,20 +292,21 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.groovyPageRenderer = Mock(PageRenderer)
 		User me = new User(id: 1, username: "me@me.net").save(validate: false)
 		User other = new User(id: 2, username: "permission@recipient.net").save(validate: false)
-		Canvas canvasOwned = newCanvas("own")
-		Resource res = new Resource(Canvas, canvasOwned.id)
+		Stream stream = newStream("own-id")
+		Resource res = new Resource(Stream, stream.id)
 		User apiUser = me
-		Operation op = Operation.CANVAS_SHARE
+		Operation op = Operation.STREAM_SHARE
 		String sharer = me.username
 		String recipient = other.username
 		String subjectTemplate = "%USER% wants to share a %RESOURCE% with you via Streamr Core"
 		EmailMessage msg = new EmailMessage(sharer, recipient, subjectTemplate, res)
 		String targetUsername = other.username
-		service.systemGrant(me, canvasOwned, Operation.CANVAS_SHARE)
+		service.systemGrant(me, stream, Operation.STREAM_SHARE)
 		when:
 		service.savePermissionAndSendShareResourceEmail(apiUser, op, targetUsername, msg)
 		then:
-		service.check(other, canvasOwned, Operation.CANVAS_SHARE)
+		service.check(other, stream, Operation.STREAM_SHARE)
+		1 * streamService.getStream(stream.id) >> stream
 		0 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
 		0 * service.mailService.sendMail { _ }
 	}
@@ -318,20 +317,21 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.groovyPageRenderer = Mock(PageRenderer)
 		EthereumIntegrationKeyService ethereumIntegrationKeyService = mockBean(EthereumIntegrationKeyService, Mock(EthereumIntegrationKeyService))
 		String ethUserUsername = "0xa50E97f6a98dD992D9eCb8207c2Aa58F54970729"
-        User createdEthUser = new User(username: ethUserUsername, name: "Ethereum User")
+		User createdEthUser = new User(username: ethUserUsername, name: "Ethereum User")
 		createdEthUser.save(validate: true, failOnError: true)
-		Canvas canvasOwned = newCanvas("own")
-		Resource res = new Resource(Canvas, canvasOwned.id)
+		Stream stream = newStream("own-id")
+		Resource res = new Resource(Stream, stream.id)
 		User apiUser = me
-		Operation op = Operation.CANVAS_GET
-		service.systemGrant(me, canvasOwned, Operation.CANVAS_SHARE)
+		Operation op = Operation.STREAM_GET
+		service.systemGrant(me, stream, Operation.STREAM_SHARE)
 		when:
 		service.savePermissionForEthereumAccount(ethUserUsername, apiUser, op, res, SignupMethod.UNKNOWN)
 		then:
+		1 * streamService.getStream(stream.id) >> stream
 		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(ethUserUsername, SignupMethod.UNKNOWN) >> createdEthUser
 		0 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
 		0 * service.mailService.sendMail { _ }
-		service.check(createdEthUser, canvasOwned, op)
+		service.check(createdEthUser, stream, op)
 	}
 
 	void "save sends an email if the user has no account yet"() {
@@ -341,10 +341,10 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.signupCodeService = Mock(SignupCodeService)
 		User me = new User(id: 1, username: "me@me.net").save(validate: false)
 		User other = new User(id: 2, username: "permission@recipient.net").save(validate: false)
-		Canvas canvasOwned = newCanvas("own")
-		Resource res = new Resource(Canvas, canvasOwned.id)
+		Stream stream = newStream("own-id")
+		Resource res = new Resource(Stream, stream.id)
 		User apiUser = me
-		Operation op = Operation.CANVAS_GET
+		Operation op = Operation.STREAM_GET
 		String targetUsername = other.username
 		String sharer = me.username
 		String recipient = other.username
@@ -356,11 +356,12 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 			used: false,
 			sent: false,
 		)
-		service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_SHARE)
+		service.systemGrant(apiUser, stream, Operation.STREAM_SHARE)
 		when:
 		service.savePermissionAndSendEmailShareResourceInvite(apiUser, recipient, op, msg)
 		then:
-		service.check(invite, canvasOwned, op)
+		service.check(invite, stream, op)
+		1 * streamService.getStream(stream.id) >> stream
 		1 * service.signupCodeService.create(recipient) >> invite
 		1 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
 		1 * service.mailService.sendMail { _ }
@@ -369,39 +370,41 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 	void "save anonymous permission"() {
 		setup:
 		User me = new User(id: 1, username: "me@me.net").save(validate: false)
-		Canvas canvasOwned = newCanvas("own")
-		Resource res = new Resource(Canvas, canvasOwned.id)
+		Stream stream = newStream("own-id")
+		Resource res = new Resource(Stream, stream.id)
 		User apiUser = me
-		Operation op = Operation.CANVAS_GET
-		service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_SHARE)
+		Operation op = Operation.STREAM_GET
+		service.systemGrant(apiUser, stream, Operation.STREAM_SHARE)
 		when:
 		service.saveAnonymousPermission(apiUser, op, res)
 		then:
-		service.check(apiUser, canvasOwned, op)
+		1 * streamService.getStream(stream.id) >> stream
+		service.check(apiUser, stream, op)
 	}
 
 	void "findAllPermissions() won't show list of permissions without 'share' permission (string id)"() {
 		setup:
-		Canvas canvas = new Canvas()
-		canvas.save()
-		Resource resource = new Resource(Canvas, canvas.id)
+		Stream stream = newStream("stream-id")
+		Resource resource = new Resource(Stream, stream.id)
 		User apiUser = me
 		boolean subscriptions = false
 		when:
 		service.findAllPermissions(resource, apiUser, subscriptions)
 		then:
+		1 * streamService.getStream(stream.id) >> stream
 		thrown NotPermittedException
 	}
 
 	void "findPermission finds permission"() {
 		setup:
-		Canvas canvasOwned = newCanvas("own")
-		Resource resource = new Resource(Canvas, canvasOwned.id)
+		Stream stream = newStream("stream-id")
+		Resource resource = new Resource(Stream, stream.id)
 		User apiUser = me
-		service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_SHARE)
-		Permission p = service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_INTERACT)
+		service.systemGrant(apiUser, stream, Operation.STREAM_SHARE)
+		Permission p = service.systemGrant(apiUser, stream, Operation.STREAM_EDIT)
 		p.save(flush: true)
 		when:
+		1 * streamService.getStream(stream.id) >> stream
 		Permission permission = service.findPermission(p.id, resource, apiUser)
 		then:
 		p == permission
@@ -409,25 +412,23 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 
 	void "findPermission throws NotFoundException when permission is not found "() {
 		setup:
-		Canvas canvasOwned = newCanvas("own")
-		Resource resource = new Resource(Canvas, canvasOwned.id)
+		Stream streamOwned = newStream("stream-id")
+		Resource resource = new Resource(Stream, streamOwned.id)
 		User apiUser = me
-		service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_SHARE)
-		Permission p = service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_INTERACT)
+		service.systemGrant(apiUser, streamOwned, Operation.STREAM_SHARE)
+		Permission p = service.systemGrant(apiUser, streamOwned, Operation.STREAM_DELETE)
 		p.save(flush: true)
 		when:
 		Permission permission = service.findPermission(null, resource, apiUser)
 		then:
 		def e = thrown(NotFoundException)
-		e.type == "Canvas"
-		e.id == null
+		e.type == "Stream"
+		e.id == "stream-id"
 	}
 
 	void "index won't show list of permissions without 'share' permission (Stream using id)"() {
 		setup:
-		Stream stream = new Stream()
-		stream.id = "stream-id"
-		stream.save()
+		Stream stream = newStream("stream-id")
 		Resource resource = new Resource(Stream, stream.id)
 		User apiUser = me
 		boolean subscriptions = false

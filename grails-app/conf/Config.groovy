@@ -1,4 +1,3 @@
-import com.unifina.service.NodeService
 import com.unifina.utils.PropertiesUtil
 import org.web3j.ens.Contracts
 
@@ -340,16 +339,6 @@ environments {
 		streamr.metrics.numberOfSessions = "Catalina:type=Manager,context=/,host=localhost"
 	}
 }
-
-/**
- * Signup Configs
- */
-streamr.signup.requireCaptcha = (System.getProperty("streamr.signup.requireCaptcha") ? Boolean.parseBoolean(System.getProperty("streamr.signup.requireCaptcha")) : false)
-
-/**
- * Streamr engine-and-editor nodes
- */
-streamr.engine.nodes = System.getProperty("streamr.engine.nodes") ? Arrays.asList(System.getProperty("streamr.engine.nodes").split(",")) : [new NodeService().getIPAddress([streamr: [node: [ip: System.getProperty("streamr.engine.node.ip")]]])]
 
 /**
  * Miscellaneous

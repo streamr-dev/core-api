@@ -8,7 +8,6 @@ import groovy.transform.CompileStatic
 @Validateable
 class StreamListParams extends ListParams {
 	String name
-	Boolean uiChannel
 
 	StreamListParams() {
 		super()
@@ -17,7 +16,6 @@ class StreamListParams extends ListParams {
 
 	static constraints = {
 		name(nullable: true, blank: false)
-		uiChannel(nullable: true)
 	}
 
 	@Override
@@ -32,18 +30,13 @@ class StreamListParams extends ListParams {
 			if (name) {
 				eq("name", name)
 			}
-			// Filter by UI channel
-			if (uiChannel != null) {
-				eq("uiChannel", uiChannel)
-			}
 		}
 	}
 
 	@CompileStatic
 	Map toMap() {
 		return super.toMap() + ([
-			name     : name,
-			uiChannel: uiChannel,
+			name: name,
 		] as Map<String, Object>)
 	}
 }

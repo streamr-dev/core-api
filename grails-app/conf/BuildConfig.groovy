@@ -74,10 +74,7 @@ grails.project.dependency.resolution = {
 		// https://stackoverflow.com/questions/8751508/grails-buildconfig-groovy-difference-between-build-compile-and-runtime
 
 		compile('log4j:log4j:1.2.16')
-		compile('com.udojava:EvalEx:1.6')
 		compile('com.mashape.unirest:unirest-java:1.4.9')
-		compile('org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.1')
-		compile('org.antlr:ST4:4.0.8')
 		compile('biz.paluch.redis:lettuce:3.5.0.Final') {
 			excludes('com.google.guava:guava:*')
 		}
@@ -106,11 +103,6 @@ grails.project.dependency.resolution = {
 		compile('com.amazonaws:aws-java-sdk-s3:1.11.908')
 		compile('org.imgscalr:imgscalr-lib:4.2')
 		compile('commons-io:commons-io:2.4')
-		compile('org.glassfish.jersey.core:jersey-client:2.27')
-		compile('org.glassfish.jersey.inject:jersey-hk2:2.27')
-		compile('org.glassfish.jersey.media:jersey-media-json-jackson:2.27')
-		compile('com.fasterxml.jackson.core:jackson-databind:2.9.6')
-		compile('com.fasterxml.jackson.core:jackson-annotations:2.9.6')
 		compile('com.streamr:client:DU2-alpha.1') {
 			excludes "org.web3j:codegen:*"
 		}
@@ -118,11 +110,7 @@ grails.project.dependency.resolution = {
 		compile('com.google.code.gson:gson:2.8.5')
 		runtime('mysql:mysql-connector-java:5.1.20')
 		runtime('com.mchange:c3p0:0.9.5.5')
-		runtime('commons-net:commons-net:3.3')
-		runtime('org.apache.commons:commons-math3:3.2')
 		runtime('commons-codec:commons-codec:1.15')
-		runtime('com.opencsv:opencsv:3.3')
-		runtime('de.ruedigermoeller:fst:2.56')
 		runtime('joda-time:joda-time:2.10.6')
 
 		test('cglib:cglib:3.2.6')

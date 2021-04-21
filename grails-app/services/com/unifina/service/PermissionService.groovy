@@ -33,11 +33,7 @@ class PermissionService {
 		if (resource == null) {
 			return null
 		}
-		if (resource instanceof Canvas) {
-			return resource.id
-		} else if (resource instanceof Dashboard) {
-			return resource.id
-		} else if (resource instanceof Product) {
+		if (resource instanceof Product) {
 			return resource.id
 		} else if (resource instanceof Stream) {
 			return resource.id
@@ -48,8 +44,6 @@ class PermissionService {
 	/**
 	 * Check whether user is allowed to perform specified operation on a resource
 	 */
-	// TODO: enable annotation for performance, but breaks a lot of tests.
-	//@Transactional(readOnly = true)
 	boolean check(Userish userish, Object resource, Operation op) {
 		Object id = findID(resource)
 		return id != null && hasPermission(userish, resource, op)
@@ -62,8 +56,6 @@ class PermissionService {
 	/**
 	 * Throws an exception if user is not allowed to perform specified operation on a resource.
 	 */
-	// TODO: enable annotation for performance, but breaks a lot of tests.
-	//@Transactional(readOnly = true)
 	void verify(Userish userish, Object resource, Operation op) throws NotPermittedException {
 		if (!check(userish, resource, op)) {
 			String name
@@ -87,7 +79,7 @@ class PermissionService {
 	/**
 	 * List all Permissions granted on a resource.
 	 *
-	 * @param resource Stream, Canvas or other Streamr resource.
+	 * @param resource Stream, or other Streamr resource.
 	 * @param subscriptions {@code true} for all permissions and {@code false} for permissions where subscription is {@code null}.
 	 * @param op Operation to limit the query result set.
 	 * @return List of Permission objects.
@@ -109,8 +101,6 @@ class PermissionService {
 	/**
 	 * List all Permissions that have not expired yet with some Operation right granted on a resource
 	 */
-	// TODO: enable annotation for performance, but breaks a lot of tests.
-	//@Transactional(readOnly = true)
 	List<Permission> getNonExpiredPermissionsTo(Object resource, Operation op) {
 		// TODO: find a way to do this in a single query instead of filtering results
 		List<Permission> results = []
@@ -133,65 +123,7 @@ class PermissionService {
 
 		// Direct permissions from database
 		List<Permission> directPermissions = store.findDirectPermissions(resourceProp, resource, null as Operation, userish)
-
-		// Special case of UI channels: they inherit permissions from the associated canvas
-		if (resource instanceof Stream && resource.isUIChannel()) {
-			Set<Permission> syntheticPermissions = new HashSet<>()
-			User user = null
-			if (userish instanceof User) {
-				user = userish as User
-			}
-			if (userish != null && isPermissionToStreamViaDashboard(userish, resource)) {
-				syntheticPermissions.add(new Permission(
-					stream: resource,
-					operation: Permission.Operation.STREAM_GET,
-					user: user,
-				))
-				syntheticPermissions.add(new Permission(
-					stream: resource,
-					operation: Permission.Operation.STREAM_SUBSCRIBE,
-					user: user,
-				))
-			}
-			// Streams inherit transitive permissions from canvas
-			List<Permission> permissions = getPermissionsTo(resource.uiChannelCanvas, userish)
-			for (Permission p : permissions) {
-				Set<Operation> operations = CANVAS_TO_STREAM[p.operation]
-				if (operations != null) {
-					for (Operation op : operations) {
-						Permission sp = new Permission(
-							stream: resource,
-							operation: op,
-							user: user,
-						)
-						syntheticPermissions.add(sp)
-					}
-				}
-			}
-			directPermissions.addAll(syntheticPermissions)
-		}
 		return directPermissions
-	}
-
-	// Maps canvas operations to stream operations
-	private final static LinkedHashMap<Operation, HashSet<Operation>> CANVAS_TO_STREAM = [
-		(Operation.CANVAS_GET)      : new HashSet<Operation>([Operation.STREAM_GET, Operation.STREAM_SUBSCRIBE]),
-		(Operation.CANVAS_EDIT)     : new HashSet<Operation>([Operation.STREAM_DELETE]),
-		(Operation.CANVAS_DELETE)   : new HashSet<Operation>([Operation.STREAM_DELETE]),
-		(Operation.CANVAS_STARTSTOP): new HashSet<Operation>([Operation.STREAM_PUBLISH]),
-	]
-
-	private boolean isPermissionToStreamViaDashboard(Userish userish, Stream stream) {
-		if (userish != null && stream.isUIChannel()) {
-			Canvas canvas = stream.uiChannelCanvas
-			int moduleId
-			try {
-				moduleId = stream.parseModuleID()
-			} catch (IllegalArgumentException e) {
-				return false
-			}
-		}
-		return false
 	}
 
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
@@ -446,16 +378,6 @@ class PermissionService {
 		String resourceProp = getResourcePropertyName(resource)
 
 		List<Permission> directPermissions = store.findDirectPermissions(resourceProp, resource, op, userish)
-
-		// Special case of UI channels: they inherit permissions from the associated canvas
-		if (directPermissions.isEmpty() && resource instanceof Stream && resource.uiChannel) {
-			for (Permission perm : getPermissionsTo(resource, userish)) {
-				if (perm.operation == op) {
-					return true
-				}
-			}
-		}
-
 		return !directPermissions.isEmpty()
 	}
 
@@ -528,11 +450,7 @@ class PermissionService {
 	static String getResourcePropertyName(Object resource) {
 		// Cannot derive name straight from resource.getClass() because of proxy assist objects!
 		Class resourceClass = resource instanceof Class ? resource : resource.getClass()
-		if (Canvas.isAssignableFrom(resourceClass)) {
-			return "canvas"
-		} else if (Dashboard.isAssignableFrom(resourceClass)) {
-			return "dashboard"
-		} else if (Product.isAssignableFrom(resourceClass)) {
+		if (Product.isAssignableFrom(resourceClass)) {
 			return "product"
 		} else if (Stream.isAssignableFrom(resourceClass)) {
 			return "stream"
@@ -578,16 +496,16 @@ class PermissionService {
 		if (!EmailValidator.validate.call(msg.to)) {
 			return
 		}
-		if (op == Operation.STREAM_GET || op == Operation.CANVAS_GET || op == Operation.DASHBOARD_GET) {
+		if (op == Operation.STREAM_GET) {
 			// Users who have provided an email address get an email
 			// send only one email for each read/get permission
 			String content = groovyPageRenderer.render([
 				template: "/emails/email_share_resource",
-				model   : [
-					sharer  : msg.sharer,
+				model: [
+					sharer: msg.sharer,
 					resource: msg.resourceType(),
-					name    : msg.resourceName(),
-					link    : msg.link(),
+					name: msg.resourceName(),
+					link: msg.link(),
 				],
 			])
 			mailService.sendMail {
@@ -604,14 +522,14 @@ class PermissionService {
 		SignupInvite invite = SignupInvite.findByEmail(username)
 		if (!invite) {
 			invite = signupCodeService.create(username)
-			if (op == Operation.STREAM_GET || op == Operation.CANVAS_GET || op == Operation.DASHBOARD_GET) {
+			if (op == Operation.STREAM_GET) {
 				String content = groovyPageRenderer.render([
 					template: "/emails/email_share_resource_invite",
-					model   : [
-						sharer  : msg.sharer,
+					model: [
+						sharer: msg.sharer,
 						resource: msg.resourceType(),
-						name    : msg.resourceName(),
-						invite  : invite,
+						name: msg.resourceName(),
+						invite: invite,
 					],
 				])
 				mailService.sendMail {

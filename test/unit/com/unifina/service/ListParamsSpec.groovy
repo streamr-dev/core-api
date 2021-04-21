@@ -1,6 +1,7 @@
 package com.unifina.service
 
-import com.unifina.domain.Dashboard
+import com.unifina.controller.StreamListParams
+import com.unifina.domain.Stream
 import grails.orm.HibernateCriteriaBuilder
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
@@ -10,7 +11,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 @TestMixin(GrailsUnitTestMixin)
-@Mock(Dashboard)
+@Mock(Stream)
 class ListParamsSpec extends Specification {
 
 	@Validateable
@@ -58,7 +59,7 @@ class ListParamsSpec extends Specification {
 
 	void "takes in values via constructor"() {
 		def params = new ExampleParams(
-			search: "cool blockchain canvas",
+			search: "cool blockchain stream",
 			sortBy: "createdAt",
 			order: "desc",
 			max: 50,
@@ -69,7 +70,7 @@ class ListParamsSpec extends Specification {
 
 		expect:
 		params.toMap() == [
-			search: "cool blockchain canvas",
+			search: "cool blockchain stream",
 			sortBy: "createdAt",
 			order: "desc",
 			max: 50,
@@ -81,7 +82,7 @@ class ListParamsSpec extends Specification {
 
 	void "reasonable values pass validation"() {
 		def params = new ExampleParams(
-			search: "cool blockchain canvas",
+			search: "cool blockchain stream",
 			sortBy: "createdAt",
 			order: "desc",
 			max: 50,
@@ -104,14 +105,14 @@ class ListParamsSpec extends Specification {
 		params.errors.getFieldErrors()*.field == fieldsWithError
 
 		where:
-		map                  | numOfErrors | fieldsWithError
-		[search: ""]         | 1           | ["search"]
-		[sortBy: ""]         | 1           | ["sortBy"]
-		[order: "chaos"]     | 1           | ["order"]
-		[max: 0]             | 1           | ["max"]
-		[max: 1001]          | 1           | ["max"]
-		[offset: -1]         | 1           | ["offset"]
-		[additional: ""]     | 1           | ["additional"]
+		map              | numOfErrors | fieldsWithError
+		[search: ""]     | 1           | ["search"]
+		[sortBy: ""]     | 1           | ["sortBy"]
+		[order: "chaos"] | 1           | ["order"]
+		[max: 0]         | 1           | ["max"]
+		[max: 1001]      | 1           | ["max"]
+		[offset: -1]     | 1           | ["offset"]
+		[additional: ""] | 1           | ["additional"]
 	}
 
 
@@ -168,23 +169,25 @@ class ListParamsSpec extends Specification {
 
 	void "createListCriteria() supports fetching by offsets"() {
 		(1..100).each {
-			new Dashboard(name: "Dashboard ${it}").save(validate: false, failOnError: true)
+			Stream s = new Stream(name: "Stream ${it}")
+			s.id = "${it}"
+			s.save(validate: false, failOnError: true)
 		}
 
-		def p1 = new DashboardListParams(max: 30)
-		def p2 = new DashboardListParams(max: 15, offset: 15)
-		def p3 = new DashboardListParams(max: 30, offset: 30)
-		def p4 = new DashboardListParams(max: 30, offset: 60)
-		def p5 = new DashboardListParams(max: 30, offset: 90)
-		def p6 = new DashboardListParams(max: 30, offset: 1100)
+		def p1 = new StreamListParams(max: 30)
+		def p2 = new StreamListParams(max: 15, offset: 15)
+		def p3 = new StreamListParams(max: 30, offset: 30)
+		def p4 = new StreamListParams(max: 30, offset: 60)
+		def p5 = new StreamListParams(max: 30, offset: 90)
+		def p6 = new StreamListParams(max: 30, offset: 1100)
 
 		expect:
-		Dashboard.withCriteria(p1.createListCriteria())*.id == (1..30)*.toString()
-		Dashboard.withCriteria(p2.createListCriteria())*.id == (16..30)*.toString()
-		Dashboard.withCriteria(p3.createListCriteria())*.id == (31..60)*.toString()
-		Dashboard.withCriteria(p4.createListCriteria())*.id == (61..90)*.toString()
-		Dashboard.withCriteria(p5.createListCriteria())*.id == (91..100)*.toString()
-		Dashboard.withCriteria(p6.createListCriteria()).empty
+		Stream.withCriteria(p1.createListCriteria())*.id == (1..30)*.toString()
+		Stream.withCriteria(p2.createListCriteria())*.id == (16..30)*.toString()
+		Stream.withCriteria(p3.createListCriteria())*.id == (31..60)*.toString()
+		Stream.withCriteria(p4.createListCriteria())*.id == (61..90)*.toString()
+		Stream.withCriteria(p5.createListCriteria())*.id == (91..100)*.toString()
+		Stream.withCriteria(p6.createListCriteria()).empty
 	}
 
 	void "CORE-1346 fix duplicate products in paging"() {

@@ -12,7 +12,6 @@ class UserService {
 	GrailsApplication grailsApplication
 	PermissionService permissionService
 	StreamService streamService
-	CanvasService canvasService
 
 	User createUser(Map properties, List<Role> roles = null) {
 		User user = new User(properties)
@@ -43,15 +42,6 @@ class UserService {
 
 			// Transfer permissions that were attached to sign-up invitation before user existed
 			permissionService.transferInvitePermissionsTo(user)
-		}
-
-		try {
-			List<Canvas> canvasExamples = Canvas.createCriteria().list {
-				ne("exampleType", ExampleType.NOT_SET)
-			}
-			canvasService.addExampleCanvases(user, canvasExamples)
-		} catch (RuntimeException e) {
-			log.error("error while adding example canvases: ", e)
 		}
 
 		try {

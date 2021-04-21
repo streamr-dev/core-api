@@ -9,7 +9,6 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 	Category category
 	Stream s1, s2, s3, s4
 	Product product
-	Module module
 	User troll
 	User user
 	Product p1
@@ -21,14 +20,6 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 		category = new Category(name: "Category")
 		category.id = "category-id"
 		category.save()
-		module = new Module(
-			name: "module name",
-			alternativeNames: "alt names",
-			implementingClass: "x",
-			jsModule: "jsmodule",
-			type: "type"
-		)
-		module.save(failOnError: true, validate: true)
 
 		s1 = new Stream(name: "stream-1")
 		s2 = new Stream(name: "stream-2")
@@ -106,6 +97,5 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 		Stream.get(s3.id) != null
 		Stream.get(s4.id) != null
 		Category.get(category.id) != null
-		Module.get(module.id) != null
 	}
 }
