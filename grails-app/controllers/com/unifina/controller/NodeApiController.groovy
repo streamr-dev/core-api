@@ -1,9 +1,11 @@
 package com.unifina.controller
 
-
 import com.unifina.domain.Canvas
 import com.unifina.domain.User
-import com.unifina.service.*
+import com.unifina.service.ApiException
+import com.unifina.service.CanvasService
+import com.unifina.service.NodeService
+import com.unifina.service.SignalPathService
 import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.map.ValueSortedMap
 import grails.compiler.GrailsCompileStatic
@@ -17,7 +19,6 @@ class NodeApiController {
 	CanvasService canvasService
 	LinkGenerator grailsLinkGenerator
 	SignalPathService signalPathService
-	TaskService taskService
 	NodeService nodeService
 
 	NodeRequestDispatcher nodeRequestDispatcher = new NodeRequestDispatcher()
@@ -69,8 +70,8 @@ class NodeApiController {
 			.collect { canvasById.get(it) }
 
 		render([
-			ok                : areAndShouldBeRunning*.toMap(),
-			shouldBeRunning   : areNotButShouldBeRunning*.toMap(),
+			ok: areAndShouldBeRunning*.toMap(),
+			shouldBeRunning: areNotButShouldBeRunning*.toMap(),
 			shouldNotBeRunning: areButShouldNotBeRunning*.toMap()
 		] as JSON)
 	}
@@ -86,9 +87,6 @@ class NodeApiController {
 	@GrailsCompileStatic
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def shutdown() {
-		// Shut down task workers
-		taskService.stopAllTaskWorkers()
-
 		// Get users of running canvases
 		Map<String, User> canvasIdToUser = signalPathService.getUsersOfRunningCanvases()
 
@@ -97,11 +95,6 @@ class NodeApiController {
 
 		// Discard adhoc canvases
 		stoppedCanvases = stoppedCanvases.findAll { !it.adhoc }
-
-		// Create start tasks
-		stoppedCanvases.each {
-			canvasService.startRemote(it, canvasIdToUser[it.id], false, true)
-		}
 
 		render(stoppedCanvases*.toMap() as JSON)
 	}

@@ -2,13 +2,14 @@ package com.unifina.service
 
 import com.google.gson.Gson
 import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
-import com.unifina.domain.*
+import com.unifina.domain.Canvas
+import com.unifina.domain.ExampleType
+import com.unifina.domain.Permission
+import com.unifina.domain.User
 import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.ModuleWithUI
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.signalpath.utils.InvalidStreamConfigException
-import com.unifina.task.CanvasDeleteTask
-import com.unifina.task.CanvasStartTask
 import com.unifina.utils.Globals
 import com.unifina.utils.JSONUtil
 import grails.converters.JSON
@@ -24,7 +25,6 @@ class CanvasService {
 	private final static Gson gson = JSONUtil.createPrettyPrintingGsonBuilder()
 
 	SignalPathService signalPathService
-	TaskService taskService
 	PermissionService permissionService
 	DashboardService dashboardService
 	StreamService streamService
@@ -107,17 +107,6 @@ class CanvasService {
 	 */
 	@Transactional
 	void deleteCanvas(Canvas canvas, User user, boolean delayed = false) {
-		if (delayed) {
-			taskService.createTask(CanvasDeleteTask, CanvasDeleteTask.getConfig(canvas), "delete-canvas", user, 30 * 60 * 1000)
-		} else if (canvas.state == Canvas.State.RUNNING) {
-			throw new ApiException(409, "CANNOT_DELETE_RUNNING", "Cannot delete running canvas.")
-		} else {
-			Collection<Stream> uiChannels = Stream.findAllByUiChannelCanvas(canvas)
-			uiChannels.each {
-				streamService.deleteStream(it)
-			}
-			canvas.delete(flush: true)
-		}
 	}
 
 	void start(Canvas canvas, boolean clearSerialization, User asUser) {
@@ -140,7 +129,6 @@ class CanvasService {
 	}
 
 	void startRemote(Canvas canvas, User user, boolean forceReset = false, boolean resetOnError = true) {
-		taskService.createTask(CanvasStartTask, CanvasStartTask.getConfig(canvas, forceReset, resetOnError), "canvas-start", user)
 	}
 
 	@Transactional(noRollbackFor = [CanvasUnreachableException])

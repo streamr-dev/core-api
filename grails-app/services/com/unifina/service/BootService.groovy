@@ -17,10 +17,6 @@ import java.security.Policy
  */
 class BootService {
 
-	def grailsApplication
-	def taskService
-	NodeService nodeService
-	def servletContext
 	StreamService streamService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 	PermissionService permissionService
