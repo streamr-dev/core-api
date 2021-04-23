@@ -1,6 +1,5 @@
 package com.unifina.utils;
 
-import org.apache.commons.codec.binary.Base64;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.SessionImplementor;
 import org.hibernate.id.IdentifierGenerator;
@@ -11,9 +10,9 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 
 public class HexIdGenerator implements IdentifierGenerator {
-
 	/**
 	 * Returns a hex string of 32 random bytes (64 hex characters)
+	 *
 	 * @return String
 	 */
 	@Override

@@ -1,12 +1,13 @@
 package com.unifina.utils
 
-import grails.util.Holders
 import grails.compiler.GrailsCompileStatic
-import groovy.transform.EqualsAndHashCode
+import grails.util.Holders
 
 @GrailsCompileStatic
-class ApplicationConfig {
-    static String getString(String key) {
-        return MapTraversal.getString(Holders.getConfig(), key)
-    }
+final class ApplicationConfig {
+	private ApplicationConfig() {}
+
+	static String getString(String key) {
+		return MapTraversal.getString(Holders.getConfig(), key)
+	}
 }
