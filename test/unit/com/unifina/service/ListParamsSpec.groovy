@@ -136,7 +136,7 @@ class ListParamsSpec extends Specification {
 
 		when:
 		def criteria = new ExampleParams(
-			search: "cool blockchain canvas",
+			search: "cool blockchain stream",
 			sortBy: "createdAt",
 			order: "desc",
 			max: 50,
@@ -162,8 +162,8 @@ class ListParamsSpec extends Specification {
 		0 * builder._
 
 		and:
-		1 * orBuilder.like("name", "%cool blockchain canvas%")
-		1 * orBuilder.like("description", "%cool blockchain canvas%")
+		1 * orBuilder.like("name", "%cool blockchain stream%")
+		1 * orBuilder.like("description", "%cool blockchain stream%")
 		0 * orBuilder._
 	}
 

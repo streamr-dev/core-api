@@ -151,7 +151,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		then:
 		!(streamOwned in service.get(Stream, anotherUser, Permission.Operation.STREAM_GET))
 
-		when: "of course, it's silly to revoke 'dashboard_share' access since it might already been re-shared..."
+		when: "of course, it's silly to revoke 'stream_share' access since it might already been re-shared..."
 		service.revoke(me, streamOwned, stranger, Permission.Operation.STREAM_SHARE)
 		service.grant(stranger, streamOwned, anotherUser, Permission.Operation.STREAM_SHARE)
 		then:

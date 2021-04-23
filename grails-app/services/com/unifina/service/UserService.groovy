@@ -37,7 +37,7 @@ class UserService {
 			log.warn("Failed to save user data: " + checkErrors(user.errors.getAllErrors()))
 			throw new UserCreationFailedException()
 		} else {
-			// Save roles, feeds and module packages
+			// Save roles
 			addRoles(user, roles)
 
 			// Transfer permissions that were attached to sign-up invitation before user existed

@@ -1,7 +1,7 @@
 package com.unifina.domain
 
 enum ExampleType {
-	// NOT_SET marks stream as a regular canvas that is not suitable for sharing or copying.
+	// NOT_SET marks stream that is not suitable for sharing or copying.
 	NOT_SET(0),
 	// SHARE marks stream as a shareable example resource.
 	SHARE(1),
