@@ -3,7 +3,6 @@ package com.unifina.utils
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.DeleteObjectRequest
 import com.amazonaws.services.s3.model.PutObjectRequest
-import com.unifina.provider.S3FileUploadProvider
 import spock.lang.Specification
 
 class S3FileUploadProviderSpec extends Specification {

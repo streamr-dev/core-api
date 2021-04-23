@@ -1,7 +1,7 @@
 package com.unifina.service
 
 import com.unifina.domain.User
-import com.unifina.signalpath.blockchain.Web3jHelper
+import com.unifina.utils.Web3jHelper
 
 class EnsService {
 	static transactional = false

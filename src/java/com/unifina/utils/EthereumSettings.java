@@ -1,6 +1,5 @@
-package com.unifina.signalpath.blockchain;
+package com.unifina.utils;
 
-import com.unifina.utils.ApplicationConfig;
 import org.apache.log4j.Logger;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
@@ -8,8 +7,8 @@ import org.web3j.protocol.websocket.WebSocketService;
 
 import java.io.Serializable;
 
-public class EthereumModuleOptions implements Serializable {
-	private static final Logger log = Logger.getLogger(EthereumModuleOptions.class);
+public class EthereumSettings implements Serializable {
+	private static final Logger log = Logger.getLogger(EthereumSettings.class);
 
 	private String network = ApplicationConfig.getString("streamr.ethereum.defaultNetwork");
 	private double gasPriceWei = 20e9; // 20 Gwei

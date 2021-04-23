@@ -1,7 +1,6 @@
 package com.unifina.service
 
-
-import com.unifina.crypto.ECRecover
+import com.unifina.utils.ECRecover
 import grails.compiler.GrailsCompileStatic
 
 @GrailsCompileStatic
@@ -40,7 +39,7 @@ class ChallengeService {
 	}
 
 	private static String getChallengeText(String address) {
-		return textPart1+address+textPart2
+		return textPart1 + address + textPart2
 	}
 
 	private static boolean challengeTextContainsAddress(String text, String address) {

@@ -1,9 +1,5 @@
-package com.unifina.signalpath.blockchain;
+package com.unifina.utils;
 
-import com.unifina.utils.MapTraversal;
-import com.unifina.utils.ThreadUtil;
-import com.unifina.utils.ApplicationConfig;
-import grails.util.Holders;
 import org.apache.log4j.Logger;
 import org.web3j.abi.EventValues;
 import org.web3j.abi.FunctionEncoder;
@@ -12,7 +8,6 @@ import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.*;
 import org.web3j.ens.NameHash;
 import org.web3j.ens.contracts.generated.ENS;
-import org.web3j.ens.contracts.generated.PublicResolver;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.*;
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -21,11 +16,9 @@ import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.ClientTransactionManager;
 import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
-import org.web3j.tx.exceptions.ContractCallException;
 import org.web3j.tx.gas.DefaultGasProvider;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -37,15 +30,18 @@ public class Web3jHelper {
 		public BlockchainException(String msg) {
 			super(msg);
 		}
+
 		public BlockchainException(Throwable cause) {
 			super(cause);
 		}
 	}
+
 	public static class BlockTimestampIsNullException extends BlockchainException {
 		public BlockTimestampIsNullException(String msg) {
 			super(msg);
 		}
 	}
+
 	public static class BlockWasNullException extends BlockchainException {
 		public BlockWasNullException(String msg) {
 			super(msg);
@@ -66,30 +62,6 @@ public class Web3jHelper {
 			return null;
 		}
 		return tr;
-	}
-
-	public static Function toWeb3jFunction(EthereumABI.Function fn, List args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-		List<String> solidity_inputtypes = new ArrayList<String>(fn.inputs.size());
-		List<String> solidity_outputtypes = new ArrayList<String>(fn.outputs.size());
-
-		for (int i = 0; i < fn.inputs.size(); i++) {
-			solidity_inputtypes.add(fn.inputs.get(i).type);
-		}
-		for (int i = 0; i < fn.outputs.size(); i++) {
-			solidity_outputtypes.add(fn.outputs.get(i).type);
-		}
-		return FunctionEncoder.makeFunction(fn.name, solidity_inputtypes, args, solidity_outputtypes);
-	}
-
-	public static Event toWeb3jEvent(EthereumABI.Event ev) throws ClassNotFoundException {
-		ArrayList<TypeReference<?>> params = new ArrayList<TypeReference<?>>();
-		for (EthereumABI.Slot s : ev.inputs) {
-			final boolean primitives = false;
-			TypeReference ref = TypeReference.makeTypeReference(s.type, s.indexed, primitives);
-			params.add(ref);
-		}
-		Event web3jevent = new Event(ev.name, params);
-		return web3jevent;
 	}
 
 	public static List<EventValues> extractEventParameters(Event event, TransactionReceipt transactionReceipt) {
@@ -162,12 +134,13 @@ public class Web3jHelper {
 	}
 
 	public static Web3j getWeb3jConnectionFromConfig() {
-		EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
+		EthereumSettings ethereumOptions = new EthereumSettings();
 		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
 	}
 
 	/**
 	 * Get a public field in Ethereum contract. Returns T of a Type&lt;T&gt; specified in fieldType.
+	 *
 	 * @return Web3j.Type return value from eth_call (Solidity type + value), or null if bad address or fieldName
 	 * <p>
 	 * For example:
@@ -215,7 +188,6 @@ public class Web3jHelper {
 	 * @return the timestamp (seconds) of the block in which trasnaction occured
 	 * @throws IOException
 	 * @throws BlockchainException
-	 *
 	 */
 
 	public static long getBlockTime(Web3j web3j, TransactionReceipt tr) throws IOException, BlockchainException {
@@ -230,14 +202,14 @@ public class Web3jHelper {
 			throw new BlockchainException(err);
 		}
 		EthBlock.Block block = eb.getBlock();
-		if(block == null){
+		if (block == null) {
 			String err = "getBlock() returned null block for txHash " + tr.getTransactionHash();
 			log.error(err);
 			throw new BlockWasNullException(err);
 		}
 		BigInteger timestamp = block.getTimestamp();
-		if(timestamp == null){
-			String err = "getBlock() returned null timestamp for block: "+block+", re txHash: " + tr.getTransactionHash();
+		if (timestamp == null) {
+			String err = "getBlock() returned null timestamp for block: " + block + ", re txHash: " + tr.getTransactionHash();
 			log.error(err);
 			throw new BlockTimestampIsNullException(err);
 		}
@@ -259,17 +231,17 @@ public class Web3jHelper {
 		Address tokenAddress = new Address(erc20address);
 		if (tokenAddress.toUint().getValue().equals(BigInteger.ZERO)) {
 			EthGetBalance ethGetBalance = web3j
-				.ethGetBalance(holderAddress, DefaultBlockParameterName.LATEST)
-				.sendAsync()
-				.get();
+					.ethGetBalance(holderAddress, DefaultBlockParameterName.LATEST)
+					.sendAsync()
+					.get();
 			final BigInteger balance = ethGetBalance.getBalance();
 			return balance;
 		}
 		//    function balanceOf(address tokenOwner) public view returns (uint balance);
 		Function balanceOf = new Function("balanceOf", Arrays.<Type>asList(new Address(holderAddress)), Arrays.<TypeReference<?>>asList(TypeReference.create(Uint.class)));
 		EthCall response = web3j.ethCall(
-			Transaction.createEthCallTransaction(holderAddress, erc20address, FunctionEncoder.encode(balanceOf)),
-			DefaultBlockParameterName.LATEST).sendAsync().get();
+				Transaction.createEthCallTransaction(holderAddress, erc20address, FunctionEncoder.encode(balanceOf)),
+				DefaultBlockParameterName.LATEST).sendAsync().get();
 		Response.Error err = response.getError();
 		if (err != null) {
 			throw new RuntimeException(err.getMessage());

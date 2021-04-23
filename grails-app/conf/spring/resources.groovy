@@ -1,5 +1,5 @@
 import com.mchange.v2.c3p0.ComboPooledDataSource
-import com.unifina.provider.S3FileUploadProvider
+import com.unifina.utils.S3FileUploadProvider
 
 beans = {
 	fileUploadProvider(S3FileUploadProvider,

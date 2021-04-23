@@ -2,8 +2,8 @@ package com.unifina.service
 
 import com.unifina.domain.IntegrationKey
 import com.unifina.domain.User
-import com.unifina.signalpath.blockchain.EthereumModuleOptions
 import com.unifina.utils.ApplicationConfig
+import com.unifina.utils.EthereumSettings
 import org.web3j.exceptions.MessageDecodingException
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.http.HttpService
@@ -14,15 +14,15 @@ import java.util.concurrent.ExecutionException
 class BalanceService {
 	Web3jHelperService web3jHelperService
 
-	protected EthereumModuleOptions ethereumOptions;
+	protected EthereumSettings ethereumSettings;
 	protected web3j;
 
 	private String dataCoinAddress;
 
 	@PostConstruct
 	void init() {
-		ethereumOptions = new EthereumModuleOptions()
-		final HttpService httpService = new HttpService(ethereumOptions.getRpcUrl())
+		ethereumSettings = new EthereumSettings()
+		final HttpService httpService = new HttpService(ethereumSettings.getRpcUrl())
 		web3j = Web3j.build(httpService)
 		dataCoinAddress = ApplicationConfig.getString("streamr.ethereum.datacoinAddress");
 		if (dataCoinAddress == null) {

@@ -1,4 +1,4 @@
-package com.unifina.security
+package com.unifina.utils
 
 import org.apache.commons.codec.binary.Hex
 import spock.lang.Specification

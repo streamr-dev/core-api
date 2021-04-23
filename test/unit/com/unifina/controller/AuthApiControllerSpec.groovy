@@ -5,7 +5,6 @@ import com.unifina.service.PermissionService
 import com.unifina.service.SignupCodeService
 import com.unifina.service.StreamService
 import com.unifina.service.UserService
-import com.unifina.signalpath.messaging.MockMailService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.codehaus.groovy.grails.commons.GrailsApplication

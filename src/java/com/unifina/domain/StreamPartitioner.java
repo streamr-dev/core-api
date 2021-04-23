@@ -1,6 +1,4 @@
-package com.unifina.data;
-
-import com.unifina.domain.Stream;
+package com.unifina.domain;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
@@ -9,7 +7,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class StreamPartitioner{
+public class StreamPartitioner {
 	private static final Charset utf8 = Charset.forName("UTF-8");
 
 	public static int partition(Stream stream, @Nullable String partitionKey) {

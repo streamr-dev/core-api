@@ -1,4 +1,4 @@
-package com.unifina.signalpath.blockchain;
+package com.unifina.utils;
 
 import org.web3j.protocol.core.Response;
 

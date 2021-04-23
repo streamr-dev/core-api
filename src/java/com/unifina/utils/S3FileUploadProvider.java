@@ -1,4 +1,4 @@
-package com.unifina.provider;
+package com.unifina.utils;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;

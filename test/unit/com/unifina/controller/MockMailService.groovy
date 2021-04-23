@@ -1,4 +1,4 @@
-package com.unifina.signalpath.messaging
+package com.unifina.controller
 
 class MockMailService {
 
@@ -33,15 +33,19 @@ class MockMailService {
 		def from(s) {
 			from = s
 		}
+
 		def to(s) {
 			to = s
 		}
+
 		def subject(s) {
 			subject = s
 		}
+
 		def body(s) {
 			body = s
 		}
+
 		def html(s) {
 			html = s
 		}

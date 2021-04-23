@@ -1,4 +1,4 @@
-package com.unifina.crypto;
+package com.unifina.utils;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -9,8 +9,11 @@ import org.ethereum.util.ByteUtil;
 import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
 
-public class ECRecover {
+public final class ECRecover {
 	private static final String SIGN_MAGIC = "\u0019Ethereum Signed Message:\n";
+
+	private ECRecover() {
+	}
 
 	public static byte[] calculateMessageHash(String message) {
 		byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);

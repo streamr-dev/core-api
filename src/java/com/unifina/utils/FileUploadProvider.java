@@ -1,4 +1,4 @@
-package com.unifina.provider;
+package com.unifina.utils;
 
 import java.net.URL;
 

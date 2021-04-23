@@ -1,6 +1,6 @@
 package com.unifina.utils
 
-import com.unifina.provider.S3FileUploadProvider
+
 import grails.test.spock.IntegrationSpec
 import groovy.transform.CompileStatic
 import spock.lang.Ignore
