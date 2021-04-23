@@ -103,7 +103,6 @@ grails.project.dependency.resolution = {
 		runtime('mysql:mysql-connector-java:5.1.20')
 		runtime('com.mchange:c3p0:0.9.5.5')
 		runtime('commons-codec:commons-codec:1.15')
-		runtime('joda-time:joda-time:2.10.6')
 
 		test('cglib:cglib:3.2.6')
 		test('org.gaul:httpbin:1.3.0') {

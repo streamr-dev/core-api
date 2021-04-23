@@ -3,12 +3,13 @@ package com.unifina.service
 import com.lambdaworks.redis.RedisClient
 import com.lambdaworks.redis.RedisConnection
 import com.lambdaworks.redis.RedisURI
-import com.unifina.utils.MapTraversal
 import com.unifina.utils.ApplicationConfig
+import com.unifina.utils.MapTraversal
 import grails.util.Holders
-import org.joda.time.DateTime
 import org.springframework.util.Assert
 import spock.lang.Specification
+
+import java.time.Instant
 
 class KeyValueStoreServiceIntegrationSpec extends Specification {
 	KeyValueStoreService service
@@ -23,18 +24,18 @@ class KeyValueStoreServiceIntegrationSpec extends Specification {
 		Assert.notNull(hosts, "streamr.redis.hosts is null!")
 		Assert.notEmpty(hosts, "streamr.redis.hosts is empty!")
 
-		RedisClient redisClient = RedisClient.create(RedisURI.create("redis://"+password+"@"+hosts.get(0)))
+		RedisClient redisClient = RedisClient.create(RedisURI.create("redis://" + password + "@" + hosts.get(0)))
 		connection = redisClient.connect()
 	}
 
-    void "get() returns inserted value"() {
+	void "get() returns inserted value"() {
 		String key = "key1"
 		String value = "value1"
 		when:
 		connection.set(key, value)
 		then:
 		service.get(key) == value
-    }
+	}
 
 	void "setWithExpiration() inserts key and value with expiration"() {
 		String key = "key2"
@@ -65,7 +66,7 @@ class KeyValueStoreServiceIntegrationSpec extends Specification {
 		Long ttl1 = connection.ttl(key)
 		Thread.sleep(2000)
 		when:
-		service.resetExpiration(key, new DateTime().plusSeconds(10).toDate())
+		service.resetExpiration(key, Date.from(Instant.now().plusSeconds(10)))
 		then:
 		Long ttl2 = connection.ttl(key)
 		ttl2 - ttl1 <= 10

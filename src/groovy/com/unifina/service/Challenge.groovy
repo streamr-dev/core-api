@@ -1,8 +1,8 @@
 package com.unifina.service
 
 import com.unifina.utils.AlphanumericStringGenerator
-import org.joda.time.DateTime
 
+import java.time.Instant
 import java.time.format.DateTimeFormatter
 
 class Challenge {
@@ -13,13 +13,13 @@ class Challenge {
 	Challenge(String text, int length, int ttlSeconds) {
 		this.id = AlphanumericStringGenerator.getRandomAlphanumericString(length)
 		this.challenge = text + id
-		this.expiration = new DateTime().plusSeconds(ttlSeconds).toDate()
+		this.expiration = Date.from(Instant.now().plusSeconds(ttlSeconds))
 	}
 
 	Challenge(String id, String text, int ttlSeconds) {
 		this.id = id
 		this.challenge = text + id
-		this.expiration = new DateTime().plusSeconds(ttlSeconds).toDate()
+		this.expiration = Date.from(Instant.now().plusSeconds(ttlSeconds))
 	}
 
 	public String getId() {
