@@ -44,8 +44,6 @@ class UrlMappings {
 
 		"/api/v1/integration_keys"(resources: "integrationKeyApi")
 
-		"/api/v1/oembed"(controller: "oembedApi", action: "index")
-
 		"/api/v1/login/challenge/$address"(method: "POST", controller: "loginApi", action: "challenge")
 		"/api/v1/login/response"(method: "POST", controller: "loginApi", action: "response")
 		"/api/v1/logout"(method: "POST", controller: "logoutApi", action: "logout")
