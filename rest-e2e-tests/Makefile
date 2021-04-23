@@ -8,11 +8,11 @@ ifeq ($(filter oneshell,$(.FEATURES)),)
 $(error error: Your version of make ($(shell make -v|head -1|cut -f 3 -d ' ')) does not support .ONESHELL)
 endif
 
-LANG := en_US.UTF-8
-SHELL := bash
-.SHELLFLAGS := -eu -o pipefail -c # run '/bin/bash ... -c /bin/cmd'
+LANG = en_US.UTF-8
+SHELL = bash
+.SHELLFLAGS = -eu -o pipefail -c # run '/bin/bash ... -c /bin/cmd'
 .ONESHELL:
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL = all
 
 nvm_brew = /usr/local/opt/nvm/nvm.sh
 ifneq ("$(wildcard $(nvm_brew))", "")
@@ -25,7 +25,7 @@ endif
 node_version = $(shell cat .nvmrc)
 define npm
 	@$(eval npm_args=$(1))
-	bash -l -c "source $(nvm_sh) && nvm exec $(node_version) npm $(npm_args)"
+	bash -e -o pipefail -l -c "source $(nvm_sh) && nvm exec $(node_version) npm $(npm_args)"
 endef
 
 all: clean vendor test/server/wait test ## Set up and test
@@ -70,9 +70,11 @@ test/stress: ## Run stress tests
 
 .PHONY: clean
 clean: ## Remove generated files
-	rm -rf node_modules
+	rm -rf \
+		rest-e2e-tests/test-data/bigfile.txt \
+		node_modules
 
 .PHONY: help
 help: ## Show Help
-	@grep -E '^[a-zA-Z0-9_\-\/]+%?:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "%-20s %s\n", $$1, $$2}'|sort
+	@grep -E '^[a-zA-Z0-9_\-\/]+%?:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "%-20s %s\n", $$1, $$2}' | sort
 
