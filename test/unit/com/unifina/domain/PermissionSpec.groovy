@@ -1,7 +1,9 @@
 package com.unifina.domain
 
+import grails.test.mixin.Mock
 import spock.lang.Specification
 
+@Mock(Permission)
 class PermissionSpec extends Specification {
 	void "validation fails if no domain class attached"() {
 		def permission = new Permission(operation: Permission.Operation.STREAM_GET)

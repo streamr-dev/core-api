@@ -7,7 +7,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 @TestFor(ProductService)
-@Mock([Category, Product, SubscriptionFree, SubscriptionPaid])
+@Mock([Category, Product, Stream, SubscriptionFree, SubscriptionPaid])
 class ProductServiceSpec extends Specification {
 	Stream s1, s2, s3, s4
 	Category category
@@ -25,7 +25,7 @@ class ProductServiceSpec extends Specification {
 		s2 = new Stream(name: "stream-2")
 		s3 = new Stream(name: "stream-3")
 		s4 = new Stream(name: "stream-4")
-		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i+1}" } // assign ids
+		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i + 1}" } // assign ids
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: false)
 	}
 
@@ -37,17 +37,17 @@ class ProductServiceSpec extends Specification {
 		user.id = 1
 		user.save(failOnError: true, validate: false)
 		product = new Product(
-				name: "name",
-				description: "description",
-				ownerAddress: "0x0000000000000000000000000000000000000000",
-				beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-				streams: s1 != null ? [s1, s2, s3] : [],
-				pricePerSecond: 10,
-				category: category,
-				state: state,
-				blockNumber: 40000,
-				blockIndex: 30,
-				owner: user
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+			streams: s1 != null ? [s1, s2, s3] : [],
+			pricePerSecond: 10,
+			category: category,
+			state: state,
+			blockNumber: 40000,
+			blockIndex: 30,
+			owner: user
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
@@ -353,15 +353,15 @@ class ProductServiceSpec extends Specification {
 		def permissionService = service.permissionService = Mock(PermissionService)
 
 		def validCommand = new ProductUpdateCommand(
-				name: "updated name",
-				description: "updated description",
-				category: category,
-				streams: [s2, s4],
-				pricePerSecond: 20L,
-				ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
-				beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
-				priceCurrency: Product.Currency.DATA,
-				minimumSubscriptionInSeconds: 1000
+			name: "updated name",
+			description: "updated description",
+			category: category,
+			streams: [s2, s4],
+			pricePerSecond: 20L,
+			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			priceCurrency: Product.Currency.DATA,
+			minimumSubscriptionInSeconds: 1000
 		)
 		def user = new User(username: "me@streamr.network")
 
@@ -472,7 +472,7 @@ class ProductServiceSpec extends Specification {
 		}
 		def permissionService = service.permissionService = Mock(PermissionService)
 		service.store = Stub(ProductStore) {
-			findProductsByStream(_) >> {Stream s ->
+			findProductsByStream(_) >> { Stream s ->
 				if (s == s2) {
 					return [product]
 				} else {
@@ -510,10 +510,10 @@ class ProductServiceSpec extends Specification {
 		service.permissionService = new PermissionService()
 
 		def validCommand = new ProductUpdateCommand(
-				name: "updated name",
-				description: "updated description",
-				category: category,
-				streams: [s2, s4]
+			name: "updated name",
+			description: "updated description",
+			category: category,
+			streams: [s2, s4]
 		)
 
 		when:
@@ -531,15 +531,15 @@ class ProductServiceSpec extends Specification {
 		def apiService = service.apiService = Mock(ApiService)
 
 		def validCommand = new ProductUpdateCommand(
-				name: "updated name",
-				description: "updated description",
-				category: category,
-				streams: [],
-				pricePerSecond: 20L,
-				ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
-				beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
-				priceCurrency: Product.Currency.DATA,
-				minimumSubscriptionInSeconds: 1000
+			name: "updated name",
+			description: "updated description",
+			category: category,
+			streams: [],
+			pricePerSecond: 20L,
+			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			priceCurrency: Product.Currency.DATA,
+			minimumSubscriptionInSeconds: 1000
 		)
 		def user = new User(username: "me@streamr.network")
 
@@ -610,17 +610,17 @@ class ProductServiceSpec extends Specification {
 		terms.termsName = "legal terms for site.org"
 
 		def validCommand = new ProductUpdateCommand(
-				name: "updated name",
-				description: "updated description",
-				category: category2,
-				streams: [s2, s4],
-				pricePerSecond: 20L,
-				ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
-				beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
-				priceCurrency: Product.Currency.DATA,
-				minimumSubscriptionInSeconds: 1000,
-				contact: contact,
-				termsOfUse: terms,
+			name: "updated name",
+			description: "updated description",
+			category: category2,
+			streams: [s2, s4],
+			pricePerSecond: 20L,
+			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			priceCurrency: Product.Currency.DATA,
+			minimumSubscriptionInSeconds: 1000,
+			contact: contact,
+			termsOfUse: terms,
 		)
 
 		when:
@@ -935,13 +935,13 @@ class ProductServiceSpec extends Specification {
 		setupProduct(Product.State.UNDEPLOYING)
 
 		def command = new ProductDeployedCommand(
-				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
-				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-				pricePerSecond: 2,
-				priceCurrency: Product.Currency.USD,
-				minimumSubscriptionInSeconds: 600,
-				blockNumber: 50000,
-				blockIndex: 10
+			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+			pricePerSecond: 2,
+			priceCurrency: Product.Currency.USD,
+			minimumSubscriptionInSeconds: 600,
+			blockNumber: 50000,
+			blockIndex: 10
 		)
 
 		when:
@@ -954,13 +954,13 @@ class ProductServiceSpec extends Specification {
 		setupProduct()
 
 		def command = new ProductDeployedCommand(
-				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
-				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-				pricePerSecond: 2,
-				priceCurrency: Product.Currency.USD,
-				minimumSubscriptionInSeconds: 600,
-				blockNumber: 50000,
-				blockIndex: 10
+			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+			pricePerSecond: 2,
+			priceCurrency: Product.Currency.USD,
+			minimumSubscriptionInSeconds: 600,
+			blockNumber: 50000,
+			blockIndex: 10
 		)
 
 		when:
@@ -976,13 +976,13 @@ class ProductServiceSpec extends Specification {
 		service.permissionService = Stub(PermissionService)
 
 		def command = new ProductDeployedCommand(
-				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
-				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-				pricePerSecond: 2,
-				priceCurrency: Product.Currency.USD,
-				minimumSubscriptionInSeconds: 600,
-				blockNumber: 30000,
-				blockIndex: 10
+			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+			pricePerSecond: 2,
+			priceCurrency: Product.Currency.USD,
+			minimumSubscriptionInSeconds: 600,
+			blockNumber: 30000,
+			blockIndex: 10
 		)
 
 		when:
@@ -999,13 +999,13 @@ class ProductServiceSpec extends Specification {
 		def permissionService = service.permissionService = Mock(PermissionService)
 
 		def command = new ProductDeployedCommand(
-				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
-				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-				pricePerSecond: 2,
-				priceCurrency: Product.Currency.USD,
-				minimumSubscriptionInSeconds: 600,
-				blockNumber: 30000,
-				blockIndex: 10
+			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+			pricePerSecond: 2,
+			priceCurrency: Product.Currency.USD,
+			minimumSubscriptionInSeconds: 600,
+			blockNumber: 30000,
+			blockIndex: 10
 		)
 
 		when:
@@ -1022,13 +1022,13 @@ class ProductServiceSpec extends Specification {
 		service.permissionService = Stub(PermissionService)
 
 		def command = new ProductDeployedCommand(
-				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
-				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-				pricePerSecond: 2,
-				priceCurrency: Product.Currency.USD,
-				minimumSubscriptionInSeconds: 600,
-				blockNumber: 30000,
-				blockIndex: 10
+			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+			pricePerSecond: 2,
+			priceCurrency: Product.Currency.USD,
+			minimumSubscriptionInSeconds: 600,
+			blockNumber: 30000,
+			blockIndex: 10
 		)
 
 		when:
@@ -1046,13 +1046,13 @@ class ProductServiceSpec extends Specification {
 		service.permissionService = Stub(PermissionService)
 
 		def command = new ProductDeployedCommand(
-				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
-				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-				pricePerSecond: 2,
-				priceCurrency: Product.Currency.USD,
-				minimumSubscriptionInSeconds: 600,
-				blockNumber: 50000,
-				blockIndex: 10
+			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+			pricePerSecond: 2,
+			priceCurrency: Product.Currency.USD,
+			minimumSubscriptionInSeconds: 600,
+			blockNumber: 50000,
+			blockIndex: 10
 		)
 
 		when:
@@ -1069,13 +1069,13 @@ class ProductServiceSpec extends Specification {
 		service.permissionService = Stub(PermissionService)
 
 		def command = new ProductDeployedCommand(
-				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
-				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-				pricePerSecond: 2,
-				priceCurrency: Product.Currency.USD,
-				minimumSubscriptionInSeconds: 600,
-				blockNumber: 50000,
-				blockIndex: 10
+			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+			pricePerSecond: 2,
+			priceCurrency: Product.Currency.USD,
+			minimumSubscriptionInSeconds: 600,
+			blockNumber: 50000,
+			blockIndex: 10
 		)
 
 		when:
@@ -1088,7 +1088,7 @@ class ProductServiceSpec extends Specification {
 
 		and:
 		def map = product.toMap()
-		map.id ==  "product-id"
+		map.id == "product-id"
 		map.type == "NORMAL"
 		map.name == "name"
 		map.description == "description"
@@ -1117,13 +1117,13 @@ class ProductServiceSpec extends Specification {
 		def permissionService = service.permissionService = Mock(PermissionService)
 
 		def command = new ProductDeployedCommand(
-				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
-				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-				pricePerSecond: 2,
-				priceCurrency: Product.Currency.USD,
-				minimumSubscriptionInSeconds: 600,
-				blockNumber: 50000,
-				blockIndex: 10
+			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+			pricePerSecond: 2,
+			priceCurrency: Product.Currency.USD,
+			minimumSubscriptionInSeconds: 600,
+			blockNumber: 50000,
+			blockIndex: 10
 		)
 
 		when:
