@@ -169,8 +169,4 @@ class Stream implements Comparable {
 			return latestDataTimestamp.before(threshold)
 		}
 	}
-
-	public Integer getPartitions() {
-		return this.partitions
-	}
 }

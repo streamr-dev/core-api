@@ -98,7 +98,7 @@ class StreamServiceSpec extends Specification {
 		IntegrationKey key1 = new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57").save(failOnError: true, validate: false)
 		User user2 = new User(id: 2, username: "u2").save(failOnError: true, validate: false)
-		IntegrationKey key2 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
+		IntegrationKey key2 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
 		User user3 = new User(id: 3, username: "u3").save(failOnError: true, validate: false)
 
@@ -133,7 +133,7 @@ class StreamServiceSpec extends Specification {
 			idInService: address1).save(failOnError: true, validate: false)
 		User user2 = new User(id: 2, username: "u2").save(failOnError: true, validate: false)
 		String address2 = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
-		new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
+		new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: address2).save(failOnError: true, validate: false)
 		Stream stream = new Stream(name: "name")
 		stream.id = "streamId"
@@ -159,7 +159,7 @@ class StreamServiceSpec extends Specification {
 		IntegrationKey key1 = new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57").save(failOnError: true, validate: false)
 		User user2 = new User(id: 2, username: "u2").save(failOnError: true, validate: false)
-		IntegrationKey key2 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
+		IntegrationKey key2 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
 		User user3 = new User(id: 3, username: "u3").save(failOnError: true, validate: false)
 
@@ -194,7 +194,7 @@ class StreamServiceSpec extends Specification {
 			idInService: address1).save(failOnError: true, validate: false)
 		User user2 = new User(id: 2, username: "u2").save(failOnError: true, validate: false)
 		String address2 = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
-		new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
+		new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: address2).save(failOnError: true, validate: false)
 		Stream stream = new Stream(name: "name")
 		stream.id = "streamId"

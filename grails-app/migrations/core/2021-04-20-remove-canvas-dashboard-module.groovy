@@ -31,4 +31,7 @@ databaseChangeLog = {
 		sql("delete from permission where operation like 'canvas_%'")
 		sql("delete from permission where operation like 'dashboard_%'")
 	}
+	changeSet(author: "kkn", id: "remove-canvas-dashboard-module-7") {
+		sql("delete from integration_key where service = 'ETHEREUM'")
+	}
 }

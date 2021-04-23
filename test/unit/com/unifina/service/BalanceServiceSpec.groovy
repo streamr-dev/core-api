@@ -29,20 +29,20 @@ class BalanceServiceSpec extends Specification {
 	def setup() {
 		service.web3jHelperService = Mock(Web3jHelperService)
 		me = new User(name: "me", username: "me@too.com").save(validate: false)
-    }
+	}
 
-    void "gets balances of keys a user has"() {
+	void "gets balances of keys a user has"() {
 		def expected = new BigInteger("100", 16)
 		def expected2 = new BigInteger("200", 16)
 
 		new IntegrationKey(
 			user: me,
-			service: IntegrationKey.Service.ETHEREUM,
+			service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: address,
 		).save(validate: false)
 		new IntegrationKey(
 			user: me,
-			service: IntegrationKey.Service.ETHEREUM,
+			service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: address2,
 		).save(validate: false)
 
@@ -69,7 +69,7 @@ class BalanceServiceSpec extends Specification {
 	void "check balance when underlying Web3j API throws InterruptedException"() {
 		new IntegrationKey(
 			user: me,
-			service: IntegrationKey.Service.ETHEREUM,
+			service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: address,
 		).save(validate: false)
 
@@ -80,10 +80,11 @@ class BalanceServiceSpec extends Specification {
 		1 * service.web3jHelperService.getERC20Balance(_, _, address) >> { throw new InterruptedException("mock: thread interrupted") }
 		thrown(ApiException)
 	}
+
 	void "check balance when underlying Web3j API throws ExecutionException"() {
 		new IntegrationKey(
 			user: me,
-			service: IntegrationKey.Service.ETHEREUM,
+			service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: address,
 		).save(validate: false)
 
@@ -94,10 +95,11 @@ class BalanceServiceSpec extends Specification {
 		1 * service.web3jHelperService.getERC20Balance(_, _, address) >> { throw new ExecutionException("mock: execution aborted", new Exception("root cause")) }
 		thrown(ApiException)
 	}
+
 	void "check balance when underlying Web3j API throws MessageDecodingException"() {
 		new IntegrationKey(
 			user: me,
-			service: IntegrationKey.Service.ETHEREUM,
+			service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: address,
 		).save(validate: false)
 

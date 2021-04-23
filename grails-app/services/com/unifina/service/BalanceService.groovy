@@ -32,7 +32,7 @@ class BalanceService {
 
 	Map<String, BigInteger> getDatacoinBalances(User user) throws InterruptedException, ExecutionException, MessageDecodingException {
 		def keys =
-			IntegrationKey.findAllByUserAndServiceInList(user, [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]);
+			IntegrationKey.findAllByUserAndServiceInList(user, [IntegrationKey.Service.ETHEREUM_ID]);
 
 		Map<String, BigInteger> result = new LinkedHashMap<String, BigInteger>();
 		for (IntegrationKey ik : keys) {

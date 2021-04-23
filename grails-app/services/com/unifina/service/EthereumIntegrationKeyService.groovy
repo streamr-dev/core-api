@@ -3,65 +3,24 @@ package com.unifina.service
 import com.unifina.domain.IntegrationKey
 import com.unifina.domain.SignupMethod
 import com.unifina.domain.User
-import com.unifina.security.StringEncryptor
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 import org.apache.commons.codec.DecoderException
 import org.apache.commons.codec.binary.Hex
 import org.ethereum.crypto.ECKey
-import org.springframework.util.Assert
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.Keys
 
-import javax.annotation.PostConstruct
 import java.security.SignatureException
 
 class EthereumIntegrationKeyService {
 
 	def grailsApplication
-	StringEncryptor encryptor
 	SubscriptionService subscriptionService
 	ChallengeService challengeService
 	UserService userService
 	PermissionService permissionService
-
-	@PostConstruct
-	void init() {
-		String password = grailsApplication.config["streamr"]["encryption"]["password"]
-		Assert.notNull(password, "streamr.encryption.password not set!")
-		encryptor = new StringEncryptor(password)
-	}
-
-	IntegrationKey createEthereumAccount(User user, String name, String privateKey) {
-		privateKey = trimPrivateKey(privateKey)
-		validatePrivateKey(privateKey)
-
-		try {
-			String address = "0x" + getAddress(privateKey)
-			final byte[] salt = new byte[1]
-			salt[0] = user.id.byteValue()
-			String encryptedPrivateKey = encryptor.encrypt(privateKey, salt)
-
-			assertUnique(address)
-
-			IntegrationKey key = new IntegrationKey(
-				name: name,
-				user: user,
-				service: IntegrationKey.Service.ETHEREUM,
-				idInService: address,
-				json: ([
-					privateKey: encryptedPrivateKey,
-					address   : address
-				] as JSON).toString()
-			).save(flush: false, failOnError: true)
-
-			subscriptionService.afterIntegrationKeyCreated(key)
-			return key
-		} catch (NumberFormatException e) {
-			throw new IllegalArgumentException("Private key must be a valid hex string!")
-		}
-	}
 
 	IntegrationKey createEthereumID(User user, String name, String challengeID, String challenge, String signature) {
 		String address
@@ -103,21 +62,12 @@ class EthereumIntegrationKeyService {
 		}
 	}
 
-	String decryptPrivateKey(IntegrationKey key) {
-		Map json = JSON.parse(key.json)
-		return encryptor.decrypt((String) json.privateKey, key.user.id.byteValue())
-	}
-
-	List<IntegrationKey> getAllPrivateKeysForUser(User user) {
-		IntegrationKey.findAllByServiceAndUser(IntegrationKey.Service.ETHEREUM, user)
-	}
-
 	User getEthereumUser(String address) {
 		if (address == null) {
 			return null
 		}
 		IntegrationKey key = IntegrationKey.createCriteria().get {
-			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
+			'in'("service", [IntegrationKey.Service.ETHEREUM_ID])
 			// ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems
 			// are in use (checksum-case, lower-case at least)
 			ilike("idInService", address)
@@ -138,11 +88,11 @@ class EthereumIntegrationKeyService {
 
 	User createEthereumUser(String address, SignupMethod signupMethod) {
 		User user = userService.createUser([
-			username     : address,
-			name         : "Anonymous User",
-			enabled      : true,
+			username: address,
+			name: "Anonymous User",
+			enabled: true,
 			accountLocked: false,
-			signupMethod : signupMethod
+			signupMethod: signupMethod
 		])
 		new IntegrationKey(
 			name: address,

@@ -86,14 +86,6 @@ grails.project.dependency.resolution = {
 			excludes('org.springframework:spring-context:*')
 			excludes('org.springframework:spring-orm:*')
 		}
-		compile('org.springframework.security:spring-security-core:4.2.9.RELEASE') {
-			// Needed for StringEncryptor
-			excludes('org.springframework:spring-aop:*')
-			excludes('org.springframework:spring-beans:*')
-			excludes('org.springframework:spring-context:*')
-			excludes('org.springframework:spring-core:*')
-			excludes('org.springframework:spring-expression:*')
-		}
 		compile('org.springframework.security:spring-security-web:4.2.9.RELEASE') { // Needed for CORS plugin
 			excludes('org.springframework:spring-web:*')
 		}

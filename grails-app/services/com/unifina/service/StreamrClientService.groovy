@@ -2,15 +2,11 @@ package com.unifina.service
 
 import com.streamr.client.StreamrClient
 import com.streamr.client.authentication.AuthenticationMethod
-import com.streamr.client.authentication.EthereumAuthenticationMethod
 import com.streamr.client.authentication.InternalAuthenticationMethod
 import com.streamr.client.options.EncryptionOptions
 import com.streamr.client.options.SigningOptions
 import com.streamr.client.options.StreamrClientOptions
-import com.unifina.domain.IntegrationKey
 import com.unifina.domain.SignupMethod
-import com.unifina.domain.User
-import com.unifina.utils.PrivateKeyGenerator
 import com.unifina.utils.ApplicationConfig
 import org.apache.log4j.Logger
 
@@ -43,46 +39,6 @@ class StreamrClientService {
 			throw new IllegalStateException("StreamrClient instance has already been created. Call setClientClass() before calling getInstanceForThisEngineNode()!")
 		}
 		clientConstructor = streamrClientClass.getConstructor(StreamrClientOptions)
-	}
-
-	/**
-	 * Returns a StreamrClient instance, authenticated with one of the provided user's
-	 * integration keys. This method fetches from the centralized database an integration key to be
-	 * used with the StreamrClient.
-	 *
-	 * Whoever calls this should take care of closing the client when it is no longer needed.
-	 */
-	StreamrClient getAuthenticatedInstance(Long userIdToAuthenticate) {
-		// Uses superpowers to get an integration key for the user to authenticate the data
-		IntegrationKey integrationKey = getIntegrationKeyForUser(userIdToAuthenticate)
-		String privateKey = ethereumIntegrationKeyService.decryptPrivateKey(integrationKey)
-		return createInstance(new EthereumAuthenticationMethod(privateKey))
-	}
-
-	/**
-	 * Returns an IntegrationKey for the given user. This is used
-	 * by Canvases to subscribe to the Streams required by the Canvas.
-	 *
-	 * Currently, the first returned integration key is chosen. It would be better
-	 * if the user could specify which key to use to run their Canvases
-	 * by marking one key as "default", or offering a choice
-	 * in Canvas run settings.
-	 */
-	private IntegrationKey getIntegrationKeyForUser(Long userId) {
-		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
-			eq("service", IntegrationKey.Service.ETHEREUM)
-			user {
-				idEq(userId)
-			}
-			order("id", "asc") // just to get deterministic results
-		}
-		if (!keys.isEmpty()) {
-			return keys[0]
-		} else {
-			User user = User.get(userId)
-			String privateKey = PrivateKeyGenerator.generate()
-			return ethereumIntegrationKeyService.createEthereumAccount(user, "Auto-generated key", privateKey)
-		}
 	}
 
 	/**

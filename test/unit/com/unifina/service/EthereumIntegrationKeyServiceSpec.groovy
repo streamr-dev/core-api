@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.unifina.domain.IntegrationKey
 import com.unifina.domain.SignupMethod
 import com.unifina.domain.User
@@ -9,7 +8,6 @@ import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import groovy.json.JsonSlurper
-import spock.lang.Shared
 import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin)
@@ -17,8 +15,6 @@ import spock.lang.Specification
 @Mock([IntegrationKey, User])
 class EthereumIntegrationKeyServiceSpec extends Specification {
 
-	@Shared
-	String actualPassword
 	User me
 
 	ChallengeService challengeService
@@ -26,108 +22,12 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 	SubscriptionService subscriptionService
 	PermissionService permissionService
 
-	void setupSpec() {
-		actualPassword = grailsApplication.config.streamr.encryption.password
-		grailsApplication.config.streamr.encryption.password = "password"
-	}
-
-	void cleanupSpec() {
-		grailsApplication.config.streamr.encryption.password = actualPassword
-	}
-
 	void setup() {
 		me = new User(username: "me@me.com").save(failOnError: true, validate: false)
-		service.init()
 		challengeService = service.challengeService = Mock(ChallengeService)
 		userService = service.userService = Mock(UserService)
 		subscriptionService = service.subscriptionService = Mock(SubscriptionService)
 		permissionService = service.permissionService = Mock(PermissionService)
-	}
-
-	void "init() without grailsConfig streamr.encryption.password throws IllegalArgumentException"() {
-		when:
-		grailsApplication.config.streamr.encryption.password = null
-		service.init()
-
-		then:
-		def e = thrown(IllegalArgumentException)
-		e.message =~ "streamr.encryption.password"
-
-		cleanup:
-		grailsApplication.config.streamr.encryption.password = "password"
-	}
-
-	void "createEthereumAccount throws IllegalArgumentException when given non-hex private key"() {
-		when:
-		service.createEthereumAccount(me, "ethKey", "THIS IS NOT A PRIVATE KEY")
-
-		then:
-		def e = thrown(IllegalArgumentException)
-		e.message == "The private key must be a hex string of 64 chars (without the 0x prefix)."
-	}
-
-	void "createEthereumAccount creates expected integration key"() {
-		when:
-		def integrationKey = service.createEthereumAccount(me,
-			"ethKey",
-			"    " + "fa7d31d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361365" + "	 "
-		)
-
-		then:
-		integrationKey.toMap() == [
-			id     : "1",
-			user   : 1,
-			name   : "ethKey",
-			service: "ETHEREUM",
-			json   : [
-				address: "0xf4f683a8502b2796392bedb05dbbcc8c6e582e59"
-			]
-		]
-	}
-
-	void "createEthereumAccount encrypts private key"() {
-		when:
-		def integrationKey = service.createEthereumAccount(me,
-			"ethKey",
-			"    " + "fa7d31d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361365" + "	 "
-		)
-		Map json = new JsonSlurper().parseText(integrationKey.json)
-
-		then:
-		json.containsKey("privateKey")
-		json.privateKey != "fa7d31d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361365"
-
-	}
-
-	void "decryptPrivateKey provides clear text private key from IntegrationKey"() {
-		def integrationKey = service.createEthereumAccount(me,
-			"ethKey",
-			"    " + "fa7d31d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361365" + "	 "
-		)
-
-		expect:
-		service.decryptPrivateKey(integrationKey) == "fa7d31d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361365"
-	}
-
-	void "getAllKeysForUser fetches all Ethereum keys for user"() {
-		def other = new User(username: "other@other.com").save(failOnError: true, validate: false)
-		def k1 = service.createEthereumAccount(me,
-			"ethKey 1",
-			"    " + "fa7d31d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361365" + "	 "
-		)
-		def k2 = service.createEthereumAccount(me,
-			"ethKey 2",
-			"    " + "fa7d31d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361366" + "	 "
-		)
-		def k3 = service.createEthereumAccount(other,
-			"ethKey 3",
-			"    " + "fa7d41d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361367" + "	 "
-		)
-
-		when:
-		def keys = service.getAllPrivateKeysForUser(me)
-		then:
-		keys == [k1, k2]
 	}
 
 	void "createEthereumID() creates IntegrationKey with proper values"() {

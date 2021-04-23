@@ -1,12 +1,11 @@
 package com.unifina.service;
 
 import com.streamr.client.StreamrClient;
-import com.unifina.domain.Stream;
-import com.unifina.domain.StreamStorageNode;
 import com.unifina.domain.EthereumAddress;
 import org.apache.log4j.Logger;
-import java.util.Map;
+
 import java.util.HashMap;
+import java.util.Map;
 
 final class NotifyStorageNodeTask extends Thread {
 
@@ -32,6 +31,7 @@ final class NotifyStorageNodeTask extends Thread {
 		this.streamrClientService = streamrClientService;
 	}
 
+	@Override
 	public void run() {
 		StreamrClient client = streamrClientService.getInstanceForThisEngineNode();
 		try {
@@ -42,10 +42,10 @@ final class NotifyStorageNodeTask extends Thread {
 		}
 	}
 
-	private Map<String,Object> createMessage() {
-		Map<String,Object> message = new HashMap();
+	private Map<String, Object> createMessage() {
+		Map<String, Object> message = new HashMap<>();
 		message.put("event", eventType.name());
-		Map<String,Object> stream = new HashMap();
+		Map<String, Object> stream = new HashMap<>();
 		stream.put("id", streamId);
 		stream.put("partitions", streamService.getStream(streamId).getPartitions());
 		message.put("stream", stream);

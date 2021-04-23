@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.unifina.domain.*
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.JSONUtil
@@ -109,7 +108,7 @@ class StreamService {
 			user {
 				'in'("id", writers*.id)
 			}
-			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
+			'in'("service", [IntegrationKey.Service.ETHEREUM_ID])
 		}
 
 		return keys*.idInService*.toLowerCase() as Set
@@ -134,7 +133,7 @@ class StreamService {
 			user {
 				'in'("id", readers*.id)
 			}
-			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
+			'in'("service", [IntegrationKey.Service.ETHEREUM_ID])
 		}
 
 		return keys*.idInService*.toLowerCase() as Set

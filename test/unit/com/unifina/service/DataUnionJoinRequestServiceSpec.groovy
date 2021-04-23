@@ -1,10 +1,10 @@
 package com.unifina.service
 
 import com.streamr.client.StreamrClient
+import com.streamr.client.dataunion.DataUnion
+import com.streamr.client.dataunion.DataUnionClient
 import com.streamr.client.dataunion.EthereumTransactionReceipt
 import com.streamr.client.options.StreamrClientOptions
-import com.streamr.client.dataunion.DataUnionClient
-import com.streamr.client.dataunion.DataUnion
 import com.unifina.BeanMockingSpecification
 import com.unifina.domain.*
 import grails.test.mixin.Mock
@@ -52,7 +52,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		IntegrationKey key = new IntegrationKey(
 			name: "Key name",
 			user: me,
-			service: IntegrationKey.Service.ETHEREUM,
+			service: IntegrationKey.Service.ETHEREUM_ID,
 			json: "{}",
 			idInService: memberAddress,
 		)
@@ -82,7 +82,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		e.code == "NOT_FOUND"
 	}
 
-    void "create supplied with correct secret"() {
+	void "create supplied with correct secret"() {
 		setup:
 		DataUnionJoinRequestCommand cmd = new DataUnionJoinRequestCommand(
 			memberAddress: memberAddress,
@@ -93,7 +93,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		notFoundStats.statusCode = 404
 		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
 		okStats.statusCode = 200
-		okStats.body =  new JsonBuilder([
+		okStats.body = new JsonBuilder([
 			active: true,
 		]).toString()
 
@@ -106,7 +106,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> okStats
 		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
 		c.state == DataUnionJoinRequest.State.ACCEPTED
-    }
+	}
 
 	void "create supplied without secret"() {
 		setup:
@@ -153,7 +153,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		Stream s2 = new Stream(name: "stream-2")
 		Stream s3 = new Stream(name: "stream-3")
 		Stream s4 = new Stream(name: "stream-4")
-		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i+1}" } // assign ids
+		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i + 1}" } // assign ids
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: false)
 
 		Category category = new Category(name: "Category")
@@ -181,7 +181,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		notFoundStats.statusCode = 404
 		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
 		okStats.statusCode = 200
-		okStats.body =  new JsonBuilder([
+		okStats.body = new JsonBuilder([
 			active: true,
 		]).toString()
 
@@ -217,7 +217,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		Stream s2 = new Stream(name: "stream-2")
 		Stream s3 = new Stream(name: "stream-3")
 		Stream s4 = new Stream(name: "stream-4")
-		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i+1}" } // assign ids
+		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i + 1}" } // assign ids
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: false)
 
 		Category category = new Category(name: "Category")
@@ -245,7 +245,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		notFoundStats.statusCode = 404
 		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
 		okStats.statusCode = 200
-		okStats.body =  new JsonBuilder([
+		okStats.body = new JsonBuilder([
 			active: true,
 		]).toString()
 
@@ -277,7 +277,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		Stream s2 = new Stream(name: "stream-2")
 		Stream s3 = new Stream(name: "stream-3")
 		Stream s4 = new Stream(name: "stream-4")
-		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i+1}" } // assign ids
+		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i + 1}" } // assign ids
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: false)
 
 		Category category = new Category(name: "Category")
@@ -302,7 +302,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		product.save(failOnError: true, validate: true)
 
 		when:
-		Set<Stream> streams = service.findStreams(new DataUnionJoinRequest(contractAddress:  contractAddress))
+		Set<Stream> streams = service.findStreams(new DataUnionJoinRequest(contractAddress: contractAddress))
 		then:
 		streams.size() == 3
 		streams.contains(s1)
@@ -345,7 +345,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		Stream s2 = new Stream(name: "stream-2")
 		Stream s3 = new Stream(name: "stream-3")
 		Stream s4 = new Stream(name: "stream-4")
-		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i+1}" } // assign ids
+		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i + 1}" } // assign ids
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: false)
 
 		Category category = new Category(name: "Category")
@@ -411,7 +411,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		Stream s2 = new Stream(name: "stream-2")
 		Stream s3 = new Stream(name: "stream-3")
 		Stream s4 = new Stream(name: "stream-4")
-		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i+1}" } // assign ids
+		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i + 1}" } // assign ids
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: false)
 
 		Category category = new Category(name: "Category")
@@ -451,7 +451,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 
 		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
 		okStats.statusCode = 200
-		okStats.body =  new JsonBuilder([
+		okStats.body = new JsonBuilder([
 			active: true,
 		]).toString()
 
@@ -459,7 +459,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		service.update(contractAddress, r.id, cmd)
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >>  {
+		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> {
 			throw new DataUnionProxyException("mocked exception")
 		}
 		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> okStats
@@ -483,7 +483,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		Stream s2 = new Stream(name: "stream-2")
 		Stream s3 = new Stream(name: "stream-3")
 		Stream s4 = new Stream(name: "stream-4")
-		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i+1}" } // assign ids
+		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i + 1}" } // assign ids
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: false)
 
 		Category category = new Category(name: "Category")
@@ -550,7 +550,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		Stream s2 = new Stream(name: "stream-2")
 		Stream s3 = new Stream(name: "stream-3")
 		Stream s4 = new Stream(name: "stream-4")
-		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i+1}" } // assign ids
+		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i + 1}" } // assign ids
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: false)
 
 		Category category = new Category(name: "Category")
@@ -592,7 +592,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		notFoundStats.statusCode = 404
 		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
 		okStats.statusCode = 200
-		okStats.body =  new JsonBuilder([
+		okStats.body = new JsonBuilder([
 			active: true,
 		]).toString()
 
@@ -622,7 +622,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		Stream s2 = new Stream(name: "stream-2")
 		Stream s3 = new Stream(name: "stream-3")
 		Stream s4 = new Stream(name: "stream-4")
-		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i+1}" } // assign ids
+		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i + 1}" } // assign ids
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: false)
 
 		Category category = new Category(name: "Category")
@@ -665,7 +665,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		notFoundStats.statusCode = 404
 		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
 		okStats.statusCode = 200
-		okStats.body =  new JsonBuilder([
+		okStats.body = new JsonBuilder([
 			active: true,
 		]).toString()
 
