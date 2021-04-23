@@ -2,8 +2,8 @@ import fetch from 'node-fetch'
 import url from 'url'
 import querystring from 'querystring'
 import FormData from 'form-data'
-import { getSessionToken } from './test-utilities'
-import { EthereumAccount } from './EthereumAccount'
+import {getSessionToken} from './test-utilities'
+import {EthereumAccount} from './EthereumAccount'
 
 class StreamrApiRequest {
 
@@ -36,7 +36,7 @@ class StreamrApiRequest {
         return this
     }
 
-    withAuthenticatedUser(authenticatedUser: EthereumAccount|undefined) {
+    withAuthenticatedUser(authenticatedUser: EthereumAccount | undefined) {
         this.authenticatedUser = authenticatedUser
         return this
     }
@@ -304,49 +304,6 @@ class Streams {
     }
 }
 
-class Canvases {
-
-    options: any
-
-    constructor(options: any) {
-        this.options = options
-    }
-
-    create(body: any) {
-        return new StreamrApiRequest(this.options)
-            .method('POST')
-            .endpoint('canvases')
-            .withBody(body)
-    }
-
-    get(id: string) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('canvases', id)
-    }
-
-    start(id: string) {
-        return new StreamrApiRequest(this.options)
-            .method('POST')
-            .endpoint('canvases', id, 'start')
-    }
-
-    stop(id: string) {
-        return new StreamrApiRequest(this.options)
-            .method('POST')
-            .endpoint('canvases', id, 'stop')
-    }
-
-    getRuntimeState(id: string, path: string) {
-        return new StreamrApiRequest(this.options)
-            .method('POST')
-            .endpoint('canvases', id, path, 'request')
-            .withBody({
-                type: 'json',
-            })
-    }
-}
-
 class Subscriptions {
 
     options: any
@@ -481,7 +438,6 @@ const options = {
 export default {
     api: {
         v1: {
-            canvases: new Canvases(options),
             categories: new Categories(options),
             integration_keys: new IntegrationKeys(options),
             products: new Products(options),

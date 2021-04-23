@@ -2,7 +2,6 @@ package com.unifina.controller
 
 import com.unifina.service.ApiError
 import com.unifina.service.ApiException
-import com.unifina.service.CanvasUnreachableException
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
@@ -27,26 +26,6 @@ class ErrorControllerSpec extends Specification {
 		then:
 		response.status == 404
 		response.json == [code: "TEST_CODE", message: "test message"]
-	}
-
-	void "Some exceptions can have special rendering"() {
-		when:
-		request.exception = new Exception(new CanvasUnreachableException())
-		controller.index()
-
-		then:
-		response.status == 500
-		response.json.code == "CANVAS_UNREACHABLE"
-	}
-
-	void "Use the top-level exception if no cause is given"() {
-		when:
-		request.exception = new CanvasUnreachableException()
-		controller.index()
-
-		then:
-		response.status == 500
-		response.json.code == "CANVAS_UNREACHABLE"
 	}
 
 	void "Must catch exceptions that occur during rendering of an error"() {
