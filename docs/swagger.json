@@ -1250,7 +1250,7 @@
     "/products/{id}/setDeploying": {
       "post": {
         "summary": "Transition Product to state DEPLOYING",
-        "description": "Inform engine-and-editor that a Product has moved from state `NOT_DEPLOYED` to `DEPLOYING`. Should be called after transaction to submit product to marketplace has been sent to Ethereum.",
+        "description": "Inform core-api that a Product has moved from state `NOT_DEPLOYED` to `DEPLOYING`. Should be called after transaction to submit product to marketplace has been sent to Ethereum.",
         "tags": [
           "products"
         ],
@@ -1324,7 +1324,7 @@
     "/products/{id}/setDeployed": {
       "post": {
         "summary": "Transition Product to state DEPLOYED",
-        "description": "Idempotent operation that informs engine-and-editor that a Product has moved from state `NOT_DEPLOYED` / `DEPLOYING` to `DEPLOYED`. Called by *Marketplace Watcher* after it notices that a Product has been added to the marketplace smart contract. Also updates Blockchain-specific information of the Product.",
+        "description": "Idempotent operation that informs core-api that a Product has moved from state `NOT_DEPLOYED` / `DEPLOYING` to `DEPLOYED`. Called by *Marketplace Watcher* after it notices that a Product has been added to the marketplace smart contract. Also updates Blockchain-specific information of the Product.",
         "tags": [
           "products"
         ],
@@ -1419,7 +1419,7 @@
     "/products/{id}/setUndeploying": {
       "post": {
         "summary": "Transition Product to state UNDEPLOYING",
-        "description": "Inform engine-and-editor that a Product has moved from state `DEPLOYED` to `UNDEPLOYING`. Should be called after transaction to remove product from marketplace has been sent to Ethereum.",
+        "description": "Inform core-api that a Product has moved from state `DEPLOYED` to `UNDEPLOYING`. Should be called after transaction to remove product from marketplace has been sent to Ethereum.",
         "tags": [
           "products"
         ],
@@ -1493,7 +1493,7 @@
     "/products/{id}/setUndeployed": {
       "post": {
         "summary": "Transition Product to state NOT_DEPLOYED",
-        "description": "Idempotent operation that informs engine-and-editor that a Product has moved from state `DEPLOYED` / `UNDEPLOYING` to `NOT_DEPLOYED`. Called by *Marketplace Watcher* after it notices that a Product has been removed from the marketplace contract.",
+        "description": "Idempotent operation that informs core-api that a Product has moved from state `DEPLOYED` / `UNDEPLOYING` to `NOT_DEPLOYED`. Called by *Marketplace Watcher* after it notices that a Product has been removed from the marketplace contract.",
         "tags": [
           "products"
         ],
@@ -2792,8 +2792,8 @@
         }
       },
       "post": {
-        "summary": "Purchase free Product / Inform engine-and-editor of Product purchase",
-        "description": "If not given field 'address', assumes user is purchasing a *free Product*. If field 'address' is given, is an idempotent operation that informs engine-and-editor that a *paid Product* has been purchased and is called by Marketplace Watcher. In both cases creates or updates an existing Subscription and related Permissions.",
+        "summary": "Purchase free Product / Inform core-api of Product purchase",
+        "description": "If not given field 'address', assumes user is purchasing a *free Product*. If field 'address' is given, is an idempotent operation that informs core-api that a *paid Product* has been purchased and is called by Marketplace Watcher. In both cases creates or updates an existing Subscription and related Permissions.",
         "tags": [
           "subscriptions"
         ],

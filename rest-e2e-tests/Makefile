@@ -35,24 +35,24 @@ node_modules: ## Run 'npm ci' if directory doesn't exist
 
 vendor: node_modules ## Install source code packages
 
-engine_status_check_url := http://localhost:8081/streamr-core/api/v1/users/me
+core_api_status_check_url := http://localhost:8081/streamr-core/api/v1/users/me
 .PHONY: test/server/wait
 test/server/wait: ## Wait for server to come online
 	export i=1
 	while true; do
-		http_code=$$(curl --silent --max-time 1 --output /dev/null --write-out "%{http_code}" $(engine_status_check_url)) || true
+		http_code=$$(curl --silent --max-time 1 --output /dev/null --write-out "%{http_code}" $(core_api_status_check_url)) || true
 		if [ "$$http_code" -eq 401 ]; then
-			echo "test/server/wait: $$(date -u) engine up and running"
+			echo "test/server/wait: $$(date -u) core-api up and running"
 			break
 		else
-			echo "test/server/wait: $$(date -u) engine responding with HTTP status code $$http_code at $(engine_status_check_url)"
+			echo "test/server/wait: $$(date -u) core-api responding with HTTP status code $$http_code at $(core_api_status_check_url)"
 			if [ "$$http_code" -eq 000 ]; then
 				sleep 3
 			fi
 		fi
 		i=$$(expr $$i + 1)
 		if [ $$i -eq 70 ]; then
-			echo "test/server/wait: timeout while waiting for engine to come online" 1>&2
+			echo "test/server/wait: timeout while waiting for core-api to come online" 1>&2
 			exit 1
 		fi
 	done

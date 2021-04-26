@@ -1,6 +1,6 @@
 # Streamr Engine and Editor
 
-![CI & CD](https://github.com/streamr-dev/engine-and-editor/workflows/CI%20&%20CD/badge.svg)
+![CI & CD](https://github.com/streamr-dev/core-api/workflows/CI%20&%20CD/badge.svg)
 
 Web application containing the backend for Streamr Core, facilitating things like:
 
@@ -50,12 +50,12 @@ make run
 
 ## CI
 
-The project uses [GitHub Actions](https://github.com/streamr-dev/engine-and-editor/actions) to automatically run tests for each
+The project uses [GitHub Actions](https://github.com/streamr-dev/core-api/actions) to automatically run tests for each
 commit to `master` and pull requests.
 
 ## Docker
 
-A [Docker image](https://hub.docker.com/r/streamr/engine-and-editor/) is automatically built and pushed to DockerHub
+A [Docker image](https://hub.docker.com/r/streamr/core-api/) is automatically built and pushed to DockerHub
 when commits are pushed to branch `master`.
 
 ## IDE

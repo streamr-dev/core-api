@@ -50,8 +50,8 @@ test-stress:
 
 .PHONY: idea
 idea: ## Generate IntelliJ IDEA project files
-	cp .idea/engine-and-editor.iml.copy .idea/engine-and-editor.iml
-	cp .idea/engine-and-editor-grailsPlugins.iml.copy .idea/engine-and-editor-grailsPlugins.iml
+	cp .idea/core-api.iml.copy .idea/core-api.iml
+	cp .idea/core-api-grailsPlugins.iml.copy .idea/core-api-grailsPlugins.iml
 	$(grails) idea-print-project-settings
 
 .PHONY: compile
@@ -82,12 +82,12 @@ services := mysql redis cassandra parity-node0 parity-sidechain-node0 bridge dat
 .PHONY: start
 start: ## Run streamr-docker-dev start ...
 	streamr-docker-dev start $(services)
-	streamr-docker-dev stop engine-and-editor
+	streamr-docker-dev stop core-api
 
 .PHONY: start-wait
 start-wait: ## Run streamr-docker-dev start ... --wait
 	streamr-docker-dev start $(services) --wait
-	streamr-docker-dev stop engine-and-editor
+	streamr-docker-dev stop core-api
 
 .PHONY: stop
 stop: ## Run streamr-docker-dev stop
@@ -164,15 +164,15 @@ docker-build-dev: ## Build Docker dev container
 		--no-cache \
 		--progress=plain \
 		--build-arg GRAILS_WAR_ENV=test \
-		--tag streamr/engine-and-editor:dev .
+		--tag streamr/core-api:dev .
 
 .PHONY: docker-push-dev
 docker-push-dev: docker-build-dev ## Push Docker dev container to registry
-	docker push docker.io/streamr/engine-and-editor:dev
+	docker push docker.io/streamr/core-api:dev
 
 .PHONY: docker-run-dev
 docker-run-dev: ## Run Docker dev container locally
-	docker run -i -t -d --rm -p 8081:8081/tcp streamr/engine-and-editor:dev
+	docker run -i -t -d --rm -p 8081:8081/tcp streamr/core-api:dev
 
 # Auxiliary recipes
 
