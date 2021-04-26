@@ -9,16 +9,14 @@ import javax.servlet.http.HttpServletResponse
 class ErrorController {
 
 	static final Map<String, Closure<ApiError>> errorMappings = [
-		InvalidStateException               : { InvalidStateException e -> new ApiError(500, "STATE_NOT_ALLOWED", e.message) },
-		ValidationException                 : validationException(),
-		CanvasUnreachableException          : { CanvasUnreachableException e -> new ApiError(500, "CANVAS_UNREACHABLE", e.message) },
-		CanvasCommunicationException        : { CanvasCommunicationException e -> new ApiError(503, "CANVAS_COMMUNICATION_ERROR", e.message) },
-		CannotRemoveEthereumKeyException    : { CannotRemoveEthereumKeyException e -> new ApiError(409, "ETHEREUM_KEY_REMOVAL_ERROR", e.message) },
-		InvalidSessionTokenException        : { InvalidSessionTokenException e -> new ApiError(401, "INVALID_SESSION_TOKEN_ERROR", e.message) },
+		InvalidStateException: { InvalidStateException e -> new ApiError(500, "STATE_NOT_ALLOWED", e.message) },
+		ValidationException: validationException(),
+		CannotRemoveEthereumKeyException: { CannotRemoveEthereumKeyException e -> new ApiError(409, "ETHEREUM_KEY_REMOVAL_ERROR", e.message) },
+		InvalidSessionTokenException: { InvalidSessionTokenException e -> new ApiError(401, "INVALID_SESSION_TOKEN_ERROR", e.message) },
 		ChallengeVerificationFailedException: { ChallengeVerificationFailedException e -> new ApiError(401, "CHALLENGE_VERIFICATION_FAILED_ERROR", e.message) },
-		DisabledUserException               : { DisabledUserException e -> new ApiError(401, "DISABLED_USER_EXCEPTION", e.message) },
-		BadRequestException                 : { BadRequestException e -> new ApiError(400, "PARAMETER_MISSING", e.message) },
-		FieldCannotBeUpdatedException       : { FieldCannotBeUpdatedException e -> new ApiError(422, "FIELD_CANNOT_BE_UPDATED", e.message) }
+		DisabledUserException: { DisabledUserException e -> new ApiError(401, "DISABLED_USER_EXCEPTION", e.message) },
+		BadRequestException: { BadRequestException e -> new ApiError(400, "PARAMETER_MISSING", e.message) },
+		FieldCannotBeUpdatedException: { FieldCannotBeUpdatedException e -> new ApiError(422, "FIELD_CANNOT_BE_UPDATED", e.message) }
 	]
 
 	private static Closure<ApiError> validationException() {

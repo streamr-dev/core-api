@@ -32,11 +32,7 @@ class Resource {
 	}
 
 	String type() {
-		if (Canvas.isAssignableFrom(clazz)) {
-			return "Canvas"
-		} else if (Dashboard.isAssignableFrom(clazz)) {
-			return "Dashboard"
-		} else if (Product.isAssignableFrom(clazz)) {
+		if (Product.isAssignableFrom(clazz)) {
 			return "Product"
 		} else if (Stream.isAssignableFrom(clazz)) {
 			return "Stream"
@@ -46,11 +42,7 @@ class Resource {
 
 	Object load(User apiUser, boolean requireShareResourcePermission) {
 		Object resource
-		if (Canvas.isAssignableFrom(clazz)) {
-			resource = Canvas.get(idToString())
-		} else if (Dashboard.isAssignableFrom(clazz)) {
-			resource = Dashboard.get(idToString())
-		} else if (Product.isAssignableFrom(clazz)) {
+		if (Product.isAssignableFrom(clazz)) {
 			resource = Product.get(idToString())
 		} else if (Stream.isAssignableFrom(clazz)) {
 			StreamService streamService = Holders.getApplicationContext().getBean(StreamService)

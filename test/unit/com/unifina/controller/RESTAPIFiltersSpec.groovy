@@ -33,15 +33,15 @@ class RESTAPIFiltersSpec extends BeanMockingSpecification {
 		when:
 		request.addHeader("Authorization", "Bearer " + USER_SESSION_TOKEN)
 		request.requestURI = "/api/v1/nodes"
-		withFilters(action: "index") {
-			controller.index()
+		withFilters(action: "config") {
+			controller.config()
 		}
 
 		then:
 		1 * sessionService.getUserishFromToken(USER_SESSION_TOKEN) >> user
 		response.status == 403
 		response.json == [
-			code   : "NOT_PERMITTED",
+			code: "NOT_PERMITTED",
 			message: "Not authorized to access this endpoint"
 		]
 	}
@@ -53,8 +53,8 @@ class RESTAPIFiltersSpec extends BeanMockingSpecification {
 		when:
 		request.addHeader("Authorization", "Bearer " + USER_SESSION_TOKEN)
 		request.requestURI = "/api/v1/nodes"
-		withFilters(action: "index") {
-			controller.index()
+		withFilters(action: "config") {
+			controller.config()
 		}
 
 		then:
@@ -67,8 +67,8 @@ class RESTAPIFiltersSpec extends BeanMockingSpecification {
 		new UserRole(user: user, role: adminRole).save(failOnError: true)
 		request.addHeader("Authorization", "Bearer " + USER_SESSION_TOKEN)
 		request.requestURI = "/api/v1/nodes"
-		withFilters(action: "index") {
-			controller.index()
+		withFilters(action: "config") {
+			controller.config()
 		}
 
 		then:

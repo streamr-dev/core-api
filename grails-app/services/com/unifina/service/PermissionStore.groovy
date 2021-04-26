@@ -75,7 +75,7 @@ class PermissionStore {
 	 * Get all resources of given type that the user has specified permission for
 	 */
 	def <T> List<T> get(Class<T> resourceClass, Userish userish, Permission.Operation op, boolean includeAnonymous,
-					Closure resourceFilter = {}) {
+		Closure resourceFilter = {}) {
 		userish = userish?.resolveToUserish()
 
 		if (!includeAnonymous && !userish?.id) {
@@ -94,7 +94,7 @@ class PermissionStore {
 
 	/**
 	 * Creates a criteria that can be included in the <code>BuildableCriteria</code> of a domain object
-	 * (Dashboard, Canvas, Stream etc.) to filter query results so that user has specified permission on
+	 * (Product, Stream etc.) to filter query results so that user has specified permission on
 	 * them.
 	 */
 	Closure createUserPermissionCriteria(Class resourceClass, Userish userish, Permission.Operation op, boolean includeAnonymous) {

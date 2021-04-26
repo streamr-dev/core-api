@@ -2,7 +2,7 @@ package com.unifina.service
 
 
 import com.unifina.domain.User
-import com.unifina.provider.FileUploadProvider
+import com.unifina.utils.FileUploadProvider
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.ImageResizer
 import com.unifina.utils.ImageVerifier
@@ -10,7 +10,7 @@ import grails.transaction.Transactional
 
 @Transactional
 class UserAvatarImageService {
-	private final long maxSize = 1024*1024*5
+	private final long maxSize = 1024 * 1024 * 5
 	FileUploadProvider fileUploadProvider
 	ImageVerifier imageVerifier = new ImageVerifier(maxSize)
 	IdGenerator idGenerator = new IdGenerator()
@@ -31,7 +31,7 @@ class UserAvatarImageService {
 		user.imageUrlSmall = smallImageUrl
 		user.imageUrlLarge = largeImageUrl
 		user.save(failOnError: true)
-    }
+	}
 
 	private String generateFilename(final String filename) {
 		if (filename.indexOf(".") == -1) {

@@ -1,4 +1,6 @@
-import com.unifina.domain.*
+import com.unifina.domain.Permission
+import com.unifina.domain.Product
+import com.unifina.domain.Stream
 
 class UrlMappings {
 	static mappings = {
@@ -8,15 +10,6 @@ class UrlMappings {
 		// API v1 url mappings
 		"/api/v1/signups"(method: "POST", controller: "authApi", action: "signup")
 		"/api/v1/users"(method: "POST", controller: "authApi", action: "register")
-
-		"/api/v1/canvases"(resources: "canvasApi", excludes: ["create", "edit"])
-		"/api/v1/canvases/$id/start"(controller: "canvasApi", action: "start")
-		"/api/v1/canvases/$id/startAsAdmin"(controller: "canvasApi", action: "startAsAdmin")
-		"/api/v1/canvases/$id/stop"(controller: "canvasApi", action: "stop")
-		"/api/v1/canvases/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Canvas }
-		"/api/v1/canvases/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Canvas }
-		"/api/v1/canvases/$canvasId/modules/$moduleId"(controller: "canvasApi", action: "module") // for internal use
-		"/api/v1/canvases/downloadCsv"(method: "GET", controller: "canvasApi", action: "downloadCsv")
 
 		"/api/v1/streams"(method: "GET", controller: "streamApi", action: "index")
 		"/api/v1/streams"(method: "POST", controller: "streamApi", action: "save")
@@ -37,17 +30,9 @@ class UrlMappings {
 		"/api/v1/streams/$streamId/storageNodes"(method: "POST", controller: "storageNodeApi", action: "addStorageNodeToStream")
 		"/api/v1/streams/$streamId/storageNodes/$storageNodeAddress"(method: "DELETE", controller: "storageNodeApi", action: "removeStorageNodeFromStream")
 
-		"/api/v1/dashboards"(resources: "dashboardApi", excludes: ["create", "edit"])
-		"/api/v1/dashboards/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Dashboard }
-		"/api/v1/dashboards/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Dashboard }
-
 		"/api/v1/permissions/cleanup"(method: "DELETE", controller: "permissionApi", action: "cleanup")
 
 		"/api/v1/metrics"(resources: "metricsApi")
-
-		"/api/v1/modules"(resources: "moduleApi")
-		"/api/v1/modules/$id/help"(controller: "moduleApi", action: "help")
-		"/api/v1/modules/$id"(controller: "moduleApi", action: "jsonGetModule")
 
 		"/api/v1/users/me"(method: "GET", controller: "userApi", action: "getUserInfo")
 		"/api/v1/users/me"(method: "PUT", controller: "userApi", action: "update")
@@ -58,13 +43,6 @@ class UrlMappings {
 		"/api/v1/users/me/balance"(method: "GET", controller: "userApi", action: "getCurrentUserBalance")
 
 		"/api/v1/integration_keys"(resources: "integrationKeyApi")
-
-		// for internal use, runtime requests to canvases
-		"/api/v1/canvases/($path**)/request"(controller: "canvasApi", action: "runtimeRequest")
-		// for internal use, runtime requests to canvases via dashboards
-		"/api/v1/dashboards/($path**)/request"(controller: "dashboardApi", action: "runtimeRequest")
-
-		"/api/v1/oembed"(controller: "oembedApi", action: "index")
 
 		"/api/v1/login/challenge/$address"(method: "POST", controller: "loginApi", action: "challenge")
 		"/api/v1/login/response"(method: "POST", controller: "loginApi", action: "response")
@@ -82,17 +60,7 @@ class UrlMappings {
 
 		"/api/v1/subscriptions"(resources: "subscriptionApi")
 
-		"/api/v1/nodes"(method: "GET", controller: "nodeApi", action: "index")
-		"/api/v1/nodes/ip"(method: "GET", controller: "nodeApi", action: "ip")
 		"/api/v1/nodes/config"(method: "GET", controller: "nodeApi", action: "config")
-		"/api/v1/nodes/shutdown"(method: "POST", controller: "nodeApi", action: "shutdown")
-		"/api/v1/nodes/canvases"(method: "GET", controller: "nodeApi", action: "canvases")
-		"/api/v1/nodes/canvases/sizes"(method: "GET", controller: "nodeApi", action: "canvasSizes")
-		"/api/v1/nodes/$nodeIp/config"(method: "GET", controller: "nodeApi", action: "configNode")
-		"/api/v1/nodes/$nodeIp/shutdown"(method: "POST", controller: "nodeApi", action: "shutdownNode")
-		"/api/v1/nodes/$nodeIp/canvases"(method: "GET", controller: "nodeApi", action: "canvasesNode")
-
-		"/api/v1/cluster/$action"(controller: "clusterApi")
 
 		"/api/v1/dataunions/$contractAddress/joinRequests"(resources: "dataUnionJoinRequestApi", excludes: ["create", "edit"])
 		"/api/v1/dataunions/$contractAddress/secrets"(resources: "dataUnionSecretApi", excludes: ["create", "edit"])

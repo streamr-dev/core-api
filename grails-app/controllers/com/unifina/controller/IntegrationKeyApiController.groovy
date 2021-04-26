@@ -23,30 +23,21 @@ class IntegrationKeyApiController {
 	@StreamrApi
 	def save(SaveIntegrationKeyCommand cmd) {
 		switch (cmd.service as IntegrationKey.Service) {
-			case IntegrationKey.Service.ETHEREUM:
-				IntegrationKey key
-				try {
-					key = ethereumIntegrationKeyService.createEthereumAccount(apiUser(), cmd.name, cmd.json.privateKey)
-				} catch (IllegalArgumentException e) {
-					throw new ApiException(400, "INVALID_HEX_STRING", e.message)
-				}
-				render key.toMap() as JSON
-				break
 			case IntegrationKey.Service.ETHEREUM_ID:
 				IntegrationKey key = ethereumIntegrationKeyService.createEthereumID(apiUser(), cmd.name, cmd.challenge.id, cmd.challenge.challenge, cmd.signature)
 				response.status = 201
 				Map json = new JsonSlurper().parseText(key.json)
 				render([
-					id       : key.id,
+					id: key.id,
 					challenge: [
-						id       : cmd.challenge.id,
+						id: cmd.challenge.id,
 						challenge: cmd.challenge.challenge
 					],
 					json: [
 						address: json.address
 					],
-					name     : cmd.name,
-					service  : IntegrationKey.Service.ETHEREUM_ID.toString(),
+					name: cmd.name,
+					service: IntegrationKey.Service.ETHEREUM_ID.toString(),
 					signature: cmd.signature
 				] as JSON)
 				break

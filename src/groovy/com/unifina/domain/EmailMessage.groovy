@@ -1,6 +1,5 @@
 package com.unifina.domain
 
-
 import grails.validation.Validateable
 import groovy.transform.ToString
 
@@ -20,12 +19,8 @@ class EmailMessage {
 	}
 
 	String resourceType() {
-		if (Canvas.isAssignableFrom(resource.clazz)) {
-			return "canvas"
-		} else if (Stream.isAssignableFrom(resource.clazz)) {
+		if (Stream.isAssignableFrom(resource.clazz)) {
 			return "stream"
-		} else if (Dashboard.isAssignableFrom(resource.clazz)) {
-			return "dashboard"
 		}
 		throw new IllegalArgumentException("Unexpected resource class: " + resourceClass)
 	}
@@ -45,12 +40,8 @@ class EmailMessage {
 	}
 
 	String link() {
-		if (Canvas.isAssignableFrom(resource.clazz)) {
-			return "/canvas/editor/" + resource.idToString()
-		} else if (Stream.isAssignableFrom(resource.clazz)) {
+		if (Stream.isAssignableFrom(resource.clazz)) {
 			return "/core/stream/show/" + resource.idToString()
-		} else if (Dashboard.isAssignableFrom(resource.clazz)) {
-			return "/dashboard/editor/" + resource.idToString()
 		}
 		throw new IllegalArgumentException("Unexpected resource class: " + resource.clazz)
 	}

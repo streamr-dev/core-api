@@ -16,7 +16,7 @@ class EthereumIntegrationKeyServiceIntegrationSpec extends Specification {
 			user: me,
 			name: "name1",
 			json: "{}",
-			service: IntegrationKey.Service.ETHEREUM,
+			service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: ethAddr,
 		).save(failOnError: true, validate: true)
 
@@ -28,7 +28,7 @@ class EthereumIntegrationKeyServiceIntegrationSpec extends Specification {
 			user: other,
 			name: "name2",
 			json: "{}",
-			service: IntegrationKey.Service.ETHEREUM,
+			service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: "0xD14197f71fC9b2F4F4c24ecE461fB0Ff7C91FD266",
 		).save(failOnError: true, validate: true)
 

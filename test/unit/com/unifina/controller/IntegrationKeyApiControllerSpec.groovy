@@ -13,7 +13,7 @@ import grails.test.mixin.TestFor
 class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 	User me
-    User someoneElse
+	User someoneElse
 
 	def setup() {
 		me = new User().save(failOnError: true, validate: false)
@@ -22,7 +22,7 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 		new IntegrationKey(
 			name: "my-integration-key-1",
 			user: me,
-			service: IntegrationKey.Service.ETHEREUM,
+			service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: "0x0000000000000000000",
 			json: "{ address: '0x0000000000000000000' }"
 		).save(validate: true, failOnError: true)
@@ -36,7 +36,7 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 		new IntegrationKey(
 			name: "not-my-integration-key",
 			user: someoneElse,
-			service: IntegrationKey.Service.ETHEREUM,
+			service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: "0x0000000000000000000",
 			json: "{ address: '0x0000000000000000000' }"
 		).save(validate: true, failOnError: true)
@@ -58,7 +58,7 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 
 		then:
 		response.status == 200
-		response.json*.name == ["my-integration-key-2"]
+		response.json*.name == ["my-integration-key-1", "my-integration-key-2"]
 	}
 
 	def "create ethereum id"() {
@@ -73,30 +73,30 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "POST"
 		request.JSON = [
-			name     : "foobar",
-			service  : IntegrationKey.Service.ETHEREUM_ID.toString(),
+			name: "foobar",
+			service: IntegrationKey.Service.ETHEREUM_ID.toString(),
 			challenge: [
-				id       : challenge.getId(),
+				id: challenge.getId(),
 				challenge: challenge.getChallenge()
 			],
 			signature: signature,
-			account  : address
+			account: address
 		]
 		authenticatedAs(me) { controller.save() }
 
 		then:
 		response.status == 201
 		response.json == [
-			id		 : null,
+			id: null,
 			challenge: [
-				id       : challenge.getId(),
+				id: challenge.getId(),
 				challenge: challenge.getChallenge()
 			],
 			json: [
-				address  : address
+				address: address
 			],
-			name     : "foobar",
-			service  : IntegrationKey.Service.ETHEREUM_ID.toString(),
+			name: "foobar",
+			service: IntegrationKey.Service.ETHEREUM_ID.toString(),
 			signature: signature,
 		]
 		1 * ethereumIntegrationKeyService.createEthereumID(_, _, _, _, _) >> new IntegrationKey(
@@ -146,7 +146,7 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 		request.requestURI = "/api/v1/integration_keys/" + id
 		request.method = "PUT"
 		request.json = [
-		    name: "key's new name",
+			name: "key's new name",
 		]
 		request.apiUser = me
 		authenticatedAs(me) { controller.update(id) }

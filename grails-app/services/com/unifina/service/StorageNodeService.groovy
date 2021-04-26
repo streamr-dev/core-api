@@ -1,9 +1,8 @@
 package com.unifina.service
 
-import com.streamr.client.StreamrClient
+import com.unifina.domain.EthereumAddress
 import com.unifina.domain.Stream
 import com.unifina.domain.StreamStorageNode
-import com.unifina.domain.EthereumAddress
 import com.unifina.utils.ApplicationConfig
 import grails.compiler.GrailsCompileStatic
 
@@ -15,7 +14,7 @@ class StorageNodeService {
 
 	List<Stream> findStreamsByStorageNode(EthereumAddress storageNodeAddress) {
 		List<StreamStorageNode> items = StreamStorageNode.findAllByStorageNodeAddress(storageNodeAddress.toString())
-		Iterable<Serializable> streamIds = items.collect{ it.streamId } as Iterable<Serializable>
+		Iterable<Serializable> streamIds = items.collect { it.streamId } as Iterable<Serializable>
 		return Stream.getAll(streamIds)
 	}
 

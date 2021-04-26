@@ -6,7 +6,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 @TestFor(Product)
-@Mock(User)
+@Mock([User, Product, Stream])
 class ProductSpec extends Specification {
 	@Unroll
 	void "isEthereumAddress(#value) == #expected"(String value, Object expected) {
@@ -32,13 +32,13 @@ class ProductSpec extends Specification {
 
 	void "previewStream() validator passes if previewStream = null and streams empty"() {
 		def p = new Product(
-				name: "name",
-				description: "description",
-				ownerAddress: "0x0000000000000000000000000000000000000000",
-				beneficiaryAddress: "0x0000000000000000000000000000000000000000",
-				pricePerSecond: 1,
-				category: new Category(),
-				owner: Mock(User)
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			pricePerSecond: 1,
+			category: new Category(),
+			owner: Mock(User)
 		)
 		when:
 		p.validate()
@@ -51,14 +51,14 @@ class ProductSpec extends Specification {
 		s1.id = "1"
 
 		def p = new Product(
-				name: "name",
-				description: "description",
-				ownerAddress: "0x0000000000000000000000000000000000000000",
-				beneficiaryAddress: "0x0000000000000000000000000000000000000000",
-				pricePerSecond: 1,
-				category: new Category(),
-				previewStream: s1,
-				owner: Mock(User)
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			pricePerSecond: 1,
+			category: new Category(),
+			previewStream: s1,
+			owner: Mock(User)
 		)
 		when:
 		p.validate()
@@ -76,15 +76,15 @@ class ProductSpec extends Specification {
 		s3.id = "3"
 
 		def p = new Product(
-				name: "name",
-				description: "description",
-				ownerAddress: "0x0000000000000000000000000000000000000000",
-				beneficiaryAddress: "0x0000000000000000000000000000000000000000",
-				pricePerSecond: 1,
-				category: new Category(),
-				streams: [s1, s2],
-				previewStream: s3,
-				owner: Mock(User)
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			pricePerSecond: 1,
+			category: new Category(),
+			streams: [s1, s2],
+			previewStream: s3,
+			owner: Mock(User)
 		)
 		when:
 		p.validate()
@@ -102,15 +102,15 @@ class ProductSpec extends Specification {
 		s3.id = "3"
 
 		def p = new Product(
-				name: "name",
-				description: "description",
-				ownerAddress: "0x0000000000000000000000000000000000000000",
-				beneficiaryAddress: "0x0000000000000000000000000000000000000000",
-				pricePerSecond: 1,
-				category: new Category(),
-				streams: [s1, s2, s3],
-				previewStream: s3,
-				owner: Mock(User)
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			pricePerSecond: 1,
+			category: new Category(),
+			streams: [s1, s2, s3],
+			previewStream: s3,
+			owner: Mock(User)
 		)
 		when:
 		p.validate()
@@ -182,8 +182,8 @@ class ProductSpec extends Specification {
 
 		where:
 		price | expected
-		-1L | false
-		0L | true
-		1L | false
+		-1L   | false
+		0L    | true
+		1L    | false
 	}
 }

@@ -23,10 +23,6 @@ class Stream implements Comparable {
 	Date dateCreated
 	Date lastUpdated
 
-	Boolean uiChannel = false
-	String uiChannelPath
-	Canvas uiChannelCanvas
-
 	Boolean requireSignedData = false
 	// Stream requires data to be encrypted
 	Boolean requireEncryptedData = false
@@ -41,9 +37,11 @@ class Stream implements Comparable {
 
 	static hasMany = [
 		permissions: Permission,
-		products   : Product
+		products: Product
 	]
-	static mappedBy = [products: 'streams']
+	static mappedBy = [
+		products: 'streams',
+	]
 	// defines which field in Product maps back to Streams - need to define this explicitly because there is also previewStream
 	static belongsTo = Product
 
@@ -55,8 +53,6 @@ class Stream implements Comparable {
 		description(nullable: true, maxSize: 255)
 		firstHistoricalDay(nullable: true)
 		lastHistoricalDay(nullable: true)
-		uiChannelPath(nullable: true, maxSize: 1024)
-		uiChannelCanvas(nullable: true)
 		requireSignedData(nullable: false)
 		requireEncryptedData(nullable: false)
 		autoConfigure(nullable: false)
@@ -68,8 +64,6 @@ class Stream implements Comparable {
 	static mapping = {
 		id generator: 'assigned'
 		name index: "name_idx"
-		uiChannel defaultValue: "false"
-		uiChannelPath index: "ui_channel_path_idx"
 		config type: 'text'
 		requireSignedData defaultValue: "false"
 		requireEncryptedData defaultValue: "false"
@@ -87,18 +81,17 @@ class Stream implements Comparable {
 	@CompileStatic
 	Map toMap() {
 		[
-			id                      : id,
-			partitions              : partitions,
-			name                    : name,
-			config                  : config == null || config.empty ? config : JSON.parse(config),
-			description             : description,
-			uiChannel               : uiChannel,
-			dateCreated             : dateCreated,
-			lastUpdated             : lastUpdated,
-			requireSignedData       : requireSignedData,
-			requireEncryptedData    : requireEncryptedData,
-			autoConfigure           : autoConfigure,
-			storageDays             : storageDays,
+			id: id,
+			partitions: partitions,
+			name: name,
+			config: config == null || config.empty ? config : JSON.parse(config),
+			description: description,
+			dateCreated: dateCreated,
+			lastUpdated: lastUpdated,
+			requireSignedData: requireSignedData,
+			requireEncryptedData: requireEncryptedData,
+			autoConfigure: autoConfigure,
+			storageDays: storageDays,
 			inactivityThresholdHours: inactivityThresholdHours,
 		]
 	}
@@ -106,16 +99,15 @@ class Stream implements Comparable {
 	@CompileStatic
 	Map toSummaryMap() {
 		[
-			id                  : id,
-			partitions          : partitions,
-			name                : name,
-			description         : description,
-			uiChannel           : uiChannel,
-			dateCreated         : dateCreated,
-			lastUpdated         : lastUpdated,
-			requireSignedData   : requireSignedData,
+			id: id,
+			partitions: partitions,
+			name: name,
+			description: description,
+			dateCreated: dateCreated,
+			lastUpdated: lastUpdated,
+			requireSignedData: requireSignedData,
 			requireEncryptedData: requireEncryptedData,
-			storageDays         : storageDays,
+			storageDays: storageDays,
 		]
 	}
 
@@ -125,11 +117,11 @@ class Stream implements Comparable {
 	@CompileStatic
 	Map toValidationMap() {
 		[
-			id                  : id,
-			partitions          : partitions,
-			requireSignedData   : requireSignedData,
+			id: id,
+			partitions: partitions,
+			requireSignedData: requireSignedData,
 			requireEncryptedData: requireEncryptedData,
-			storageDays         : storageDays,
+			storageDays: storageDays,
 		]
 	}
 
@@ -176,36 +168,5 @@ class Stream implements Comparable {
 
 			return latestDataTimestamp.before(threshold)
 		}
-	}
-
-	/**
-	 * Return true if this Stream is an UI Channel.
-	 */
-	@CompileStatic
-	boolean isUIChannel() {
-		return uiChannel && uiChannelCanvas != null && uiChannelPath != null
-	}
-
-	/**
-	 * Return module id parsed from uiChannelPath or throw an IllegalArgumentException on error.
-	 */
-	@CompileStatic
-	Integer parseModuleID() {
-		if (uiChannelPath == null) {
-			throw new IllegalArgumentException("Unable to parse module if from null uiChannelPath.")
-		}
-		String[] components = uiChannelPath.split("/")
-		if (components.length >= 5) {
-			try {
-				return Integer.parseInt(components[4])
-			} catch (NumberFormatException e) {
-				throw new IllegalArgumentException("Unable to parse module id from '" + components[4] + "'.")
-			}
-		}
-		throw new IllegalArgumentException("UI Channel path doesn't contain module id.")
-	}
-
-	public Integer getPartitions() {
-		return this.partitions
 	}
 }

@@ -17,13 +17,13 @@ class NewPermissionCommandSpec extends Specification {
 		expect:
 		cmd.validate() == expected
 		where:
-		testName|user|operation|expected
-		"happy"|"username@example.com"|"CANVAS_GET"|true
-		"op lowercase"|"username@example.com"|"canvas_get"|true
-		"wrong operation"|"username@example.com"|"xxxx"|false
-		"null user"|null|"CANVAS_GET"|false
-		"null operation"|"username@example.com"|null|false
-		"all null"|null|null|false
+		testName          | user                   | operation    | expected
+		"happy"           | "username@example.com" | "STREAM_GET" | true
+		"op lowercase"    | "username@example.com" | "stream_get" | true
+		"wrong operation" | "username@example.com" | "xxxx"       | false
+		"null user"       | null                   | "STREAM_GET" | false
+		"null operation"  | "username@example.com" | null         | false
+		"all null"        | null                   | null         | false
 	}
 
 	@Unroll
@@ -36,11 +36,11 @@ class NewPermissionCommandSpec extends Specification {
 		expect:
 		cmd.validate() == expected
 		where:
-		testName|anonymous|operation|expected
-		"happy"|true|"CANVAS_GET"|true
-		"null anonymoys"|null|"CANVAS_GET"|false
-		"null operation"|true|null|false
-		"all null"|null|null|false
+		testName         | anonymous | operation    | expected
+		"happy"          | true      | "STREAM_GET" | true
+		"null anonymoys" | null      | "STREAM_GET" | false
+		"null operation" | true      | null         | false
+		"all null"       | null      | null         | false
 	}
 
 	@Unroll
@@ -54,10 +54,10 @@ class NewPermissionCommandSpec extends Specification {
 		expect:
 		cmd.validate() == expected
 		where:
-		testName|user|anonymous|operation|expected
-		"happy"|"username@example.com"|false|"CANVAS_GET"|true
-		"anonymous and user defined"|"username@example.com"|true|"CANVAS_GET"|false
-		"only operation defined"|null|null|"CANVAS_GET"|false
-		"only null"|null|null|null|false
+		testName                     | user                   | anonymous | operation    | expected
+		"happy"                      | "username@example.com" | false     | "STREAM_GET" | true
+		"anonymous and user defined" | "username@example.com" | true      | "STREAM_GET" | false
+		"only operation defined"     | null                   | null      | "STREAM_GET" | false
+		"only null"                  | null                   | null      | null         | false
 	}
 }

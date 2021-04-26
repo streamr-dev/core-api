@@ -8,14 +8,14 @@ ifeq ($(filter oneshell,$(.FEATURES)),)
 $(error error: Your version of make ($(shell make -v|head -1|cut -f 3 -d ' ')) does not support .ONESHELL)
 endif
 
-LANG := en_US.UTF-8
-SHELL := bash
-.SHELLFLAGS := -eu -o pipefail -c # run '/bin/bash ... -c /bin/cmd'
+LANG = en_US.UTF-8
+SHELL = bash
+.SHELLFLAGS = -eu -o pipefail -c # run '/bin/bash ... -c /bin/cmd'
 .ONESHELL:
 .DELETE_ON_ERROR:
-.DEFAULT_GOAL := idea
+.DEFAULT_GOAL = idea
 
-grails := grails -plain-output
+grails = grails -plain-output
 
 # Testing recipes
 
@@ -178,10 +178,12 @@ docker-run-dev: ## Run Docker dev container locally
 
 .PHONY: clean
 clean: ## Remove all files created by this Makefile
-	rm -rf tomcat.8081/work
-	rm -rf target
-	rm -rf .slcache
-	rm -rf "$$HOME/.grails"
+	rm -rf \
+		dependencies.txt \
+		tomcat.8081/work \
+		target \
+		.slcache \
+		"$$HOME/.grails"
 	$(grails) clean-all
 	mkdir -p "$$HOME/.grails/scripts"
 

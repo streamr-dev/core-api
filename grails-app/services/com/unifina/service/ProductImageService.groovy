@@ -2,14 +2,14 @@ package com.unifina.service
 
 
 import com.unifina.domain.Product
-import com.unifina.provider.FileUploadProvider
+import com.unifina.utils.FileUploadProvider
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.ImageResizer
 import com.unifina.utils.ImageVerifier
 
 class ProductImageService {
 	FileUploadProvider fileUploadProvider
-	private final long maxSize = 1024*1024*5
+	private final long maxSize = 1024 * 1024 * 5
 	ImageVerifier imageVerifier = new ImageVerifier(maxSize)
 	IdGenerator idGenerator = new IdGenerator()
 	ImageResizer imageResizer = new ImageResizer()
@@ -30,6 +30,7 @@ class ProductImageService {
 		product.thumbnailUrl = newThumbnailUrl
 		product.save(failOnError: true)
 	}
+
 	private String generateFilename(final String filename) {
 		if (filename.indexOf(".") == -1) {
 			throw new ApiException(400, "FILE_EXT_UNDEFINED", "file extension is undefined")

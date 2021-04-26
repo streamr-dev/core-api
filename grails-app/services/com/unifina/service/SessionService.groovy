@@ -3,7 +3,9 @@ package com.unifina.service
 import com.unifina.domain.User
 import com.unifina.domain.Userish
 import org.apache.log4j.Logger
-import org.joda.time.DateTime
+
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 class SessionService {
 	static final int TOKEN_LENGTH = 64
@@ -29,11 +31,12 @@ class SessionService {
 	}
 
 	Userish getUserishFromToken(String token) throws InvalidSessionTokenException {
-		keyValueStoreService.resetExpiration(token, new DateTime().plusHours(TTL_HOURS).toDate())
+		Date date = Date.from(Instant.now().plus(TTL_HOURS, ChronoUnit.HOURS))
+		keyValueStoreService.resetExpiration(token, date)
 		String userishClassAndId = keyValueStoreService.get(token)
 
 		if (userishClassAndId == null) {
-			throw new InvalidSessionTokenException("Invalid token: "+token)
+			throw new InvalidSessionTokenException("Invalid token: " + token)
 		}
 		return stringToUserish(userishClassAndId)
 	}
@@ -44,7 +47,7 @@ class SessionService {
 
 	String userishToString(Userish u) {
 		if (u instanceof User) {
-			return "User"+u.id.toString()
+			return "User" + u.id.toString()
 		}
 		throw new InvalidArgumentsException("Unrecognized userish")
 	}

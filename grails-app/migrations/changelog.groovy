@@ -6,4 +6,5 @@ databaseChangeLog = {
 	include file: 'core/2021-04-15-remove-serialization.groovy'
 	include file: 'core/2021-04-20-remove-hostconfig.groovy'
 	include file: 'core/2021-04-20-remove-task.groovy'
+	include file: 'core/2021-04-20-remove-canvas-dashboard-module.groovy'
 }

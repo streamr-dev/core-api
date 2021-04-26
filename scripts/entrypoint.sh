@@ -24,7 +24,6 @@ CATALINA_OPTS="\
 	-Dstreamr.ethereum.networks.sidechain=$ETHEREUM_NETWORKS_SIDECHAIN \
 	-Dstreamr.ethereum.nodePrivateKey=$ETHEREUM_NODE_PRIVATE_KEY \
 	-Dstreamr.ethereum.ensRegistryContractAddress=$ETHEREUM_ENS_REGISTRY_CONTRACT_ADDRESS \
-	-Dstreamr.encryption.password=$STREAMR_ENCRYPTION_PASSWORD \
 "
 wait-for-it.sh "$DB_HOST:$DB_PORT" --timeout=300 \
 	&& while ! mysql --user="$DB_USER" --host="$DB_HOST" --password="$DB_PASS" "$DB_NAME" -e "SELECT 1;" 1>/dev/null; do echo "waiting for db"; sleep 1; done \

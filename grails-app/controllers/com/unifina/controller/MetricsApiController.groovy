@@ -11,19 +11,7 @@ class MetricsApiController {
 
 	@StreamrApi(allowRoles = AllowRole.DEVOPS)
 	def index() {
-		MetricsService.EventProcessingMetrics eventProcessingMetrics = metricsService.fetchEventProcessingMetrics()
 		render([
-			canvases: [
-				running: metricsService.numOfRunningCanvases(),
-				totalSerializedBytes: metricsService.bytesUsedByRunningCanvases(),
-			],
-			realTime: [
-				eventsPerSecond: eventProcessingMetrics.realTimeEventsPerSecond,
-				avgProcessingDelay: eventProcessingMetrics.realTimeAvgProcessingDelay,
-			],
-			historical: [
-			  eventsPerSecond: eventProcessingMetrics.historicalEventsPerSecond
-			],
 			numOfTomcatSessions: metricsService.numOfSessionsTomcat()
 		] as JSON)
 	}

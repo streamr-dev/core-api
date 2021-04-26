@@ -2,7 +2,7 @@ package com.unifina.service
 
 import com.unifina.domain.IntegrationKey
 import com.unifina.domain.User
-import com.unifina.signalpath.blockchain.Web3jHelper
+import com.unifina.utils.Web3jHelper
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
 import org.web3j.abi.datatypes.Address
@@ -41,7 +41,7 @@ class EthereumService {
 		IntegrationKey key = IntegrationKey.createCriteria().get {
 			eq("user", user)
 			eq("idInService", ethereumAddress, [ignoreCase: true])
-			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
+			'in'("service", [IntegrationKey.Service.ETHEREUM_ID])
 		}
 		return key != null
 	}

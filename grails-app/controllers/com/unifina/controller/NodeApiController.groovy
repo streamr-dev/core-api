@@ -1,41 +1,9 @@
 package com.unifina.controller
 
-import com.unifina.domain.Canvas
-import com.unifina.domain.User
-import com.unifina.service.ApiException
-import com.unifina.service.CanvasService
-import com.unifina.service.NodeService
-import com.unifina.service.SignalPathService
-import com.unifina.signalpath.SignalPath
-import com.unifina.signalpath.map.ValueSortedMap
-import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.util.Holders
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 class NodeApiController {
-	GrailsApplication grailsApplication
-	CanvasService canvasService
-	LinkGenerator grailsLinkGenerator
-	SignalPathService signalPathService
-	NodeService nodeService
-
-	NodeRequestDispatcher nodeRequestDispatcher = new NodeRequestDispatcher()
-
-
-	@GrailsCompileStatic
-	@StreamrApi(allowRoles = AllowRole.ADMIN)
-	def index() {
-		render(getStreamrNodes() as JSON)
-	}
-
-	@GrailsCompileStatic
-	@StreamrApi(allowRoles = AllowRole.ADMIN)
-	def ip() {
-		render([ip: nodeService.getIPAddress()] as JSON)
-	}
-
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def config() {
 		Map<String, Object> config = Holders.getFlatConfig()
@@ -52,84 +20,5 @@ class NodeApiController {
 			}
 		}
 		render(config as JSON)
-	}
-
-	@GrailsCompileStatic
-	@StreamrApi(allowRoles = AllowRole.ADMIN)
-	def canvases() {
-		Collection<Canvas> running = signalPathService.runningSignalPaths*.canvas
-		Collection<Canvas> shouldBeRunning = Canvas.findAllByStateAndServer(Canvas.State.RUNNING, nodeService.getIPAddress())
-
-		Map<String, Canvas> canvasById = (running + shouldBeRunning).collectEntries { Canvas c -> [(c.id): c] }
-
-		Collection<Canvas> areAndShouldBeRunning = (running*.id).intersect(shouldBeRunning*.id as Collection<String>)
-			.collect { canvasById.get(it) }
-		Collection<Canvas> areNotButShouldBeRunning = (shouldBeRunning*.id).minus(running*.id)
-			.collect { canvasById.get(it) }
-		Collection<Canvas> areButShouldNotBeRunning = (running*.id).minus(shouldBeRunning*.id)
-			.collect { canvasById.get(it) }
-
-		render([
-			ok: areAndShouldBeRunning*.toMap(),
-			shouldBeRunning: areNotButShouldBeRunning*.toMap(),
-			shouldNotBeRunning: areButShouldNotBeRunning*.toMap()
-		] as JSON)
-	}
-
-	@StreamrApi(allowRoles = AllowRole.ADMIN)
-	def canvasSizes() {
-		def sizePerCanvas = new ValueSortedMap(true)
-		signalPathService.runningSignalPaths.each { SignalPath sp ->
-		}
-		render(sizePerCanvas as JSON)
-	}
-
-	@GrailsCompileStatic
-	@StreamrApi(allowRoles = AllowRole.ADMIN)
-	def shutdown() {
-		// Get users of running canvases
-		Map<String, User> canvasIdToUser = signalPathService.getUsersOfRunningCanvases()
-
-		// Stop all canvases
-		List<Canvas> stoppedCanvases = signalPathService.stopAllLocalCanvases()
-
-		// Discard adhoc canvases
-		stoppedCanvases = stoppedCanvases.findAll { !it.adhoc }
-
-		render(stoppedCanvases*.toMap() as JSON)
-	}
-
-	@GrailsCompileStatic
-	@StreamrApi(allowRoles = AllowRole.ADMIN)
-	def configNode(String nodeIp) {
-		invokeOrRedirect("config", nodeIp, this.&config)
-	}
-
-	@GrailsCompileStatic
-	@StreamrApi(allowRoles = AllowRole.ADMIN)
-	def shutdownNode(String nodeIp) {
-		invokeOrRedirect("shutdown", nodeIp, this.&shutdown)
-	}
-
-	@GrailsCompileStatic
-	@StreamrApi(allowRoles = AllowRole.ADMIN)
-	def canvasesNode(String nodeIp) {
-		invokeOrRedirect("canvases", nodeIp, this.&canvases)
-	}
-
-	private List<String> getStreamrNodes() {
-		(List<String>) grailsApplication.config.streamr.engine.nodes
-	}
-
-	@GrailsCompileStatic
-	private void invokeOrRedirect(String action, String nodeIp, Closure closure) {
-		if (nodeService.isIpAddressOfCurrentNode(nodeIp)) {
-			closure.call()
-		} else if (!getStreamrNodes().contains(nodeIp)) {
-			throw new ApiException(400, "NOT_A_VALID_NODE", "Not a valid node: '${nodeIp}'")
-		} else {
-			String path = grailsLinkGenerator.link(controller: "nodeApi", action: action, absolute: false)
-			nodeRequestDispatcher.perform(new NodeRequest(nodeIp, path, request, response))
-		}
 	}
 }

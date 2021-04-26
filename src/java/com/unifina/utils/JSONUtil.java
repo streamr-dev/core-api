@@ -4,7 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
-public class JSONUtil {
+public final class JSONUtil {
+	private JSONUtil() {
+	}
+
 	private static GsonBuilder createBuilder() {
 		GsonBuilder builder = new GsonBuilder()
 				.serializeNulls()

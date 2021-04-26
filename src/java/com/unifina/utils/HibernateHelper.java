@@ -2,14 +2,17 @@ package com.unifina.utils;
 
 import org.hibernate.proxy.HibernateProxy;
 
-public class HibernateHelper {
+public final class HibernateHelper {
+	private HibernateHelper() {
+	}
+
 	/**
 	 * Utility method that tries to properly initialize the Hibernate CGLIB
-	 * proxy. 
-	 * 
+	 * proxy.
+	 *
 	 * @param <T>
 	 * @param maybeProxy -- the possible Hibernate generated proxy
-	 * @param baseClass -- the resulting class to be cast to.
+	 * @param baseClass  -- the resulting class to be cast to.
 	 * @return the object of a class <T>
 	 * @throws ClassCastException
 	 */

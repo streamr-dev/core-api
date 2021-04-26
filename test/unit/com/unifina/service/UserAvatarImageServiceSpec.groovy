@@ -1,11 +1,9 @@
 package com.unifina.service
 
-
 import com.unifina.domain.User
-import com.unifina.provider.FileUploadProvider
+import com.unifina.utils.FileUploadProvider
 import com.unifina.utils.ImageResizer
 import com.unifina.utils.ImageVerifier
-import com.unifina.utils.testutils.FakeIdGenerator
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -15,12 +13,12 @@ import spock.lang.Specification
 class UserAvatarImageServiceSpec extends Specification {
 	User user
 	String filename = "picture.png"
-    def setup() {
+
+	def setup() {
 		service.imageResizer = Stub(ImageResizer)
 		service.fileUploadProvider = Stub(FileUploadProvider) {
 			uploadFile(_, _) >> new URL("https://streamr.network/files/id-0")
 		}
-		service.idGenerator = new FakeIdGenerator()
 
 		user = new User(
 			username: "user@domain.com",

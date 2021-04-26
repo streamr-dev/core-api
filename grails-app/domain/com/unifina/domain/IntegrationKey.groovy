@@ -32,8 +32,6 @@ class IntegrationKey implements Serializable {
 	}
 
 	enum Service {
-		// Ethereum keys for canvases on Profile page
-		ETHEREUM,
 		// Ethereum Accounts on Profile page
 		ETHEREUM_ID
 	}
@@ -41,26 +39,20 @@ class IntegrationKey implements Serializable {
 	@CompileStatic
 	Map toMap() {
 		return [
-				id  : id,
-				user: user.id,
-				name: name,
-				service: service.toString(),
-				json: jsonMap()
+			id: id,
+			user: user.id,
+			name: name,
+			service: service.toString(),
+			json: jsonMap()
 		]
 	}
 
 	@CompileStatic
 	private Map jsonMap() {
-		if (service == Service.ETHEREUM || service == Service.ETHEREUM_ID) {
+		if (service == Service.ETHEREUM_ID) {
 			return [address: ((JSONObject) JSON.parse(json)).get("address")]
 		} else {
 			return [:]
 		}
-	}
-
-	String parsePrivateKey() {
-		JSONObject element = JSON.parse(json) as JSONObject
-		String key = element.get("privateKey")
-		return key
 	}
 }

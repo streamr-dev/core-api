@@ -1,6 +1,9 @@
 package com.unifina.service
 
-import com.unifina.domain.*
+import com.unifina.domain.Permission
+import com.unifina.domain.SignupInvite
+import com.unifina.domain.Stream
+import com.unifina.domain.User
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders
 
@@ -20,23 +23,13 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	User me, anotherUser, stranger, someone
 
-	Dashboard dashAllowed, dashRestricted, dashOwned, dashPublic
-	Permission dashReadPermission, dashAnonymousReadPermission
-
-	Canvas canvas
-	// User has indirect permissions to this UI channel stream via the canvas
+	Stream streamAllowed
+	Stream streamRestricted
+	Stream streamOwned
+	Stream streamPublic
 	Stream stream
-
-	Dashboard dashboard
-	// User has indirect permissions to this UI channel stream via the dashboard
-	Stream uiChannelStream
-	Canvas uiChannelCanvas
-
-	Canvas vulCan
-	Stream uiChannelPublic
-	Stream uiChannelSecret
-	Dashboard vulPubDash
-	Dashboard vulSecretDash
+	Permission dashReadPermission
+	Permission dashAnonymousReadPermission
 
 	SignupInvite invite
 
@@ -70,51 +63,32 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 			name: "someone",
 		).save(failOnError: true)
 
-		// Dashboards
-		dashAllowed = new Dashboard(name: "allowed").save(failOnError: true)
-		dashRestricted = new Dashboard(name: "restricted").save(failOnError: true)
-		dashOwned = new Dashboard(name: "owned").save(failOnError: true)
-		dashPublic = new Dashboard(name: "public").save(failOnError: true)
+		// Streams
+		streamAllowed = new Stream(name: "allowed")
+		streamAllowed.id = "stream-allowed-id"
+		streamAllowed.save(failOnError: true)
+		streamRestricted = new Stream(name: "restricted")
+		streamRestricted.id = "stream-restricted-id"
+		streamRestricted.save(failOnError: true)
+		streamOwned = new Stream(name: "owned")
+		streamOwned.id = "stream-owned-id"
+		streamOwned.save(failOnError: true)
+		streamPublic = new Stream(name: "public")
+		streamPublic.id = "stream-public-id"
+		streamPublic.save(failOnError: true)
 
-		service.systemGrantAll(anotherUser, dashAllowed)
-		service.systemGrantAll(me, dashOwned)
-		service.systemGrantAll(anotherUser, dashRestricted)
-		service.systemGrantAll(anotherUser, dashPublic)
+		stream = new Stream(name: "stream")
+		stream.id = "stream-id"
+		stream.save(failOnError: true)
+
+		service.systemGrantAll(anotherUser, streamAllowed)
+		service.systemGrantAll(me, streamOwned)
+		service.systemGrantAll(anotherUser, streamRestricted)
+		service.systemGrantAll(anotherUser, streamPublic)
 
 		// Set up the Permissions to the allowed resources
-		dashReadPermission = service.systemGrant(me, dashAllowed, Permission.Operation.DASHBOARD_GET)
-		dashAnonymousReadPermission = service.systemGrantAnonymousAccess(dashPublic, Permission.Operation.DASHBOARD_GET)
-
-		canvas = new Canvas().save(validate: true, failOnError: true)
-		stream = new Stream(name: "ui channel", uiChannel: true, uiChannelCanvas: canvas, uiChannelPath: "/canvases/" + canvas.id + "/modules/2")
-		stream.id = "stream-id"
-		stream.save(validate: true, failOnError: true)
-
-		uiChannelCanvas = new Canvas()
-		uiChannelCanvas.save(validate: true, failOnError: true)
-		dashboard = new Dashboard(name: "dashboard")
-		dashboard.save(validate: true, failOnError: true)
-		uiChannelStream = new Stream(name: "ui channel", uiChannel: true, uiChannelCanvas: uiChannelCanvas, uiChannelPath: "/canvases/" + uiChannelCanvas.id + "/modules/2")
-		uiChannelStream.id = "stream-id-2"
-		uiChannelStream.save(validate: true, failOnError: true)
-
-		vulCan = new Canvas(name: "canvas")
-		vulCan.save(failOnError: true, validate: true)
-		int publicModuleID = 1
-		uiChannelPublic = new Stream(name: "ui channel public", uiChannel: true, uiChannelCanvas: vulCan, uiChannelPath: "/canvases/" + vulCan.id + "/modules/" + publicModuleID)
-		uiChannelPublic.id = "11"
-		uiChannelPublic.save(failOnError: true, validate: true)
-
-		int secretModuleID = 2
-		uiChannelSecret = new Stream(name: "ui channel secret", uiChannel: true, uiChannelCanvas: vulCan, uiChannelPath: "/canvases/" + vulCan.id + "/modules/" + secretModuleID)
-		uiChannelSecret.id = "22"
-		uiChannelSecret.save(failOnError: true, validate: true)
-
-		vulPubDash = new Dashboard(name: "vulnerability public dashboard")
-		vulPubDash.save(failOnError: true, validate: true)
-		vulSecretDash = new Dashboard(name: "vulnerability secret dashboard")
-		vulSecretDash.save(failOnError: true, validate: true)
-		service.systemGrant(me, vulPubDash, Permission.Operation.DASHBOARD_GET)
+		dashReadPermission = service.systemGrant(me, streamAllowed, Permission.Operation.STREAM_GET)
+		dashAnonymousReadPermission = service.systemGrantAnonymousAccess(streamPublic, Permission.Operation.STREAM_GET)
 
 		// Sign-up invitations can also receive Permissions; they will later be converted to User permissions
 		invite = new SignupInvite(email: "him-permission-service-integration-spec@streamr.network", code: "sikritCode", sent: true, used: false).save(validate: false, flush: true)
@@ -125,42 +99,23 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 	}
 
 	void cleanup() {
-		Permission.findAllByDashboard(dashAllowed)*.delete(flush: true)
-		Permission.findAllByDashboard(dashRestricted)*.delete(flush: true)
-		Permission.findAllByDashboard(dashOwned)*.delete(flush: true)
-		Permission.findAllByDashboard(dashPublic)*.delete(flush: true)
-		Permission.findAllByDashboard(dashboard)*.delete(flush: true)
-		Permission.findAllByDashboard(vulPubDash)*.delete(flush: true)
-		Permission.findAllByCanvas(canvas)*.delete(flush: true)
-		Permission.findAllByCanvas(vulCan)*.delete(flush: true)
-		Permission.findAllByCanvas(uiChannelCanvas)*.delete(flush: true)
-		Permission.findAllByStream(stream)*.delete(flush: true)
-		Permission.findAllByStream(uiChannelStream)*.delete(flush: true)
-		Permission.findAllByStream(uiChannelPublic)*.delete(flush: true)
-		Permission.findAllByStream(uiChannelStream)*.delete(flush: true)
+		Permission.findAllByStream(streamAllowed)*.delete(flush: true)
+		Permission.findAllByStream(streamRestricted)*.delete(flush: true)
+		Permission.findAllByStream(streamOwned)*.delete(flush: true)
+		Permission.findAllByStream(streamPublic)*.delete(flush: true)
 		Permission.findAllByStream(anonymousStream)*.delete(flush: true)
+		Permission.findAllByStream(stream)*.delete(flush: true)
 
-		dashAllowed?.delete(flush: true)
-		dashRestricted?.delete(flush: true)
-		dashOwned?.delete(flush: true)
-		dashPublic?.delete(flush: true)
-		dashboard?.delete(flush: true)
+		streamAllowed?.delete(flush: true)
+		streamRestricted?.delete(flush: true)
+		streamOwned?.delete(flush: true)
+		streamPublic?.delete(flush: true)
+		stream?.delete(flush: true)
 
 		me?.delete(flush: true)
 		anotherUser?.delete(flush: true)
 		stranger?.delete(flush: true)
 		someone?.delete(flush: true)
-
-		stream?.delete(flush: true)
-		uiChannelStream?.delete(flush: true)
-		canvas?.delete(flush: true)
-		uiChannelCanvas?.delete(flush: true)
-
-		uiChannelPublic?.delete(flush: true)
-		uiChannelSecret?.delete(flush: true)
-		vulPubDash?.delete(flush: true)
-		vulSecretDash?.delete(flush: true)
-		vulCan?.delete(flush: true)
 
 		invite?.delete(flush: true)
 
@@ -169,166 +124,155 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	void "get closure filtering works as expected"() {
 		expect:
-		service.get(Dashboard, me, Permission.Operation.DASHBOARD_GET) { like("name", "%ll%") } == [dashAllowed]
-		service.get(Dashboard, me, Permission.Operation.DASHBOARD_SHARE) == [dashOwned]
-		service.get(Dashboard, me, Permission.Operation.DASHBOARD_SHARE) { like("name", "%ll%") } == []
+		service.get(Stream, me, Permission.Operation.STREAM_GET) { like("name", "%ll%") } == [streamAllowed]
+		service.get(Stream, me, Permission.Operation.STREAM_SHARE) == [streamOwned]
+		service.get(Stream, me, Permission.Operation.STREAM_SHARE) { like("name", "%ll%") } == []
 	}
 
 	void "sharing read rights to others"() {
 		when:
-		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
-		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_SHARE)
+		service.grant(me, streamOwned, stranger, Permission.Operation.STREAM_GET)
+		service.grant(me, streamOwned, stranger, Permission.Operation.STREAM_SHARE)
 		then:
-		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == [dashOwned]
-		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_SHARE) == [dashOwned]
+		service.get(Stream, stranger, Permission.Operation.STREAM_GET) == [streamOwned]
+		service.get(Stream, stranger, Permission.Operation.STREAM_SHARE) == [streamOwned]
 
 		expect:
-		!(dashOwned in service.get(Dashboard, anotherUser, Permission.Operation.DASHBOARD_GET))
+		!(streamOwned in service.get(Stream, anotherUser, Permission.Operation.STREAM_GET))
 
 		when: "stranger shares read access"
-		service.grant(stranger, dashOwned, anotherUser, Permission.Operation.DASHBOARD_GET)
+		service.grant(stranger, streamOwned, anotherUser, Permission.Operation.STREAM_GET)
 		then:
-		dashOwned in service.get(Dashboard, anotherUser, Permission.Operation.DASHBOARD_GET)
-		!(dashOwned in service.get(Dashboard, anotherUser, Permission.Operation.DASHBOARD_SHARE))
+		streamOwned in service.get(Stream, anotherUser, Permission.Operation.STREAM_GET)
+		!(streamOwned in service.get(Stream, anotherUser, Permission.Operation.STREAM_SHARE))
 
 		when:
-		service.revoke(stranger, dashOwned, anotherUser, Permission.Operation.DASHBOARD_GET)
+		service.revoke(stranger, streamOwned, anotherUser, Permission.Operation.STREAM_GET)
 		then:
-		!(dashOwned in service.get(Dashboard, anotherUser, Permission.Operation.DASHBOARD_GET))
+		!(streamOwned in service.get(Stream, anotherUser, Permission.Operation.STREAM_GET))
 
-		when: "of course, it's silly to revoke 'dashboard_share' access since it might already been re-shared..."
-		service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_SHARE)
-		service.grant(stranger, dashOwned, anotherUser, Permission.Operation.DASHBOARD_SHARE)
+		when: "of course, it's silly to revoke 'stream_share' access since it might already been re-shared..."
+		service.revoke(me, streamOwned, stranger, Permission.Operation.STREAM_SHARE)
+		service.grant(stranger, streamOwned, anotherUser, Permission.Operation.STREAM_SHARE)
 		then:
 		thrown AccessControlException
 	}
 
 	void "default revocation is all access"() {
 		setup:
-		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
-		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_SHARE)
+		service.grant(me, streamOwned, stranger, Permission.Operation.STREAM_GET)
+		service.grant(me, streamOwned, stranger, Permission.Operation.STREAM_SHARE)
 		when:
-		service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
+		service.revoke(me, streamOwned, stranger, Permission.Operation.STREAM_GET)
 		then: "by default, revoke all access"
-		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == []
-		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_SHARE) == [dashOwned]
+		service.get(Stream, stranger, Permission.Operation.STREAM_GET) == []
+		service.get(Stream, stranger, Permission.Operation.STREAM_SHARE) == [streamOwned]
 	}
 
 	void "revocation is granular"() {
 		setup:
-		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
-		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_SHARE)
+		service.grant(me, streamOwned, stranger, Permission.Operation.STREAM_GET)
+		service.grant(me, streamOwned, stranger, Permission.Operation.STREAM_SHARE)
 		when:
-		service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_SHARE)
+		service.revoke(me, streamOwned, stranger, Permission.Operation.STREAM_SHARE)
 		then: "only 'share' access is revoked"
-		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == [dashOwned]
-		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_SHARE) == []
+		service.get(Stream, stranger, Permission.Operation.STREAM_GET) == [streamOwned]
+		service.get(Stream, stranger, Permission.Operation.STREAM_SHARE) == []
 	}
 
 	void "get does not return expired permissions"() {
-		def p1 = service.systemGrant(someone, dashRestricted, Permission.Operation.DASHBOARD_GET)
-		def p2 = service.systemGrant(someone, dashOwned, Permission.Operation.DASHBOARD_GET)
+		def p1 = service.systemGrant(someone, streamRestricted, Permission.Operation.STREAM_GET)
+		def p2 = service.systemGrant(someone, streamOwned, Permission.Operation.STREAM_GET)
 		p1.endsAt = new Date(System.currentTimeMillis() - 1000 * 60000)
 		p2.endsAt = new Date(0)
 		p1.save(failOnError: true)
 		p2.save(failOnError: true, flush: true)
 
 		expect:
-		service.get(Dashboard, someone, Permission.Operation.DASHBOARD_GET) == []
+		service.get(Stream, someone, Permission.Operation.STREAM_GET) == []
 	}
 
 	void "get returns non-expired permissions"() {
-		def p1 = service.systemGrant(someone, dashRestricted, Permission.Operation.DASHBOARD_GET)
-		def p2 = service.systemGrant(someone, dashOwned, Permission.Operation.DASHBOARD_GET)
+		def p1 = service.systemGrant(someone, streamRestricted, Permission.Operation.STREAM_GET)
+		def p2 = service.systemGrant(someone, streamOwned, Permission.Operation.STREAM_GET)
 		p1.endsAt = new Date(System.currentTimeMillis() + 10000)
 		p2.endsAt = new Date(System.currentTimeMillis() + 1000000)
 		p1.save(failOnError: true)
 		p2.save(failOnError: true)
 
 		expect:
-		service.get(Dashboard, someone, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashRestricted] as Set
+		service.get(Stream, someone, Permission.Operation.STREAM_GET) as Set == [streamOwned, streamRestricted] as Set
 	}
 
 	void "getAll lists public resources"() {
 		expect:
-		service.getAll(Dashboard, me, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashPublic, dashAllowed, vulPubDash] as Set
-		service.getAll(Dashboard, anotherUser, Permission.Operation.DASHBOARD_GET) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
-		service.getAll(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == [dashPublic]
+		(service.getAll(Stream, me, Permission.Operation.STREAM_GET) as Set).containsAll([streamOwned, streamPublic, streamAllowed] as Set)
+		(service.getAll(Stream, anotherUser, Permission.Operation.STREAM_GET) as Set).containsAll([streamAllowed, streamRestricted, streamPublic] as Set)
+		service.getAll(Stream, stranger, Permission.Operation.STREAM_GET).contains(streamPublic)
 	}
 
 	void "getAll returns public resources on bad/null user"() {
 		expect:
-		service.get(Dashboard, new User(), Permission.Operation.DASHBOARD_GET) == []
-		service.get(Dashboard, null, Permission.Operation.DASHBOARD_GET) == []
-		service.getAll(Dashboard, new User(), Permission.Operation.DASHBOARD_GET) == [dashPublic]
-		service.getAll(Dashboard, null, Permission.Operation.DASHBOARD_GET) == [dashPublic]
+		service.get(Stream, new User(), Permission.Operation.STREAM_GET) == []
+		service.get(Stream, null, Permission.Operation.STREAM_GET) == []
+		service.getAll(Stream, new User(), Permission.Operation.STREAM_GET).contains(streamPublic)
+		service.getAll(Stream, null, Permission.Operation.STREAM_GET).contains(streamPublic)
 	}
 
 	void "granting and revoking read rights"() {
 		when:
-		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
+		service.grant(me, streamOwned, stranger, Permission.Operation.STREAM_GET)
 		then:
-		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == [dashOwned]
+		service.get(Stream, stranger, Permission.Operation.STREAM_GET) == [streamOwned]
 
 		when:
-		service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
+		service.revoke(me, streamOwned, stranger, Permission.Operation.STREAM_GET)
 		then:
-		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == []
+		service.get(Stream, stranger, Permission.Operation.STREAM_GET) == []
 	}
 
 	void "granting and revoking share rights"() {
 		when:
-		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_SHARE)
+		service.grant(me, streamOwned, stranger, Permission.Operation.STREAM_SHARE)
 		then:
-		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_SHARE) == [dashOwned]
+		service.get(Stream, stranger, Permission.Operation.STREAM_SHARE) == [streamOwned]
 	}
 
 	void "granting works (roughly) idempotently"() {
 		expect:
-		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == []
+		service.get(Stream, stranger, Permission.Operation.STREAM_GET) == []
 		when: "double-granting still has the same effect: there exists a permission for user to resource"
-		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
-		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
+		service.grant(me, streamOwned, stranger, Permission.Operation.STREAM_GET)
+		service.grant(me, streamOwned, stranger, Permission.Operation.STREAM_GET)
 		then: "now you see it..."
-		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == [dashOwned]
+		service.get(Stream, stranger, Permission.Operation.STREAM_GET) == [streamOwned]
 		when:
-		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
-		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
-		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
-		service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
+		service.grant(me, streamOwned, stranger, Permission.Operation.STREAM_GET)
+		service.grant(me, streamOwned, stranger, Permission.Operation.STREAM_GET)
+		service.grant(me, streamOwned, stranger, Permission.Operation.STREAM_GET)
+		service.revoke(me, streamOwned, stranger, Permission.Operation.STREAM_GET)
 		then: "now you don't."
-		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == []
+		service.get(Stream, stranger, Permission.Operation.STREAM_GET) == []
 	}
 
-	void "retrieve all readable Dashboards correctly"() {
+	void "retrieve all readable Streams correctly"() {
 		expect:
-		service.get(Dashboard, me, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashAllowed, vulPubDash] as Set
-		service.get(Dashboard, anotherUser, Permission.Operation.DASHBOARD_GET) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
-		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == []
-	}
-
-	void "getPermissionsTo(resource, userish) returns correct UI channel permissions via associated canvas"() {
-		service.systemGrantAll(me, canvas)
-
-		expect:
-		service.getPermissionsTo(stream, me).size() == 4
-		service.check(me, stream, Permission.Operation.STREAM_GET)
-		service.check(me, stream, Permission.Operation.STREAM_PUBLISH)
-		service.check(me, stream, Permission.Operation.STREAM_SUBSCRIBE)
-		service.check(me, stream, Permission.Operation.STREAM_DELETE)
+		service.get(Stream, me, Permission.Operation.STREAM_GET) as Set == [streamOwned, streamAllowed] as Set
+		service.get(Stream, anotherUser, Permission.Operation.STREAM_GET) as Set == [streamAllowed, streamRestricted, streamPublic] as Set
+		service.get(Stream, stranger, Permission.Operation.STREAM_GET) == []
 	}
 
 	void "getPermissionsTo with Operation returns all permissions for the given resource"() {
 		setup:
-		List<Permission> beforeRead = service.getPermissionsTo(dashOwned, Permission.Operation.DASHBOARD_GET)
-		List<Permission> beforeWrite = service.getPermissionsTo(dashOwned, Permission.Operation.DASHBOARD_EDIT)
-		Permission perm = service.systemGrant(stranger, dashOwned, Permission.Operation.DASHBOARD_GET)
-		List<Permission> afterRead = service.getPermissionsTo(dashOwned, Permission.Operation.DASHBOARD_GET)
-		List<Permission> afterWrite = service.getPermissionsTo(dashOwned, Permission.Operation.DASHBOARD_EDIT)
-		List<Permission> all = service.getPermissionsTo(dashOwned)
+		List<Permission> beforeRead = service.getPermissionsTo(streamOwned, Permission.Operation.STREAM_GET)
+		List<Permission> beforeWrite = service.getPermissionsTo(streamOwned, Permission.Operation.STREAM_EDIT)
+		Permission perm = service.systemGrant(stranger, streamOwned, Permission.Operation.STREAM_GET)
+		List<Permission> afterRead = service.getPermissionsTo(streamOwned, Permission.Operation.STREAM_GET)
+		List<Permission> afterWrite = service.getPermissionsTo(streamOwned, Permission.Operation.STREAM_EDIT)
+		List<Permission> all = service.getPermissionsTo(streamOwned)
 		List<Permission> allOperations = new ArrayList<Permission>()
-		Permission.Operation.dashboardOperations().collect { Permission.Operation op ->
-			allOperations.addAll(service.getPermissionsTo(dashOwned, op))
+		Permission.Operation.streamOperations().collect { Permission.Operation op ->
+			allOperations.addAll(service.getPermissionsTo(streamOwned, op))
 		}
 		expect:
 		!beforeRead.contains(perm)
@@ -340,26 +284,26 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	void "getPermissionsTo returns all permissions for the given resource"() {
 		setup:
-		def perm = service.systemGrant(stranger, dashOwned, Permission.Operation.DASHBOARD_GET)
+		def perm = service.systemGrant(stranger, streamOwned, Permission.Operation.STREAM_GET)
 		expect:
-		service.getPermissionsTo(dashOwned).size() == 6
-		service.getPermissionsTo(dashOwned).contains(perm)
-		service.getPermissionsTo(dashAllowed).size() == 6
-		service.getPermissionsTo(dashAllowed).contains(dashReadPermission)
-		service.getPermissionsTo(dashRestricted).size() == 5
-		service.getPermissionsTo(dashRestricted)[0].user == anotherUser
+		service.getPermissionsTo(streamOwned).size() == 7
+		service.getPermissionsTo(streamOwned).contains(perm)
+		service.getPermissionsTo(streamAllowed).size() == 7
+		service.getPermissionsTo(streamAllowed).contains(dashReadPermission)
+		service.getPermissionsTo(streamRestricted).size() == 6
+		service.getPermissionsTo(streamRestricted)[0].user == anotherUser
 	}
 
 	void "getNonExpiredPermissionsTo with Operation returns all non-expired permissions for the given resource"() {
 		// craft an expired permission
-		service.systemGrant(me, dashboard, Permission.Operation.DASHBOARD_EDIT, null, new Date(0))
+		service.systemGrant(me, stream, Permission.Operation.STREAM_EDIT, null, new Date(0))
 		setup:
-		List<Permission> beforeRead = service.getNonExpiredPermissionsTo(dashOwned, Permission.Operation.DASHBOARD_GET)
-		List<Permission> beforeWrite = service.getNonExpiredPermissionsTo(dashOwned, Permission.Operation.DASHBOARD_EDIT)
-		Permission perm = service.systemGrant(stranger, dashOwned, Permission.Operation.DASHBOARD_GET)
-		List<Permission> afterRead = service.getNonExpiredPermissionsTo(dashOwned, Permission.Operation.DASHBOARD_GET)
-		List<Permission> afterWrite = service.getNonExpiredPermissionsTo(dashOwned, Permission.Operation.DASHBOARD_EDIT)
-		List<Permission> testDashPerms = service.getNonExpiredPermissionsTo(dashboard, Permission.Operation.DASHBOARD_EDIT)
+		List<Permission> beforeRead = service.getNonExpiredPermissionsTo(streamOwned, Permission.Operation.STREAM_GET)
+		List<Permission> beforeWrite = service.getNonExpiredPermissionsTo(streamOwned, Permission.Operation.STREAM_EDIT)
+		Permission perm = service.systemGrant(stranger, streamOwned, Permission.Operation.STREAM_GET)
+		List<Permission> afterRead = service.getNonExpiredPermissionsTo(streamOwned, Permission.Operation.STREAM_GET)
+		List<Permission> afterWrite = service.getNonExpiredPermissionsTo(streamOwned, Permission.Operation.STREAM_EDIT)
+		List<Permission> testDashPerms = service.getNonExpiredPermissionsTo(stream, Permission.Operation.STREAM_EDIT)
 		expect:
 		!beforeRead.contains(perm)
 		afterRead.contains(perm)
@@ -370,29 +314,29 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	void "signup invitation can be granted and revoked of permissions just like normal users"() {
 		expect:
-		!service.getPermissionsTo(dashOwned).find { it.invite == invite }
+		!service.getPermissionsTo(streamOwned).find { it.invite == invite }
 
 		when:
-		service.systemGrant(invite, dashOwned, Permission.Operation.DASHBOARD_GET)
+		service.systemGrant(invite, streamOwned, Permission.Operation.STREAM_GET)
 		then:
-		service.getPermissionsTo(dashOwned).find { it.invite == invite }
+		service.getPermissionsTo(streamOwned).find { it.invite == invite }
 
 		when:
-		service.systemRevoke(invite, dashOwned, Permission.Operation.DASHBOARD_GET)
+		service.systemRevoke(invite, streamOwned, Permission.Operation.STREAM_GET)
 		then:
-		!service.getPermissionsTo(dashOwned).find { it.invite == invite }
+		!service.getPermissionsTo(streamOwned).find { it.invite == invite }
 	}
 
 	void "signup invitations are converted correctly"() {
 		expect:
-		!service.check(anotherUser, dashOwned, Permission.Operation.DASHBOARD_GET)
+		!service.check(anotherUser, streamOwned, Permission.Operation.STREAM_GET)
 
 		when: "pretend anotherUser was just created"
-		service.systemGrant(invite, dashOwned, Permission.Operation.DASHBOARD_GET)
+		service.systemGrant(invite, streamOwned, Permission.Operation.STREAM_GET)
 		def permissions = service.transferInvitePermissionsTo(anotherUser)
 		permissions*.save(flush: true) // flush hibernate cache
 		then:
-		service.check(anotherUser, dashOwned, Permission.Operation.DASHBOARD_GET)
+		service.check(anotherUser, streamOwned, Permission.Operation.STREAM_GET)
 	}
 
 	void "cannot revoke only share permission"() {

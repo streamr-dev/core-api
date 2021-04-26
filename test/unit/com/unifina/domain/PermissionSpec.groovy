@@ -1,25 +1,34 @@
 package com.unifina.domain
 
+import grails.test.mixin.Mock
 import spock.lang.Specification
 
+@Mock(Permission)
 class PermissionSpec extends Specification {
 	void "validation fails if no domain class attached"() {
+		def permission = new Permission(operation: Permission.Operation.STREAM_GET)
+		permission.save()
 		expect:
-		!new Permission(operation: Permission.Operation.CANVAS_GET).validate()
+		!permission.validate()
 	}
 
 	void "validation fails if more than 1 domain class attached"() {
+		def product = new Product()
+		def stream = new Stream(name: "stream")
+		def permission = new Permission(operation: Permission.Operation.STREAM_GET, product: product, stream: stream)
 		expect:
-		!new Permission(operation: Permission.Operation.CANVAS_GET, canvas: new Canvas(), stream: new Stream()).validate()
+		!permission.validate()
 	}
 
 	void "validation succeeds if exactly 1 domain class attached"() {
+		def stream = new Stream()
+		def permission = new Permission(operation: Permission.Operation.STREAM_GET, stream: stream)
 		expect:
-		new Permission(operation: Permission.Operation.CANVAS_GET, canvas: new Canvas()).validate()
+		permission.validate()
 	}
 
 	void "all items in resourceFields are defined as fields"() {
-		Permission p = new Permission(operation: Permission.Operation.CANVAS_GET)
+		Permission p = new Permission(operation: Permission.Operation.STREAM_GET)
 
 		when:
 		Permission.resourceFields.each {
@@ -34,10 +43,10 @@ class PermissionSpec extends Specification {
 		expect:
 		Permission.Operation.fromString(input) == result
 		where:
-		input|result
-		"product_get"|Permission.Operation.PRODUCT_GET
-		"PRODUCT_GET"|Permission.Operation.PRODUCT_GET
-		"PrOdUcT_gEt"|Permission.Operation.PRODUCT_GET
+		input         | result
+		"product_get" | Permission.Operation.PRODUCT_GET
+		"PRODUCT_GET" | Permission.Operation.PRODUCT_GET
+		"PrOdUcT_gEt" | Permission.Operation.PRODUCT_GET
 	}
 
 	void "permission fromString() throws IllegalArgumentException on invalid input"() {

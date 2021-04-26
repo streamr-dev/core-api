@@ -1,4 +1,3 @@
-import com.unifina.service.NodeService
 import com.unifina.utils.PropertiesUtil
 import org.web3j.ens.Contracts
 
@@ -164,17 +163,6 @@ streamr.cps.maxConnTotal = 400
 streamr.cps.maxConnPerRoute = 200
 
 /**
- * Streamr cluster config
- */
-streamr.cluster.internalPort = System.getProperty("streamr.cluster.internalPort") ? Integer.parseInt(System.getProperty("streamr.cluster.internalPort")) : 8081
-streamr.cluster.internalProtocol = System.getProperty("streamr.cluster.internalProtocol") ?: "http"
-environments {
-	production {
-		streamr.cluster.internalPort = System.getProperty("streamr.cluster.internalPort") ? Integer.parseInt(System.getProperty("streamr.cluster.internalPort")) : 8080
-	}
-}
-
-/**
  * Migration config
  */
 grails.plugin.databasemigration.updateOnStart = true
@@ -200,11 +188,6 @@ cors.headers = ['Access-Control-Allow-Headers': 'origin, authorization, accept, 
  */
 // Where to send email reports
 unifina.reports.recipient = "henri.pihkala@streamr.network"
-
-/**
- * Node IP address config. Autodetected if not set.
- */
-streamr.engine.node.ip = System.getProperty("streamr.engine.node.ip")
 
 /**
  * Streamr API URLs
@@ -265,28 +248,6 @@ environments {
 }
 
 /**
- * Serialization config
- */
-streamr.serialization.intervalInMillis = System.getProperty("streamr.serialization.intervalInMillis") ? Long.parseLong(System.getProperty("streamr.serialization.intervalInMillis")) : 5 * 60 * 1000
-streamr.serialization.maxBytes = System.getProperty("streamr.serialization.maxBytes") ? Long.parseLong(System.getProperty("streamr.serialization.maxBytes")) : 1024 * 1024 * 8
-environments {
-	test {
-		streamr.serialization.intervalInMillis = 1000
-	}
-}
-
-/**
- * Encryption settings
- */
-streamr.encryption.password = System.getProperty("streamr.encryption.password") ?: "password" // dev and test environments have a default password
-environments {
-	production {
-		streamr.encryption.password = System.getProperty("streamr.encryption.password")
-		// in production, the system property must be set
-	}
-}
-
-/**
  * Email config
  */
 grails {
@@ -340,16 +301,6 @@ environments {
 		streamr.metrics.numberOfSessions = "Catalina:type=Manager,context=/,host=localhost"
 	}
 }
-
-/**
- * Signup Configs
- */
-streamr.signup.requireCaptcha = (System.getProperty("streamr.signup.requireCaptcha") ? Boolean.parseBoolean(System.getProperty("streamr.signup.requireCaptcha")) : false)
-
-/**
- * Streamr engine-and-editor nodes
- */
-streamr.engine.nodes = System.getProperty("streamr.engine.nodes") ? Arrays.asList(System.getProperty("streamr.engine.nodes").split(",")) : [new NodeService().getIPAddress([streamr: [node: [ip: System.getProperty("streamr.engine.node.ip")]]])]
 
 /**
  * Miscellaneous
