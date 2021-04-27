@@ -2,8 +2,8 @@ FROM streamr/grails-builder:v0.0.6 AS builder
 # GRAILS_WAR_ENV argument must be 'prod' or 'test'. Default is 'prod'.
 ARG GRAILS_WAR_ENV
 ENV GRAILS_WAR_ENV=${GRAILS_WAR_ENV:-prod}
-COPY . /src/engine-and-editor
-WORKDIR /src/engine-and-editor
+COPY . /src/core-api
+WORKDIR /src/core-api
 RUN grails -non-interactive -plain-output $GRAILS_WAR_ENV war
 
 
@@ -19,7 +19,7 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
 	&& rm -rf /var/lib/apt/lists/*
 COPY src/conf/tomcat-server.xml /usr/local/tomcat/conf/server.xml
 COPY scripts/wait-for-it.sh scripts/entrypoint.sh /usr/local/tomcat/bin/
-COPY --from=builder /src/engine-and-editor/target/ROOT.war /usr/local/tomcat/webapps/streamr-core.war
+COPY --from=builder /src/core-api/target/ROOT.war /usr/local/tomcat/webapps/streamr-core.war
 
 # Default values for ENV variables
 ENV DB_USER root

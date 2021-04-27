@@ -83,7 +83,7 @@ jobs:
           platforms: linux/amd64
           push: false
           load: true
-          tags: streamr/engine-and-editor:dev
+          tags: streamr/core-api:dev
           build-args: |
             GRAILS_WAR_ENV=${{ env.GRAILS_WAR_ENV }}
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -101,7 +101,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: Setup End to End tests
         run: |
-          streamr-docker-dev start engine-and-editor
+          streamr-docker-dev start core-api
           streamr-docker-dev wait
           cd rest-e2e-tests
           npm ci
@@ -126,7 +126,7 @@ jobs:
         id: docker_meta
         uses: crazy-max/ghaction-docker-meta@v2.3.0
         with:
-          images: streamr/engine-and-editor
+          images: streamr/core-api
           tags: |
             type=sha
             type=ref,event=branch
@@ -201,7 +201,7 @@ jobs:
       - name: Start Streamr Docker Stack
         uses: streamr-dev/streamr-docker-dev-action@v1.0.0-alpha.3
         with:
-          services-to-start: "mysql redis engine-and-editor cassandra parity-node0 parity-sidechain-node0 bridge broker-node-storage-1 broker-node-no-storage-1 nginx smtp"
+          services-to-start: "mysql redis core-api cassandra parity-node0 parity-sidechain-node0 bridge broker-node-storage-1 broker-node-no-storage-1 nginx smtp"
       - uses: actions/checkout@v2.3.4
         with:
           repository: streamr-dev/streamr-client-testing
