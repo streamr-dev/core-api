@@ -50,23 +50,17 @@ grails.project.dependency.resolution = {
 	repositories {
 		// Fast local repos first
 		grailsHome()
-		mavenLocal()
-
-		// Maven central
-		mavenRepo "https://repo1.maven.org/maven2/"
-
-		// Ethereum Repository
-		mavenRepo "https://dl.bintray.com/ethereum/maven/"
-
-		// Streamr Maven
-		mavenRepo "https://dl.bintray.com/streamr/maven/"
-
 		// Remote Grails repos
 		grailsPlugins()
-		grailsCentral()
-
 		// New Grails repo
 		mavenRepo "https://repo.grails.org/grails/plugins"
+		// Maven central
+		mavenRepo "https://repo1.maven.org/maven2/"
+		// Ethereum Repository
+		mavenRepo "https://dl.bintray.com/ethereum/maven/"
+		// Streamr Maven
+		mavenRepo "https://dl.bintray.com/streamr/maven/"
+		mavenLocal()
 	}
 
 	dependencies {

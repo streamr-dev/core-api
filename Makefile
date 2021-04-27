@@ -9,7 +9,7 @@ $(error error: Your version of make ($(shell make -v|head -1|cut -f 3 -d ' ')) d
 endif
 
 LANG = en_US.UTF-8
-SHELL = bash
+SHELL = /bin/bash
 .SHELLFLAGS = -eu -o pipefail -c # run '/bin/bash ... -c /bin/cmd'
 .ONESHELL:
 .DELETE_ON_ERROR:
