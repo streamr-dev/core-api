@@ -25,6 +25,7 @@ databaseChangeLog = {
 	changeSet(author: "kkn", id: "remove-canvas-dashboard-module-5") {
 		dropUniqueConstraint(tableName: "stream", constraintName: "FKCAD54F8052E2E25F")
 		dropUniqueConstraint(tableName: "stream", constraintName: "ui_channel_path_idx")
+		sql("delete from permission where stream_id is not null and operation like 'stream_%' and stream_id in (select id from stream where ui_channel = 1)")
 		sql("delete from stream where ui_channel = 1")
 		dropColumn(tableName: "stream", columnName: "ui_channel_canvas_id")
 		dropColumn(tableName: "stream", columnName: "ui_channel_path")
