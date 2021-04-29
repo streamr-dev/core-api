@@ -2292,7 +2292,7 @@
     "/streams/{id}/data/partitions/{partition}/range": {
       "get": {
         "summary": "Get events between a range from the stream",
-        "description": "Get events between a range from the stream. The range can be defined between two timestamps or between two message references (timestamp and sequence number). The publisher must be specified in the case of message references.",
+        "description": "Get events between a range from the stream. The range can be defined between two timestamps or between two message references (timestamp and sequence number).",
         "parameters": [
           {
             "in": "path",
@@ -2340,7 +2340,14 @@
           {
             "in": "query",
             "name": "publisherId",
-            "description": "Id of the publisher of the two message references, in case sequence numbers are defined",
+            "description": "Id of the publisher of the two message references",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "msgChainId",
+            "description": "Id of the message chain of the publisher, required if publisherId is specified",
             "required": false,
             "type": "string"
           }
@@ -2373,7 +2380,7 @@
     "/streams/{id}/data/partitions/{partition}/from": {
       "get": {
         "summary": "Get events from a timestamp or reference from the stream",
-        "description": "Get events from a timestamp or reference from the stream. The starting point can be defined by a timestamp or by a message reference (timestamp and sequence number). The publisher must be specified in the case of message reference.",
+        "description": "Get events from a timestamp or reference from the stream. The starting point can be defined by a timestamp or by a message reference (timestamp and sequence number).",
         "parameters": [
           {
             "in": "path",
@@ -2407,7 +2414,7 @@
           {
             "in": "query",
             "name": "publisherId",
-            "description": "Id of the publisher of the two message references, in case sequence numbers are defined",
+            "description": "Id of the publisher",
             "required": false,
             "type": "string"
           }
