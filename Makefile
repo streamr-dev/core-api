@@ -52,7 +52,7 @@ test-stress:
 idea: ## Generate IntelliJ IDEA project files
 	cp .idea/core-api.iml.copy .idea/core-api.iml
 	cp .idea/core-api-grailsPlugins.iml.copy .idea/core-api-grailsPlugins.iml
-	$(grails) idea-print-project-settings
+	$(grails) --refresh-dependencies idea-print-project-settings
 
 .PHONY: compile
 compile: ## Compile code
