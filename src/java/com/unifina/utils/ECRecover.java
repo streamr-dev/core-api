@@ -1,13 +1,14 @@
 package com.unifina.utils;
 
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.ethereum.crypto.ECKey;
-import org.ethereum.crypto.HashUtil;
-import org.ethereum.util.ByteUtil;
+import org.web3j.crypto.ECDSASignature;
+import org.web3j.crypto.Hash;
+import org.web3j.crypto.Keys;
+import org.web3j.crypto.Sign;
+import org.web3j.utils.Numeric;
 
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.SignatureException;
+import java.util.Arrays;
 
 public final class ECRecover {
 	private static final String SIGN_MAGIC = "\u0019Ethereum Signed Message:\n";
@@ -16,22 +17,36 @@ public final class ECRecover {
 	}
 
 	public static byte[] calculateMessageHash(String message) {
-		byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
-		String prefix = SIGN_MAGIC + messageBytes.length;
-		byte[] toHash = ByteUtil.merge(prefix.getBytes(), messageBytes);
-		return HashUtil.sha3(toHash);
+		int msgLen = message.getBytes(StandardCharsets.UTF_8).length;
+		String s = String.format("%s%d%s", SIGN_MAGIC, msgLen, message);
+		byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
+		return Hash.sha3(bytes);
 	}
 
-	public static String recoverAddress(byte[] messageHash, String signatureHex) throws SignatureException, DecoderException {
-		byte[] signature = Hex.decodeHex(signatureHex.replace("0x", "").toCharArray());
+	public static String recoverAddress(byte[] messageHash, String signatureHex) {
+		final ECDSASignature signature;
+		byte[] source = Numeric.hexStringToByteArray(signatureHex);
+		BigInteger r = toBigInteger(source, 0, 32);
+		BigInteger s = toBigInteger(source, 32, 64);
+		signature = new ECDSASignature(r, s);
+		for (byte i = 0; i < 4; i++) {
+			BigInteger publicKey;
+			try {
+				publicKey = Sign.recoverFromSignature(i, signature, messageHash);
+			} catch (RuntimeException e) {
+				continue;
+			}
+			if (publicKey != null) {
+				String address = Keys.getAddress(publicKey);
+				String addr = Numeric.prependHexPrefix(address);
+				return addr;
+			}
+		}
+		return null;
+	}
 
-		byte[] r = new byte[32];
-		byte[] s = new byte[32];
-		byte v = signature[64];
-		System.arraycopy(signature, 0, r, 0, r.length);
-		System.arraycopy(signature, 32, s, 0, s.length);
-
-		ECKey.ECDSASignature signatureObj = ECKey.ECDSASignature.fromComponents(r, s, v);
-		return "0x" + Hex.encodeHexString(ECKey.signatureToKey(messageHash, signatureObj.toBase64()).getAddress());
+	private static BigInteger toBigInteger(final byte[] source, final int from, final int to) {
+		byte[] bytes = Arrays.copyOfRange(source, from, to);
+		return new BigInteger(1, bytes);
 	}
 }
