@@ -48,13 +48,8 @@ grails.project.dependency.resolution = {
 	// whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
 
 	repositories {
-		// Fast local repos first
-		grailsHome()
-		// Remote Grails repos
-		grailsPlugins()
-		// New Grails repo
+		mavenRepo "https://repo.grails.org/grails/core"
 		mavenRepo "https://repo.grails.org/grails/plugins"
-		// Maven central
 		mavenRepo "https://repo1.maven.org/maven2/"
 		mavenLocal()
 	}
@@ -68,25 +63,6 @@ grails.project.dependency.resolution = {
 		compile('biz.paluch.redis:lettuce:3.5.0.Final')
 		compile('com.google.code.findbugs:jsr305:3.0.2')
 		compile('org.jetbrains:annotations:17.0.0')
-		compile('org.ethereum:ethereumj-core:1.12.0-RELEASE') {
-			excludes('com.cedarsoftware:java-util')
-			excludes('ch.qos.logback:logback-classic:*')
-			excludes('org.springframework:spring-core:*')
-			excludes('org.springframework:spring-context:*')
-			excludes('org.springframework:spring-orm:*')
-			excludes('com.fasterxml.jackson.core:jackson-databind:*')
-			excludes('com.google.guava:guava:*')
-			excludes('com.googlecode.concurrent-locks:concurrent-locks:*')
-			excludes('com.googlecode.json-simple:json-simple:*')
-			excludes('org.apache.commons:commons-collections4:*')
-			excludes('org.apache.commons:commons-lang3:*')
-			excludes('io.netty:netty-all:*')
-			excludes('org.ethereum:leveldbjni-all:*')
-			excludes('org.ethereum:rocksdbjni:*')
-			excludes('org.ethereum:solcJ-all:*')
-			excludes('org.iq80.leveldb:leveldb:*')
-			excludes('org.xerial.snappy:snappy-java:*')
-		}
 		compile('org.springframework.security:spring-security-web:4.2.9.RELEASE') { // Needed for CORS plugin
 			excludes('org.springframework:spring-web:*')
 		}
