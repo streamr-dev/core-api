@@ -20,7 +20,7 @@ class ChallengeService {
 
 	void checkValidChallengeResponse(String challengeID, String challenge, String signature, String givenAddress) throws ChallengeVerificationFailedException {
 		String address = verifyChallengeAndGetAddress(challengeID, challenge, signature)
-		boolean valid = address.toLowerCase() == givenAddress.toLowerCase() && challengeTextContainsAddress(challenge, givenAddress)
+		boolean valid = address != null && address.toLowerCase() == givenAddress.toLowerCase() && challengeTextContainsAddress(challenge, givenAddress)
 		if (valid) {
 			keyValueStoreService.delete(challengeID)
 		} else {

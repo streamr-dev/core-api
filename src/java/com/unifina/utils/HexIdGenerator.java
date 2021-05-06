@@ -1,9 +1,8 @@
 package com.unifina.utils;
 
-import org.hibernate.HibernateException;
 import org.hibernate.engine.SessionImplementor;
 import org.hibernate.id.IdentifierGenerator;
-import org.spongycastle.util.encoders.Hex;
+import org.web3j.utils.Numeric;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
@@ -16,7 +15,7 @@ public class HexIdGenerator implements IdentifierGenerator {
 	 * @return String
 	 */
 	@Override
-	public Serializable generate(SessionImplementor session, Object object) throws HibernateException {
+	public Serializable generate(SessionImplementor session, Object object) {
 		UUID uuid = UUID.randomUUID();
 		UUID uuid2 = UUID.randomUUID();
 
@@ -27,7 +26,6 @@ public class HexIdGenerator implements IdentifierGenerator {
 		bb.putLong(uuid2.getMostSignificantBits());
 		bb.putLong(uuid2.getLeastSignificantBits());
 
-		return new String(Hex.encode(bytes));
+		return Numeric.toHexString(bytes, 0, bytes.length, false);
 	}
-
 }
