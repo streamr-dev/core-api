@@ -1,8 +1,8 @@
-# Streamr Engine and Editor
+# Streamr Core API
 
 ![CI & CD](https://github.com/streamr-dev/core-api/workflows/CI%20&%20CD/badge.svg)
 
-Web application containing the backend for Streamr Core, facilitating things like:
+RESTful API containing the backend for Streamr Core, facilitating things like:
 
 - Creating streams
 - Creating products for the Streamr Marketplace
@@ -30,7 +30,7 @@ provide.
 - Redis
 - A Streamr Network consisting of [broker nodes](https://github.com/streamr-dev/broker)
 
-You might also want to run the [Core UI](https://github.com/streamr-dev/streamr-platform).
+You might also want to run the [Core frontend](https://github.com/streamr-dev/core-frontend).
 
 ## Building and running
 
@@ -75,11 +75,8 @@ These are also available as pre-shared run configurations if you use IntelliJ ID
 
 This codebase comprises two logical parts:
 
-- API which allows users to create and manage streams, canvases, products, and other Streamr resources. The API
+- API which allows users to create and manage streams, products, and other Streamr resources. The API
   controllers and services are mainly written in Groovy and use the Grails web framework.
-- The Engine is written mostly in Java and is responsible for executing canvases (user-defined processes which process,
-  analyze and act upon real-time event data. The APIs, on the other hand, is responsible for API(s), rendered web pages
-  and other front-facing functionality.
 
 When you run the app with `grails run-app`, most changes to source code files are automatically hot reloaded into the
 running JVM process.
