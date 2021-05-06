@@ -5,6 +5,7 @@ import {StreamrClient} from 'streamr-client'
 import {Response} from 'node-fetch'
 
 describe('Streams API', () => {
+    const ZERO_ADDRESS: string = '0x0000000000000000000000000000000000000000'
 
     let streamId: string
     const streamOwner = StreamrClient.generateEthereumAccount()
@@ -219,10 +220,60 @@ describe('Streams API', () => {
         })
     })
 
+    describe('GET /api/v1/streams/:id/publisher/0x0000000000000000000000000000000000000000', () => {
+        it('should return 200 if the stream has public publish permission', async () => {
+            const stream = await getStreamrClient(streamOwner).createStream({
+                name: 'Stream with public publish permission',
+            })
+            const permission = await Streamr.api.v1.streams
+                .grantPublic(stream.id, 'stream_publish')
+                .withAuthenticatedUser(streamOwner)
+                .call()
+            const response = await Streamr.api.v1.streams
+                .publisher(stream.id, ZERO_ADDRESS)
+                .call()
+            assert.equal(response.status, 200)
+        })
+        it('should return 404 if the stream does not have public publish permission', async () => {
+            const stream = await getStreamrClient(streamOwner).createStream({
+                name: 'Stream without public publish permission',
+            })
+            const response = await Streamr.api.v1.streams
+                .publisher(stream.id, ZERO_ADDRESS)
+                .call()
+            assert.equal(response.status, 404)
+        })
+    })
+
     describe('GET /api/v1/streams/:id/subscribers', () => {
         it('does not require authentication', async () => {
             const json = await getStreamrClient(anonymousUser).getStreamSubscribers(streamId)
             assert.isOk(json)
+        })
+    })
+
+    describe('GET /api/v1/streams/:id/subscriber/0x0000000000000000000000000000000000000000', () => {
+        it('should return 200 if the stream has public subscribe permission', async () => {
+            const stream = await getStreamrClient(streamOwner).createStream({
+                name: 'Stream with public subscribe permission',
+            })
+            const permission = await Streamr.api.v1.streams
+                .grantPublic(stream.id, 'stream_subscribe')
+                .withAuthenticatedUser(streamOwner)
+                .call()
+            const response = await Streamr.api.v1.streams
+                .subscriber(stream.id, ZERO_ADDRESS)
+                .call()
+            assert.equal(response.status, 200)
+        })
+        it('should return 404 if the stream does not have public subscribe permission', async () => {
+            const stream = await getStreamrClient(streamOwner).createStream({
+                name: 'Stream without public subscribe permission',
+            })
+            const response = await Streamr.api.v1.streams
+                .subscriber(stream.id, ZERO_ADDRESS)
+                .call()
+            assert.equal(response.status, 404)
         })
     })
 
