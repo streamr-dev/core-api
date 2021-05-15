@@ -290,10 +290,16 @@ class Streams {
             .endpoint('streams', id, 'permissions', 'me')
     }
 
-    delete(streamId: string, permissionId: number) {
+    deletePermission(streamId: string, permissionId: number) {
         return new StreamrApiRequest(this.options)
             .method('DELETE')
             .endpoint('streams', streamId, 'permissions', String(permissionId))
+    }
+
+    delete(streamId: string) {
+        return new StreamrApiRequest(this.options)
+            .method('DELETE')
+            .endpoint('streams', streamId)
     }
 
     list(queryParams: any) {

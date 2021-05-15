@@ -1,7 +1,7 @@
-import { assert } from 'chai'
+import {assert} from 'chai'
 import Streamr from './streamr-api-clients'
-import { StreamrClient, Stream, StreamPermision } from 'streamr-client'
-import { getSessionToken, getStreamrClient } from './test-utilities'
+import {Stream, StreamPermision, StreamrClient} from 'streamr-client'
+import {getSessionToken, getStreamrClient} from './test-utilities'
 
 describe('Permissions API', () => {
     const me = StreamrClient.generateEthereumAccount()
@@ -54,16 +54,16 @@ describe('Permissions API', () => {
         })
     })
 
-    describe('DELETE /api/v1/streams/{streamId}/permissions/{permissionId}', function() {
+    describe('DELETE /api/v1/streams/{streamId}/permissions/{permissionId}', function () {
         let stream: Stream
 
-        before(async function() {
+        before(async function () {
             stream = await getStreamrClient(me).createStream({
                 name: `permissions-api.test.js-delete-${Date.now()}`
             })
         })
 
-        it('delete a permission', async function() {
+        it('delete a permission', async function () {
             const permissionResponse = await Streamr.api.v1.streams
                 .grant(stream.id, StreamrClient.generateEthereumAccount().address, 'stream_get')
                 .withAuthenticatedUser(me)
@@ -72,13 +72,13 @@ describe('Permissions API', () => {
             assert.equal(permissionResponse.status, 200)
 
             const response = await Streamr.api.v1.streams
-                .delete(stream.id, permissionGet.id)
+                .deletePermission(stream.id, permissionGet.id)
                 .withAuthenticatedUser(me)
                 .call()
             assert.equal(response.status, 204)
         })
 
-        it('deleting last share permission is not allowed', async function() {
+        it('deleting last share permission is not allowed', async function () {
             const ownPermissionsResponse = await Streamr.api.v1.streams
                 .getOwnPermissions(stream.id)
                 .withAuthenticatedUser(me)
@@ -88,13 +88,13 @@ describe('Permissions API', () => {
             const sharePermission = ownPermissions.filter((permission: StreamPermision) => permission.operation === 'stream_share')[0]
 
             const response = await Streamr.api.v1.streams
-                .delete(stream.id, sharePermission.id)
+                .deletePermission(stream.id, sharePermission.id)
                 .withAuthenticatedUser(me)
                 .call()
             assert.equal(response.status, 500)
         })
 
-        it('deletes permissions', async function() {
+        it('deletes permissions', async function () {
             const ownPermissionsResponse = await Streamr.api.v1.streams
                 .getOwnPermissions(stream.id)
                 .withAuthenticatedUser(me)
@@ -103,9 +103,9 @@ describe('Permissions API', () => {
             assert.equal(ownPermissionsResponse.status, 200)
             const permissionsToDelete = ownPermissions.filter((permission: StreamPermision) => permission.operation !== 'stream_share')
 
-            permissionsToDelete.forEach(async function(permission: StreamPermision) {
+            permissionsToDelete.forEach(async function (permission: StreamPermision) {
                 const response = await Streamr.api.v1.streams
-                    .delete(stream.id, permission.id)
+                    .deletePermission(stream.id, permission.id)
                     .withAuthenticatedUser(me)
                     .call()
                 assert.equal(response.status, 204, `delete permission unexpected status ${response.status} for ${JSON.stringify(permission)}`)

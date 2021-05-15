@@ -1,12 +1,17 @@
 package com.unifina.controller
 
 import com.unifina.domain.*
-import com.unifina.service.*
+import com.unifina.service.NotPermittedException
+import com.unifina.service.PermissionService
+import com.unifina.service.StorageNodeService
+import com.unifina.service.ValidationException
 import grails.converters.JSON
 import grails.validation.Validateable
+import groovy.transform.ToString
 import org.apache.log4j.Logger
 
 @Validateable
+@ToString
 class StorageNodeAddCommand {
 	String address
 

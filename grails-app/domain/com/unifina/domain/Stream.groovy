@@ -37,7 +37,8 @@ class Stream implements Comparable {
 
 	static hasMany = [
 		permissions: Permission,
-		products: Product
+		products: Product,
+		storageNodes: StreamStorageNode,
 	]
 	static mappedBy = [
 		products: 'streams',
@@ -70,6 +71,7 @@ class Stream implements Comparable {
 		autoConfigure defaultValue: "true"
 		storageDays defaultValue: DEFAULT_STORAGE_DAYS
 		exampleType enumType: "ordinal", defaultValue: ExampleType.NOT_SET.ordinal(), index: "example_type_idx"
+		storageNodes cascade: "all-delete-orphan"
 	}
 
 	@Override
