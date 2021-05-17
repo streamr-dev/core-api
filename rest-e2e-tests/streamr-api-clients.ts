@@ -302,6 +302,18 @@ class Streams {
             .endpoint('streams')
             .withQueryParams(queryParams)
     }
+
+    publisher(streamId: string, address: string) {
+        return new StreamrApiRequest(this.options)
+            .method('GET')
+            .endpoint('streams', streamId, 'publisher', address)
+    }
+
+    subscriber(streamId: string, address: string) {
+        return new StreamrApiRequest(this.options)
+            .method('GET')
+            .endpoint('streams', streamId, 'subscriber', address)
+    }
 }
 
 class Subscriptions {

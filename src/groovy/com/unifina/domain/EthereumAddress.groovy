@@ -1,15 +1,16 @@
 package com.unifina.domain
 
-import org.web3j.crypto.Keys
 import com.unifina.service.ValidationException
 import grails.compiler.GrailsCompileStatic
 import groovy.transform.EqualsAndHashCode
+import org.web3j.crypto.Keys
 import org.web3j.crypto.Sign
 import org.web3j.utils.Numeric
 
 @GrailsCompileStatic
 @EqualsAndHashCode
 class EthereumAddress {
+	static final String ZERO = "0x0000000000000000000000000000000000000000"
 	private static final String PREFIX = "0x"
 
 	private String value

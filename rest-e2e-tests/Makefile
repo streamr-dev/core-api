@@ -9,7 +9,7 @@ $(error error: Your version of make ($(shell make -v|head -1|cut -f 3 -d ' ')) d
 endif
 
 LANG = en_US.UTF-8
-SHELL = bash
+SHELL = /bin/bash
 .SHELLFLAGS = -eu -o pipefail -c # run '/bin/bash ... -c /bin/cmd'
 .ONESHELL:
 .DEFAULT_GOAL = all
@@ -61,11 +61,11 @@ test/server/wait: ## Wait for server to come online
 test: vendor test/e2e test/stress ## Run tests
 
 .PHONY: test/e2e
-test/e2e: ## Run end to end tests
+test/e2e: vendor ## Run end to end tests
 	$(call npm, run test:e2e)
 
 .PHONY: test/stress
-test/stress: ## Run stress tests
+test/stress: vendor ## Run stress tests
 	$(call npm, run test:stress)
 
 .PHONY: clean

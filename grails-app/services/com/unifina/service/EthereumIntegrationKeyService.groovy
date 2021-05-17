@@ -6,13 +6,9 @@ import com.unifina.domain.User
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import groovy.transform.CompileStatic
-import org.apache.commons.codec.DecoderException
-import org.apache.commons.codec.binary.Hex
-import org.ethereum.crypto.ECKey
 import org.web3j.crypto.Credentials
+import org.web3j.crypto.ECKeyPair
 import org.web3j.crypto.Keys
-
-import java.security.SignatureException
 
 class EthereumIntegrationKeyService {
 
@@ -28,8 +24,6 @@ class EthereumIntegrationKeyService {
 			address = challengeService.verifyChallengeAndGetAddress(challengeID, challenge, signature)
 		} catch (ChallengeVerificationFailedException e) {
 			throw e
-		} catch (SignatureException | DecoderException e) {
-			throw new ApiException(400, "ADDRESS_RECOVERY_ERROR", e.message)
 		}
 
 		assertUnique(address)
@@ -118,9 +112,8 @@ class EthereumIntegrationKeyService {
 	@CompileStatic
 	public static String getAddress(String privateKey) {
 		BigInteger pk = new BigInteger(privateKey, 16)
-		ECKey key = ECKey.fromPrivate(pk)
-		String publicKey = Hex.encodeHexString(key.getAddress())
-		return publicKey
+		ECKeyPair keyPair = ECKeyPair.create(pk)
+		return Keys.getAddress(keyPair.publicKey)
 	}
 
 	@CompileStatic

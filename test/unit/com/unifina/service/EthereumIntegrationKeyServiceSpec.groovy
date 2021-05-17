@@ -8,6 +8,7 @@ import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import groovy.json.JsonSlurper
+import org.web3j.crypto.ECKeyPair
 import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin)
@@ -28,6 +29,13 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		userService = service.userService = Mock(UserService)
 		subscriptionService = service.subscriptionService = Mock(SubscriptionService)
 		permissionService = service.permissionService = Mock(PermissionService)
+	}
+
+	void "get address from private key"() {
+		setup:
+		ECKeyPair keyPair = ECKeyPair.create("0x0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF".getBytes())
+		expect:
+		EthereumIntegrationKeyService.getAddress(keyPair.privateKey.toString()) == "37aa29f21ccb6a280830ccbefdbb40b9f5b08b34"
 	}
 
 	void "createEthereumID() creates IntegrationKey with proper values"() {

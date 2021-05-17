@@ -158,6 +158,15 @@ class StreamApiController {
 		if (stream == null) {
 			throw new NotFoundException("Stream", id)
 		} else {
+			// Use zero address to mark public permissions
+			if (address == EthereumAddress.ZERO) {
+				if (permissionService.checkAnonymousAccess(stream, Operation.STREAM_PUBLISH)) {
+					render(status: 200)
+				} else {
+					render(status: 404)
+				}
+				return
+			}
 			if (streamService.isStreamEthereumPublisher(stream, address)) {
 				render(status: 200)
 			} else {
@@ -172,6 +181,15 @@ class StreamApiController {
 		if (stream == null) {
 			throw new NotFoundException("Stream", id)
 		} else {
+			// Use zero address to mark public permissions
+			if (address == EthereumAddress.ZERO) {
+				if (permissionService.checkAnonymousAccess(stream, Operation.STREAM_SUBSCRIBE)) {
+					render(status: 200)
+				} else {
+					render(status: 404)
+				}
+				return
+			}
 			if (streamService.isStreamEthereumSubscriber(stream, address)) {
 				render(status: 200)
 			} else {
