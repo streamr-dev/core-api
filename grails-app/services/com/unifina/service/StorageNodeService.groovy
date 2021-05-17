@@ -29,14 +29,6 @@ class StorageNodeService {
 		}
 	}
 
-	private static final class StorageNodeThreadErrorHandler implements Thread.UncaughtExceptionHandler {
-		@Override
-		void uncaughtException(Thread t, Throwable e) {
-			String s = String.format("error while processing storage node request: %s", t.getName())
-			log.error(s, e)
-		}
-	}
-
 	StreamStorageNode addStorageNodeToStream(EthereumAddress storageNodeAddress, String streamId) {
 		boolean exists = (StreamStorageNode.findByStorageNodeAddressAndStreamId(storageNodeAddress.toString(), streamId) != null)
 		if (!exists) {
@@ -50,7 +42,7 @@ class StorageNodeService {
 					streamService,
 					streamrClientService)
 				Thread thread = new Thread(task)
-				thread.setUncaughtExceptionHandler(new StorageNodeThreadErrorHandler())
+				thread.setUncaughtExceptionHandler(new NotifyStorageNodeTask.ErrorHandler())
 				thread.setName(String.format("AddStorageNodeTask[%s,%s]", streamId, storageNodeAddress))
 				thread.start()
 				return saved
@@ -74,7 +66,7 @@ class StorageNodeService {
 					streamService,
 					streamrClientService)
 				Thread thread = new Thread(task)
-				thread.setUncaughtExceptionHandler(new StorageNodeThreadErrorHandler())
+				thread.setUncaughtExceptionHandler(new NotifyStorageNodeTask.ErrorHandler())
 				thread.setName(String.format("RemoveStorageNodeTask[%s,%s]", streamId, storageNodeAddress))
 				thread.start()
 			} catch (Exception e) {

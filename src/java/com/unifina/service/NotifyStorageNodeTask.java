@@ -8,8 +8,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 final class NotifyStorageNodeTask implements Runnable {
-
 	private static final Logger log = Logger.getLogger(NotifyStorageNodeTask.class);
+
+	static final class ErrorHandler implements Thread.UncaughtExceptionHandler {
+		@Override
+		public void uncaughtException(Thread t, Throwable e) {
+			String s = String.format("error while processing storage node request %s", t.getName());
+			log.error(s, e);
+		}
+	}
 
 	public enum AssigmentEvent {
 		STREAM_ADDED,
@@ -42,7 +49,8 @@ final class NotifyStorageNodeTask implements Runnable {
 			com.streamr.client.rest.Stream assignmentStream = client.getStream(StorageNodeService.createAssignmentStreamId());
 			client.publish(assignmentStream, createMessage());
 		} catch (Exception e) {
-			log.error("Unable to notify StorageNode: streamId=" + streamId + ", event=" + eventType, e);
+			String msg = String.format("Unable to notify StorageNode: streamId=%s, event=%s, address=%s", streamId, eventType, storageNodeAddress);
+			log.error(msg, e);
 		}
 	}
 
