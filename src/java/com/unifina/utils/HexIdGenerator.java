@@ -1,6 +1,6 @@
 package com.unifina.utils;
 
-import org.hibernate.engine.SessionImplementor;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.id.IdentifierGenerator;
 import org.web3j.utils.Numeric;
 
