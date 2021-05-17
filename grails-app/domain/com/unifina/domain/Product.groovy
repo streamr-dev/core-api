@@ -3,6 +3,7 @@ package com.unifina.domain
 import com.unifina.utils.HexIdGenerator
 import grails.compiler.GrailsCompileStatic
 import grails.persistence.Entity
+import grails.validation.Validateable
 import groovy.json.JsonSlurper
 
 @Entity
@@ -50,7 +51,7 @@ class Product {
 
 	static hasMany = [
 		permissions: Permission,
-		streams    : Stream
+		streams: Stream,
 	]
 
 	enum Type {
@@ -111,28 +112,28 @@ class Product {
 	@GrailsCompileStatic
 	Map toMap(boolean isOwner = false) {
 		def map = [
-			id                          : id,
-			type                        : type.toString(),
-			name                        : name,
-			description                 : description,
-			imageUrl                    : imageUrl,
-			thumbnailUrl                : thumbnailUrl,
-			category                    : category?.id,
-			streams                     : streams*.id,
-			state                       : state.toString(),
-			previewStream               : previewStream?.id,
-			previewConfigJson           : previewConfigJson,
-			created                     : dateCreated,
-			updated                     : lastUpdated,
-			ownerAddress                : ownerAddress,
-			beneficiaryAddress          : beneficiaryAddress,
-			pricePerSecond              : pricePerSecond.toString(),
-			isFree                      : this.isFree(),
-			priceCurrency               : priceCurrency.toString(),
+			id: id,
+			type: type.toString(),
+			name: name,
+			description: description,
+			imageUrl: imageUrl,
+			thumbnailUrl: thumbnailUrl,
+			category: category?.id,
+			streams: streams*.id,
+			state: state.toString(),
+			previewStream: previewStream?.id,
+			previewConfigJson: previewConfigJson,
+			created: dateCreated,
+			updated: lastUpdated,
+			ownerAddress: ownerAddress,
+			beneficiaryAddress: beneficiaryAddress,
+			pricePerSecond: pricePerSecond.toString(),
+			isFree: this.isFree(),
+			priceCurrency: priceCurrency.toString(),
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
-			owner                       : owner.name,
-			contact                     : contact?.toMap(),
-			termsOfUse                  : termsOfUse?.toMap(),
+			owner: owner.name,
+			contact: contact?.toMap(),
+			termsOfUse: termsOfUse?.toMap(),
 		]
 		if (isOwner && pendingChanges != null) {
 			JsonSlurper slurper = new JsonSlurper()
@@ -147,25 +148,25 @@ class Product {
 	@GrailsCompileStatic
 	Map toSummaryMap() {
 		def map = [
-			id                          : id,
-			type                        : type.toString(),
-			name                        : name,
-			description                 : description,
-			imageUrl                    : imageUrl,
-			thumbnailUrl                : thumbnailUrl,
-			category                    : category?.id,
-			state                       : state.toString(),
-			previewStream               : previewStream?.id,
-			previewConfigJson           : previewConfigJson,
-			created                     : dateCreated,
-			updated                     : lastUpdated,
-			ownerAddress                : ownerAddress,
-			beneficiaryAddress          : beneficiaryAddress,
-			pricePerSecond              : pricePerSecond.toString(),
-			isFree                      : this.isFree(),
-			priceCurrency               : priceCurrency.toString(),
+			id: id,
+			type: type.toString(),
+			name: name,
+			description: description,
+			imageUrl: imageUrl,
+			thumbnailUrl: thumbnailUrl,
+			category: category?.id,
+			state: state.toString(),
+			previewStream: previewStream?.id,
+			previewConfigJson: previewConfigJson,
+			created: dateCreated,
+			updated: lastUpdated,
+			ownerAddress: ownerAddress,
+			beneficiaryAddress: beneficiaryAddress,
+			pricePerSecond: pricePerSecond.toString(),
+			isFree: this.isFree(),
+			priceCurrency: priceCurrency.toString(),
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
-			owner                       : owner.name
+			owner: owner.name
 		]
 		if (type == Type.DATAUNION) {
 			map.put("dataUnionVersion", dataUnionVersion)
@@ -183,5 +184,73 @@ class Product {
 
 	static isEthereumAddress = { String value ->
 		value ==~ /^0x[a-fA-F0-9]{40}$/ ?: "validation.isEthereumAddress"
+	}
+}
+
+@GrailsCompileStatic
+@Validateable
+class Contact implements Serializable {
+	// Contact's email address.
+	String email
+	// Contact's URL address.
+	String url
+	// Social media link 1
+	String social1
+	// Social media link 2
+	String social2
+	// Social media link 3
+	String social3
+	// Social media link 4
+	String social4
+
+	static constraints = {
+		email(nullable: true, validator: EmailValidator.validateNullEmail, maxSize: 255)
+		url(nullable: true, url: true, maxSize: 2048)
+		social1(nullable: true, url: true, maxSize: 2048)
+		social2(nullable: true, url: true, maxSize: 2048)
+		social3(nullable: true, url: true, maxSize: 2048)
+		social4(nullable: true, url: true, maxSize: 2048)
+	}
+
+	Map toMap() {
+		return [
+			email: email,
+			url: url,
+			social1: social1,
+			social2: social2,
+			social3: social3,
+			social4: social4,
+		]
+	}
+}
+
+@GrailsCompileStatic
+@Validateable
+class TermsOfUse implements Serializable {
+	Boolean redistribution = true
+	Boolean commercialUse = true
+	Boolean reselling = true
+	Boolean storage = true
+	String termsUrl
+	String termsName
+
+	static constraints = {
+		redistribution(nullable: false)
+		commercialUse(nullable: false)
+		reselling(nullable: false)
+		storage(nullable: false)
+		termsUrl(nullable: true, url: true, maxSize: 2048)
+		termsName(nullable: true, maxSize: 100)
+	}
+
+	Map toMap() {
+		return [
+			redistribution: redistribution,
+			commercialUse: commercialUse,
+			reselling: reselling,
+			storage: storage,
+			termsUrl: termsUrl,
+			termsName: termsName,
+		]
 	}
 }
