@@ -104,6 +104,7 @@ jobs:
           streamr-docker-dev start core-api
           streamr-docker-dev wait
           cd rest-e2e-tests
+          npm install -g npm@7.13.0
           npm ci
       - name: Run End to End tests
         run: |
