@@ -1,8 +1,7 @@
 package com.unifina.utils;
 
 import org.apache.commons.codec.binary.Base64;
-import org.hibernate.HibernateException;
-import org.hibernate.engine.SessionImplementor;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.id.IdentifierGenerator;
 
 import java.io.Serializable;
@@ -35,7 +34,7 @@ public class IdGenerator implements IdentifierGenerator {
 	}
 
 	@Override
-	public Serializable generate(SessionImplementor session, Object object) throws HibernateException {
+	public Serializable generate(SessionImplementor session, Object o) {
 		return generate();
 	}
 }

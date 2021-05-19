@@ -72,7 +72,7 @@ grails.project.dependency.resolution = {
 		compile('com.amazonaws:aws-java-sdk-s3:1.11.908')
 		compile('org.imgscalr:imgscalr-lib:4.2')
 		compile('commons-io:commons-io:2.4')
-		compile('com.streamr:client:2.2.0') {
+		compile('com.streamr:client:2.2.1') {
 			excludes "org.web3j:codegen:*"
 		}
 
@@ -95,7 +95,7 @@ grails.project.dependency.resolution = {
 
 		compile(":mail:1.0.8-SNAPSHOT")
 
-		runtime(':hibernate:3.6.10.19') // or :hibernate4:4.3.10
+		runtime(':hibernate4:4.3.10')
 		runtime(":cors:1.3.0") {
 			excludes('spring-security-core')
 			excludes('spring-security-web')
