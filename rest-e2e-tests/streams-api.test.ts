@@ -409,11 +409,9 @@ describe('Streams API', () => {
 
         it('deletes streams storage nodes', async () => {
             const storageNodeAddress = StreamrClient.generateEthereumAccount().address
-            console.log(storageNodeAddress)
             const stream = await getStreamrClient(streamOwner).createStream({
                 name: 'stream-id-' + Date.now(),
             })
-            console.log(stream.id)
             const storage = await Streamr.api.v1.storagenodes
                 .addStorageNodeToStream(storageNodeAddress, stream.id)
                 .withAuthenticatedUser(streamOwner)
