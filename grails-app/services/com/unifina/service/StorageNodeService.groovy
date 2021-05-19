@@ -5,12 +5,9 @@ import com.unifina.domain.Stream
 import com.unifina.domain.StreamStorageNode
 import com.unifina.utils.ApplicationConfig
 import grails.compiler.GrailsCompileStatic
-import org.apache.log4j.Logger
 
 @GrailsCompileStatic
 class StorageNodeService {
-	private static final Logger log = Logger.getLogger(StorageNodeService.class)
-
 	StreamService streamService
 	StreamrClientService streamrClientService
 
@@ -33,22 +30,18 @@ class StorageNodeService {
 		boolean exists = (StreamStorageNode.findByStorageNodeAddressAndStreamId(storageNodeAddress.toString(), streamId) != null)
 		if (!exists) {
 			StreamStorageNode instance = new StreamStorageNode(streamService.getStream(streamId), storageNodeAddress.toString())
-			try {
-				StreamStorageNode saved = instance.save(validate: true, failOnError: true)
-				NotifyStorageNodeTask task = new NotifyStorageNodeTask(
-					storageNodeAddress,
-					streamId,
-					NotifyStorageNodeTask.AssigmentEvent.STREAM_ADDED,
-					streamService,
-					streamrClientService)
-				Thread thread = new Thread(task)
-				thread.setUncaughtExceptionHandler(new NotifyStorageNodeTask.ErrorHandler())
-				thread.setName(String.format("AddStorageNodeTask[%s,%s]", streamId, storageNodeAddress))
-				thread.start()
-				return saved
-			} catch (Exception e) {
-				log.error("error while adding a new storage node to stream", e)
-			}
+			StreamStorageNode saved = instance.save(validate: true, failOnError: true)
+			NotifyStorageNodeTask task = new NotifyStorageNodeTask(
+				storageNodeAddress,
+				streamId,
+				NotifyStorageNodeTask.AssigmentEvent.STREAM_ADDED,
+				streamService,
+				streamrClientService)
+			Thread thread = new Thread(task)
+			thread.setUncaughtExceptionHandler(new NotifyStorageNodeTask.ErrorHandler())
+			thread.setName(String.format("AddStorageNodeTask[%s,%s]", streamId, storageNodeAddress))
+			thread.start()
+			return saved
 		} else {
 			throw new DuplicateNotAllowedException("StorageNode", storageNodeAddress.toString())
 		}
@@ -57,21 +50,17 @@ class StorageNodeService {
 	void removeStorageNodeFromStream(EthereumAddress storageNodeAddress, String streamId) {
 		StreamStorageNode instance = StreamStorageNode.findByStorageNodeAddressAndStreamId(storageNodeAddress.toString(), streamId)
 		if (instance != null) {
-			try {
-				instance.delete(flush: true)
-				NotifyStorageNodeTask task = new NotifyStorageNodeTask(
-					storageNodeAddress,
-					streamId,
-					NotifyStorageNodeTask.AssigmentEvent.STREAM_REMOVED,
-					streamService,
-					streamrClientService)
-				Thread thread = new Thread(task)
-				thread.setUncaughtExceptionHandler(new NotifyStorageNodeTask.ErrorHandler())
-				thread.setName(String.format("RemoveStorageNodeTask[%s,%s]", streamId, storageNodeAddress))
-				thread.start()
-			} catch (Exception e) {
-				log.error("error while removing a storage node from stream", e)
-			}
+			instance.delete(flush: true)
+			NotifyStorageNodeTask task = new NotifyStorageNodeTask(
+				storageNodeAddress,
+				streamId,
+				NotifyStorageNodeTask.AssigmentEvent.STREAM_REMOVED,
+				streamService,
+				streamrClientService)
+			Thread thread = new Thread(task)
+			thread.setUncaughtExceptionHandler(new NotifyStorageNodeTask.ErrorHandler())
+			thread.setName(String.format("RemoveStorageNodeTask[%s,%s]", streamId, storageNodeAddress))
+			thread.start()
 		} else {
 			throw new NotFoundException("StorageNode", storageNodeAddress.toString())
 		}
