@@ -8,7 +8,6 @@ import grails.compiler.GrailsCompileStatic
 
 @GrailsCompileStatic
 class StorageNodeService {
-
 	StreamService streamService
 	StreamrClientService streamrClientService
 
@@ -30,13 +29,19 @@ class StorageNodeService {
 	StreamStorageNode addStorageNodeToStream(EthereumAddress storageNodeAddress, String streamId) {
 		boolean exists = (StreamStorageNode.findByStorageNodeAddressAndStreamId(storageNodeAddress.toString(), streamId) != null)
 		if (!exists) {
-			StreamStorageNode instance = new StreamStorageNode(
-				streamId: streamId,
-				storageNodeAddress: storageNodeAddress.toString()
-			)
-			StreamStorageNode saved = instance.save(validate: true)
-			new NotifyStorageNodeTask(storageNodeAddress, streamId, NotifyStorageNodeTask.AssigmentEvent.STREAM_ADDED, streamService, streamrClientService).start()
-			return saved;
+			StreamStorageNode instance = new StreamStorageNode(streamService.getStream(streamId), storageNodeAddress.toString())
+			StreamStorageNode saved = instance.save(validate: true, failOnError: true)
+			NotifyStorageNodeTask task = new NotifyStorageNodeTask(
+				storageNodeAddress,
+				streamId,
+				NotifyStorageNodeTask.AssigmentEvent.STREAM_ADDED,
+				streamService,
+				streamrClientService)
+			Thread thread = new Thread(task)
+			thread.setUncaughtExceptionHandler(new NotifyStorageNodeTask.ErrorHandler())
+			thread.setName(String.format("AddStorageNodeTask[%s,%s]", streamId, storageNodeAddress))
+			thread.start()
+			return saved
 		} else {
 			throw new DuplicateNotAllowedException("StorageNode", storageNodeAddress.toString())
 		}
@@ -45,8 +50,17 @@ class StorageNodeService {
 	void removeStorageNodeFromStream(EthereumAddress storageNodeAddress, String streamId) {
 		StreamStorageNode instance = StreamStorageNode.findByStorageNodeAddressAndStreamId(storageNodeAddress.toString(), streamId)
 		if (instance != null) {
-			instance.delete()
-			new NotifyStorageNodeTask(storageNodeAddress, streamId, NotifyStorageNodeTask.AssigmentEvent.STREAM_REMOVED, streamService, streamrClientService).start()
+			instance.delete(flush: true)
+			NotifyStorageNodeTask task = new NotifyStorageNodeTask(
+				storageNodeAddress,
+				streamId,
+				NotifyStorageNodeTask.AssigmentEvent.STREAM_REMOVED,
+				streamService,
+				streamrClientService)
+			Thread thread = new Thread(task)
+			thread.setUncaughtExceptionHandler(new NotifyStorageNodeTask.ErrorHandler())
+			thread.setName(String.format("RemoveStorageNodeTask[%s,%s]", streamId, storageNodeAddress))
+			thread.start()
 		} else {
 			throw new NotFoundException("StorageNode", storageNodeAddress.toString())
 		}

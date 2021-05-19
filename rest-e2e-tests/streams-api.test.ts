@@ -369,4 +369,64 @@ describe('Streams API', () => {
             })
         })
     })
+
+    describe('DELETE /api/v1/streams/:id', () => {
+        it('happy path', async () => {
+            const stream = await getStreamrClient(streamOwner).createStream({
+                name: 'stream-id-' + Date.now(),
+            })
+            const deleted = await Streamr.api.v1.streams
+                .delete(stream.id)
+                .withAuthenticatedUser(streamOwner)
+                .call()
+            assert.equal(deleted.status, 204)
+            assert.equal(deleted.size, 0)
+        })
+        it('deletes a stream with a permission', async () => {
+            const stream = await getStreamrClient(streamOwner).createStream({
+                name: 'stream-id-' + Date.now(),
+            })
+            const sharePermission = await Streamr.api.v1.streams
+                .grant(stream.id, anonymousUser.address, 'stream_share')
+                .withAuthenticatedUser(streamOwner)
+                .call()
+            assert.equal(sharePermission.status, 200)
+            const deleted = await Streamr.api.v1.streams
+                .delete(stream.id)
+                .withAuthenticatedUser(streamOwner)
+                .call()
+            assert.equal(deleted.status, 204)
+            assert.equal(deleted.size, 0)
+        })
+
+        async function assertStreamsStorageNodeCount(streamId: string, storageNodeCount: number) {
+            const nodes = await Streamr.api.v1.storagenodes
+                .findStorageNodesByStream(streamId)
+                .call()
+            const json = await nodes.json()
+            assert.equal(json.length, storageNodeCount)
+        }
+
+        it('deletes streams storage nodes', async () => {
+            const storageNodeAddress = StreamrClient.generateEthereumAccount().address
+            const stream = await getStreamrClient(streamOwner).createStream({
+                name: 'stream-id-' + Date.now(),
+            })
+            const storage = await Streamr.api.v1.storagenodes
+                .addStorageNodeToStream(storageNodeAddress, stream.id)
+                .withAuthenticatedUser(streamOwner)
+                .call()
+            assert.equal(storage.status, 200)
+
+            await assertStreamsStorageNodeCount(stream.id, 1);
+
+            const deleted = await Streamr.api.v1.streams
+                .delete(stream.id)
+                .withAuthenticatedUser(streamOwner)
+                .call()
+            assert.equal(deleted.status, 204)
+            assert.equal(deleted.size, 0)
+            // calling assertStreamsStorageNodeCount(stream.id, 0) will return 404 because Stream is deleted
+        })
+    })
 })
