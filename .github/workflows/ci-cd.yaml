@@ -209,6 +209,7 @@ jobs:
       - uses: actions/setup-java@v2.1.0
         with:
           java-version: '8'
+          distribution: 'zulu'
       - name: setup-client-testing
         working-directory: streamr-client-testing
         run: |
