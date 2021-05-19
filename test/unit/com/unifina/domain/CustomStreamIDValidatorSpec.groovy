@@ -31,6 +31,7 @@ class CustomStreamIDValidatorSpec extends Specification {
 		"sub.my-domain.eth/foo//bar" | false
 		"foobar.eth/abc/def" | false
 		"sub.my-domain.eth" | false
+		"0xAbcdeabCDE123456789012345678901234567890" | false
 		"0x1111111111111111111111111111111111111111/abc/def" | false
 		"foo" | false
 		"" | false
