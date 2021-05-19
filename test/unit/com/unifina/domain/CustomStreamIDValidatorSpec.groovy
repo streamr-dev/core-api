@@ -1,5 +1,6 @@
 package com.unifina.domain
 
+import org.apache.commons.lang3.StringUtils
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -32,6 +33,7 @@ class CustomStreamIDValidatorSpec extends Specification {
 		"foobar.eth/abc/def" | false
 		"sub.my-domain.eth" | false
 		"0xAbcdeabCDE123456789012345678901234567890" | false
+		"0xAbcdeabCDE123456789012345678901234567890/" + StringUtils.repeat("x", 300) | false
 		"0x1111111111111111111111111111111111111111/abc/def" | false
 		"foo" | false
 		"" | false

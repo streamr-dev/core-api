@@ -27,6 +27,8 @@ class CustomStreamIDValidator {
 	private static final String ETHEREUM_ADDRESS_REGEX = "0x[a-fA-F0-9]{40}"
 	private static final Pattern STREAM_ID_REGEX = Pattern.compile("^((?:" + ETHEREUM_ADDRESS_REGEX + ")|(?:" + ENS_DOMAIN_REGEX +"))(?:" + PATH_REGEX + ")\$")
 
+	private static final int MAX_LENGTH = 255
+
 	DomainValidator domainValidator
 
 	CustomStreamIDValidator(DomainValidator domainValidator) {
@@ -37,13 +39,14 @@ class CustomStreamIDValidator {
 		if (id == null) {
 			return true
 		} else {
-			Matcher matcher = STREAM_ID_REGEX.matcher(id)
-			if (matcher.matches()) {
-				String domain = matcher.group(1)
-				return domainValidator.isOwnedBy(domain, creator)
-			} else {
-				return false;
+			if (id.length() <= MAX_LENGTH) {
+				Matcher matcher = STREAM_ID_REGEX.matcher(id)
+				if (matcher.matches()) {
+					String domain = matcher.group(1)
+					return domainValidator.isOwnedBy(domain, creator)
+				}
 			}
+			return false;
 		}
 	}
 }
