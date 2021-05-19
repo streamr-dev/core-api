@@ -13,7 +13,7 @@ class CustomStreamIDValidator {
 
 	// ENS domain rules:
 	// - must contain two or more segments separated by dot
-    // - segments can contain chars a-z, A-Z, 0-9 and -
+	// - segments can contain chars a-z, A-Z, 0-9 and -
 	// https://docs.ens.domains/contract-api-reference/name-processing
 	private static final String ENS_DOMAIN_REGEX = "(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z0-9-]+"
 
