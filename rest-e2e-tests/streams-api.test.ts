@@ -403,9 +403,6 @@ describe('Streams API', () => {
             const nodes = await Streamr.api.v1.storagenodes
                 .findStorageNodesByStream(streamId)
                 .call()
-            if (nodes.status == 404) {
-                return 0
-            }
             const json = await nodes.json()
             assert.equal(json.length, storageNodeCount)
         }
@@ -431,9 +428,7 @@ describe('Streams API', () => {
                 .call()
             assert.equal(deleted.status, 204)
             assert.equal(deleted.size, 0)
-
-            // assert returns 404
-            await assertStreamsStorageNodeCount(stream.id, 0)
+            // calling assertStreamsStorageNodeCount(stream.id, 0) will return 404 because Stream is deleted
         })
     })
 })
