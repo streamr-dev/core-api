@@ -25,13 +25,16 @@ endif
 node_version = $(shell cat .nvmrc)
 define npm
 	@$(eval npm_args=$(1))
-	bash -e -o pipefail -l -c "source $(nvm_sh) && nvm exec $(node_version) npm $(npm_args)"
+	bash -e -o pipefail -l -c "source $(nvm_sh) && CXXFLAGS=-std=c++14 nvm exec $(node_version) npm $(npm_args)"
 endef
 
 all: clean vendor test/server/wait test ## Set up and test
 
 node_modules: ## Run 'npm ci' if directory doesn't exist
 	$(call npm, ci)
+
+npm_install: ## Run 'npm install'
+	$(call npm, install)
 
 vendor: node_modules ## Install source code packages
 
@@ -77,4 +80,3 @@ clean: ## Remove generated files
 .PHONY: help
 help: ## Show Help
 	@grep -E '^[a-zA-Z0-9_\-\/]+%?:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "%-20s %s\n", $$1, $$2}' | sort
-

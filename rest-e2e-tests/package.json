@@ -6,8 +6,8 @@
   "repository": "https://github.com/streamr-dev/core-api",
   "scripts": {
     "test": "npm run test:e2e && npm run test:stress",
-    "test:e2e": "ts-mocha *.test.* --exclude '*.stress-test.*' --recursive --color false --exit --timeout 5000",
-    "test:stress": "ts-mocha *.stress-test.* --recursive --color false --exit"
+    "test:e2e": "ts-mocha src/*.test.* --exclude 'src/*.stress-test.*' --recursive --color false --exit --timeout 5000",
+    "test:stress": "ts-mocha src/*.stress-test.* --recursive --color false --exit"
   },
   "author": "Streamr developers",
   "license": "AGPL-3.0-only",
@@ -18,14 +18,12 @@
   "dependencies": {
     "@ethersproject/wallet": "5.1.0",
     "ajv": "6.12.6",
-    "async-wait-until": "2.0.5",
     "chai": "4.3.4",
     "form-data": "4.0.0",
     "lodash": "4.17.21",
     "mocha": "8.4.0",
     "node-fetch": "2.6.1",
-    "sleep-promise": "9.1.0",
-    "streamr-client": "5.3.0-alpha.3",
+    "streamr-client": "5.4.1",
     "ts-mocha": "8.0.0",
     "typescript": "4.2.4"
   },
