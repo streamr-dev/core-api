@@ -6,8 +6,8 @@
   "repository": "https://github.com/streamr-dev/core-api",
   "scripts": {
     "test": "npm run test:e2e && npm run test:stress",
-    "test:e2e": "ts-mocha *.test.* --exclude '*.stress-test.*' --recursive --color false --exit --timeout 5000",
-    "test:stress": "ts-mocha *.stress-test.* --recursive --color false --exit"
+    "test:e2e": "ts-mocha src/*.test.* --exclude 'src/*.stress-test.*' --recursive --color false --exit --timeout 5000",
+    "test:stress": "ts-mocha src/*.stress-test.* --recursive --color false --exit"
   },
   "author": "Streamr developers",
   "license": "AGPL-3.0-only",
