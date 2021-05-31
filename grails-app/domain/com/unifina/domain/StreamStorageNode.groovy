@@ -1,24 +1,18 @@
 package com.unifina.domain
 
+import com.unifina.utils.IdGenerator
 import grails.persistence.Entity
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
 @Entity
-@EqualsAndHashCode(includes = "streamId,storageNodeAddress")
+@EqualsAndHashCode(includes = "id,streamId,storageNodeAddress,dateCreated")
 @ToString
-class StreamStorageNode implements Serializable {
-	String streamId
+class StreamStorageNode {
+	String id
+	String streamId // TODO: remove streamId?
 	String storageNodeAddress
 	Date dateCreated
-
-	StreamStorageNode(final Stream stream, final String storageNodeAddress) {
-		Objects.requireNonNull(stream, "stream")
-		this.stream = stream
-		this.streamId = stream.getId()
-		Objects.requireNonNull(storageNodeAddress, "storageNodeAddress")
-		this.storageNodeAddress = storageNodeAddress
-	}
 
 	static belongsTo = [
 		stream: Stream,
@@ -30,10 +24,7 @@ class StreamStorageNode implements Serializable {
 	}
 
 	static mapping = {
-		id composite: [
-			'streamId',
-			'storageNodeAddress',
-		]
+		id(generator: IdGenerator.name)
 		stream(insertable: false, updateable: false)
 	}
 

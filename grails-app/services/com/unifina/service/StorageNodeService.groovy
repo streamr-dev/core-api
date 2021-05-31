@@ -12,25 +12,53 @@ class StorageNodeService {
 	StreamrClientService streamrClientService
 
 	List<Stream> findStreamsByStorageNode(EthereumAddress storageNodeAddress) {
-		List<StreamStorageNode> items = StreamStorageNode.findAllByStorageNodeAddress(storageNodeAddress.toString())
-		Iterable<Serializable> streamIds = items.collect { it.streamId } as Iterable<Serializable>
-		return Stream.getAll(streamIds)
+		List<StreamStorageNode> nodes = StreamStorageNode.findAllByStorageNodeAddress(storageNodeAddress.toString())
+		List<Stream> results = new ArrayList<>()
+		for (StreamStorageNode node : nodes) {
+			Stream stream = node.getStream()
+			results.add(stream)
+		}
+		return results
 	}
 
-	List<StreamStorageNode> findStorageNodesByStream(String streamId) {
-		boolean streamExists = (Stream.get(streamId) != null)
-		if (streamExists) {
-			return StreamStorageNode.findAllByStreamId(streamId)
+	Set<StreamStorageNode> findStorageNodesByStream(String streamId) {
+		Stream stream = streamService.getStream(streamId)
+		if (stream != null) {
+			return stream.getStorageNodes()
 		} else {
 			throw new NotFoundException("Stream", streamId)
 		}
 	}
 
+	StreamStorageNode findStorageNodeByAddress(Stream stream, EthereumAddress address) {
+		for (final StreamStorageNode node : stream.getStorageNodes()) {
+			if (node.getStorageNodeAddress() == address.toString()) {
+				return node
+			}
+		}
+		return null
+	}
+
+	boolean hasStorageNodeWithAddress(Stream stream, EthereumAddress address) {
+		for (final StreamStorageNode node : stream.getStorageNodes()) {
+			if (node.getStorageNodeAddress() == address.toString()) {
+				return true
+			}
+		}
+		return false
+	}
+
 	StreamStorageNode addStorageNodeToStream(EthereumAddress storageNodeAddress, String streamId) {
-		boolean exists = (StreamStorageNode.findByStorageNodeAddressAndStreamId(storageNodeAddress.toString(), streamId) != null)
-		if (!exists) {
-			StreamStorageNode instance = new StreamStorageNode(streamService.getStream(streamId), storageNodeAddress.toString())
-			StreamStorageNode saved = instance.save(validate: true, failOnError: true)
+		Stream stream = streamService.getStream(streamId)
+		if (stream == null) {
+			throw new NotFoundException("Stream", streamId)
+		}
+		if (!hasStorageNodeWithAddress(stream, storageNodeAddress)) {
+			StreamStorageNode node = new StreamStorageNode(
+				storageNodeAddress: storageNodeAddress.toString(),
+				streamId: streamId)
+			stream.addToStorageNodes(node)
+			stream.save(validate: true, failOnError: true)
 			NotifyStorageNodeTask task = new NotifyStorageNodeTask(
 				storageNodeAddress,
 				streamId,
@@ -41,15 +69,23 @@ class StorageNodeService {
 			thread.setUncaughtExceptionHandler(new NotifyStorageNodeTask.ErrorHandler())
 			thread.setName(String.format("AddStorageNodeTask[%s,%s]", streamId, storageNodeAddress))
 			thread.start()
-			return saved
+			return node
 		} else {
+			// TODO: https://linear.app/streamr/issue/BACK-155/assign-a-stream-to-a-storage-node-when-it-has-already-been-assigned
+			// TODO: return an instance of StorageNode?
+			//return findStorageNodeByAddress(stream, storageNodeAddress)
 			throw new DuplicateNotAllowedException("StorageNode", storageNodeAddress.toString())
 		}
 	}
 
 	void removeStorageNodeFromStream(EthereumAddress storageNodeAddress, String streamId) {
-		StreamStorageNode instance = StreamStorageNode.findByStorageNodeAddressAndStreamId(storageNodeAddress.toString(), streamId)
+		Stream stream = streamService.getStream(streamId)
+		if (stream == null) {
+			throw new NotFoundException("Stream", streamId)
+		}
+		StreamStorageNode instance = findStorageNodeByAddress(stream, storageNodeAddress)
 		if (instance != null) {
+			stream.removeFromStorageNodes(instance)
 			instance.delete(flush: true)
 			NotifyStorageNodeTask task = new NotifyStorageNodeTask(
 				storageNodeAddress,

@@ -1,5 +1,6 @@
 package com.unifina.domain
 
+
 import grails.converters.JSON
 import grails.persistence.Entity
 import groovy.transform.CompileStatic
