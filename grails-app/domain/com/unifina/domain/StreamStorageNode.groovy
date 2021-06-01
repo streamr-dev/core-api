@@ -10,7 +10,7 @@ import groovy.transform.ToString
 @ToString
 class StreamStorageNode {
 	String id
-	String streamId // TODO: remove streamId?
+	String streamId
 	String storageNodeAddress
 	Date dateCreated
 
