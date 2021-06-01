@@ -35,7 +35,7 @@ class StorageNodeApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def findStorageNodesByStream(String streamId) {
-		List<StreamStorageNode> streamStorageNodes = storageNodeService.findStorageNodesByStream(streamId)
+		Set<StreamStorageNode> streamStorageNodes = storageNodeService.findStorageNodesByStream(streamId)
 		return render(streamStorageNodes*.toMap() as JSON)
 	}
 
