@@ -129,7 +129,7 @@ describe('Storage Node API', () => {
 
 		it('duplicate', async () => {
 			const response = await addStorageNodeToStream(storageNodeAddress, streamId, streamOwner);
-			assert.equal(response.status, 400)
+			assert.equal(response.status, 200)
 		});
 
 		it('validation error', async() => {
