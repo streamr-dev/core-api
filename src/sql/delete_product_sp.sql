@@ -7,7 +7,7 @@ create procedure delete_product(
 begin
 	declare sid varchar(255) default '';
 	declare eof bool default false;
-    declare cur_stream_ids cursor for
+	declare cur_stream_ids cursor for
 		select stream_id from product_streams where product_id = pid;
 	declare continue handler for not found set eof := true;
 
@@ -16,7 +16,6 @@ begin
 	end if;
 
 	select 'starting to delete' as 'message', pid as 'product_id';
-	delete from permission where product_id = pid;
 	open cur_stream_ids;
 	get_stream_ids: loop
 		fetch cur_stream_ids into sid;
@@ -25,12 +24,13 @@ begin
 		end if;
 		if sid is not null then
 			select sid as 'stream_id';
-			delete from permission where stream_id = sid;
+			delete from permission where stream_id = sid and subscription_id is not null;
 			delete from product_streams where stream_id = sid;
 		end if;
 	end loop get_stream_ids;
 	close cur_stream_ids;
 	delete from subscription where product_id = pid;
+	delete from permission where product_id = pid;
 	delete from product where id = pid;
 end$$
 delimiter ;
