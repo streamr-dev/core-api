@@ -10,11 +10,12 @@ updates:
       time: "08:00"
       timezone: "Europe/Helsinki"
     commit-message:
-      prefix: "build"
+      prefix: "ci"
       include: "scope"
     reviewers:
       - "kare"
-      - "teogeb"
+    assignees:
+      - "kare"
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
@@ -26,5 +27,18 @@ updates:
       include: "scope"
     reviewers:
       - "kare"
-      - "teogeb"
-
+    assignees:
+      - "kare"
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "08:00"
+      timezone: "Europe/Helsinki"
+    commit-message:
+      prefix: "build"
+      include: "scope"
+    reviewers:
+      - "kare"
+    assignees:
+      - "kare"
