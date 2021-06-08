@@ -23,18 +23,18 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		controller.permissionService = mainContext.getBean(PermissionService)
 		apiService = controller.apiService = Mock(ApiService)
 
-		me = new User(username: "me")
+		me = new User(username: "0x82D871cFA31cA2FD52bF98Dcce9f44FfDf47d50A")
 		me.save(validate: false)
 
-		def otherUser = new User(username: "other").save(validate: false)
+		def otherUser = new User(username: "0x9f856b2BF24d0C74969DbC54F7AF429Bf012b2F0").save(validate: false)
 
 		// First use real streamService to create the streams
 		streamService = mainContext.getBean(StreamService)
 		streamService.permissionService = controller.permissionService
-		streamOne = streamService.createStream(new CreateStreamCommand(name: "stream", description: "description"), me, null)
-		streamTwoId = streamService.createStream(new CreateStreamCommand(name: "ztream"), me, null).id
-		streamThreeId = streamService.createStream(new CreateStreamCommand(name: "atream"), me, null).id
-		streamFourId = streamService.createStream(new CreateStreamCommand(name: "otherUserStream"), otherUser, null).id
+		streamOne = streamService.createStream(new CreateStreamCommand(id: me.username + "/stream", name: "stream", description: "description"), me, null)
+		streamTwoId = streamService.createStream(new CreateStreamCommand(id: me.username + "/ztream", name: "ztream"), me, null).id
+		streamThreeId = streamService.createStream(new CreateStreamCommand(id: me.username + "/atream", name: "atream"), me, null).id
+		streamFourId = streamService.createStream(new CreateStreamCommand(id: me.username + "/otherUserStream", name: "otherUserStream"), otherUser, null).id
 
 		controller.streamService = streamService
 	}
@@ -80,7 +80,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 
 		then:
 		response.json.length() == 1
-		response.json[0].id.length() == 22
+		response.json[0].id.length() == 49
 		response.json[0].name == "stream"
 		response.json[0].config == [
 			fields: []
@@ -329,7 +329,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		params.id = streamOne.id
 		request.method = "POST"
 		request.JSON = ["field1": "string"]
-		authenticatedAs(me) { controller.setFields()}
+		authenticatedAs(me) { controller.setFields() }
 
 		then:
 		1 * apiService.authorizedGetById(Stream, streamOne.id, me, Permission.Operation.STREAM_EDIT) >> streamOne
@@ -352,7 +352,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		1 * streamService.getStreamEthereumPublishers(streamOne) >> addresses
 		response.status == 200
 		response.json == [
-		    'addresses': addresses.toArray()
+			'addresses': addresses.toArray()
 		]
 	}
 

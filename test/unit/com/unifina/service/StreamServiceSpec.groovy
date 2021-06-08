@@ -8,7 +8,7 @@ import spock.lang.Specification
 @TestFor(StreamService)
 @Mock([Stream, User, IntegrationKey, Permission, PermissionService])
 class StreamServiceSpec extends Specification {
-	User me = new User(username: "me")
+	User me = new User(username: "0x83b20d83cd0565c6592b11b9bc5b5a0b2b8d6ba9")
 
 	def setup() {
 		me.save(validate: false, failOnError: true)
@@ -22,14 +22,14 @@ class StreamServiceSpec extends Specification {
 			name: "example stream",
 			exampleType: ExampleType.SHARE
 		)
-		s0.id = "stream-0"
+		s0.id = me.username + "/stream-0"
 		s0.save(failOnError: true)
 		streams << s0
 		Stream s1 = new Stream(
 			name: "example 2 stream",
 			exampleType: ExampleType.SHARE
 		)
-		s1.id = "stream-1"
+		s1.id = me.username + "/stream-1"
 		s1.save(failOnError: true)
 		streams << s1
 
@@ -61,22 +61,23 @@ class StreamServiceSpec extends Specification {
 
 	void "createStream results in all permissions for Stream"() {
 		when:
-		def stream = service.createStream(new CreateStreamCommand(name: "name"), me, null)
+		def stream = service.createStream(new CreateStreamCommand(id: me.username + "/name", name: "name"), me, null)
 
 		then:
 		Permission.findAllByStream(stream)*.toMap() == [
-			[id: 1, user: "me", operation: Permission.Operation.STREAM_GET.id],
-			[id: 2, user: "me", operation: Permission.Operation.STREAM_EDIT.id],
-			[id: 3, user: "me", operation: Permission.Operation.STREAM_DELETE.id],
-			[id: 4, user: "me", operation: Permission.Operation.STREAM_PUBLISH.id],
-			[id: 5, user: "me", operation: Permission.Operation.STREAM_SUBSCRIBE.id],
-			[id: 6, user: "me", operation: Permission.Operation.STREAM_SHARE.id],
+			[id: 1, user: "0x83b20d83cd0565c6592b11b9bc5b5a0b2b8d6ba9", operation: Permission.Operation.STREAM_GET.id],
+			[id: 2, user: "0x83b20d83cd0565c6592b11b9bc5b5a0b2b8d6ba9", operation: Permission.Operation.STREAM_EDIT.id],
+			[id: 3, user: "0x83b20d83cd0565c6592b11b9bc5b5a0b2b8d6ba9", operation: Permission.Operation.STREAM_DELETE.id],
+			[id: 4, user: "0x83b20d83cd0565c6592b11b9bc5b5a0b2b8d6ba9", operation: Permission.Operation.STREAM_PUBLISH.id],
+			[id: 5, user: "0x83b20d83cd0565c6592b11b9bc5b5a0b2b8d6ba9", operation: Permission.Operation.STREAM_SUBSCRIBE.id],
+			[id: 6, user: "0x83b20d83cd0565c6592b11b9bc5b5a0b2b8d6ba9", operation: Permission.Operation.STREAM_SHARE.id],
 		]
 	}
 
 	void "createStream uses its params"() {
 		when:
 		def params = new CreateStreamCommand(
+			id: me.username + "/test",
 			name: "Test stream",
 			description: "Test stream",
 			requireSignedData: true

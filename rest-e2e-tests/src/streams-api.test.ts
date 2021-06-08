@@ -14,7 +14,8 @@ describe('Streams API', () => {
 
     before(async () => {
         const response = await getStreamrClient(streamOwner).createStream({
-            name: 'stream-id-' + Date.now(),
+            id: '/default/stream/for/testing',
+            name: 'Stream name with date: ' + Date.now(),
         })
         streamId = response.id
     })
@@ -22,7 +23,7 @@ describe('Streams API', () => {
     describe('POST /api/v1/streams', function () {
 
         it('happy path', async function () {
-            const assertValidResponse = (json: any, properties: any, expectedId?: string) => {
+            const assertValidResponse = (json: any, properties: any, expectedId: string) => {
                 assert.equal(json.name, properties.name)
                 assert.equal(json.description, properties.description)
                 assert.deepEqual(json.config, properties.config)
@@ -30,11 +31,10 @@ describe('Streams API', () => {
                 assert.equal(json.autoConfigure, properties.autoConfigure)
                 assert.equal(json.storageDays, properties.storageDays)
                 assert.equal(json.inactivityThresholdHours, properties.inactivityThresholdHours)
-                if (expectedId !== undefined) {
-                    assert.equal(json.id, expectedId)
-                }
+                assert.equal(json.id, expectedId)
             }
             const properties = {
+                id: '/hello/world/stream',
                 name: 'Mock name',
                 description: 'Mock description',
                 config: {
@@ -52,10 +52,17 @@ describe('Streams API', () => {
                 uiChannel: false,
             }
             const createResponse = await getStreamrClient(streamOwner).createStream(properties)
-            assertValidResponse(createResponse, properties)
+            assertValidResponse(createResponse, properties, streamOwner.address.toLowerCase() + "/hello/world/stream")
             const streamId = createResponse.id
             const fetchResponse = await getStreamrClient(streamOwner).getStream(streamId)
             assertValidResponse(fetchResponse, properties, streamId)
+        })
+
+        it('missing id', async function () {
+            const request = getStreamrClient(streamOwner).createStream({
+                id: undefined,
+            })
+            await assertStreamrClientResponseError(request, 422)
         })
 
         it('invalid properties', async function () {
@@ -223,6 +230,7 @@ describe('Streams API', () => {
     describe('GET /api/v1/streams/:id/publisher/0x0000000000000000000000000000000000000000', () => {
         it('should return 200 if the stream has public publish permission', async () => {
             const stream = await getStreamrClient(streamOwner).createStream({
+                id: `/test-stream/${Date.now()}`,
                 name: 'Stream with public publish permission',
             })
             const permission = await Streamr.api.v1.streams
@@ -236,6 +244,7 @@ describe('Streams API', () => {
         })
         it('should return 404 if the stream does not have public publish permission', async () => {
             const stream = await getStreamrClient(streamOwner).createStream({
+                id: `/test-stream/${Date.now()}`,
                 name: 'Stream without public publish permission',
             })
             const response = await Streamr.api.v1.streams
@@ -255,6 +264,7 @@ describe('Streams API', () => {
     describe('GET /api/v1/streams/:id/subscriber/0x0000000000000000000000000000000000000000', () => {
         it('should return 200 if the stream has public subscribe permission', async () => {
             const stream = await getStreamrClient(streamOwner).createStream({
+                id: `/test-stream/${Date.now()}`,
                 name: 'Stream with public subscribe permission',
             })
             const permission = await Streamr.api.v1.streams
@@ -268,6 +278,7 @@ describe('Streams API', () => {
         })
         it('should return 404 if the stream does not have public subscribe permission', async () => {
             const stream = await getStreamrClient(streamOwner).createStream({
+                id: `/test-stream/${Date.now()}`,
                 name: 'Stream without public subscribe permission',
             })
             const response = await Streamr.api.v1.streams
@@ -373,6 +384,7 @@ describe('Streams API', () => {
     describe('DELETE /api/v1/streams/:id', () => {
         it('happy path', async () => {
             const stream = await getStreamrClient(streamOwner).createStream({
+                id: `/test-stream/${Date.now()}`,
                 name: 'stream-id-' + Date.now(),
             })
             const deleted = await Streamr.api.v1.streams
@@ -384,6 +396,7 @@ describe('Streams API', () => {
         })
         it('deletes a stream with a permission', async () => {
             const stream = await getStreamrClient(streamOwner).createStream({
+                id: `/test-stream/${Date.now()}`,
                 name: 'stream-id-' + Date.now(),
             })
             const sharePermission = await Streamr.api.v1.streams
@@ -410,6 +423,7 @@ describe('Streams API', () => {
         it('deletes streams storage nodes', async () => {
             const storageNodeAddress = StreamrClient.generateEthereumAccount().address
             const stream = await getStreamrClient(streamOwner).createStream({
+                id: `/test-stream/${Date.now()}`,
                 name: 'stream-id-' + Date.now(),
             })
             const storage = await Streamr.api.v1.storagenodes
