@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="all rest-e2e-tests" type="mocha-javascript-test-runner">
-    <node-interpreter>project</node-interpreter>
+    <node-interpreter>$PROJECT_DIR$/rest-e2e-tests/node_modules/.bin/ts-node</node-interpreter>
     <node-options />
     <mocha-package>$PROJECT_DIR$/rest-e2e-tests/node_modules/mocha</mocha-package>
     <working-directory>$PROJECT_DIR$/rest-e2e-tests</working-directory>
