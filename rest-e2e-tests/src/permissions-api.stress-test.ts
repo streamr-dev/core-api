@@ -1,9 +1,9 @@
-import { assert } from 'chai'
+import {assert} from 'chai'
 import Streamr from './streamr-api-clients'
-import { StreamrClient, Stream } from 'streamr-client'
-import { getStreamrClient } from './test-utilities'
+import {Stream, StreamrClient} from 'streamr-client'
+import {getStreamrClient} from './test-utilities'
 
-describe('POST /api/v1/streams/{id}/permissions', function() {
+describe('POST /api/v1/streams/{id}/permissions', function () {
 
 	this.timeout(200 * 1000)
 
@@ -12,6 +12,7 @@ describe('POST /api/v1/streams/{id}/permissions', function() {
 
 	before(async () => {
 		stream = await getStreamrClient(me).createStream({
+			id: `/permissions-api.test.js-${Date.now()}`,
 			name: `permissions-api.test.js-${Date.now()}`
 		})
 	})
@@ -32,7 +33,7 @@ describe('POST /api/v1/streams/{id}/permissions', function() {
 		const ITERATIONS = 50
 
 		it('survives a race condition when granting multiple permissions to a non-existing user using Ethereum address', async () => {
-			for (let i=0; i<ITERATIONS; i++) {
+			for (let i = 0; i < ITERATIONS; i++) {
 				console.log("\titeration: " + (i + 1))
 				const responses = await Promise.all(operations.map((operation) => {
 					return Streamr.api.v1.streams
@@ -46,7 +47,7 @@ describe('POST /api/v1/streams/{id}/permissions', function() {
 		})
 
 		it('survives a race condition when granting multiple permissions to a non-existing user using email address', async () => {
-			for (let i=0; i<ITERATIONS; i++) {
+			for (let i = 0; i < ITERATIONS; i++) {
 				console.log("\titeration: " + (i + 1))
 				const responses = await Promise.all(operations.map((operation) => {
 					return Streamr.api.v1.streams
