@@ -1,12 +1,12 @@
-import { assert } from 'chai'
-const fs = require('fs')
-const zlib = require('zlib')
+import {assert} from 'chai'
 import Streamr from './streamr-api-clients'
-import { SchemaValidator } from './schema-validator'
-import { assertResponseIsError, getStreamrClient, testUsers } from './test-utilities'
-import { EthereumAccount } from './EthereumAccount'
-import { StreamrClient } from 'streamr-client'
-import { Response } from 'node-fetch'
+import {SchemaValidator} from './schema-validator'
+import {assertResponseIsError, getStreamrClient, testUsers} from './test-utilities'
+import {EthereumAccount} from './EthereumAccount'
+import {StreamrClient} from 'streamr-client'
+import {Response} from 'node-fetch'
+import fs from 'fs'
+import zlib from 'zlib'
 
 const schemaValidator = new SchemaValidator()
 
@@ -38,26 +38,29 @@ async function createStreamAndReturnId(streamBody: any, user: EthereumAccount) {
     return stream.id
 }
 
-describe('Products API', function() {
+describe('Products API', function () {
     let genericProductBody: any
 
     let streamId1: string
     let streamId2: string
-	let streamId3: string
-	const productOwner = StreamrClient.generateEthereumAccount()
-	const otherUser = StreamrClient.generateEthereumAccount()
-	const devOpsUser = testUsers.devOpsUser
+    let streamId3: string
+    const productOwner = StreamrClient.generateEthereumAccount()
+    const otherUser = StreamrClient.generateEthereumAccount()
+    const devOpsUser = testUsers.devOpsUser
 
     this.timeout(1000 * 25)
 
     before(async () => {
         streamId1 = await createStreamAndReturnId({
+            id: `/test-stream/${Date.now()}`,
             name: 'stream-1'
         }, productOwner)
         streamId2 = await createStreamAndReturnId({
+            id: `/test-stream/${Date.now()}`,
             name: 'stream-2'
         }, productOwner)
         streamId3 = await createStreamAndReturnId({
+            id: `/test-stream/${Date.now()}`,
             name: 'stream-3'
         }, productOwner)
 
@@ -148,6 +151,7 @@ describe('Products API', function() {
 
         it('requires stream_share permission on streams (in body)', async () => {
             const streamId = await createStreamAndReturnId({
+                id: `/test-stream/${Date.now()}`,
                 name: 'other user\'s stream'
             }, otherUser)
 
@@ -173,7 +177,7 @@ describe('Products API', function() {
                     .call()
             })
 
-            it ('responds with 200', () => {
+            it('responds with 200', () => {
                 assert.equal(response.status, 200)
             })
 
@@ -227,20 +231,20 @@ describe('Products API', function() {
                     },
                 })
             })
-		})
+        })
 
-		it('set dataUnionVersion number', async () => {
-			const response = await Streamr.api.v1.products
-				.create({
-					type: 'DATAUNION',
-					dataUnionVersion: 2
-				})
-				.withAuthenticatedUser(productOwner)
-				.call()
-			assert.equal(response.status, 200)
-			const json = await response.json()
-			assert.equal(json.dataUnionVersion, 2)
-		});
+        it('set dataUnionVersion number', async () => {
+            const response = await Streamr.api.v1.products
+                .create({
+                    type: 'DATAUNION',
+                    dataUnionVersion: 2
+                })
+                .withAuthenticatedUser(productOwner)
+                .call()
+            assert.equal(response.status, 200)
+            const json = await response.json()
+            assert.equal(json.dataUnionVersion, 2)
+        });
     })
 
     describe('GET /api/v1/products/:id', () => {
@@ -994,7 +998,7 @@ describe('Products API', function() {
 
         it('verifies file contents', async () => {
             const response = await Streamr.api.v1.products
-                .uploadImage(createdProductId,  fs.createReadStream('./test-data/file.txt'))
+                .uploadImage(createdProductId, fs.createReadStream('./test-data/file.txt'))
                 .withAuthenticatedUser(productOwner)
                 .call()
             await assertResponseIsError(response, 415, 'UNSUPPORTED_FILE_TYPE')
@@ -1006,7 +1010,7 @@ describe('Products API', function() {
 
             before(async () => {
                 response = await Streamr.api.v1.products
-                    .uploadImage(createdProductId,  fs.createReadStream('./test-data/500-by-400-image.png'))
+                    .uploadImage(createdProductId, fs.createReadStream('./test-data/500-by-400-image.png'))
                     .withAuthenticatedUser(productOwner)
                     .call()
                 json = await response.json()
@@ -1049,7 +1053,7 @@ describe('Products API', function() {
 
             it('can replace existing image with a new image', async () => {
                 const response2 = await Streamr.api.v1.products
-                    .uploadImage(createdProductId,  fs.createReadStream('./test-data/500-by-400-image-2.png'))
+                    .uploadImage(createdProductId, fs.createReadStream('./test-data/500-by-400-image-2.png'))
                     .withAuthenticatedUser(productOwner)
                     .call()
                 const json2 = await response2.json()
@@ -1096,6 +1100,7 @@ describe('Products API', function() {
 
         it('requires stream_share permission on Stream', async () => {
             const streamId4 = await createStreamAndReturnId({
+                id: `/test-stream/${Date.now()}`,
                 name: 'stream-3'
             }, otherUser)
 

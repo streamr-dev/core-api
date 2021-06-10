@@ -20,7 +20,7 @@
   "properties": {
     "id": {
       "description": "Unique identifier for a stream",
-      "$ref": "#/definitions/resourceIdentifier"
+      "$ref": "#/definitions/streamId"
     },
     "partitions": {
       "description": "Number of partitions in this stream",
@@ -84,6 +84,12 @@
       "minLength": 1,
       "maxLength": 255,
       "pattern": "^[a-zA-Z0-9-_]+$"
+    },
+    "streamId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^[a-zA-Z0-9-_/]+$"
     }
   }
 }
