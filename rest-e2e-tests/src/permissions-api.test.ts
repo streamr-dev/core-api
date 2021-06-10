@@ -17,6 +17,7 @@ describe('Permissions API', () => {
 
         before(async () => {
             stream = await getStreamrClient(me).createStream({
+                id: `/test-stream/${Date.now()}`,
                 name: `permissions-api.test.js-${Date.now()}`
             })
         })
@@ -59,6 +60,7 @@ describe('Permissions API', () => {
 
         before(async function () {
             stream = await getStreamrClient(me).createStream({
+                id: `/test-stream/${Date.now()}`,
                 name: `permissions-api.test.js-delete-${Date.now()}`
             })
         })

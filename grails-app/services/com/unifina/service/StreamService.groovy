@@ -1,7 +1,6 @@
 package com.unifina.service
 
 import com.unifina.domain.*
-import com.unifina.utils.IdGenerator
 import com.unifina.utils.JSONUtil
 import grails.validation.Validateable
 import groovy.transform.CompileStatic
@@ -47,15 +46,15 @@ class StreamService {
 			storageDays: cmd.storageDays,
 			inactivityThresholdHours: cmd.inactivityThresholdHours,
 		)
-		if (cmd.id != null) {
-			if ((customStreamIDValidator != null) && (!customStreamIDValidator.validate(cmd.id, user))) {
-				throw new ValidationException(new FieldError("stream", "id", null))
-			}
-			stream.id = cmd.id
-		} else {
-			stream.id = IdGenerator.getShort()
+		stream.id = cmd.id
+		if ((customStreamIDValidator != null) && (!customStreamIDValidator.validate(cmd.id, user))) {
+			throw new ValidationException(new FieldError("stream", "id", cmd.id))
 		}
-		stream.name = ((cmd.name == null || cmd.name.trim() == "")) ? stream.id : cmd.name
+		if (cmd.name == null || cmd.name.trim() == "") {
+			stream.name = stream.id
+		} else {
+			stream.name = cmd.name
+		}
 
 		if (!stream.validate()) {
 			throw new ValidationException(stream.errors)

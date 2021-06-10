@@ -70,7 +70,7 @@
       "description": "Identifiers of streams that belong to this product",
       "type": "array",
       "items": {
-        "$ref": "#/definitions/resourceIdentifier"
+        "$ref": "#/definitions/streamId"
       }
     },
     "state": {
@@ -329,6 +329,12 @@
       "minLength": 1,
       "maxLength": 255,
       "pattern": "^[a-zA-Z0-9-_]+$"
+    },
+    "streamId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^[a-zA-Z0-9-_/]+$"
     }
   }
 }

@@ -1,8 +1,9 @@
 package com.unifina.domain
 
+import grails.compiler.GrailsCompileStatic
+
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import grails.compiler.GrailsCompileStatic
 
 @GrailsCompileStatic
 class CustomStreamIDValidator {
@@ -25,28 +26,27 @@ class CustomStreamIDValidator {
 	private static final String PATH_REGEX = "(?:(?:/[\\w\\.-]+)+\\w)|(?:/\\w)"
 
 	private static final String ETHEREUM_ADDRESS_REGEX = "0x[a-fA-F0-9]{40}"
-	private static final Pattern STREAM_ID_REGEX = Pattern.compile("^((?:" + ETHEREUM_ADDRESS_REGEX + ")|(?:" + ENS_DOMAIN_REGEX +"))(?:" + PATH_REGEX + ")\$")
+	private static final Pattern STREAM_ID_REGEX = Pattern.compile("^((?:" + ETHEREUM_ADDRESS_REGEX + ")|(?:" + ENS_DOMAIN_REGEX + "))(?:" + PATH_REGEX + ")\$")
 
 	private static final int MAX_LENGTH = 255
 
 	DomainValidator domainValidator
 
 	CustomStreamIDValidator(DomainValidator domainValidator) {
-		this.domainValidator = domainValidator;
+		this.domainValidator = domainValidator
 	}
 
 	boolean validate(String id, User creator) {
 		if (id == null) {
-			return true
-		} else {
-			if (id.length() <= MAX_LENGTH) {
-				Matcher matcher = STREAM_ID_REGEX.matcher(id)
-				if (matcher.matches()) {
-					String domain = matcher.group(1)
-					return domainValidator.isOwnedBy(domain, creator)
-				}
-			}
-			return false;
+			return false
 		}
+		if (id.length() <= MAX_LENGTH) {
+			Matcher matcher = STREAM_ID_REGEX.matcher(id)
+			if (matcher.matches()) {
+				String domain = matcher.group(1)
+				return domainValidator.isOwnedBy(domain, creator)
+			}
+		}
+		return false
 	}
 }

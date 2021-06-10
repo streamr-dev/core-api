@@ -3,42 +3,52 @@
 
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "daily"
+      interval: daily
       time: "08:00"
-      timezone: "Europe/Helsinki"
+      timezone: Europe/Helsinki
     commit-message:
-      prefix: "ci"
-      include: "scope"
+      prefix: ci
+      include: scope
     reviewers:
-      - "kare"
+      - kare
     assignees:
-      - "kare"
-  - package-ecosystem: "gradle"
-    directory: "/"
+      - kare
+    labels:
+      - github-actions
+      - dependencies
+  - package-ecosystem: docker
+    directory: /
     schedule:
-      interval: "daily"
+      interval: daily
       time: "08:00"
-      timezone: "Europe/Helsinki"
+      timezone: Europe/Helsinki
     commit-message:
-      prefix: "build"
-      include: "scope"
+      prefix: build
+      include: scope
     reviewers:
-      - "kare"
+      - kare
     assignees:
-      - "kare"
-  - package-ecosystem: "docker"
-    directory: "/"
+      - kare
+    labels:
+      - javascript
+      - dependencies
+  - package-ecosystem: npm
+    directory: /rest-e2e-tests
     schedule:
-      interval: "daily"
+      interval: daily
       time: "08:00"
-      timezone: "Europe/Helsinki"
+      timezone: Europe/Helsinki
     commit-message:
-      prefix: "build"
-      include: "scope"
+      prefix: test
+      include: scope
     reviewers:
-      - "kare"
+      - kare
     assignees:
-      - "kare"
+      - kare
+    labels:
+      - javascript
+      - dependencies
+
