@@ -216,7 +216,7 @@ jobs:
           ## npm install is used because package-lock.json could be from a previous client version.
           npm install
           ./gradlew fatjar
-      - uses: nick-invision/retry@v2.4.0
+      - uses: nick-invision/retry@v2.4.1
         name: run-client-testing
         with:
           max_attempts: 2
