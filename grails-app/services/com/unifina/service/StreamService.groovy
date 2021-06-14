@@ -48,7 +48,7 @@ class StreamService {
 		)
 		stream.id = cmd.id
 		if ((customStreamIDValidator != null) && (!customStreamIDValidator.validate(cmd.id, user))) {
-			throw new ValidationException(new FieldError("stream", "id", cmd.id))
+			throw new ValidationException(new FieldError("stream", "id", cmd.id, false, new String[0], new String[0], null))
 		}
 		if (cmd.name == null || cmd.name.trim() == "") {
 			stream.name = stream.id

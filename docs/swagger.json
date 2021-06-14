@@ -829,7 +829,7 @@
             "examples": {
               "application/json": {
                 "code": "VALIDATION_ERROR",
-                "message": "Validation failed for fields: category (typeMismatch)"
+                "message": "Invalid category: foo (typeMismatch)"
               }
             }
           }
@@ -1081,7 +1081,7 @@
             "examples": {
               "application/json": {
                 "code": "VALIDATION_ERROR",
-                "message": "Validation failed for fields: category (typeMismatch)"
+                "message": "Invalid category: foo (typeMismatch)"
               }
             }
           }
@@ -1409,7 +1409,7 @@
             "examples": {
               "application/json": {
                 "code": "VALIDATION_ERROR",
-                "message": "Validation failed for fields: blockNumber (nullable)"
+                "message": "Invalid blockNumber: foo (nullable)"
               }
             }
           }
@@ -1578,7 +1578,7 @@
             "examples": {
               "application/json": {
                 "code": "VALIDATION_ERROR",
-                "message": "Validation failed for fields: blockNumber (nullable)"
+                "message": "Invalid blockNumber: foo (nullable)"
               }
             }
           }
@@ -1661,7 +1661,7 @@
             "examples": {
               "application/json": {
                 "code": "VALIDATION_ERROR",
-                "message": "Validation failed for fields: blockNumber (nullable)"
+                "message": "Invalid blockNumber: foo (nullable)"
               }
             }
           }
@@ -2851,7 +2851,7 @@
             "examples": {
               "application/json": {
                 "code": "VALIDATION_ERROR",
-                "message": "Validation failed for fields: address"
+                "message": "Invalid address: foo"
               }
             }
           }

@@ -62,14 +62,15 @@ describe('Streams API', () => {
             const request = getStreamrClient(streamOwner).createStream({
                 id: undefined,
             })
-            await assertStreamrClientResponseError(request, 422)
+            await assertStreamrClientResponseError(request, 422, 'VALIDATION_ERROR', `Invalid id`)
         })
 
         it('invalid properties', async function () {
             const request = getStreamrClient(streamOwner).createStream({
+                id: `/${Date.now()}`,
                 partitions: 999,
             })
-            await assertStreamrClientResponseError(request, 422)
+            await assertStreamrClientResponseError(request, 422, 'VALIDATION_ERROR', `Invalid partitions: 999 (max.exceeded)`)
         })
 
         it('create with owned domain id', async function () {
@@ -96,7 +97,7 @@ describe('Streams API', () => {
                 id: streamId,
             }
             const request = getStreamrClient(streamOwner).createStream(properties)
-            await assertStreamrClientResponseError(request, 422)
+            await assertStreamrClientResponseError(request, 422, 'VALIDATION_ERROR', `Invalid id: ${streamId}`)
         })
 
         it('create stream with duplicate id', async function () {
@@ -109,7 +110,7 @@ describe('Streams API', () => {
             const response = await getStreamrClient(ensDomainOwner).createStream(properties)
             assert.equal(response.id, streamId)
             const errorResponse = getStreamrClient(ensDomainOwner).createStream(properties)
-            await assertStreamrClientResponseError(errorResponse, 400)
+            await assertStreamrClientResponseError(errorResponse, 400, 'DUPLICATE_NOT_ALLOWED', `Stream with id ${streamId} already exists`)
         })
 
         it('create stream with too long id', async function () {
@@ -121,27 +122,29 @@ describe('Streams API', () => {
                 id: streamId,
             }
             const response = getStreamrClient(ensDomainOwner).createStream(properties)
-            await assertStreamrClientResponseError(response, 422)
+            await assertStreamrClientResponseError(response, 422, 'VALIDATION_ERROR', `Invalid id: ${streamId}`)
         })
 
         it('create stream with too long description', async function () {
             let streamId = 'testdomain1.eth/foobar/' + Date.now()
+            const description = 'x'.repeat(256)
             const properties = {
                 id: streamId,
-                description: 'x'.repeat(256),
+                description
             }
             const response = getStreamrClient(ensDomainOwner).createStream(properties)
-            await assertStreamrClientResponseError(response, 422)
+            await assertStreamrClientResponseError(response, 422, 'VALIDATION_ERROR', `Invalid description: ${description}`)
         })
 
         it('create stream with too long name', async function () {
             let streamId = 'testdomain1.eth/foobar/' + Date.now()
+            const name = 'x'.repeat(256)
             const properties = {
                 id: streamId,
-                name: 'x'.repeat(256),
+                name
             }
             const response = getStreamrClient(ensDomainOwner).createStream(properties)
-            await assertStreamrClientResponseError(response, 422)
+            await assertStreamrClientResponseError(response, 422, 'VALIDATION_ERROR', `Invalid name: ${name}`)
         })
     })
 
