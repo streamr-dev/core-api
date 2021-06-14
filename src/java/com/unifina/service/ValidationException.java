@@ -1,6 +1,9 @@
 package com.unifina.service;
 import java.util.List;
 import java.util.Collections;
+import java.util.Objects;
+import java.util.stream.Stream;
+import java.util.stream.Collectors;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 
@@ -21,10 +24,20 @@ public class ValidationException extends RuntimeException {
 	}
 
 	private static String turnToMessage(List<FieldError> errors) {
-		String msg = "Validation failed for fields:\n";
-		for (FieldError error : errors) {
-			msg += error.getField() + " (" + error.getCode() + ")\n";
+		return "Invalid " + errors
+			.stream()
+			.map(ValidationException::createFieldErrorDescription)
+			.collect(Collectors.joining(", "));
+	}
+
+	private static String createFieldErrorDescription(FieldError error) {
+		String s = error.getField();
+		if (error.getRejectedValue() != null) {
+			s += ": " + error.getRejectedValue();
 		}
-		return msg;
+		if (error.getCode() != null) {
+			s += " (" + error.getCode() + ")";
+		}
+		return s;
 	}
 }

@@ -131,7 +131,7 @@ describe('Products API', function () {
                 .create(body)
                 .withAuthenticatedUser(productOwner)
                 .call()
-            await assertResponseIsError(response, 422, 'VALIDATION_ERROR', 'category (typeMismatch)')
+            await assertResponseIsError(response, 422, 'VALIDATION_ERROR', 'Invalid category: non-existing-category-id (typeMismatch)')
         })
 
         it('validates existence of streams (in body)', async () => {
@@ -146,7 +146,7 @@ describe('Products API', function () {
                 .create(body)
                 .withAuthenticatedUser(productOwner)
                 .call()
-            await assertResponseIsError(response, 422, 'VALIDATION_ERROR', 'streams (typeMismatch)')
+            await assertResponseIsError(response, 422, 'VALIDATION_ERROR', 'Invalid streams: [non-existing-stream-id-1, non-existing-stream-id-2] (typeMismatch)')
         })
 
         it('requires stream_share permission on streams (in body)', async () => {

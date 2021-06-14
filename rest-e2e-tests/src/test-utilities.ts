@@ -13,13 +13,15 @@ export const assertResponseIsError = async (response: any, statusCode: number, p
 	}
 }
 
-export const assertStreamrClientResponseError = async (request: any, expectedStatusCode: number) => {
+export const assertStreamrClientResponseError = async (request: any, expectedStatusCode: number, programmaticCode: string, includeInMessage: string) => {
 	return request
 		.then(() => {
 			assert.fail('Should response with an error code')
 		})
 		.catch((e: any) => {
 			assert.equal(e.response.status, expectedStatusCode)
+			assert.include(e.message, programmaticCode)
+			assert.include(e.message, includeInMessage)
 		})
 }
 
