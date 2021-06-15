@@ -1,9 +1,9 @@
 package com.unifina.service
 
+import com.streamr.s3.S3Client
 import com.unifina.domain.Category
 import com.unifina.domain.Product
 import com.unifina.domain.User
-import com.unifina.utils.FileUploadProvider
 import com.unifina.utils.ImageResizer
 import com.unifina.utils.ImageVerifier
 import grails.test.mixin.Mock
@@ -19,7 +19,7 @@ class ProductImageServiceSpec extends Specification {
 
 	void setup() {
 		service.imageResizer = Stub(ImageResizer)
-		service.fileUploadProvider = Stub(FileUploadProvider) {
+		service.s3Client = Stub(S3Client) {
 			uploadFile(_, _) >> new URL("https://streamr.network/files/id-0")
 		}
 
@@ -77,7 +77,7 @@ class ProductImageServiceSpec extends Specification {
 	}
 
 	void "replaceImage() uploads image via fileUploadProvider#uploadFile"() {
-		def fileUploadProvider = service.fileUploadProvider = Mock(FileUploadProvider)
+		def fileUploadProvider = service.s3Client = Mock(S3Client)
 		service.imageVerifier = Mock(ImageVerifier)
 		def bytes = new byte[256]
 
@@ -88,7 +88,7 @@ class ProductImageServiceSpec extends Specification {
 	}
 
 	void "replaceImage() does not invoke fileUploadProvider#deleteFile if Product does not have existing image"() {
-		def fileUploadProvider = service.fileUploadProvider = Mock(FileUploadProvider)
+		def fileUploadProvider = service.s3Client = Mock(S3Client)
 		service.imageVerifier = Mock(ImageVerifier)
 		def bytes = new byte[256]
 
@@ -99,7 +99,7 @@ class ProductImageServiceSpec extends Specification {
 	}
 
 	void "replaceImage() invokes fileUploadProvider#deleteFile if Product has existing image"() {
-		def fileUploadProvider = service.fileUploadProvider = Mock(FileUploadProvider)
+		def fileUploadProvider = service.s3Client = Mock(S3Client)
 		service.imageVerifier = Mock(ImageVerifier)
 		def bytes = new byte[256]
 		product.imageUrl = "https://streamr.network/files/2.png"

@@ -1,4 +1,4 @@
-package com.unifina.utils;
+package com.streamr.s3;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
@@ -15,19 +15,19 @@ import org.apache.log4j.Logger;
 import java.io.ByteArrayInputStream;
 import java.net.URL;
 
-public class S3FileUploadProvider implements FileUploadProvider {
-	private static final Logger log = Logger.getLogger(S3FileUploadProvider.class);
+public class S3ClientDefault implements S3Client {
+	private static final Logger log = Logger.getLogger(S3ClientDefault.class);
 	private final String bucketName;
 	private final AmazonS3 s3client;
 
-	public S3FileUploadProvider(String region, String bucketName) {
+	public S3ClientDefault(String region, String bucketName) {
 		this(AmazonS3ClientBuilder.standard()
 				.withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
 				.withRegion(region)
 				.build(), bucketName);
 	}
 
-	public S3FileUploadProvider(AmazonS3 s3client, String bucketName) {
+	public S3ClientDefault(AmazonS3 s3client, String bucketName) {
 		this.s3client = s3client;
 		this.bucketName = bucketName;
 	}

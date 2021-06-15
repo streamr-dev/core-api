@@ -1,20 +1,20 @@
-package com.unifina.utils
+package com.streamr.s3
 
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.DeleteObjectRequest
 import com.amazonaws.services.s3.model.PutObjectRequest
 import spock.lang.Specification
 
-class S3FileUploadProviderSpec extends Specification {
+class S3ClientSpec extends Specification {
 	void "uploadFile() calls AmazonS3.putObject()"() {
-		def s3Client = Mock(AmazonS3)
-		def fileUploadProvider = new S3FileUploadProvider(s3Client, "bucketName")
+		def amazonS3 = Mock(AmazonS3)
+		def s3Client = new S3ClientDefault(amazonS3, "bucketName")
 		def bytes = new byte[16]
 
 		when:
-		fileUploadProvider.uploadFile("key/filename", bytes)
+		s3Client.uploadFile("key/filename", bytes)
 		then:
-		1 * s3Client.putObject({ PutObjectRequest request ->
+		1 * amazonS3.putObject({ PutObjectRequest request ->
 			assert request.bucketName == "bucketName"
 			assert request.key == "key/filename"
 			assert request.inputStream.bytes == bytes
@@ -23,25 +23,25 @@ class S3FileUploadProviderSpec extends Specification {
 	}
 
 	void "uploadFile() returns URL for uploaded File"() {
-		def s3Client = Stub(AmazonS3) {
+		def amazonS3 = Stub(AmazonS3) {
 			getUrl("bucketName", "key/filename") >> new URL("https://streamr.network/files/file.png")
 		}
-		def fileUploadProvider = new S3FileUploadProvider(s3Client, "bucketName")
+		def s3Client = new S3ClientDefault(amazonS3, "bucketName")
 
 		when:
-		URL url = fileUploadProvider.uploadFile("key/filename", new byte[16])
+		URL url = s3Client.uploadFile("key/filename", new byte[16])
 		then:
 		url.toString() == "https://streamr.network/files/file.png"
 	}
 
 	void "deleteFile() calls AmazonS3.deleteObject()"() {
-		def s3Client = Mock(AmazonS3)
-		def fileUploadProvider = new S3FileUploadProvider(s3Client, "bucketName")
+		def amazonS3 = Mock(AmazonS3)
+		def s3Client = new S3ClientDefault(amazonS3, "bucketName")
 
 		when:
-		fileUploadProvider.deleteFile("https://s3-sa-east-1.amazonaws.com/bucketName/directory/filename")
+		s3Client.deleteFile("https://s3-sa-east-1.amazonaws.com/bucketName/directory/filename")
 		then:
-		1 * s3Client.deleteObject({ DeleteObjectRequest request ->
+		1 * amazonS3.deleteObject({ DeleteObjectRequest request ->
 			assert request.bucketName == "bucketName"
 			assert request.key == "directory/filename"
 			return true

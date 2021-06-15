@@ -1,8 +1,8 @@
-package com.unifina.utils;
+package com.streamr.s3;
 
 import java.net.URL;
 
-public interface FileUploadProvider {
+interface S3Client {
 	URL uploadFile(String fileName, byte[] contents);
 
 	void deleteFile(String fileName);
