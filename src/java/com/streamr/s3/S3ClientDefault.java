@@ -18,7 +18,7 @@ import java.net.URL;
 public class S3ClientDefault implements S3Client {
 	private static final Logger log = Logger.getLogger(S3ClientDefault.class);
 	private final String bucketName;
-	private final AmazonS3 s3client;
+	private final AmazonS3 amazonS3;
 
 	public S3ClientDefault(String region, String bucketName) {
 		this(AmazonS3ClientBuilder.standard()
@@ -27,8 +27,8 @@ public class S3ClientDefault implements S3Client {
 				.build(), bucketName);
 	}
 
-	public S3ClientDefault(AmazonS3 s3client, String bucketName) {
-		this.s3client = s3client;
+	public S3ClientDefault(AmazonS3 amazonS3, String bucketName) {
+		this.amazonS3 = amazonS3;
 		this.bucketName = bucketName;
 	}
 
@@ -38,7 +38,7 @@ public class S3ClientDefault implements S3Client {
 		try {
 			final ObjectMetadata metadata = new ObjectMetadata();
 			metadata.setContentLength(contents.length);
-			s3client.putObject(new PutObjectRequest(bucketName,
+			amazonS3.putObject(new PutObjectRequest(bucketName,
 					fileName,
 					new ByteArrayInputStream(contents),
 					metadata));
@@ -49,14 +49,14 @@ public class S3ClientDefault implements S3Client {
 			log.error(e);
 			throw new CommunicationErrorWithHostException();
 		}
-		return s3client.getUrl(bucketName, fileName);
+		return amazonS3.getUrl(bucketName, fileName);
 	}
 
 	@Override
 	public void deleteFile(String url) {
 		try {
 			AmazonS3URI s3Uri = new AmazonS3URI(url);
-			s3client.deleteObject(new DeleteObjectRequest(s3Uri.getBucket(), s3Uri.getKey()));
+			amazonS3.deleteObject(new DeleteObjectRequest(s3Uri.getBucket(), s3Uri.getKey()));
 		} catch (AmazonServiceException e) {
 			log.error(e);
 			throw new HostingServiceException();
