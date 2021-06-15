@@ -7,6 +7,8 @@ import com.unifina.utils.ImageResizer
 import com.unifina.utils.ImageVerifier
 import grails.transaction.Transactional
 
+import java.nio.file.Paths
+
 @Transactional
 class UserAvatarImageService {
 	private final long maxSize = 1024 * 1024 * 5
@@ -38,5 +40,10 @@ class UserAvatarImageService {
 		}
 		final String extension = filename.substring(filename.lastIndexOf(".")).toLowerCase()
 		return "avatar-images/${idGenerator.generate()}${extension}"
+	}
+
+	String copyImage(String imageUrl) {
+		String filename = Paths.get(imageUrl).getFileName().toString()
+		return s3Client.copyFile(imageUrl, generateFilename(filename))
 	}
 }
