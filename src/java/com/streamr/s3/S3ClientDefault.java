@@ -6,6 +6,7 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.AmazonS3URI;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -64,6 +65,24 @@ public class S3ClientDefault implements S3Client {
 			log.error(e);
 			throw new CommunicationErrorWithHostException();
 		}
+	}
+
+	@Override
+	public String copyFile(String fileAmazonS3Uri, String destinationKey) {
+		AmazonS3URI s3Uri = new AmazonS3URI(fileAmazonS3Uri);
+		String sourceKey = s3Uri.getKey();
+		CopyObjectRequest copyObjRequest = new CopyObjectRequest(this.bucketName, sourceKey, this.bucketName, destinationKey);
+		try {
+			amazonS3.copyObject(copyObjRequest);
+		} catch (AmazonServiceException e) {
+			log.error(e);
+			throw new HostingServiceException();
+		} catch (AmazonClientException e) {
+			log.error(e);
+			throw new CommunicationErrorWithHostException();
+		}
+		URL url = amazonS3.getUrl(this.bucketName, destinationKey);
+		return url.toString();
 	}
 
 	static class HostingServiceException extends ApiException {
