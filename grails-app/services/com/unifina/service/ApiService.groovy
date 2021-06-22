@@ -1,17 +1,10 @@
 package com.unifina.service
 
-import com.mashape.unirest.http.HttpResponse
-import com.mashape.unirest.http.Unirest
-import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
 import com.unifina.domain.Permission
 import com.unifina.domain.User
 import com.unifina.domain.Userish
 import grails.compiler.GrailsCompileStatic
-import grails.converters.JSON
-import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
-import org.codehaus.groovy.grails.web.json.JSONObject
 
 class ApiService {
 
@@ -60,41 +53,5 @@ class ApiService {
 			throw new NotFoundException(domainClass.simpleName, id)
 		}
 		return domainObject
-	}
-
-	@CompileStatic
-	Map post(String url, Map body, AuthorizationHeader authorizationHeader) {
-		def req = Unirest.post(url)
-
-		if (authorizationHeader) {
-			req.header("Authorization", authorizationHeader.toString())
-		}
-
-		req.header("Content-Type", "application/json")
-
-		log.info("request: $body")
-
-		HttpResponse<String> response = req.body((body as JSON).toString()).asString()
-
-		try {
-			if (response.getStatus() == 204) {
-				return [:]
-			} else if (response.getStatus() >= 200 && response.getStatus() < 300) {
-				Map responseBody = (JSONObject) JSON.parse(response.getBody())
-				return responseBody
-			} else {
-				// JSON error message?
-				Map responseBody
-				try {
-					responseBody = (JSONObject) JSON.parse(response.getBody())
-				} catch (Exception e) {
-					throw new UnexpectedApiResponseException("Got unexpected response from api call to $url: " + response.getBody())
-				}
-				throw new ApiException(response.getStatus(), responseBody.code?.toString(), responseBody.message?.toString())
-			}
-		} catch (ConverterException e) {
-			log.error("request: Failed to parse JSON response: " + response.getBody())
-			throw new RuntimeException("Failed to parse JSON response", e)
-		}
 	}
 }

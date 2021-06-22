@@ -59,7 +59,6 @@ grails.project.dependency.resolution = {
 		// https://stackoverflow.com/questions/8751508/grails-buildconfig-groovy-difference-between-build-compile-and-runtime
 
 		compile('log4j:log4j:1.2.16')
-		compile('com.mashape.unirest:unirest-java:1.4.9')
 		compile('biz.paluch.redis:lettuce:3.5.0.Final')
 		compile('com.google.code.findbugs:jsr305:3.0.2')
 		compile('org.jetbrains:annotations:17.0.0')
