@@ -1,7 +1,7 @@
 package com.unifina.service
 
+import com.streamr.s3.S3Client
 import com.unifina.domain.User
-import com.unifina.utils.FileUploadProvider
 import com.unifina.utils.ImageResizer
 import com.unifina.utils.ImageVerifier
 import grails.test.mixin.Mock
@@ -16,7 +16,7 @@ class UserAvatarImageServiceSpec extends Specification {
 
 	def setup() {
 		service.imageResizer = Stub(ImageResizer)
-		service.fileUploadProvider = Stub(FileUploadProvider) {
+		service.s3Client = Stub(S3Client) {
 			uploadFile(_, _) >> new URL("https://streamr.network/files/id-0")
 		}
 
@@ -63,18 +63,18 @@ class UserAvatarImageServiceSpec extends Specification {
 
 
 	void "replaceImage() uploads image via fileUploadProvider#uploadFile"() {
-		service.fileUploadProvider = Mock(FileUploadProvider)
+		service.s3Client = Mock(S3Client)
 		service.imageVerifier = Mock(ImageVerifier)
 		def bytes = new byte[256]
 
 		when:
 		service.replaceImage(user, bytes, filename)
 		then:
-		2 * service.fileUploadProvider.uploadFile(_, _)
+		2 * service.s3Client.uploadFile(_, _)
 	}
 
 	void "replaceImage() does not invoke fileUploadProvider#deleteFile if User does not have existing image"() {
-		service.fileUploadProvider = Mock(FileUploadProvider)
+		service.s3Client = Mock(S3Client)
 		service.imageVerifier = Mock(ImageVerifier)
 		def bytes = new byte[256]
 		user.imageUrlLarge = "https://streamr.network/files/1.png"
@@ -83,12 +83,12 @@ class UserAvatarImageServiceSpec extends Specification {
 		when:
 		service.replaceImage(user, bytes, filename)
 		then:
-		1 * service.fileUploadProvider.deleteFile("https://streamr.network/files/1.png")
-		1 * service.fileUploadProvider.deleteFile("https://streamr.network/files/2.png")
+		1 * service.s3Client.deleteFile("https://streamr.network/files/1.png")
+		1 * service.s3Client.deleteFile("https://streamr.network/files/2.png")
 	}
 
 	void "replaceImage() invokes fileUploadProvider#deleteFile if User has existing image"() {
-		service.fileUploadProvider = Mock(FileUploadProvider)
+		service.s3Client = Mock(S3Client)
 		service.imageVerifier = Mock(ImageVerifier)
 		service.imageResizer = Mock(ImageResizer)
 		def bytes = new byte[256]
@@ -98,7 +98,7 @@ class UserAvatarImageServiceSpec extends Specification {
 		service.replaceImage(user, bytes, filename)
 
 		then:
-		1 * service.fileUploadProvider.deleteFile("https://streamr.network/files/2.png")
+		1 * service.s3Client.deleteFile("https://streamr.network/files/2.png")
 	}
 
 	void "replaceImage() updates Product.imageUrlSmall"() {

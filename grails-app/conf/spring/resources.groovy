@@ -1,8 +1,8 @@
 import com.mchange.v2.c3p0.ComboPooledDataSource
-import com.unifina.utils.S3FileUploadProvider
+import com.streamr.s3.S3ClientDefault
 
 beans = {
-	fileUploadProvider(S3FileUploadProvider,
+	s3Client(S3ClientDefault,
 		(String) grailsApplication.config.streamr.fileUpload.s3.region,
 		(String) grailsApplication.config.streamr.fileUpload.s3.bucket
 	)
