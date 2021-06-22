@@ -68,7 +68,7 @@ grails.project.dependency.resolution = {
 		compile('org.web3j:core:4.8.4') {
 			excludes "org.java-websocket:Java-WebSocket:*" // Version conflict with com.streamr:client
 		}
-		compile('com.amazonaws:aws-java-sdk-s3:1.11.908')
+		compile('com.amazonaws:aws-java-sdk-s3:1.12.10')
 		compile('org.imgscalr:imgscalr-lib:4.2')
 		compile('commons-io:commons-io:2.4')
 		compile('com.streamr:client:2.2.1') {
