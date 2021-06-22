@@ -59,7 +59,6 @@ grails.project.dependency.resolution = {
 		// https://stackoverflow.com/questions/8751508/grails-buildconfig-groovy-difference-between-build-compile-and-runtime
 
 		compile('log4j:log4j:1.2.16')
-		compile('com.mashape.unirest:unirest-java:1.4.9')
 		compile('biz.paluch.redis:lettuce:3.5.0.Final')
 		compile('com.google.code.findbugs:jsr305:3.0.2')
 		compile('org.jetbrains:annotations:17.0.0')
@@ -69,7 +68,7 @@ grails.project.dependency.resolution = {
 		compile('org.web3j:core:4.8.4') {
 			excludes "org.java-websocket:Java-WebSocket:*" // Version conflict with com.streamr:client
 		}
-		compile('com.amazonaws:aws-java-sdk-s3:1.11.908')
+		compile('com.amazonaws:aws-java-sdk-s3:1.12.10')
 		compile('org.imgscalr:imgscalr-lib:4.2')
 		compile('commons-io:commons-io:2.4')
 		compile('com.streamr:client:2.2.1') {
