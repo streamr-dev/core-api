@@ -1,12 +1,16 @@
 package com.unifina.service
 
-import com.unifina.domain.*
+
+import com.unifina.domain.ExampleType
+import com.unifina.domain.Permission
+import com.unifina.domain.Stream
+import com.unifina.domain.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(StreamService)
-@Mock([Stream, User, IntegrationKey, Permission, PermissionService])
+@Mock([Stream, User, Permission, PermissionService])
 class StreamServiceSpec extends Specification {
 	User me = new User(username: "0x83b20d83cd0565c6592b11b9bc5b5a0b2b8d6ba9")
 

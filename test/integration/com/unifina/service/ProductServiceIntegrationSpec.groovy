@@ -28,9 +28,9 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 		[s1, s2, s3, s4].eachWithIndex { Stream s, int i -> s.id = "stream-id-${i + 1}" }
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: true)
 
-		troll = new User(username: "sylvester", name: "sylvester stallone", email: "s@s.com")
+		troll = new User(username: "0x0000000000000000000000000000000000000005", name: "sylvester stallone", email: "s@s.com")
 		troll.save(failOnError: true, validate: false)
-		user = new User(username: "arnold", name: "arnold schwarzenegger", email: "a@schwarzenegger.com")
+		user = new User(username: "0x0000000000000000000000000000000000000006", name: "arnold schwarzenegger", email: "a@schwarzenegger.com")
 		user.save(failOnError: true, validate: false)
 		p1 = new Product(
 			name: "troll product",
@@ -61,17 +61,9 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 		)
 		p2.save(failOnError: true, validate: true)
 
-		new IntegrationKey(
-			user: troll,
-			name: "ik1",
-			service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: "0x0000000000000000000000000000000000000005",
-			json: "{}"
-		).save(failOnError: true, validate: false)
-
-		fs1 = new SubscriptionFree(product: p1, user: troll, address: "0x0000000000000000000000000000000000000005", endsAt: new Date())
+		fs1 = new SubscriptionFree(product: p1, user: troll, endsAt: new Date())
 		fs1.save(failOnError: true, validate: true)
-		fs2 = new SubscriptionFree(product: p1, user: user, address: "0x0000000000000000000000000000000000000005", endsAt: new Date())
+		fs2 = new SubscriptionFree(product: p1, user: user, endsAt: new Date())
 		fs2.save(failOnError: true, validate: true)
 	}
 
@@ -84,7 +76,7 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 		service.subscriptionService.permissionService = new PermissionService()
 
 		when:
-		service.removeUsersProducts("sylvester")
+		service.removeUsersProducts("0x0000000000000000000000000000000000000005")
 
 		then:
 		Product.get(p1.id) == null

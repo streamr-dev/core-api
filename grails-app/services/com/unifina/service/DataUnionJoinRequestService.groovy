@@ -164,8 +164,8 @@ class DataUnionJoinRequestService {
 		// TODO CORE-1834: check if user already has a PENDING request
 		// TODO CORE-1834: OR if user already has a write permission to the stream
 
-		// Backend must check that the given memberAddress is one of the Ethereum IDs bound to the logged in user
-		if (user.getUsername() != cmd.memberAddress) {
+		// Backend must check that the given memberAddress is an Ethereum address bound to the logged in user
+		if (user.getUsername().toLowerCase() != cmd.memberAddress.toLowerCase()) {
 			throw new NotFoundException("Given member address is not owned by the user")
 		}
 

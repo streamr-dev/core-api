@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.unifina.domain.User
 import spock.lang.Specification
 
@@ -14,7 +13,7 @@ class EthereumIntegrationKeyServiceIntegrationSpec extends Specification {
 		).save(failOnError: true, validate: true)
 
 		User other = new User(
-			username: "0xD14197f71fC9b2F4F4c24ecE461fB0Ff7C91FD266",
+			username: "0xD14197f71fC9b2F4F4c24ecE461fB0Ff7C91FD26",
 			name: "ethereum-ik-spec-2@streamr.network",
 		).save(failOnError: true, validate: true)
 
