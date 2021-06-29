@@ -1,6 +1,5 @@
 package com.unifina.service
 
-import com.unifina.domain.IntegrationKey
 import com.unifina.domain.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -15,10 +14,9 @@ import java.util.concurrent.ExecutionException
 @FreshRuntime
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(BalanceService)
-@Mock([User, IntegrationKey])
+@Mock([User])
 class BalanceServiceSpec extends Specification {
 	def address = "0x494531425508c4Bc95E522b24fd571461583E916"
-	def address2 = "0x0000000000000000000000000000000000000001"
 
 	User me
 
@@ -28,51 +26,22 @@ class BalanceServiceSpec extends Specification {
 
 	def setup() {
 		service.web3jHelperService = Mock(Web3jHelperService)
-		me = new User(name: "me", username: "me@too.com").save(validate: false)
+		me = new User(name: "me", username: address).save(validate: false)
 	}
 
 	void "gets balances of keys a user has"() {
 		def expected = new BigInteger("100", 16)
-		def expected2 = new BigInteger("200", 16)
-
-		new IntegrationKey(
-			user: me,
-			service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: address,
-		).save(validate: false)
-		new IntegrationKey(
-			user: me,
-			service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: address2,
-		).save(validate: false)
-
 		when:
 		def result = service.getDatacoinBalances(me)
 
 		then:
 		1 * service.web3jHelperService.getERC20Balance(_, _, address) >> expected
-		1 * service.web3jHelperService.getERC20Balance(_, _, address2) >> expected2
 		result == [
 			(address): expected,
-			(address2): expected2,
 		]
 	}
 
-	void "returns empty map if user has no keys"() {
-		when:
-		def result = service.getDatacoinBalances(me)
-
-		then:
-		result == [:]
-	}
-
 	void "check balance when underlying Web3j API throws InterruptedException"() {
-		new IntegrationKey(
-			user: me,
-			service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: address,
-		).save(validate: false)
-
 		when:
 		service.getDatacoinBalances(me)
 
@@ -82,12 +51,6 @@ class BalanceServiceSpec extends Specification {
 	}
 
 	void "check balance when underlying Web3j API throws ExecutionException"() {
-		new IntegrationKey(
-			user: me,
-			service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: address,
-		).save(validate: false)
-
 		when:
 		service.getDatacoinBalances(me)
 
@@ -97,12 +60,6 @@ class BalanceServiceSpec extends Specification {
 	}
 
 	void "check balance when underlying Web3j API throws MessageDecodingException"() {
-		new IntegrationKey(
-			user: me,
-			service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: address,
-		).save(validate: false)
-
 		when:
 		service.getDatacoinBalances(me)
 
