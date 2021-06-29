@@ -208,7 +208,7 @@ from user_images_tmp
 						newImageUrlSmall = userAvatarImageService.copyImage(imageUrlSmall)
 					}
 					if (newImageUrlLarge != null && newImageUrlSmall != null) {
-						String id = rs["id"]
+						Long id = rs["id"]
 						if (id != null) {
 							images.add(new UserImage(
 								userId: id,
@@ -226,7 +226,6 @@ where id = ?
 				""", [image.getImageUrlLarge(), image.getImageUrlSmall(), image.getUserId()])
 
 				}
-				sql.execute("drop table user_images_tmp")
 			}
 
 		}
