@@ -13,6 +13,7 @@ class DataUnionSecretApiController {
 	private User loggedInUser() {
 		return (User) request.apiUser
 	}
+
 	static boolean isValidID(String value) {
 		if (value == null) {
 			return false
@@ -30,9 +31,6 @@ class DataUnionSecretApiController {
 		String adminAddress = ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress)
 		if (adminAddress == null) {
 			throw new BadRequestException("Data Union address is not of a data union smart contract")
-		}
-		if (!ethereumService.hasEthereumAddress(user, adminAddress)) {
-			throw new NotPermittedException(user?.username, "data union", contractAddress, "manage")
 		}
 	}
 
