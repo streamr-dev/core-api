@@ -165,11 +165,7 @@ class DataUnionJoinRequestService {
 		// TODO CORE-1834: OR if user already has a write permission to the stream
 
 		// Backend must check that the given memberAddress is one of the Ethereum IDs bound to the logged in user
-		IntegrationKey key = IntegrationKey.createCriteria().get {
-			eq("user", user)
-			ilike("idInService", cmd.memberAddress)
-		}
-		if (key == null) {
+		if (user.getUsername() != cmd.memberAddress) {
 			throw new NotFoundException("Given member address is not owned by the user")
 		}
 
