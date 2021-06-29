@@ -231,14 +231,6 @@ where id = ?
 
 		}
 	}
-
-	changeSet(author: "kkn", id: "user-is-ethereum-address-rm-integration-key-4") {
-		grailsChange {
-			change {
-				sql.execute("drop table integration_key")
-			}
-		}
-	}
 }
 
 /*
