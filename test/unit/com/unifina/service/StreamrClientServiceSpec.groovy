@@ -2,7 +2,6 @@ package com.unifina.service
 
 import com.streamr.client.StreamrClient
 import com.streamr.client.authentication.InternalAuthenticationMethod
-import com.unifina.domain.IntegrationKey
 import com.unifina.domain.User
 import com.unifina.utils.testutils.FakeStreamrClient
 import grails.test.mixin.Mock
@@ -11,14 +10,14 @@ import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
 @TestFor(StreamrClientService)
-@Mock([User, IntegrationKey])
+@Mock([User])
 class StreamrClientServiceSpec extends Specification {
 	User user
 
 	void setup() {
 		user = new User(
-			username: "StreamrClientServiceIntegrationSpec-${System.currentTimeMillis()}@streamr.invalid",
-			name: "user",
+			username: "0x34D239d79Ac9d928547adA6Ba92db54b19688411",
+			name: "StreamrClientServiceIntegrationSpec-${System.currentTimeMillis()}@streamr.invalid",
 		).save(failOnError: true)
 
 		service.setClientClass(FakeStreamrClient)

@@ -54,7 +54,6 @@ class DataUnionSecretApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.dataUnionSecretService.findAll(contractAddress) >> [s1, s2]
 		response.json[0].id == "1"
 		response.json[0].name == "secret 1"
@@ -89,11 +88,9 @@ class DataUnionSecretApiControllerSpec extends Specification {
 			controller.index()
 		}
 		then:
-		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> null
 		def e = thrown(ApiException)
-		e.statusCode == 403
-		e.code == "FORBIDDEN"
+		e.statusCode == 400
 	}
 
 	void "save() test"() {
@@ -117,7 +114,6 @@ class DataUnionSecretApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.dataUnionSecretService.create(contractAddress, _ as DataUnionSecretCommand) >> secret
 		response.json.id == "1"
 		response.json.name == "secret name"
@@ -190,11 +186,9 @@ class DataUnionSecretApiControllerSpec extends Specification {
 			controller.save()
 		}
 		then:
-		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> null
 		def e = thrown(ApiException)
-		e.statusCode == 403
-		e.code == "FORBIDDEN"
+		e.statusCode == 400
 	}
 
 	void "show() test"() {
@@ -216,7 +210,6 @@ class DataUnionSecretApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.dataUnionSecretService.find(contractAddress, validID) >> s1
 		response.json.id == "1"
 		response.json.name == "secret 1"
@@ -280,7 +273,6 @@ class DataUnionSecretApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.dataUnionSecretService.find(contractAddress, validID) >> null
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
@@ -297,11 +289,9 @@ class DataUnionSecretApiControllerSpec extends Specification {
 			controller.show()
 		}
 		then:
-		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> null
 		def e = thrown(ApiException)
-		e.statusCode == 403
-		e.code == "FORBIDDEN"
+		e.statusCode == 400
 	}
 
 	void "update() test"() {
@@ -326,14 +316,13 @@ class DataUnionSecretApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.dataUnionSecretService.update(contractAddress, validID, _ as DataUnionSecretCommand) >> {
 			s1.name = "new name"
 			s1.secret = "new secret"
 			return s1
 		}
 		response.status == 200
-		response.json.id  == "1"
+		response.json.id == "1"
 		response.json.name == "new name"
 		response.json.secret == "new secret"
 	}
@@ -424,7 +413,6 @@ class DataUnionSecretApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.dataUnionSecretService.update(contractAddress, validID, _ as DataUnionSecretCommand) >> { throw new NotFoundException("Secret not found") }
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
@@ -444,11 +432,9 @@ class DataUnionSecretApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
-		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> null
 		def e = thrown(ApiException)
-		e.statusCode == 403
-		e.code == "FORBIDDEN"
+		e.statusCode == 400
 	}
 
 	void "delete() test"() {
@@ -462,7 +448,6 @@ class DataUnionSecretApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.dataUnionSecretService.delete(contractAddress, validID)
 		response.status == 204
 	}
@@ -523,7 +508,6 @@ class DataUnionSecretApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.dataUnionSecretService.delete(contractAddress, validID) >> {
 			throw new NotFoundException("mocked: not found!")
 		}
@@ -542,10 +526,8 @@ class DataUnionSecretApiControllerSpec extends Specification {
 			controller.delete()
 		}
 		then:
-		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> null
 		def e = thrown(ApiException)
-		e.statusCode == 403
-		e.code == "FORBIDDEN"
+		e.statusCode == 400
 	}
 }
