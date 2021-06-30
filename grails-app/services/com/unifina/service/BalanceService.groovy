@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.domain.IntegrationKey
+
 import com.unifina.domain.User
 import com.unifina.utils.ApplicationConfig
 import com.unifina.utils.EthereumSettings
@@ -31,22 +31,19 @@ class BalanceService {
 	}
 
 	Map<String, BigInteger> getDatacoinBalances(User user) throws InterruptedException, ExecutionException, MessageDecodingException {
-		def keys =
-			IntegrationKey.findAllByUserAndServiceInList(user, [IntegrationKey.Service.ETHEREUM_ID]);
-
-		Map<String, BigInteger> result = new LinkedHashMap<String, BigInteger>();
-		for (IntegrationKey ik : keys) {
-			try {
-				result.put(ik.idInService, web3jHelperService.getERC20Balance(web3j, dataCoinAddress, ik.idInService))
-			} catch (ExecutionException e) {
-				throw new ApiException(500, "BALANCE_ERROR_EXECUTION_EXCEPTION", e.getMessage())
-			} catch (RuntimeException e) {
-				throw new ApiException(500, "BALANCE_ERROR_RUNTIME_EXCEPTION", e.getMessage())
-			} catch (InterruptedException e) {
-				throw new ApiException(500, "BALANCE_ERROR_INTERRUPTED_EXCEPTION", e.getMessage())
-			}
+		Map<String, BigInteger> result = new LinkedHashMap<String, BigInteger>()
+		try {
+			String address = user.getUsername()
+			BigInteger balance = web3jHelperService.getERC20Balance(web3j, dataCoinAddress, address)
+			result.put(address, balance)
+		} catch (ExecutionException e) {
+			throw new ApiException(500, "BALANCE_ERROR_EXECUTION_EXCEPTION", e.getMessage())
+		} catch (RuntimeException e) {
+			throw new ApiException(500, "BALANCE_ERROR_RUNTIME_EXCEPTION", e.getMessage())
+		} catch (InterruptedException e) {
+			throw new ApiException(500, "BALANCE_ERROR_INTERRUPTED_EXCEPTION", e.getMessage())
 		}
-		return result;
+		return result
 	}
 }
 

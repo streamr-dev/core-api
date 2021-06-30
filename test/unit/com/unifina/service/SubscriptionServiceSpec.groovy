@@ -6,7 +6,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(SubscriptionService)
-@Mock([SubscriptionFree, IntegrationKey, SubscriptionPaid, Permission, Product, Stream, Subscription])
+@Mock([SubscriptionFree, SubscriptionPaid, Permission, Product, Stream, Subscription])
 class SubscriptionServiceSpec extends BeanMockingSpecification {
 
 	User user, user2
@@ -16,8 +16,8 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
 	void setup() {
-		user = new User(username: "me@streamr.network").save(failOnError: true, validate: false)
-		user2 = new User(username: "someoneElse@streamr.network").save(failOnError: true, validate: false)
+		user = new User(username: "0x0000000000000000000000000000000000000005").save(failOnError: true, validate: false)
+		user2 = new User(username: "0x000000000000000000000000000000000000000C").save(failOnError: true, validate: false)
 		s1 = new Stream(name: "stream-1")
 		s2 = new Stream(name: "stream-2")
 		s3 = new Stream(name: "stream-3")
@@ -35,51 +35,8 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 	}
 
 	void "getSubscriptionsOfUser() returns empty if user has no subscriptions tied to integration keys and no free subscriptions"() {
-		new IntegrationKey(
-			user: user,
-			name: "ik1",
-			service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: "0x0000000000000000000000000000000000000005"
-		).save(failOnError: true, validate: false)
-
-		new IntegrationKey(
-			user: user,
-			name: "ik1",
-			service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: "0x000000000000000000000000000000000000000C"
-		).save(failOnError: true, validate: false)
-
 		expect:
 		service.getSubscriptionsOfUser(user) == []
-	}
-
-	void "getSubscriptionsOfUser() returns subscriptions tied to user's integration keys"() {
-		new IntegrationKey(
-			user: user,
-			name: "ik1",
-			service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: "0x0000000000000000000000000000000000000005"
-		).save(failOnError: true, validate: false)
-
-		new IntegrationKey(
-			user: user,
-			name: "ik1",
-			service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: "0x000000000000000000000000000000000000000C"
-		).save(failOnError: true, validate: false)
-
-		def s1 = new SubscriptionPaid(address: "0x0000000000000000000000000000000000000000")
-			.save(failOnError: true, validate: false)
-		def s2 = new SubscriptionPaid(address: "0x0000000000000000000000000000000000000005")
-			.save(failOnError: true, validate: false)
-		def s3 = new SubscriptionPaid(address: "0x000000000000000000000000000000000000000C")
-			.save(failOnError: true, validate: false)
-		def s4 = new SubscriptionPaid(address: "0x000000000000000000000000000000000000000C")
-			.save(failOnError: true, validate: false)
-
-
-		expect:
-		service.getSubscriptionsOfUser(user) == [s2, s3, s4]
 	}
 
 	void "getSubscriptionsOfUser() returns free subscriptions as well"() {
@@ -131,11 +88,6 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 
 	void "onSubscribed() creates subscription-linked permissions if user found for address"() {
 		String address = "0x0000000000000000000000000000000000000000"
-		new IntegrationKey(
-			user: user,
-			idInService: address,
-			service: IntegrationKey.Service.ETHEREUM_ID
-		).save(failOnError: true, validate: false)
 		Permission p1 = new Permission(operation: Permission.Operation.STREAM_SUBSCRIBE, user: user, stream: s1).save(failOnError: true, validate: false)
 		Permission p2 = new Permission(operation: Permission.Operation.STREAM_SUBSCRIBE, user: user, stream: s2).save(failOnError: true, validate: false)
 
@@ -158,12 +110,6 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 
 		assert Permission.exists(p1.id)
 		assert Permission.exists(p2.id)
-
-		new IntegrationKey(
-			user: user,
-			idInService: address,
-			service: IntegrationKey.Service.ETHEREUM_ID
-		).save(failOnError: true, validate: false)
 
 		Permission p3 = new Permission(operation: Permission.Operation.STREAM_SUBSCRIBE, user: user, stream: s1, endsAt: new Date())
 		Permission p4 = new Permission(operation: Permission.Operation.STREAM_SUBSCRIBE, user: user, stream: s2, endsAt: new Date())
@@ -193,12 +139,6 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 
 		assert Permission.exists(p1.id)
 		assert Permission.exists(p2.id)
-
-		new IntegrationKey(
-			user: user,
-			idInService: address,
-			service: IntegrationKey.Service.ETHEREUM_ID
-		).save(failOnError: true, validate: false)
 
 		Permission p3 = new Permission(operation: Permission.Operation.STREAM_SUBSCRIBE, user: user, stream: s1, endsAt: new Date())
 		Permission p4 = new Permission(operation: Permission.Operation.STREAM_SUBSCRIBE, user: user, stream: s2, endsAt: new Date())
@@ -307,138 +247,5 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		1 * permissionService.systemRevoke(p2) >> { p2.delete(flush: true) }
 		!Permission.exists(p1.id)
 		!Permission.exists(p2.id)
-	}
-
-	void "beforeIntegrationKeyRemoved() removes all subscription-linked permissions for given integration key"() {
-		String address1 = "0x0000000000000000000000000000000000000000"
-		String address2 = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-
-		def integrationKey = new IntegrationKey(
-			user: user,
-			idInService: address1,
-			service: IntegrationKey.Service.ETHEREUM_ID
-		).save(failOnError: true, validate: false)
-
-		new IntegrationKey(
-			user: user2,
-			idInService: address2,
-			service: IntegrationKey.Service.ETHEREUM_ID
-		).save(failOnError: true, validate: false)
-
-		def product2 = new Product(streams: [s3]).save(failOnError: true, validate: false)
-
-		setup: "create permissions"
-		Subscription sub1 = new SubscriptionPaid(product: product, address: address1).save(failOnError: true, validate: false)
-		Permission p1 = new Permission(stream: s1, subscription: sub1, endsAt: new Date()).save(failOnError: true, validate: false)
-		Permission p2 = new Permission(stream: s2, subscription: sub1, endsAt: new Date()).save(failOnError: true, validate: false)
-
-		Subscription sub2 = new SubscriptionPaid(product: product2, address: address1).save(failOnError: true, validate: false)
-		Permission p3 = new Permission(stream: s3, subscription: sub2, endsAt: new Date()).save(failOnError: true, validate: false)
-
-		Subscription sub3 = new SubscriptionPaid(product: product, address: address2).save(failOnError: true, validate: false)
-		new Permission(stream: s1, subscription: sub3, endsAt: new Date()).save(failOnError: true, validate: false)
-		new Permission(stream: s2, subscription: sub3, endsAt: new Date()).save(failOnError: true, validate: false)
-
-		Subscription sub4 = new SubscriptionPaid(product: product2, address: address2).save(failOnError: true, validate: false)
-		new Permission(stream: s3, subscription: sub4, endsAt: new Date()).save(failOnError: true, validate: false)
-
-		new Permission(user: user, stream: s1, operation: Permission.Operation.STREAM_SUBSCRIBE).save(failOnError: true, validate: false)
-		assert Permission.count() == 2 + 1 + 2 + 1 + 1
-
-		when:
-		service.beforeIntegrationKeyRemoved(integrationKey)
-		then:
-		1 * permissionService.systemRevoke(p1) >> { p1.delete(flush: true) }
-		1 * permissionService.systemRevoke(p2) >> { p2.delete(flush: true) }
-		1 * permissionService.systemRevoke(p3) >> { p3.delete(flush: true) }
-		Permission.findAll()*.id == [4L, 5L, 6L, 7L]
-	}
-
-	void "afterIntegrationKeyCreated() creates subscription-linked permissions for given integration key"() {
-		def date = new Date()
-		def product2 = new Product(streams: [s3]).save(failOnError: true, validate: false)
-		String address = "0x0000000000000000000000000000000000000000"
-		new SubscriptionPaid(
-			address: address,
-			product: product,
-			endsAt: date
-		).save(failOnError: true, validate: true)
-		new SubscriptionPaid(
-			address: address,
-			product: product2,
-			endsAt: date
-		).save(failOnError: true, validate: true)
-
-		def integrationKey = new IntegrationKey(
-			user: user,
-			idInService: address,
-			service: IntegrationKey.Service.ETHEREUM_ID
-		).save(failOnError: true, validate: false)
-
-		Permission p1 = new Permission(operation: Permission.Operation.STREAM_SUBSCRIBE, user: user, stream: s1).save(failOnError: true, validate: false)
-		Permission p2 = new Permission(operation: Permission.Operation.STREAM_SUBSCRIBE, user: user, stream: s2).save(failOnError: true, validate: false)
-		Permission p3 = new Permission(operation: Permission.Operation.STREAM_SUBSCRIBE, user: user, stream: s3).save(failOnError: true, validate: false)
-
-		when:
-		service.afterIntegrationKeyCreated(integrationKey)
-
-		then:
-		2 * ethereumIntegrationKeyService.getEthereumUser(address) >> user
-		1 * permissionService.systemGrant(user, s1, Permission.Operation.STREAM_SUBSCRIBE, _, _) >> p1
-		1 * permissionService.systemGrant(user, s2, Permission.Operation.STREAM_SUBSCRIBE, _, _) >> p2
-		1 * permissionService.systemGrant(user, s3, Permission.Operation.STREAM_SUBSCRIBE, _, _) >> p3
-		Permission.findAll()*.toInternalMap() as Set == [p1.toInternalMap(), p2.toInternalMap(), p3.toInternalMap()] as Set
-	}
-
-	void "afterIntegrationKeyCreated() updates subscription-linked permissions on a per-user basis"() {
-		String address1 = "0x0000000000000000000000000000000000000000"
-		String address2 = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-
-		new IntegrationKey(
-			user: user,
-			idInService: address1,
-			service: IntegrationKey.Service.ETHEREUM_ID
-		).save(failOnError: true, validate: false)
-
-		new IntegrationKey(
-			user: user2,
-			idInService: address2,
-			service: IntegrationKey.Service.ETHEREUM_ID
-		).save(failOnError: true, validate: false)
-
-		Subscription sub1, sub2
-		Permission p1, p2, p3, p4
-
-		setup: "create permissions"
-		def date = new Date()
-		sub1 = new SubscriptionPaid(product: product, address: address1).save(failOnError: true, validate: false)
-		p1 = new Permission(user: user, stream: s1, operation: Permission.Operation.STREAM_SUBSCRIBE, subscription: sub1, endsAt: date).save(failOnError: true, validate: false)
-		p2 = new Permission(user: user, stream: s2, operation: Permission.Operation.STREAM_SUBSCRIBE, subscription: sub1, endsAt: date).save(failOnError: true, validate: false)
-
-		product.streams = [s1]
-		product.save(failOnError: true, validate: false)
-
-		sub2 = new SubscriptionPaid(product: product, address: address2).save(failOnError: true, validate: false)
-		p3 = new Permission(user: user2, stream: s3, operation: Permission.Operation.STREAM_SUBSCRIBE, subscription: sub2, endsAt: date).save(failOnError: true, validate: false)
-
-		assert Permission.findAll()*.toInternalMap() as Set == [p1.toInternalMap(), p2.toInternalMap(), p3.toInternalMap()] as Set
-
-		and: "change product"
-		product.streams = [s2, s3]
-		product.save(failOnError: true, validate: false)
-
-		when:
-		service.afterProductUpdated(product)
-		then:
-		interaction {
-			p1 = new Permission(operation: Permission.Operation.STREAM_SUBSCRIBE, user: user, stream: s3).save(failOnError: true, validate: false)
-			p4 = new Permission(operation: Permission.Operation.STREAM_SUBSCRIBE, user: user2, stream: s2).save(failOnError: true, validate: false)
-			1 * ethereumIntegrationKeyService.getEthereumUser(address1) >> user
-			1 * ethereumIntegrationKeyService.getEthereumUser(address2) >> user2
-			1 * permissionService.systemGrant(user, s3, Permission.Operation.STREAM_SUBSCRIBE, _, _) >> p1
-			1 * permissionService.systemGrant(user2, s2, Permission.Operation.STREAM_SUBSCRIBE, _, _) >> p4
-		}
-		Permission.findAll()*.toInternalMap() as Set == [p1.toInternalMap(), p2.toInternalMap(),
-														 p3.toInternalMap(), p4.toInternalMap()] as Set
 	}
 }

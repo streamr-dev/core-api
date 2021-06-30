@@ -15,8 +15,7 @@ class SubscriptionService {
 	}
 
 	List<Subscription> getSubscriptionsOfUser(User user) {
-		List<IntegrationKey> integrationKeys = IntegrationKey.findAllByUserAndService(user, IntegrationKey.Service.ETHEREUM_ID)
-		def addresses = integrationKeys*.idInService
+		def addresses = [user?.getUsername()]
 		List<Subscription> subscriptions = new ArrayList<>()
 		subscriptions.addAll(SubscriptionPaid.findAllByAddressInList(addresses))
 		subscriptions.addAll(SubscriptionFree.findAllByUser(user))
@@ -47,26 +46,6 @@ class SubscriptionService {
 	}
 
 	/**
-	 * Should be invoked before an `IntegrationKey` is removed
-	 */
-	void beforeIntegrationKeyRemoved(IntegrationKey key) {
-		List<Subscription> subscriptions = SubscriptionPaid.findAllByAddress(key.idInService) as List<Subscription>
-		subscriptions.each {
-			deletePermissions(it)
-		}
-	}
-
-	/**
-	 * Should be invoked after an `IntegrationKey` is added
-	 */
-	void afterIntegrationKeyCreated(IntegrationKey key) {
-		List<Subscription> subscriptions = SubscriptionPaid.findAllByAddress(key.idInService) as List<Subscription>
-		subscriptions.each {
-			createPermissions(it)
-		}
-	}
-
-	/**
 	 * Should be invoked after a Product has been updated
 	 */
 	void afterProductUpdated(Product product) {
@@ -90,7 +69,7 @@ class SubscriptionService {
 	}
 
 	private void deletePermissions(Subscription subscription) {
-		for (Permission p: streamPermissionsFor(subscription)) {
+		for (Permission p : streamPermissionsFor(subscription)) {
 			permissionService.systemRevoke(p)
 		}
 	}

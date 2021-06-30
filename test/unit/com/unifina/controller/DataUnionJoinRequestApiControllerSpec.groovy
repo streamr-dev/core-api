@@ -14,23 +14,23 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 	final String contractAddress = "0x6c90aece04198da2d5ca9b956b8f95af8041de37"
 	final String validID = "L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g"
 
-    def setup() {
+	def setup() {
 		me = new User(id: 1, name: "firstname lastname", username: "firstname.lastname@address.com")
 		me.save(validate: true, failOnError: true)
 		controller.dataUnionJoinRequestService = Mock(DataUnionJoinRequestService)
 		controller.ethereumService = Mock(EthereumService)
-    }
+	}
 
 	void "isDataUnionAddress"(String value, Object expected) {
 		expect:
 		DataUnionJoinRequestApiController.isDataUnionAddress(value) == expected
 		where:
-		value | expected
+		value                                        | expected
 		"0x0000000000000000000000000000000000000000" | true
 		"0x0000000000000000000000000000AAAA0000FFFF" | true
-		null  | false
-		""    | false
-		"0x1" | false
+		null                                         | false
+		""                                           | false
+		"0x1"                                        | false
 	}
 
 	void "findAll() test"() {
@@ -52,14 +52,13 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.dataUnionJoinRequestService.findAll(contractAddress, null) >> [r]
 		response.json[0].id == validID
 		response.json[0].memberAddress == "0x0000000000000000000000000000000000000001"
 		response.json[0].contractAddress == contractAddress
 		response.json[0].state == "PENDING"
 		response.status == 200
-    }
+	}
 
 	void "findAll() bad request on invalid contract address input"() {
 		when:
@@ -86,11 +85,9 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 			controller.index()
 		}
 		then:
-		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> null
 		def e = thrown(ApiException)
-		e.statusCode == 403
-		e.code == "FORBIDDEN"
+		e.statusCode == 400
 	}
 
 	void "save() test"() {
@@ -177,7 +174,6 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.dataUnionJoinRequestService.find(contractAddress, validID) >> r
 		response.json.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
 		response.json.contractAddress == contractAddress
@@ -227,7 +223,6 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.dataUnionJoinRequestService.find(contractAddress, validID) >> null
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
@@ -244,11 +239,9 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 			controller.show()
 		}
 		then:
-		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> null
 		def e = thrown(ApiException)
-		e.statusCode == 403
-		e.code == "FORBIDDEN"
+		e.statusCode == 400
 	}
 
 	void "update() test"() {
@@ -274,7 +267,6 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.dataUnionJoinRequestService.update(contractAddress, validID, _ as DataUnionUpdateJoinRequestCommand) >> {
 			r.state = DataUnionJoinRequest.State.ACCEPTED
 			return r
@@ -354,7 +346,6 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.dataUnionJoinRequestService.update(contractAddress, validID, _ as DataUnionUpdateJoinRequestCommand) >> {
 			throw new NotFoundException("mocked: entity not found")
 		}
@@ -376,11 +367,9 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
-		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> null
 		def e = thrown(ApiException)
-		e.statusCode == 403
-		e.code == "FORBIDDEN"
+		e.statusCode == 400
 	}
 
 	void "delete() test"() {
@@ -403,7 +392,6 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.dataUnionJoinRequestService.delete(contractAddress, validID)
 		response.status == 204
 	}
@@ -449,7 +437,6 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.dataUnionJoinRequestService.delete(contractAddress, validID) >> {
 			throw new NotFoundException("mocked: entity not found")
 		}
@@ -468,10 +455,8 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 			controller.delete()
 		}
 		then:
-		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
-		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> null
 		def e = thrown(ApiException)
-		e.statusCode == 403
-		e.code == "FORBIDDEN"
+		e.statusCode == 400
 	}
 }
