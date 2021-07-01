@@ -12,7 +12,7 @@ import grails.test.mixin.TestFor
 import groovy.json.JsonBuilder
 
 @TestFor(DataUnionJoinRequestService)
-@Mock([User, DataUnionJoinRequest, DataUnionSecret])
+@Mock([User, IntegrationKey, DataUnionJoinRequest, DataUnionSecret])
 class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 
 	private static final String memberAddress = "0xCCCC000000000000000000000000AAAA0000FFFF"
@@ -44,10 +44,20 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 
 		me = new User(
 			name: "First Lastname",
-			username: memberAddress,
+			username: "first@last.com",
 		)
 		me.id = 1
 		me.save(validate: true, failOnError: true)
+
+		IntegrationKey key = new IntegrationKey(
+			name: "Key name",
+			user: me,
+			service: IntegrationKey.Service.ETHEREUM_ID,
+			json: "{}",
+			idInService: memberAddress,
+		)
+		key.id = "key-id"
+		key.save(validate: true, failOnError: true)
 
 		DataUnionSecret secret = new DataUnionSecret(
 			name: "name of the secret",

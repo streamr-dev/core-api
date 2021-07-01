@@ -1,5 +1,7 @@
 package com.unifina.service
 
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.User
 import com.unifina.utils.Web3jHelper
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
@@ -32,5 +34,15 @@ class EthereumService {
 			log.error("fetch data union admins ethereum address error", e)
 			throw new RuntimeException(e)
 		}
+	}
+
+	/** Checks if given user has registered the given Ethereum address in their Streamr profile */
+	boolean hasEthereumAddress(User user, String ethereumAddress) {
+		IntegrationKey key = IntegrationKey.createCriteria().get {
+			eq("user", user)
+			eq("idInService", ethereumAddress, [ignoreCase: true])
+			'in'("service", [IntegrationKey.Service.ETHEREUM_ID])
+		}
+		return key != null
 	}
 }

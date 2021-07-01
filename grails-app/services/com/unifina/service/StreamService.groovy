@@ -103,48 +103,49 @@ class StreamService {
 		// This approach might be slow if there are a lot of allowed writers to the Stream
 		List<User> writers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_PUBLISH)*.user
 
-		List<User> users = User.createCriteria().list {
-			'in'("id", writers*.id)
+		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
+			user {
+				'in'("id", writers*.id)
+			}
+			'in'("service", [IntegrationKey.Service.ETHEREUM_ID])
 		}
 
-		Set<String> publishers = new HashSet<>()
-		publishers.addAll(users*.getUsername()*.toLowerCase())
-		return publishers
+		return keys*.idInService*.toLowerCase() as Set
 	}
 
 	boolean isStreamEthereumPublisher(Stream stream, String ethereumAddress) {
-		User user = User.createCriteria().get {
-			// ilike = case-insensitive like: Ethereum addresses are case-insensitive but
-			// different case systems are in use (checksum-case, lower-case at least)
-			ilike("username", ethereumAddress)
+		IntegrationKey key = IntegrationKey.createCriteria().get {
+			ilike("idInService", ethereumAddress)
+			// ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
 		}
-		if (user == null) {
+		if (key == null || key.user == null) {
 			return false
 		}
-		return permissionService.check(user, stream, Permission.Operation.STREAM_PUBLISH)
+		return permissionService.check(key.user, stream, Permission.Operation.STREAM_PUBLISH)
 	}
 
 	Set<String> getStreamEthereumSubscribers(Stream stream) {
 		// This approach might be slow if there are a lot of allowed readers to the Stream
 		List<User> readers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_SUBSCRIBE)*.user
 
-		List<User> users = User.createCriteria().list {
-			'in'("id", readers*.id)
+		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
+			user {
+				'in'("id", readers*.id)
+			}
+			'in'("service", [IntegrationKey.Service.ETHEREUM_ID])
 		}
 
-		return users*.username*.toLowerCase() as Set
+		return keys*.idInService*.toLowerCase() as Set
 	}
 
 	boolean isStreamEthereumSubscriber(Stream stream, String ethereumAddress) {
-		User user = User.createCriteria().get {
-			// ilike = case-insensitive like: Ethereum addresses are case-insensitive but
-			// different case systems are in use (checksum-case, lower-case at least)
-			ilike("username", ethereumAddress)
+		IntegrationKey key = IntegrationKey.createCriteria().get {
+			ilike("idInService", ethereumAddress)
 		}
-		if (user == null) {
+		if (key == null || key.user == null) {
 			return false
 		}
-		return permissionService.check(user, stream, Permission.Operation.STREAM_SUBSCRIBE)
+		return permissionService.check(key.user, stream, Permission.Operation.STREAM_SUBSCRIBE)
 	}
 
 	@CompileStatic
