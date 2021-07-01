@@ -96,7 +96,7 @@ jobs:
         run: |
           echo "NODE_VERSION=$(cat rest-e2e-tests/.nvmrc | sed -e '/^v/ s/^v//')" >> $GITHUB_ENV
       - name: Install Node
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@v2.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Setup End to End tests
