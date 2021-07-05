@@ -7,7 +7,7 @@ WORKDIR /src/core-api
 RUN grails -non-interactive -plain-output $GRAILS_WAR_ENV war
 
 
-FROM tomcat:7.0.106-jdk8-openjdk-slim-buster
+FROM tomcat:9.0.50-jdk8-openjdk-slim-buster
 # bash is required by wait_for_it.sh script and provided by base image
 # curl is required for container healthcheck
 # mysql-client is required by entrypoint.sh
