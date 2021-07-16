@@ -16,7 +16,7 @@
     "npm": ">=7.13"
   },
   "dependencies": {
-    "@ethersproject/wallet": "5.1.0",
+    "@ethersproject/wallet": "5.4.0",
     "ajv": "6.12.6",
     "chai": "4.3.4",
     "form-data": "4.0.0",
