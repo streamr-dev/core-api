@@ -95,7 +95,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.getPermissionsTo(streamRestricted, stranger) == []
 		service.getPermissionsTo(streamRestricted, null) == []
 		service.getPermissionsTo(streamPublic, me)[0].operation == Operation.STREAM_GET
-		service.getPermissionsTo(streamPublic, anotherUser).size() == 1 + Operation.streamOperations().size()
+		service.getPermissionsTo(streamPublic, anotherUser).size() == Operation.streamOperations().size()
 		service.getPermissionsTo(streamPublic, stranger)[0].operation == Operation.STREAM_GET
 		service.getPermissionsTo(streamPublic, null)[0].operation == Operation.STREAM_GET
 	}

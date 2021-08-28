@@ -11,7 +11,7 @@ class PermissionStore {
 
 	List<Permission> findDirectPermissions(String resourceProp, Object resource, Permission.Operation operation, Userish userish) {
 		List<Permission> directPermissions = new LinkedList<>();
-		
+
 		// first find only user-specific Permissions (100..1000x faster than "anonymous OR user-specific" query)
 		if (isNotNullAndIdNotNull(userish)) {
 			String userProp = PermissionService.getUserPropertyName(userish)
@@ -29,7 +29,7 @@ class PermissionStore {
 		}
 
 		// if no user-specific permissions found, do the slower anonymous permissions query (still 10x faster than "OR" query)
-		if (directPermissions.size() < 0) {
+		if (directPermissions.isEmpty()) {
 			directPermissions = Permission.withCriteria {
 				eq(resourceProp, resource)
 				if (operation != null) {
