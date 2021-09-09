@@ -39,7 +39,7 @@ class StorageNodeService {
 		return null
 	}
 
-	StreamStorageNode addStorageNodeToStream(EthereumAddress storageNodeAddress, String streamId) {
+	synchronized StreamStorageNode addStorageNodeToStream(EthereumAddress storageNodeAddress, String streamId) {
 		Stream stream = streamService.getStream(streamId)
 		if (stream == null) {
 			throw new NotFoundException("Stream", streamId)
@@ -61,11 +61,12 @@ class StorageNodeService {
 			thread.setUncaughtExceptionHandler(new NotifyStorageNodeTask.ErrorHandler())
 			thread.setName(String.format("AddStorageNodeTask[%s,%s]", streamId, storageNodeAddress))
 			thread.start()
+			thread.join()
 		}
 		return node
 	}
 
-	void removeStorageNodeFromStream(EthereumAddress storageNodeAddress, String streamId) {
+	synchronized void removeStorageNodeFromStream(EthereumAddress storageNodeAddress, String streamId) {
 		Stream stream = streamService.getStream(streamId)
 		if (stream == null) {
 			throw new NotFoundException("Stream", streamId)
@@ -84,6 +85,7 @@ class StorageNodeService {
 			thread.setUncaughtExceptionHandler(new NotifyStorageNodeTask.ErrorHandler())
 			thread.setName(String.format("RemoveStorageNodeTask[%s,%s]", streamId, storageNodeAddress))
 			thread.start()
+			thread.join()
 		} else {
 			throw new NotFoundException("StorageNode", storageNodeAddress.toString())
 		}
