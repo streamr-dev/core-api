@@ -62,9 +62,7 @@ class EthereumIntegrationKeyService {
 		}
 		IntegrationKey key = IntegrationKey.createCriteria().get {
 			'in'("service", [IntegrationKey.Service.ETHEREUM_ID])
-			// ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems
-			// are in use (checksum-case, lower-case at least)
-			ilike("idInService", address)
+			eq("idInService", address) // MySQL is set up in case sensitive mode
 		}
 		if (key == null) {
 			return null
