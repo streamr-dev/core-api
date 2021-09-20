@@ -115,8 +115,8 @@ class StreamService {
 
 	boolean isStreamEthereumPublisher(Stream stream, String ethereumAddress) {
 		IntegrationKey key = IntegrationKey.createCriteria().get {
+			// toLowerCase() due to broken ORM in unit tests
 			eq("idInService", ethereumAddress?.toLowerCase())
-			// ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
 		}
 		if (key == null || key.user == null) {
 			return false
@@ -140,6 +140,7 @@ class StreamService {
 
 	boolean isStreamEthereumSubscriber(Stream stream, String ethereumAddress) {
 		IntegrationKey key = IntegrationKey.createCriteria().get {
+			// toLowerCase() due to broken ORM in unit tests
 			eq("idInService", ethereumAddress?.toLowerCase())
 		}
 		if (key == null || key.user == null) {
