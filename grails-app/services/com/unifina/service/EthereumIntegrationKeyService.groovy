@@ -17,9 +17,7 @@ class EthereumIntegrationKeyService {
 			return null
 		}
 		User user = User.createCriteria().get {
-			// ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems
-			// are in use (checksum-case, lower-case at least)
-			ilike("username", address)
+			eq("username", address) // MySQL is set up in case sensitive mode
 		}
 		return user
 	}

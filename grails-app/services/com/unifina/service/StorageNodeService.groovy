@@ -12,13 +12,7 @@ class StorageNodeService {
 	StreamrClientService streamrClientService
 
 	List<Stream> findStreamsByStorageNode(EthereumAddress storageNodeAddress) {
-		List<StreamStorageNode> nodes = StreamStorageNode.findAllByStorageNodeAddress(storageNodeAddress.toString())
-		List<Stream> results = new ArrayList<>()
-		for (StreamStorageNode node : nodes) {
-			Stream stream = node.getStream()
-			results.add(stream)
-		}
-		return results
+		return Stream.findAll("FROM Stream WHERE id IN (SELECT streamId FROM StreamStorageNode WHERE storageNodeAddress=?)", [storageNodeAddress.toString()])
 	}
 
 	Set<StreamStorageNode> findStorageNodesByStream(String streamId) {
