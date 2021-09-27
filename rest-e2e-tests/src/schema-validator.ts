@@ -4,10 +4,11 @@ import permissionSchema from '../schemas/permission.json'
 import productSchema from '../schemas/product.json'
 import streamSchema from '../schemas/stream.json'
 import subscriptionSchema from '../schemas/subscription.json'
+import addFormats from 'ajv-formats'
 
 export class SchemaValidator {
 
-    ajv: Ajv.Ajv
+    private ajv: Ajv
 
     constructor() {
         this.ajv = new Ajv({
@@ -20,6 +21,7 @@ export class SchemaValidator {
                 'Subscription': subscriptionSchema
             }
         })
+        addFormats(this.ajv)
     }
 
     validateCategory(data: any) {

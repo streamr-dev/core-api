@@ -32,6 +32,7 @@
     "@types/lodash": "4.14.169",
     "@types/mocha": "8.2.2",
     "@types/node": "14.14.45",
-    "@types/node-fetch": "2.5.10"
+    "@types/node-fetch": "2.5.10",
+    "ajv-formats": "2.1.1"
   }
 }
