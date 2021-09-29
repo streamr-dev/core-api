@@ -21,17 +21,17 @@
     "chai": "4.3.4",
     "form-data": "4.0.0",
     "lodash": "4.17.21",
-    "mocha": "8.4.0",
+    "mocha": "9.1.2",
     "node-fetch": "2.6.1",
-    "streamr-client": "5.4.1",
+    "streamr-client": "5.4.5",
     "ts-mocha": "8.0.0",
     "typescript": "4.2.4"
   },
   "devDependencies": {
-    "@types/chai": "4.2.18",
-    "@types/lodash": "4.14.169",
-    "@types/mocha": "8.2.2",
-    "@types/node": "14.14.45",
+    "@types/chai": "4.2.22",
+    "@types/lodash": "4.14.175",
+    "@types/mocha": "9.0.0",
+    "@types/node": "16.10.1",
     "@types/node-fetch": "2.5.10"
   }
 }
