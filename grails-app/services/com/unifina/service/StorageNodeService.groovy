@@ -1,16 +1,13 @@
 package com.unifina.service
 
-import com.streamr.client.StreamrClient
 import com.unifina.domain.EthereumAddress
 import com.unifina.domain.Stream
 import com.unifina.domain.StreamStorageNode
 import com.unifina.utils.ApplicationConfig
 import grails.compiler.GrailsCompileStatic
-import org.apache.log4j.Logger
 
 @GrailsCompileStatic
 class StorageNodeService {
-	private static final Logger log = Logger.getLogger(StorageNodeService.class)
 	StreamService streamService
 	StreamrClientService streamrClientService
 
@@ -48,37 +45,18 @@ class StorageNodeService {
 				streamId: streamId)
 			stream.addToStorageNodes(node)
 			stream.save(validate: true, failOnError: true)
-			notifyStorageNode(storageNodeAddress, streamId, StreamStorageNode.AssigmentEvent.STREAM_ADDED)
-		}
-		return node
-	}
-
-	private void notifyStorageNode(EthereumAddress storageNodeAddress, String streamId, StreamStorageNode.AssigmentEvent assigmentEvent) {
-		StreamrClient client = streamrClientService.getInstanceForThisEngineNode();
-		try {
-			com.streamr.client.rest.Stream assignmentStream = client.getStream(StorageNodeService.createAssignmentStreamId())
-			Map<String, Object> message = createMessage(
+			NotifyStorageNodeTask task = new NotifyStorageNodeTask(
 				storageNodeAddress,
 				streamId,
-				assigmentEvent)
-			client.publish(assignmentStream, message)
-		} catch (Exception e) {
-			String msg = String.format("Unable to notify StorageNode: streamId=%s, event=%s, address=%s", streamId, assigmentEvent, storageNodeAddress)
-			log.error(msg, e)
+				NotifyStorageNodeTask.AssigmentEvent.STREAM_ADDED,
+				streamService,
+				streamrClientService)
+			Thread thread = new Thread(task)
+			thread.setUncaughtExceptionHandler(new NotifyStorageNodeTask.ErrorHandler())
+			thread.setName(String.format("AddStorageNodeTask[%s,%s]", streamId, storageNodeAddress))
+			thread.start()
 		}
-	}
-
-	private Map<String, Object> createMessage(final EthereumAddress storageNodeAddress,
-		final String streamId, final StreamStorageNode.AssigmentEvent eventType) {
-
-		Map<String, Object> message = new HashMap<>()
-		message.put("event", eventType.name())
-		Map<String, Object> stream = new HashMap<>()
-		stream.put("id", streamId)
-		stream.put("partitions", streamService.getStream(streamId).getPartitions())
-		message.put("stream", stream)
-		message.put("storageNode", storageNodeAddress)
-		return message
+		return node
 	}
 
 	void removeStorageNodeFromStream(EthereumAddress storageNodeAddress, String streamId) {
@@ -90,7 +68,16 @@ class StorageNodeService {
 		if (instance != null) {
 			stream.removeFromStorageNodes(instance)
 			instance.delete(flush: true)
-			notifyStorageNode(storageNodeAddress, streamId, StreamStorageNode.AssigmentEvent.STREAM_REMOVED)
+			NotifyStorageNodeTask task = new NotifyStorageNodeTask(
+				storageNodeAddress,
+				streamId,
+				NotifyStorageNodeTask.AssigmentEvent.STREAM_REMOVED,
+				streamService,
+				streamrClientService)
+			Thread thread = new Thread(task)
+			thread.setUncaughtExceptionHandler(new NotifyStorageNodeTask.ErrorHandler())
+			thread.setName(String.format("RemoveStorageNodeTask[%s,%s]", streamId, storageNodeAddress))
+			thread.start()
 		} else {
 			throw new NotFoundException("StorageNode", storageNodeAddress.toString())
 		}
