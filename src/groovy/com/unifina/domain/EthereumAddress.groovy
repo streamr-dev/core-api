@@ -22,6 +22,7 @@ class EthereumAddress {
 		this.value = Keys.toChecksumAddress(value)
 	}
 
+	@Override
 	public String toString() {
 		return value
 	}
