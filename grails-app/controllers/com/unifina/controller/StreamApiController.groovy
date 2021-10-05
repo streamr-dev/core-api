@@ -4,20 +4,102 @@ import com.unifina.domain.*
 import com.unifina.domain.Permission.Operation
 import com.unifina.service.*
 import grails.converters.JSON
+import org.apache.log4j.LogManager
+import org.apache.log4j.Logger
+
+import javax.sql.DataSource
+import java.sql.Connection
+import java.sql.ResultSet
+import java.sql.SQLException
+import java.sql.Statement
 
 class StreamApiController {
+	private static final Logger log = LogManager.getLogger(StreamApiController.class)
+
 	StreamService streamService
 	PermissionService permissionService
 	ApiService apiService
 	EnsService ensService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	DataSource dataSourceUnproxied
+
+	private User loggedInUser() {
+		return request.apiUser
+	}
+
+	private void close(AutoCloseable closeable, String errorMessage) {
+		try {
+			if (closeable != null) {
+				closeable.close()
+			}
+		} catch (Exception e) {
+			log.error(errorMessage, e)
+		} finally {
+			closeable = null
+		}
+	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def index(StreamListParams listParams) {
 		if (params.public) {
 			listParams.publicAccess = params.boolean("public")
 		}
-		def results = apiService.list(Stream, listParams, (User) request.apiUser)
+		String sql = "select p.stream_id from stream s " +
+			"inner join permission p on s.id = p.stream_id " +
+			"where (p.operation = 'stream_get' and " +
+			"(p.anonymous = 1 or p.user_id = ?) " +
+			"and (p.ends_at is null or p.ends_at > ?)) " +
+			"and match(`name`, `description`) against (?) " +
+			"group by p.stream_id order by ? ? limit ? offset ?"
+		long start = System.currentTimeMillis()
+		Connection con
+		Statement pstmt
+		ResultSet rs
+		List<String> streamIds = new ArrayList<>()
+		try {
+			con = dataSourceUnproxied.getConnection()
+			pstmt = con.prepareStatement(sql)
+			int k = 1
+			pstmt.setLong(k++, loggedInUser().getId())
+			pstmt.setDate(k++, new java.sql.Date(System.currentTimeMillis()))
+			String searchTerm = listParams.getSearch()
+			if (listParams.getName()) {
+				searchTerm = listParams.getName()
+			}
+			pstmt.setString(k++, searchTerm)
+			if (listParams.getSortBy() == null) {
+				listParams.setSortBy("name")
+			}
+			if (listParams.getOrder() == null) {
+				listParams.setOrder("ASC")
+			}
+			pstmt.setString(k++, listParams.getSortBy())
+			pstmt.setString(k++, listParams.getOrder())
+			pstmt.setInt(k++, listParams.getMax())
+			pstmt.setInt(k++, listParams.getOffset())
+			rs = pstmt.executeQuery()
+			while (rs.next()) {
+				String id = rs.getString("stream_id")
+				streamIds.add(id)
+			}
+		} catch (SQLException e) {
+			log.error("Error while running sql query for stream search", e)
+		} finally {
+			close(pstmt, "Error while closing prepared statement")
+			close(rs, "Error while closing result set")
+			close(con, "Error while closing sql connection")
+		}
+		log.info(String.format("Stream search by name and description time %d ms", System.currentTimeMillis() - start))
+		start = System.currentTimeMillis()
+		List<Stream> results
+		if (!streamIds.isEmpty()) {
+			results = Stream.createCriteria().list() {
+				'in'("id", streamIds)
+			}
+		} else {
+			results = new ArrayList<>()
+		}
+		log.info(String.format("Load Streams by id time %d ms", System.currentTimeMillis() - start))
 		PaginationUtils.setHint(response, listParams, results.size(), params)
 		if (params.noConfig) {
 			render(results*.toSummaryMap() as JSON)
