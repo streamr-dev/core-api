@@ -50,7 +50,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		then:
 		response.json.length() == 3
 		1 * controller.dataSourceUnproxied.getConnection()
-		1 * controller.streamStore.search(_, _) >> [
+		1 * controller.streamStore.search(_, _, _) >> [
 			streamOne,
 			Stream.findById(streamTwoId),
 			Stream.findById(streamThreeId)
@@ -66,7 +66,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		response.json.length() == 3
 		response.json[0].config == null
 		1 * controller.dataSourceUnproxied.getConnection()
-		1 * controller.streamStore.search(_, _) >> [
+		1 * controller.streamStore.search(_, _, _) >> [
 			streamOne,
 			Stream.findById(streamTwoId),
 			Stream.findById(streamThreeId)
@@ -87,7 +87,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		]
 		response.json[0].description == "description"
 		1 * controller.dataSourceUnproxied.getConnection()
-		1 * controller.streamStore.search(_, _) >> [
+		1 * controller.streamStore.search(_, _, _) >> [
 			streamOne
 		]
 	}
@@ -101,7 +101,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		then:
 		response.json[0].name == name
 		1 * controller.dataSourceUnproxied.getConnection()
-		1 * controller.streamStore.search(_, _) >> [
+		1 * controller.streamStore.search(_, _, _) >> [
 			Stream.findById(streamTwoId)
 		]
 	}
