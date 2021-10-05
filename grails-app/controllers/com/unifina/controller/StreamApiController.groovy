@@ -13,19 +13,8 @@ import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Statement
 
-class StreamApiController {
-	private static final Logger log = LogManager.getLogger(StreamApiController.class)
-
-	StreamService streamService
-	PermissionService permissionService
-	ApiService apiService
-	EnsService ensService
-	EthereumIntegrationKeyService ethereumIntegrationKeyService
-	DataSource dataSourceUnproxied
-
-	private User loggedInUser() {
-		return request.apiUser
-	}
+class StreamStore {
+	private static final Logger log = LogManager.getLogger(StreamStore.class)
 
 	private void close(AutoCloseable closeable, String errorMessage) {
 		try {
@@ -39,28 +28,25 @@ class StreamApiController {
 		}
 	}
 
-	@StreamrApi(authenticationLevel = AuthLevel.NONE)
-	def index(StreamListParams listParams) {
-		if (params.public) {
-			listParams.publicAccess = params.boolean("public")
-		}
+	List<Stream> search(Connection con, User user, StreamListParams listParams) {
 		String sql = "select p.stream_id from stream s " +
 			"inner join permission p on s.id = p.stream_id " +
-			"where (p.operation = 'stream_get' and " +
-			"(p.anonymous = 1 or p.user_id = ?) " +
+			"where (p.operation = ? and " +
+			"(p.anonymous = ? or p.user_id = ?) " +
 			"and (p.ends_at is null or p.ends_at > ?)) " +
 			"and match(`name`, `description`) against (?) " +
 			"group by p.stream_id order by ? ? limit ? offset ?"
 		long start = System.currentTimeMillis()
-		Connection con
 		Statement pstmt
 		ResultSet rs
 		List<String> streamIds = new ArrayList<>()
 		try {
-			con = dataSourceUnproxied.getConnection()
 			pstmt = con.prepareStatement(sql)
 			int k = 1
-			pstmt.setLong(k++, loggedInUser().getId())
+			Permission.Operation operation = listParams.operationToEnum()
+			pstmt.setString(k++, operation?.toString().toLowerCase())
+			pstmt.setBoolean(k++, listParams.getPublicAccess())
+			pstmt.setLong(k++, user.getId())
 			pstmt.setDate(k++, new java.sql.Date(System.currentTimeMillis()))
 			String searchTerm = listParams.getSearch()
 			if (listParams.getName()) {
@@ -100,6 +86,29 @@ class StreamApiController {
 			results = new ArrayList<>()
 		}
 		log.info(String.format("Load Streams by id time %d ms", System.currentTimeMillis() - start))
+		return results
+	}
+}
+
+class StreamApiController {
+	StreamService streamService
+	PermissionService permissionService
+	ApiService apiService
+	EnsService ensService
+	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	DataSource dataSourceUnproxied
+	StreamStore streamStore = new StreamStore()
+
+	private User loggedInUser() {
+		return request.apiUser
+	}
+
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
+	def index(StreamListParams listParams) {
+		if (params.public) {
+			listParams.publicAccess = params.boolean("public")
+		}
+		List<Stream> results = streamStore.search(dataSourceUnproxied.getConnection(), loggedInUser(), listParams)
 		PaginationUtils.setHint(response, listParams, results.size(), params)
 		if (params.noConfig) {
 			render(results*.toSummaryMap() as JSON)

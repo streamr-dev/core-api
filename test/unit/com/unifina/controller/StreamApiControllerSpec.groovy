@@ -7,6 +7,8 @@ import com.unifina.service.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
+import javax.sql.DataSource
+
 @TestFor(StreamApiController)
 @Mock([User, Stream, Permission, PermissionService, StreamService, RESTAPIFilters])
 class StreamApiControllerSpec extends ControllerSpecification {
@@ -20,6 +22,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 	def streamFourId
 
 	def setup() {
+		controller.dataSourceUnproxied = Mock(DataSource)
+		controller.streamStore = Mock(StreamStore)
 		controller.permissionService = mainContext.getBean(PermissionService)
 		apiService = controller.apiService = Mock(ApiService)
 
@@ -45,10 +49,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 
 		then:
 		response.json.length() == 3
-		1 * apiService.list(Stream, {
-			assert it.toMap() == new StreamListParams().toMap()
-			return true
-		}, me) >> [
+		1 * controller.dataSourceUnproxied.getConnection()
+		1 * controller.streamStore.search(_, _) >> [
 			streamOne,
 			Stream.findById(streamTwoId),
 			Stream.findById(streamThreeId)
@@ -63,10 +65,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		then:
 		response.json.length() == 3
 		response.json[0].config == null
-		1 * apiService.list(Stream, {
-			assert it.toMap() == new StreamListParams().toMap()
-			return true
-		}, me) >> [
+		1 * controller.dataSourceUnproxied.getConnection()
+		1 * controller.streamStore.search(_, _) >> [
 			streamOne,
 			Stream.findById(streamTwoId),
 			Stream.findById(streamThreeId)
@@ -86,10 +86,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 			fields: []
 		]
 		response.json[0].description == "description"
-		1 * apiService.list(Stream, {
-			assert it.toMap() == new StreamListParams(name: "stream").toMap()
-			return true
-		}, me) >> [
+		1 * controller.dataSourceUnproxied.getConnection()
+		1 * controller.streamStore.search(_, _) >> [
 			streamOne
 		]
 	}
@@ -102,10 +100,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 
 		then:
 		response.json[0].name == name
-		1 * apiService.list(Stream, {
-			assert it.toMap() == new StreamListParams(name: "ztream").toMap()
-			return true
-		}, me) >> [
+		1 * controller.dataSourceUnproxied.getConnection()
+		1 * controller.streamStore.search(_, _) >> [
 			Stream.findById(streamTwoId)
 		]
 	}
