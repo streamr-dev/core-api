@@ -61,7 +61,7 @@ final class NotifyStorageNodeTask implements Runnable {
 		stream.put("id", streamId);
 		stream.put("partitions", streamService.getStream(streamId).getPartitions());
 		message.put("stream", stream);
-		message.put("storageNode", storageNodeAddress);
+		message.put("storageNode", storageNodeAddress.toString());
 		return message;
 	}
 }
