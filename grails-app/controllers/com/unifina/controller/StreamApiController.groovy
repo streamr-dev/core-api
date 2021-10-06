@@ -29,13 +29,29 @@ class StreamStore {
 	}
 
 	List<Stream> search(Connection con, User user, StreamListParams listParams) {
-		String sql = "select p.stream_id from stream s " +
-			"inner join permission p on s.id = p.stream_id " +
-			"where (p.operation = ? and " +
-			"(p.anonymous = ? or p.user_id = ?) " +
-			"and (p.ends_at is null or p.ends_at > ?)) " +
-			"and match(`name`, `description`) against (?) " +
-			"group by p.stream_id order by ? ? limit ? offset ?"
+		boolean isSearch = listParams.getName() != null || listParams.getSearch() != null
+		boolean hasUser = user != null
+		String sql = "select p.stream_id from stream s "
+		sql += "inner join permission p on s.id = p.stream_id "
+		sql += "where (p.operation = ? and  (p.anonymous = ? or p.user_id = ?) "
+		sql += " and (p.ends_at is null or p.ends_at > ?)) "
+
+		if (isSearch) {
+			sql += " and match(`name`, `description`) against (?) "
+		}
+		sql += " group by p.stream_id "
+
+		String sortBy = listParams.getSortBy()
+		if (sortBy != null && sortBy.matches("[a-zA-Z0-9_]+")) {
+			sql += " order by "
+			sql += sortBy
+			sql += " "
+			if (listParams.getOrder() != null) {
+				sql += listParams.getOrder()
+				sql += " "
+			}
+		}
+		sql += " limit ? offset ? "
 		long start = System.currentTimeMillis()
 		Statement pstmt
 		ResultSet rs
@@ -48,22 +64,19 @@ class StreamStore {
 			pstmt.setBoolean(k++, listParams.getPublicAccess())
 			pstmt.setLong(k++, user.getId())
 			pstmt.setDate(k++, new java.sql.Date(System.currentTimeMillis()))
-			String searchTerm = listParams.getSearch()
-			if (listParams.getName()) {
-				searchTerm = listParams.getName()
+			if (isSearch) {
+				String searchTerm = listParams.getSearch()
+				if (listParams.getName()) {
+					searchTerm = listParams.getName()
+				}
+				pstmt.setString(k++, searchTerm)
 			}
-			pstmt.setString(k++, searchTerm)
-			if (listParams.getSortBy() == null) {
-				listParams.setSortBy("name")
-			}
-			if (listParams.getOrder() == null) {
-				listParams.setOrder("ASC")
-			}
-			pstmt.setString(k++, listParams.getSortBy())
-			pstmt.setString(k++, listParams.getOrder())
 			pstmt.setInt(k++, listParams.getMax())
 			pstmt.setInt(k++, listParams.getOffset())
 			rs = pstmt.executeQuery()
+			if (log.isDebugEnabled()) {
+				log.debug("Stream search SQL: " + pstmt.toString())
+			}
 			while (rs.next()) {
 				String id = rs.getString("stream_id")
 				streamIds.add(id)
