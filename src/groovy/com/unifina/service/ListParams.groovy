@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.controller.StreamListParams
 import com.unifina.domain.Permission
 import grails.validation.Validateable
 import groovy.transform.CompileStatic
@@ -44,9 +45,14 @@ abstract class ListParams {
 	Closure createListCriteria() {
 		return {
 			if (search) {
-				or {
-					searchFields.each {
-						like(it, "%${search}%")
+				// For stream table we have full text index for better performance
+				if (this instanceof StreamListParams) {
+					sqlRestriction("match(name, description) against (?)", [search])
+				} else {
+					or {
+						searchFields.each {
+							like(it, "%${search}%")
+						}
 					}
 				}
 			}
