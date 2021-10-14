@@ -88,7 +88,7 @@ class StreamStore {
 			close(rs, "Error while closing result set")
 			close(con, "Error while closing sql connection")
 		}
-		log.info(String.format("Stream search by name and description time %d ms", System.currentTimeMillis() - start))
+		log.debug(String.format("Stream search by name and description time %d ms", System.currentTimeMillis() - start))
 		start = System.currentTimeMillis()
 		List<Stream> results
 		if (!streamIds.isEmpty()) {
@@ -98,7 +98,7 @@ class StreamStore {
 		} else {
 			results = new ArrayList<>()
 		}
-		log.info(String.format("Load Streams by id time %d ms", System.currentTimeMillis() - start))
+		log.debug(String.format("Load Streams by id time %d ms", System.currentTimeMillis() - start))
 		return results
 	}
 }
