@@ -54,6 +54,11 @@ jobs:
       - name: Integration test
         run: |
           make -f Makefile.ci test-integration
+      - name: Stop Streamr Docker Stack
+        if: always()
+        run: |
+          docker kill $(docker ps -q)
+          docker rm $(docker ps -a -q)
 
   e2e:
     name: End to end test
@@ -113,6 +118,11 @@ jobs:
         run: |
           cd rest-e2e-tests
           npm run test:stress
+      - name: Stop Streamr Docker Stack
+        if: always()
+        run: |
+          docker kill $(docker ps -q)
+          docker rm $(docker ps -a -q)
 
   build-docker:
     name: Build Docker and push to Docker Hub
