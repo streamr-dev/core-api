@@ -9,11 +9,6 @@ import groovy.transform.ToString
 @EqualsAndHashCode(includes = "id,streamId,storageNodeAddress,dateCreated")
 @ToString
 class StreamStorageNode {
-	enum AssigmentEvent {
-		STREAM_ADDED,
-		STREAM_REMOVED
-	}
-
 	String id
 	String streamId
 	String storageNodeAddress
