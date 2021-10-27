@@ -13,9 +13,10 @@ class DataUnionSecretApiControllerSpec extends Specification {
 	User me
 	final String contractAddress = "0x6c90aece04198da2d5ca9b956b8f95af8041de37"
 	final String validID = "L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g"
+	final String address = "0x8888aece04198da2d5ca9b956b8f95af80418888"
 
 	void setup() {
-		me = new User(id: 1, name: "firstname lastname", username: "firstname.lastname@address.com")
+		me = new User(id: 1, name: "firstname lastname", username: address)
 		me.save(validate: true, failOnError: true)
 		DataUnionSecret secret = new DataUnionSecret(
 			name: "name of the secret",
@@ -54,6 +55,7 @@ class DataUnionSecretApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(_, _) >>> true
 		1 * controller.dataUnionSecretService.findAll(contractAddress) >> [s1, s2]
 		response.json[0].id == "1"
 		response.json[0].name == "secret 1"
@@ -114,6 +116,7 @@ class DataUnionSecretApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(_, _) >>> true
 		1 * controller.dataUnionSecretService.create(contractAddress, _ as DataUnionSecretCommand) >> secret
 		response.json.id == "1"
 		response.json.name == "secret name"
@@ -210,6 +213,7 @@ class DataUnionSecretApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(_, _) >>> true
 		1 * controller.dataUnionSecretService.find(contractAddress, validID) >> s1
 		response.json.id == "1"
 		response.json.name == "secret 1"
@@ -273,6 +277,7 @@ class DataUnionSecretApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(_, _) >>> true
 		1 * controller.dataUnionSecretService.find(contractAddress, validID) >> null
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
@@ -316,6 +321,7 @@ class DataUnionSecretApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(_, _) >>> true
 		1 * controller.dataUnionSecretService.update(contractAddress, validID, _ as DataUnionSecretCommand) >> {
 			s1.name = "new name"
 			s1.secret = "new secret"
@@ -413,6 +419,7 @@ class DataUnionSecretApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(_, _) >>> true
 		1 * controller.dataUnionSecretService.update(contractAddress, validID, _ as DataUnionSecretCommand) >> { throw new NotFoundException("Secret not found") }
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
@@ -448,6 +455,7 @@ class DataUnionSecretApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(_, _) >>> true
 		1 * controller.dataUnionSecretService.delete(contractAddress, validID)
 		response.status == 204
 	}
@@ -508,6 +516,7 @@ class DataUnionSecretApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(_, _) >>> true
 		1 * controller.dataUnionSecretService.delete(contractAddress, validID) >> {
 			throw new NotFoundException("mocked: not found!")
 		}

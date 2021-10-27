@@ -51,6 +51,9 @@ class DataUnionJoinRequestApiController {
 		if (adminAddress == null) {
 			throw new BadRequestException("Data Union address is not of a data union smart contract")
 		}
+		if (!ethereumService.hasEthereumAddress(user, adminAddress)) {
+			throw new NotPermittedException(user?.username, "data union", contractAddress, "manage")
+		}
 	}
 
 	// curl -v -X GET -H "Authorization: token tester1-api-key" "http://localhost:8081/streamr-core/api/v1/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests?state=pending"

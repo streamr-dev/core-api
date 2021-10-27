@@ -13,9 +13,10 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 	User me
 	final String contractAddress = "0x6c90aece04198da2d5ca9b956b8f95af8041de37"
 	final String validID = "L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g"
+	final String address = "0x8888aece04198da2d5ca9b956b8f95af80418888"
 
 	def setup() {
-		me = new User(id: 1, name: "firstname lastname", username: "firstname.lastname@address.com")
+		me = new User(id: 1, name: "firstname lastname", username: address)
 		me.save(validate: true, failOnError: true)
 		controller.dataUnionJoinRequestService = Mock(DataUnionJoinRequestService)
 		controller.ethereumService = Mock(EthereumService)
@@ -52,6 +53,7 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(_, _) >>> true
 		1 * controller.dataUnionJoinRequestService.findAll(contractAddress, null) >> [r]
 		response.json[0].id == validID
 		response.json[0].memberAddress == "0x0000000000000000000000000000000000000001"
@@ -174,6 +176,7 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(_, _) >>> true
 		1 * controller.dataUnionJoinRequestService.find(contractAddress, validID) >> r
 		response.json.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
 		response.json.contractAddress == contractAddress
@@ -223,6 +226,7 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(_, _) >>> true
 		1 * controller.dataUnionJoinRequestService.find(contractAddress, validID) >> null
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
@@ -267,6 +271,7 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(_, _) >>> true
 		1 * controller.dataUnionJoinRequestService.update(contractAddress, validID, _ as DataUnionUpdateJoinRequestCommand) >> {
 			r.state = DataUnionJoinRequest.State.ACCEPTED
 			return r
@@ -346,6 +351,7 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(_, _) >>> true
 		1 * controller.dataUnionJoinRequestService.update(contractAddress, validID, _ as DataUnionUpdateJoinRequestCommand) >> {
 			throw new NotFoundException("mocked: entity not found")
 		}
@@ -392,6 +398,7 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(_, _) >>> true
 		1 * controller.dataUnionJoinRequestService.delete(contractAddress, validID)
 		response.status == 204
 	}
@@ -437,6 +444,7 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(_, _) >>> true
 		1 * controller.dataUnionJoinRequestService.delete(contractAddress, validID) >> {
 			throw new NotFoundException("mocked: entity not found")
 		}
