@@ -11,7 +11,12 @@ on:
     paths-ignore:
       - '**.md'
       - 'docs/swagger.json'
-
+concurrency:
+  group: ci-${{ github.head_ref }}
+  cancel-in-progress: true
+defaults:
+  run:
+    shell: bash
 env:
   GRAILS_WAR_ENV: 'test'
   GRAILS_VERSION: '2.5.6'
