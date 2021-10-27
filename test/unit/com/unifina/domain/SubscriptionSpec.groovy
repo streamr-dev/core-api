@@ -18,7 +18,7 @@ class SubscriptionSpec extends BeanMockingSpecification {
 		subscription.fetchUser() == null
 	}
 
-	void "fetchUser() returns user if IntegrationKey with address found"() {
+	void "fetchUser() returns user if User with address is found"() {
 		User user = new User(username: "0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00").save(failOnError: true, validate: false)
 		when:
 		User fetched = subscription.fetchUser()
