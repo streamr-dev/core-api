@@ -61,7 +61,6 @@ and user_id = ?
 order by integration_key.date_created
 limit 100000 offset 1
 					""", [userId]) { GroovyResultSet key ->
-						// TODO: Clone the user to create a newUser
 						String id = key["id"]
 						String idInService = key["id_in_service"]
 						String name = key["name"]
@@ -107,7 +106,6 @@ values(
 						Long newUserId = sql.firstRow("select last_insert_id() as new_user_id").new_user_id
 						sql.execute("update integration_key set user_id = ? where id = ?", [newUserId, key.getId()])
 						sql.execute("insert into user_images_tmp(id, image_url_large, image_url_small) values(?, ?, ?)", [newUserId, user.getImageUrlLarge(), user.getImageUrlSmall()])
-						// TODO: Clone all of user's permissions to newUser
 						sql.eachRow("""
 select operation, invite_id, anonymous, stream_id, product_id, subscription_id, ends_at
 from permission
