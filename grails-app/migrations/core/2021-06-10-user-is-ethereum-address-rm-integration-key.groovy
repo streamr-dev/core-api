@@ -155,7 +155,7 @@ product_id, subscription_id, ends_at
 ?, ?, ?)
 							""", [
 								0, operation, newUserId,
-								inviteId, false, streamId,
+								inviteId, true, streamId,
 								productId, subscriptionId, endsAt
 							])
 						}
