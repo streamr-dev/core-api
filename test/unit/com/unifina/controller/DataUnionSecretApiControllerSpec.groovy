@@ -90,9 +90,11 @@ class DataUnionSecretApiControllerSpec extends Specification {
 			controller.index()
 		}
 		then:
-		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> null
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> ""
+		1 * controller.ethereumService.hasEthereumAddress(me, _) >> false
 		def e = thrown(ApiException)
-		e.statusCode == 400
+		e.statusCode == 403
+		e.code == "FORBIDDEN"
 	}
 
 	void "save() test"() {
