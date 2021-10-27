@@ -8,7 +8,7 @@ import grails.converters.JSON
 class LoginApiController {
 	ChallengeService challengeService
 	SessionService sessionService
-	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	EthereumUserService ethereumUserService
 	UserService userService
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
@@ -24,7 +24,7 @@ class LoginApiController {
 		}
 		challengeService.checkValidChallengeResponse(cmd.challenge?.id,
 			cmd.challenge?.challenge, cmd.signature.toLowerCase(), cmd.address.toLowerCase())
-		User user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(cmd.address.toLowerCase(), SignupMethod.fromRequest(request))
+		User user = ethereumUserService.getOrCreateFromEthereumAddress(cmd.address.toLowerCase(), SignupMethod.fromRequest(request))
 		assertEnabled(user)
 		SessionToken token = sessionService.generateToken(user)
 		render(token.toMap() as JSON)

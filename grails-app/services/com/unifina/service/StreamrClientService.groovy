@@ -17,7 +17,7 @@ import java.util.concurrent.locks.ReentrantLock
 
 class StreamrClientService {
 
-	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	EthereumUserService ethereumUserService
 	SessionService sessionService
 
 	private static final Logger log = Logger.getLogger(StreamrClientService)
@@ -62,7 +62,7 @@ class StreamrClientService {
 					// Create a custom EthereumAuthenticationMethod which doesn't call the API, but instead uses the internal services to
 					// get a sessionToken. Calling the API here can lead to a deadlock situation in some corner cases, because the
 					// service calls "itself" while blocking in a mutex-lock.
-					InternalAuthenticationMethod authenticationMethod = new InternalAuthenticationMethod(nodePrivateKey, ethereumIntegrationKeyService, sessionService, SignupMethod.API)
+					InternalAuthenticationMethod authenticationMethod = new InternalAuthenticationMethod(nodePrivateKey, ethereumUserService, sessionService, SignupMethod.API)
 					instanceForThisEngineNode = createInstance(authenticationMethod)
 					// Make sure the instance is authenticated before returning
 					instanceForThisEngineNode.getSessionToken()

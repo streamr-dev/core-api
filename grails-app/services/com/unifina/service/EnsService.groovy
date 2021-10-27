@@ -5,11 +5,11 @@ import com.unifina.utils.Web3jHelper
 
 class EnsService {
 	static transactional = false
-	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	EthereumUserService ethereumUserService
 
 	boolean isENSOwnedBy(String domain, User expectedOwner) {
 		String actualOwnerAddress = Web3jHelper.getENSDomainOwner(domain)
-		User actualOwner = ethereumIntegrationKeyService.getEthereumUser(actualOwnerAddress)
+		User actualOwner = ethereumUserService.getEthereumUser(actualOwnerAddress)
 		return (actualOwner != null) && (actualOwner.id == expectedOwner.id)
 	}
 }

@@ -10,9 +10,9 @@ import org.web3j.crypto.ECKeyPair
 import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin)
-@TestFor(EthereumIntegrationKeyService)
+@TestFor(EthereumUserService)
 @Mock([User])
-class EthereumIntegrationKeyServiceSpec extends Specification {
+class EthereumUserServiceSpec extends Specification {
 	String address = "0x8eEEF384734a8cEfeC53eA49eb651D0257cbA6B6"
 	User me
 
@@ -29,7 +29,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		setup:
 		ECKeyPair keyPair = ECKeyPair.create("0x0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF".getBytes())
 		expect:
-		EthereumIntegrationKeyService.getAddress(keyPair.privateKey.toString()) == "37aa29f21ccb6a280830ccbefdbb40b9f5b08b34"
+		EthereumUserService.getAddress(keyPair.privateKey.toString()) == "37aa29f21ccb6a280830ccbefdbb40b9f5b08b34"
 	}
 
 	void "create user checks for duplicate address"() {

@@ -7,7 +7,7 @@ import org.web3j.crypto.Credentials
 import org.web3j.crypto.ECKeyPair
 import org.web3j.crypto.Keys
 
-class EthereumIntegrationKeyService {
+class EthereumUserService {
 	def grailsApplication
 	UserService userService
 	PermissionService permissionService

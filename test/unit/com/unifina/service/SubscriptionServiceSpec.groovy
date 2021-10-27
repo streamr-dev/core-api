@@ -13,7 +13,7 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 	Stream s1, s2, s3
 	Product product
 	PermissionService permissionService
-	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	EthereumUserService ethereumUserService
 
 	void setup() {
 		user = new User(username: "0x0000000000000000000000000000000000000005").save(failOnError: true, validate: false)
@@ -26,7 +26,7 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		[s1, s2, s3]*.save(failOnError: true, validate: false)
 		product = new Product(streams: [s1, s2]).save(failOnError: true, validate: false)
 		permissionService = service.permissionService = mockBean(PermissionService, Mock(PermissionService))
-		ethereumIntegrationKeyService = mockBean(EthereumIntegrationKeyService, Mock(EthereumIntegrationKeyService))
+		ethereumUserService = mockBean(EthereumUserService, Mock(EthereumUserService))
 	}
 
 	void "getSubscriptionsOfUser() returns empty if user has no integration keys or free subscriptions"() {
@@ -96,7 +96,7 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		service.onSubscribed(product, address, new Date())
 
 		then:
-		1 * ethereumIntegrationKeyService.getEthereumUser(address) >> user
+		1 * ethereumUserService.getEthereumUser(address) >> user
 		1 * permissionService.systemGrant(user, s1, Permission.Operation.STREAM_SUBSCRIBE, _, _) >> p1
 		1 * permissionService.systemGrant(user, s2, Permission.Operation.STREAM_SUBSCRIBE, _, _) >> p2
 		Permission.findAll()*.toInternalMap() as Set == [p1.toInternalMap(), p2.toInternalMap()] as Set
@@ -118,7 +118,7 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		service.onSubscribed(product, address, new Date())
 
 		then:
-		1 * ethereumIntegrationKeyService.getEthereumUser(address) >> user
+		1 * ethereumUserService.getEthereumUser(address) >> user
 		1 * permissionService.systemGrant(user, s1, Permission.Operation.STREAM_SUBSCRIBE, _, _) >> p3
 		1 * permissionService.systemGrant(user, s2, Permission.Operation.STREAM_SUBSCRIBE, _, _) >> p4
 		Permission.exists(p1.id)
@@ -147,7 +147,7 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		service.onSubscribed(product, address, new Date())
 
 		then:
-		1 * ethereumIntegrationKeyService.getEthereumUser(address) >> user
+		1 * ethereumUserService.getEthereumUser(address) >> user
 		1 * permissionService.systemGrant(user, s1, Permission.Operation.STREAM_SUBSCRIBE, _, _) >> p3
 		1 * permissionService.systemGrant(user, s2, Permission.Operation.STREAM_SUBSCRIBE, _, _) >> p4
 		1 * permissionService.systemRevoke(p1) >> { p1.delete(flush: true) }

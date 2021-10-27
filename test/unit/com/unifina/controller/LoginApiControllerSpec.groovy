@@ -14,14 +14,14 @@ import grails.test.mixin.TestFor
 class LoginApiControllerSpec extends ControllerSpecification {
 	ChallengeService challengeService
 	SessionService sessionService
-	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	EthereumUserService ethereumUserService
 	User me
 
 	def setup() {
 		me = new User().save(failOnError: true, validate: false)
 		challengeService = controller.challengeService = Mock(ChallengeService)
 		sessionService = controller.sessionService = Mock(SessionService)
-		ethereumIntegrationKeyService = controller.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
+		ethereumUserService = controller.ethereumUserService = Mock(EthereumUserService)
 	}
 
 	void "should generate challenge"() {
@@ -57,17 +57,17 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		request.method = "POST"
 		request.JSON = [
 			challenge: [
-				id       : challenge.getId(),
+				id: challenge.getId(),
 				challenge: challenge.getChallenge()
 			],
 			signature: signature,
-			address  : address
+			address: address
 		]
 		authenticatedAs(me) { controller.response() }
 
 		then:
 		1 * challengeService.checkValidChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address)
-		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(address, SignupMethod.API) >> user
+		1 * ethereumUserService.getOrCreateFromEthereumAddress(address, SignupMethod.API) >> user
 		1 * sessionService.generateToken(user) >> token
 		response.status == 200
 		response.json == token.toMap()
@@ -83,11 +83,11 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		request.method = "POST"
 		request.JSON = [
 			challenge: [
-				id       : challenge.getId(),
+				id: challenge.getId(),
 				challenge: challenge.getChallenge()
 			],
 			signature: signature,
-			address  : address
+			address: address
 		]
 		authenticatedAs(me) { controller.response() }
 
@@ -110,17 +110,17 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		request.method = "POST"
 		request.JSON = [
 			challenge: [
-				id       : challenge.getId(),
+				id: challenge.getId(),
 				challenge: challenge.getChallenge()
 			],
 			signature: signature,
-			address  : address
+			address: address
 		]
 		authenticatedAs(me) { controller.response() }
 
 		then:
 		1 * challengeService.checkValidChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address)
-		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(address, SignupMethod.API) >> user
+		1 * ethereumUserService.getOrCreateFromEthereumAddress(address, SignupMethod.API) >> user
 		thrown DisabledUserException
 	}
 }

@@ -1,16 +1,16 @@
 package com.unifina.domain
 
 import com.unifina.BeanMockingSpecification
-import com.unifina.service.EthereumIntegrationKeyService
+import com.unifina.service.EthereumUserService
 
 class SubscriptionSpec extends BeanMockingSpecification {
 
 	Subscription subscription
-	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	EthereumUserService ethereumUserService
 
 	void setup() {
 		subscription = new SubscriptionPaid(address: "0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00")
-		ethereumIntegrationKeyService = mockBean(EthereumIntegrationKeyService, Mock(EthereumIntegrationKeyService))
+		ethereumUserService = mockBean(EthereumUserService, Mock(EthereumUserService))
 	}
 
 	void "fetchUser() returns null if no IntegrationKey with address found"() {
@@ -23,7 +23,7 @@ class SubscriptionSpec extends BeanMockingSpecification {
 		when:
 		User fetched = subscription.fetchUser()
 		then:
-		1 * ethereumIntegrationKeyService.getEthereumUser("0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00") >> user
+		1 * ethereumUserService.getEthereumUser("0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00") >> user
 		fetched != null
 	}
 }
