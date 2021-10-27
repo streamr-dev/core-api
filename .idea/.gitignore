@@ -1,2 +1,23 @@
 # Datasource local storage ignored files
 /dataSources/
+/vcs.xml
+# User-specific stuff
+/**/workspace.xml
+/**/tasks.xml
+/**/usage.statistics.xml
+/**/dictionaries
+/**/shelf
+# Generated files
+/**/contentModel.xml
+# Sensitive or high-churn files
+/core-api-grailsPlugins.iml
+/core-api.iml
+/**/dataSources/
+/**/dataSources.ids
+/**/dataSources.local.xml
+/**/sqlDataSources.xml
+/**/dynamic.xml
+/**/uiDesigner.xml
+/**/dbnavigator.xml
+/httpRequests
+/sonarlint
