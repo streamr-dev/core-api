@@ -107,9 +107,7 @@ class StreamService {
 			'in'("id", writers*.id)
 		}
 
-		Set<String> publishers = new HashSet<>()
-		publishers.addAll(users*.getUsername()*.toLowerCase())
-		return publishers
+		return users*.username*.toLowerCase() as Set
 	}
 
 	boolean isStreamEthereumPublisher(Stream stream, String ethereumAddress) {
