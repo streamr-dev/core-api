@@ -13,7 +13,7 @@ class SubscriptionSpec extends BeanMockingSpecification {
 		ethereumUserService = mockBean(EthereumUserService, Mock(EthereumUserService))
 	}
 
-	void "fetchUser() returns null if no IntegrationKey with address found"() {
+	void "fetchUser() returns null if no User with address found"() {
 		expect:
 		subscription.fetchUser() == null
 	}
