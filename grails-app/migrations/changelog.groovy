@@ -9,5 +9,6 @@ databaseChangeLog = {
 	include file: 'core/2021-04-20-remove-canvas-dashboard-module.groovy'
 	include file: 'core/2021-05-14-stream-fk-storage-node.groovy'
 	include file: 'core/2021-10-04-stream-fulltext-search.groovy'
+	include file: 'core/2021-10-06-permission-index.groovy'
 	include file: 'core/2021-06-10-user-is-ethereum-address-rm-integration-key.groovy'
 }
