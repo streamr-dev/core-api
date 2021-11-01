@@ -344,22 +344,6 @@ class Subscriptions {
     }
 }
 
-class IntegrationKeys {
-
-    options: any
-
-    constructor(options: any) {
-        this.options = options
-    }
-
-    create(body: any) {
-        return new StreamrApiRequest(this.options)
-            .method('POST')
-            .endpoint('integration_keys')
-            .withBody(body)
-    }
-}
-
 class Permissions {
 
     resourcesName: string
@@ -457,7 +441,6 @@ export default {
     api: {
         v1: {
             categories: new Categories(options),
-            integration_keys: new IntegrationKeys(options),
             products: new Products(options),
             streams: new Streams(options),
             subscriptions: new Subscriptions(options),

@@ -5,6 +5,7 @@ import com.unifina.domain.User
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.ImageResizer
 import com.unifina.utils.ImageVerifier
+import grails.transaction.NotTransactional
 import grails.transaction.Transactional
 
 import java.nio.file.Paths
@@ -42,6 +43,7 @@ class UserAvatarImageService {
 		return "avatar-images/${idGenerator.generate()}${extension}"
 	}
 
+	@NotTransactional
 	String copyImage(String imageUrl) {
 		String filename = Paths.get(imageUrl).getFileName().toString()
 		return s3Client.copyFile(imageUrl, generateFilename(filename))

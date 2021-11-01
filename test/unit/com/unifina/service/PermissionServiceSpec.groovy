@@ -315,7 +315,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		setup:
 		service.mailService = Mock(MailService)
 		service.groovyPageRenderer = Mock(PageRenderer)
-		EthereumIntegrationKeyService ethereumIntegrationKeyService = mockBean(EthereumIntegrationKeyService, Mock(EthereumIntegrationKeyService))
+		EthereumUserService ethereumUserService = mockBean(EthereumUserService, Mock(EthereumUserService))
 		String ethUserUsername = "0xa50E97f6a98dD992D9eCb8207c2Aa58F54970729"
 		User createdEthUser = new User(username: ethUserUsername, name: "Ethereum User")
 		createdEthUser.save(validate: true, failOnError: true)
@@ -328,7 +328,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.savePermissionForEthereumAccount(ethUserUsername, apiUser, op, res, SignupMethod.UNKNOWN)
 		then:
 		1 * streamService.getStream(stream.id) >> stream
-		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(ethUserUsername, SignupMethod.UNKNOWN) >> createdEthUser
+		1 * ethereumUserService.getOrCreateFromEthereumAddress(ethUserUsername, SignupMethod.UNKNOWN) >> createdEthUser
 		0 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
 		0 * service.mailService.sendMail { _ }
 		service.check(createdEthUser, stream, op)

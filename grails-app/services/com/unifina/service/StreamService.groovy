@@ -103,50 +103,44 @@ class StreamService {
 		// This approach might be slow if there are a lot of allowed writers to the Stream
 		List<User> writers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_PUBLISH)*.user
 
-		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
-			user {
-				'in'("id", writers*.id)
-			}
-			'in'("service", [IntegrationKey.Service.ETHEREUM_ID])
+		List<User> users = User.createCriteria().list {
+			'in'("id", writers*.id)
 		}
 
-		return keys*.idInService*.toLowerCase() as Set
+		return users*.username*.toLowerCase() as Set
 	}
 
 	boolean isStreamEthereumPublisher(Stream stream, String ethereumAddress) {
-		IntegrationKey key = IntegrationKey.createCriteria().get {
+		User user = User.createCriteria().get {
 			// toLowerCase() due to broken ORM in unit tests
-			eq("idInService", ethereumAddress?.toLowerCase())
+			eq("username", ethereumAddress?.toLowerCase())
 		}
-		if (key == null || key.user == null) {
+		if (user == null) {
 			return false
 		}
-		return permissionService.check(key.user, stream, Permission.Operation.STREAM_PUBLISH)
+		return permissionService.check(user, stream, Permission.Operation.STREAM_PUBLISH)
 	}
 
 	Set<String> getStreamEthereumSubscribers(Stream stream) {
 		// This approach might be slow if there are a lot of allowed readers to the Stream
 		List<User> readers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_SUBSCRIBE)*.user
 
-		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
-			user {
-				'in'("id", readers*.id)
-			}
-			'in'("service", [IntegrationKey.Service.ETHEREUM_ID])
+		List<User> users = User.createCriteria().list {
+			'in'("id", readers*.id)
 		}
 
-		return keys*.idInService*.toLowerCase() as Set
+		return users*.username*.toLowerCase() as Set
 	}
 
 	boolean isStreamEthereumSubscriber(Stream stream, String ethereumAddress) {
-		IntegrationKey key = IntegrationKey.createCriteria().get {
+		User user = User.createCriteria().get {
 			// toLowerCase() due to broken ORM in unit tests
-			eq("idInService", ethereumAddress?.toLowerCase())
+			eq("username", ethereumAddress?.toLowerCase())
 		}
-		if (key == null || key.user == null) {
+		if (user == null) {
 			return false
 		}
-		return permissionService.check(key.user, stream, Permission.Operation.STREAM_SUBSCRIBE)
+		return permissionService.check(user, stream, Permission.Operation.STREAM_SUBSCRIBE)
 	}
 
 	@CompileStatic

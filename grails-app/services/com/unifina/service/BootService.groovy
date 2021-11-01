@@ -12,7 +12,7 @@ import org.apache.log4j.Logger
 class BootService {
 
 	StreamService streamService
-	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	EthereumUserService ethereumUserService
 	PermissionService permissionService
 
 	private static final Logger log = Logger.getLogger(BootService.class)
@@ -45,7 +45,7 @@ class BootService {
 		if (stream == null) {
 			log.info("creating stream for storage node assignments: " + streamId)
 			EthereumAddress nodeAddress = EthereumAddress.fromPrivateKey(ApplicationConfig.getString("streamr.ethereum.nodePrivateKey"))
-			User nodeUser = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(nodeAddress.toString(), SignupMethod.UNKNOWN)
+			User nodeUser = ethereumUserService.getOrCreateFromEthereumAddress(nodeAddress.toString(), SignupMethod.UNKNOWN)
 			stream = streamService.createStream(new CreateStreamCommand(id: streamId), nodeUser, null)
 			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_GET)
 			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)

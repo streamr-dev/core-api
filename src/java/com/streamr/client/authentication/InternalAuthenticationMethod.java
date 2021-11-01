@@ -2,7 +2,7 @@ package com.streamr.client.authentication;
 
 import com.unifina.domain.SignupMethod;
 import com.unifina.domain.User;
-import com.unifina.service.EthereumIntegrationKeyService;
+import com.unifina.service.EthereumUserService;
 import com.unifina.service.SessionService;
 import com.unifina.service.SessionToken;
 import org.web3j.utils.Numeric;
@@ -13,9 +13,9 @@ public class InternalAuthenticationMethod extends EthereumAuthenticationMethod {
 	private final SessionService sessionService;
 	private final User user;
 
-	public InternalAuthenticationMethod(String ethereumPrivateKey, EthereumIntegrationKeyService ethereumIntegrationKeyService, SessionService sessionService, SignupMethod signupMethod) {
+	public InternalAuthenticationMethod(String ethereumPrivateKey, EthereumUserService ethereumUserService, SessionService sessionService, SignupMethod signupMethod) {
 		super(Numeric.prependHexPrefix(ethereumPrivateKey));
-		this.user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(this.getAddress(), signupMethod);
+		this.user = ethereumUserService.getOrCreateFromEthereumAddress(this.getAddress(), signupMethod);
 		this.sessionService = sessionService;
 	}
 

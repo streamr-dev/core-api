@@ -1,6 +1,6 @@
 package com.unifina.domain
 
-import com.unifina.service.EthereumIntegrationKeyService
+import com.unifina.service.EthereumUserService
 import grails.compiler.GrailsCompileStatic
 import grails.persistence.Entity
 import grails.util.Holders
@@ -26,6 +26,6 @@ class SubscriptionPaid extends Subscription {
 
 	@Override
 	User fetchUser() {
-		Holders.getApplicationContext().getBean(EthereumIntegrationKeyService).getEthereumUser(address)
+		Holders.getApplicationContext().getBean(EthereumUserService).getEthereumUser(address)
 	}
 }

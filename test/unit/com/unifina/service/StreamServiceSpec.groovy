@@ -1,12 +1,16 @@
 package com.unifina.service
 
-import com.unifina.domain.*
+
+import com.unifina.domain.ExampleType
+import com.unifina.domain.Permission
+import com.unifina.domain.Stream
+import com.unifina.domain.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(StreamService)
-@Mock([Stream, User, IntegrationKey, Permission, PermissionService])
+@Mock([Stream, User, Permission, PermissionService])
 class StreamServiceSpec extends Specification {
 	User me = new User(username: "0x83b20d83cd0565c6592b11b9bc5b5a0b2b8d6ba9")
 
@@ -95,26 +99,18 @@ class StreamServiceSpec extends Specification {
 	void "getStreamEthereumPublishers should return Ethereum addresses of users with write permission to the Stream"() {
 		setup:
 		service.permissionService = Mock(PermissionService)
-		User user1 = new User(id: 1, username: "u1").save(failOnError: true, validate: false)
-		IntegrationKey key1 = new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57").save(failOnError: true, validate: false)
-		User user2 = new User(id: 2, username: "u2").save(failOnError: true, validate: false)
-		IntegrationKey key2 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
-		User user3 = new User(id: 3, username: "u3").save(failOnError: true, validate: false)
+		User user1 = new User(id: 1, username: "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57").save(failOnError: true, validate: false)
+		User user2 = new User(id: 2, username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
 
 		// User with key but no write permission - this key should not be returned by the query
-		User userWithKeyButNoPermission = new User(id: 4, username: "u4").save(failOnError: true, validate: false)
-		new IntegrationKey(user: userWithKeyButNoPermission, service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: "0x12345e3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+		User userWithKeyButNoPermission = new User(id: 4, username: "0x12345e3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
 
 		Set<String> validAddresses = new HashSet<String>()
-		validAddresses.add(key1.idInService)
-		validAddresses.add(key2.idInService)
+		validAddresses.add(user1.getUsername())
+		validAddresses.add(user2.getUsername())
 		Permission p1 = new Permission(user: user1)
 		Permission p2 = new Permission(user: user2)
-		Permission p3 = new Permission(user: user3)
-		List<Permission> perms = [p1, p2, p3]
+		List<Permission> perms = [p1, p2]
 		Stream stream = new Stream(name: "name")
 		stream.id = "streamId"
 		stream.save(failOnError: true, validate: false)
@@ -128,14 +124,10 @@ class StreamServiceSpec extends Specification {
 	void "isStreamEthereumPublisher should return true iff user has write permission to the stream"() {
 		setup:
 		service.permissionService = Mock(PermissionService)
-		User user1 = new User(id: 1, username: "u1").save(failOnError: true, validate: false)
 		String address1 = "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57"
-		new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: address1).save(failOnError: true, validate: false)
-		User user2 = new User(id: 2, username: "u2").save(failOnError: true, validate: false)
+		User user1 = new User(id: 1, username: address1).save(failOnError: true, validate: false)
 		String address2 = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
-		new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: address2).save(failOnError: true, validate: false)
+		User user2 = new User(id: 2, username: address2).save(failOnError: true, validate: false)
 		Stream stream = new Stream(name: "name")
 		stream.id = "streamId"
 		stream.save(failOnError: true, validate: false)
@@ -156,26 +148,18 @@ class StreamServiceSpec extends Specification {
 	void "getStreamEthereumSubscribers should return Ethereum addresses of users with stream_get permission to the Stream"() {
 		setup:
 		service.permissionService = Mock(PermissionService)
-		User user1 = new User(id: 1, username: "u1").save(failOnError: true, validate: false)
-		IntegrationKey key1 = new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57").save(failOnError: true, validate: false)
-		User user2 = new User(id: 2, username: "u2").save(failOnError: true, validate: false)
-		IntegrationKey key2 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
-		User user3 = new User(id: 3, username: "u3").save(failOnError: true, validate: false)
+		User user1 = new User(id: 1, username: "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57").save(failOnError: true, validate: false)
+		User user2 = new User(id: 2, username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
 
 		// User with key but no read permission - this key should not be returned by the query
-		User userWithKeyButNoPermission = new User(id: 4, username: "u4").save(failOnError: true, validate: false)
-		new IntegrationKey(user: userWithKeyButNoPermission, service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: "0x12345e3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+		User userWithKeyButNoPermission = new User(id: 4, username: "0x12345e3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
 
 		Set<String> validAddresses = new HashSet<String>()
-		validAddresses.add(key1.idInService)
-		validAddresses.add(key2.idInService)
+		validAddresses.add(user1.getUsername())
+		validAddresses.add(user2.getUsername())
 		Permission p1 = new Permission(user: user1)
 		Permission p2 = new Permission(user: user2)
-		Permission p3 = new Permission(user: user3)
-		List<Permission> perms = [p1, p2, p3]
+		List<Permission> perms = [p1, p2]
 		Stream stream = new Stream(name: "name")
 		stream.id = "streamId"
 		stream.save(failOnError: true, validate: false)
@@ -189,14 +173,10 @@ class StreamServiceSpec extends Specification {
 	void "isStreamEthereumSubscriber should return true iff user has stream_get permission to the stream"() {
 		setup:
 		service.permissionService = Mock(PermissionService)
-		User user1 = new User(id: 1, username: "u1").save(failOnError: true, validate: false)
 		String address1 = "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57"
-		new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: address1).save(failOnError: true, validate: false)
-		User user2 = new User(id: 2, username: "u2").save(failOnError: true, validate: false)
+		User user1 = new User(id: 1, username: address1).save(failOnError: true, validate: false)
 		String address2 = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
-		new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: address2).save(failOnError: true, validate: false)
+		User user2 = new User(id: 2, username: address2).save(failOnError: true, validate: false)
 		Stream stream = new Stream(name: "name")
 		stream.id = "streamId"
 		stream.save(failOnError: true, validate: false)

@@ -30,18 +30,9 @@ class SubscriptionPaidIntegrationSpec extends IntegrationSpec {
 	void "fetchUser() is case-insensitive w.r.t. ethereum addresses [database property]"() {
 		setup:
 		def subscriber = new User(
-			username: "subscription-service-integration-spec-2@streamr.network",
+			username: "0xffffffffffFFFFFFFFFFaaaaaaaaaaBBBBBBBBBB",
 			name: "Subscription Service Integration Spec 2",
 		).save(failOnError: true)
-
-		new IntegrationKey(
-			user: subscriber,
-			name: "Integration Key",
-			service: IntegrationKey.Service.ETHEREUM_ID,
-			json: "{}",
-			idInService: "0xffffffffffFFFFFFFFFFaaaaaaaaaaBBBBBBBBBB"
-		).save(failOnError: true)
-
 		def subscription = new SubscriptionPaid(
 			product: product,
 			endsAt: new Date(0),

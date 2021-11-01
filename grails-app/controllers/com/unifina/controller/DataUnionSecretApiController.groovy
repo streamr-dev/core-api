@@ -13,6 +13,7 @@ class DataUnionSecretApiController {
 	private User loggedInUser() {
 		return (User) request.apiUser
 	}
+
 	static boolean isValidID(String value) {
 		if (value == null) {
 			return false

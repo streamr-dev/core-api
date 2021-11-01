@@ -1,38 +1,29 @@
 package com.unifina.domain
 
 import com.unifina.BeanMockingSpecification
-import com.unifina.service.EthereumIntegrationKeyService
-import grails.test.mixin.Mock
+import com.unifina.service.EthereumUserService
 
-@Mock([IntegrationKey])
 class SubscriptionSpec extends BeanMockingSpecification {
 
 	Subscription subscription
-	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	EthereumUserService ethereumUserService
 
 	void setup() {
 		subscription = new SubscriptionPaid(address: "0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00")
-		ethereumIntegrationKeyService = mockBean(EthereumIntegrationKeyService, Mock(EthereumIntegrationKeyService))
+		ethereumUserService = mockBean(EthereumUserService, Mock(EthereumUserService))
 	}
 
-	void "fetchUser() returns null if no IntegrationKey with address found"() {
+	void "fetchUser() returns null if no User with address found"() {
 		expect:
 		subscription.fetchUser() == null
 	}
 
-	void "fetchUser() returns user if IntegrationKey with address found"() {
-		User user = new User(username: "me@streamr.network").save(failOnError: true, validate: false)
-		new IntegrationKey(
-			user: user,
-			name: "integration key",
-			service: IntegrationKey.Service.ETHEREUM_ID,
-			json: "{}",
-			idInService: "0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00"
-		).save(failOnError: true, validate: true)
+	void "fetchUser() returns user if User with address is found"() {
+		User user = new User(username: "0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00").save(failOnError: true, validate: false)
 		when:
 		User fetched = subscription.fetchUser()
 		then:
-		1 * ethereumIntegrationKeyService.getEthereumUser("0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00") >> user
+		1 * ethereumUserService.getEthereumUser("0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00") >> user
 		fetched != null
 	}
 }

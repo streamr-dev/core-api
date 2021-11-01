@@ -15,7 +15,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 	User me
 	User ethUser
 	SessionService sessionService
-	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	EthereumUserService ethereumUserService
 
 	def setup() {
 		me = new User(
@@ -35,7 +35,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		ethUser.id = 2
 		ethUser.save(validate: false)
 		sessionService = mockBean(SessionService, Mock(SessionService))
-		ethereumIntegrationKeyService = mockBean(EthereumIntegrationKeyService, Mock(EthereumIntegrationKeyService))
+		ethereumUserService = mockBean(EthereumUserService, Mock(EthereumUserService))
 	}
 
 	void "unauthenticated user gets back 401"() {
