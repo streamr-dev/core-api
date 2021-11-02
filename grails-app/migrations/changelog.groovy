@@ -11,4 +11,5 @@ databaseChangeLog = {
 	include file: 'core/2021-10-04-stream-fulltext-search.groovy'
 	include file: 'core/2021-10-06-permission-index.groovy'
 	include file: 'core/2021-06-10-user-is-ethereum-address-rm-integration-key.groovy'
+	include file: 'core/2021-11-02-unique-username-index.groovy'
 }
