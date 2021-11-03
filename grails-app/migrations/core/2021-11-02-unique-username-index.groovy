@@ -2,7 +2,7 @@ package core
 
 databaseChangeLog = {
 	changeSet(author: "kkn", id: "unique-username-index-1") {
-		sql("alter table user add unique index (username);")
+		sql("alter table user add unique index username_idx (username);")
 	}
 	changeSet(author: "kkn", id: "unique-username-index-2") {
 		// alter table permission drop index stream_id_operation_anonymous_idx;
