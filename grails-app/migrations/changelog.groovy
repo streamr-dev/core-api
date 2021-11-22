@@ -13,4 +13,5 @@ databaseChangeLog = {
 	include file: 'core/2021-06-10-user-is-ethereum-address-rm-integration-key.groovy'
 	include file: 'core/2021-11-01-delete-integration-key.groovy'
 	include file: 'core/2021-11-02-unique-username-index.groovy'
+	include file: 'core/2021-11-22-add-product-chain-field.groovy'
 }
