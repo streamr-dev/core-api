@@ -1,14 +1,11 @@
 package com.unifina.service
 
-import com.streamr.client.StreamrClient
 import com.streamr.client.dataunion.DataUnion
 import com.streamr.client.dataunion.DataUnionClient
 import com.streamr.client.dataunion.EthereumTransactionReceipt
 import com.unifina.domain.*
 import com.unifina.utils.ApplicationConfig
 import com.unifina.utils.ThreadUtil
-import grails.util.Holders
-import groovy.json.JsonSlurper
 import org.apache.log4j.Logger
 
 class DataUnionJoinRequestService {
@@ -20,30 +17,10 @@ class DataUnionJoinRequestService {
 	EthereumService ethereumService
 	PermissionService permissionService
 	StreamrClientService streamrClientService
-	DataUnionService dataUnionService
 
 	private isMemberActive(String contractAddress, String memberAddress) {
-		int version = getVersion(contractAddress)
-		if (version == 1) {
-			try {
-				DataUnionService.ProxyResponse result = dataUnionService.memberStats(contractAddress, memberAddress)
-				if (result.statusCode == 200 && result.body != null || result.body != "") {
-					Map<String, Object> json = new JsonSlurper().parseText(result.body)
-					if (json.active != null && json.active == true) {
-						return true
-					}
-				}
-			} catch (DataUnionProxyException e) {
-				// on error proceed with sending join message
-				log.error("DUS member stats query error", e)
-			}
-			return false
-		} else if (version == 2) {
-			DataUnion du = getClient().dataUnionFromMainnetAddress(contractAddress)
-			return du.isMemberActive(memberAddress)
-		} else {
-			throw new IllegalArgumentException("Invalid DataUnion version: " + version)
-		}
+		DataUnion du = getClient().dataUnionFromMainnetAddress(contractAddress)
+		return du.isMemberActive(memberAddress)
 	}
 
 	private void onApproveJoinRequest(DataUnionJoinRequest c) {
@@ -64,21 +41,14 @@ class DataUnionJoinRequestService {
 			}
 		}
 
-		// Join the member. Depends on DU version
-		int version = getVersion(c.contractAddress)
-		if (version == 1) {
-			// Send a join message to the joinPartStream
-			sendMessage(c, "join")
-		} else if (version == 2) {
-			// Add the member by calling the sidechain DU directly
-			DataUnionClient client = getClient()
-			DataUnion du = client.dataUnionFromMainnetAddress(c.contractAddress)
-			EthereumTransactionReceipt transactionReceipt = du.addMembers(c.memberAddress)
-			log.debug("transaction=" + transactionReceipt.getTransactionHash())
-			client.waitForSidechainTx(transactionReceipt.getTransactionHash(), JOIN_REQUEST_TRANSACTION_POLL_INTERVAL, JOIN_REQUEST_TRANSACTION_TIMEOUT)
-		} else {
-			throw new IllegalArgumentException("Invalid DataUnion version: " + version)
-		}
+		// Join the member
+		// Add the member by calling the sidechain DU directly
+		DataUnionClient client = getClient()
+		DataUnion du = client.dataUnionFromMainnetAddress(c.contractAddress)
+		EthereumTransactionReceipt transactionReceipt = du.addMembers(c.memberAddress)
+		String txHash = transactionReceipt.getTransactionHash()
+		log.debug("transaction=" + txHash)
+		client.waitForSidechainTx(txHash, JOIN_REQUEST_TRANSACTION_POLL_INTERVAL, JOIN_REQUEST_TRANSACTION_TIMEOUT)
 
 		// Check that member status becomes active within a timeout
 		final int timeout = 10 * 1000 // ms
@@ -113,31 +83,6 @@ class DataUnionJoinRequestService {
 		}
 		log.debug(String.format("exiting findStreams(): %s", streams))
 		return streams
-	}
-
-	/**
-	 * Sends a message to joinPartStream using the credentials of this Engine node
-	 */
-	private void sendMessage(DataUnionJoinRequest c, String type) {
-		log.debug("sendMessage: fetching joinPartStreamID for data union ${c.contractAddress}")
-		String joinPartStreamID = ethereumService.fetchJoinPartStreamID(c.contractAddress)
-		log.debug(String.format("sending message to join part stream id: '%s', data union address: '%s'", joinPartStreamID, c.contractAddress))
-		Map<String, Object> msg = new HashMap<>()
-		msg.put("type", type)
-		msg.put("addresses", Arrays.asList(c.memberAddress))
-
-		StreamrClient client = streamrClientService.getInstanceForThisEngineNode()
-		log.debug("sendMessage: StreamrClient state is ${client.getState()}, websocket url: ${client.getOptions().getWebsocketApiUrl()}")
-
-		com.streamr.client.rest.Stream stream = client.getStream(joinPartStreamID)
-
-		if (stream == null) {
-			throw new NotFoundException(String.format("Stream not found by id: %s", joinPartStreamID))
-		}
-
-		log.debug("sendMessage: publishing message to stream ${stream.getId()}: ${msg}")
-		client.publish(stream, msg)
-		log.debug("exiting sendMessage")
 	}
 
 	Set<User> findMembers(String contractAddress) {
@@ -247,21 +192,11 @@ class DataUnionJoinRequestService {
 			permissionService.systemRevoke(c.user, s, Permission.Operation.STREAM_GET)
 			permissionService.systemRevoke(c.user, s, Permission.Operation.STREAM_PUBLISH)
 		}
-		int version = getVersion(c.contractAddress)
-		if (version == 1) {
-			sendMessage(c, "part")
-		}
 		c.delete()
 	}
 
 	DataUnionClient getClient() {
 		String nodePrivateKey = ApplicationConfig.getString("streamr.ethereum.nodePrivateKey")
 		return streamrClientService.getInstanceForThisEngineNode().dataUnionClient(nodePrivateKey, nodePrivateKey)
-	}
-
-	int getVersion(String contractAddress) {
-		ProductService productService = Holders.getApplicationContext().getBean(ProductService.class)
-		Product product = productService.findByBeneficiaryAddress(contractAddress)
-		return product.dataUnionVersion
 	}
 }

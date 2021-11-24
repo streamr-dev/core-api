@@ -5,7 +5,6 @@ import {getStreamrClient, testUsers} from './test-utilities'
 import {EthereumAccount} from './EthereumAccount'
 
 const NODE_ADDRESS = '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'  // address of streamr.ethereum.nodePrivateKey account
-const DATA_UNION_VERSION = 2
 
 const createDataUnion = async (admin: EthereumAccount) => {
 	const adminClient = getStreamrClient(admin)
@@ -20,7 +19,6 @@ const createProduct = async (owner: EthereumAccount, beneficiaryAddress: string)
 		name: 'product e2e test: ' + Date.now(),
 		beneficiaryAddress,
 		type: 'DATAUNION',
-		dataUnionVersion: DATA_UNION_VERSION,
 	}
 	const json = await Streamr.api.v1.products
 		.create(properties)
@@ -36,15 +34,6 @@ const createJoinRequest = async (joiner: EthereumAccount, dataUnionAddress: stri
 }
 
 describe('DataUnions API', () => {
-
-	describe('GET /api/v1/dataunions', () => {
-
-		it('responds with status code 200', async () => {
-			const response = await Streamr.api.v1.dataunions.list().call()
-			assert.equal(response.status, 200)
-		})
-
-	})
 
 	describe('PUT /api/v1/dataunions/:id/joinRequests/:id', function () {
 

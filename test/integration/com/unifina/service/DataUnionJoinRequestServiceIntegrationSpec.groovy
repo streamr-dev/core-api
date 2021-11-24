@@ -1,19 +1,21 @@
 package com.unifina.service
 
 import com.streamr.client.StreamrClient
+import com.streamr.client.dataunion.DataUnion
+import com.streamr.client.dataunion.DataUnionClient
 import com.streamr.client.options.StreamrClientOptions
 import com.unifina.domain.*
-import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 // This is an integration test because Grails doesn't support criteria queries in unit tests
 class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 	DataUnionJoinRequestService service = new DataUnionJoinRequestService()
 	User me
-	com.streamr.client.rest.Stream joinPartStream
 	Category category
 	final String contractAddress = "0x0000000000000000000000000000000000000000"
 	StreamrClient streamrClientMock
+	DataUnionClient dataUnionClientMock
+	DataUnion dataUnionMock
 
 	void setup() {
 		me = new User(
@@ -26,25 +28,21 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		category.id = "category-id"
 		category.save(validate: true, failOnError: true)
 
-		joinPartStream = new com.streamr.client.rest.Stream("join part stream", "")
-		joinPartStream.setId("joinPartStream")
-
 		service.streamrClientService = Mock(StreamrClientService)
 		streamrClientMock = Mock(StreamrClient)
-		streamrClientMock.getStream(joinPartStream.id) >> joinPartStream
 		streamrClientMock.getOptions() >> Mock(StreamrClientOptions)
 		service.streamrClientService.getInstanceForThisEngineNode() >> streamrClientMock
+		dataUnionClientMock = Mock(DataUnionClient)
+		dataUnionMock = Mock(DataUnion)
 
 		Product product = new Product(
 			beneficiaryAddress: contractAddress,
-			dataUnionVersion: 1,
 			owner: me
 		)
 		product.save(failOnError: true, validate: false)
 
 		service.ethereumService = Mock(EthereumService)
 		service.permissionService = Mock(PermissionService)
-		service.dataUnionService = Mock(DataUnionService)
 	}
 
 	void "findAll"() {
@@ -163,21 +161,12 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 			state: "ACCEPTED",
 		)
 
-		DataUnionService.ProxyResponse notFoundStats = new DataUnionService.ProxyResponse()
-		notFoundStats.statusCode = 404
-		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
-		okStats.statusCode = 200
-		okStats.body = new JsonBuilder([
-			active: true,
-		]).toString()
-
 		when:
 		def c = service.update(contractAddress, r.id, cmd)
 		then:
-		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		2 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> notFoundStats
-		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> okStats
-		1 * streamrClientMock.publish(_, [type: "join", addresses: [r.memberAddress]])
+		1 * streamrClientMock.dataUnionClient(_, _) >> dataUnionClientMock
+		1 * dataUnionClientMock.dataUnionFromMainnetAddress(_) >> dataUnionMock
+		1 * dataUnionMock.isMemberActive(_) >> true
 		c.state == DataUnionJoinRequest.State.ACCEPTED
 		// no changes below
 		c.contractAddress == contractAddress
@@ -234,7 +223,6 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 			blockIndex: 30,
 			owner: me,
 			type: Product.Type.DATAUNION,
-			dataUnionVersion: 2,
 		)
 		product.save(failOnError: true, validate: true)
 

@@ -33,8 +33,6 @@ class Product {
 	// Product's legal terms of use.
 	TermsOfUse termsOfUse = new TermsOfUse()
 
-	Integer dataUnionVersion
-
 	static embedded = [
 		'contact',
 		'termsOfUse',
@@ -92,7 +90,6 @@ class Product {
 		owner(nullable: false)
 		contact(nullable: true)
 		termsOfUse(nullable: true)
-		dataUnionVersion(nullable: true, validator: { Integer d, p -> (p.type == Type.DATAUNION) ? ((d == 1) || (d == 2) || (d == null)) : (d == null) })
 	}
 
 	static mapping = {
@@ -139,9 +136,6 @@ class Product {
 			JsonSlurper slurper = new JsonSlurper()
 			map.put("pendingChanges", (HashMap<String, Serializable>) slurper.parseText(pendingChanges))
 		}
-		if (type == Type.DATAUNION) {
-			map.put("dataUnionVersion", dataUnionVersion)
-		}
 		return map
 	}
 
@@ -168,9 +162,6 @@ class Product {
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
 			owner: owner.name
 		]
-		if (type == Type.DATAUNION) {
-			map.put("dataUnionVersion", dataUnionVersion)
-		}
 		return map;
 	}
 

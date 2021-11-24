@@ -19,7 +19,7 @@ class ProductService {
 
 	List<Product> relatedProducts(Product product, int maxResults, User user) {
 		// find Product.owner's other products
-        ListParams params = new ProductListParams(productOwner: product.owner, max: maxResults, publicAccess: true)
+		ListParams params = new ProductListParams(productOwner: product.owner, max: maxResults, publicAccess: true)
 		Set<Product> all = new HashSet<Product>(list(params, user))
 
 		// find other products from the same category
@@ -59,12 +59,12 @@ class ProductService {
 	}
 
 	Product findById(String id, User currentUser, Permission.Operation op)
-			throws NotFoundException, NotPermittedException {
+		throws NotFoundException, NotPermittedException {
 		apiService.authorizedGetById(Product, id, currentUser, op)
 	}
 
 	Product create(ProductCreateCommand command, User currentUser)
-			throws ValidationException, NotPermittedException {
+		throws ValidationException, NotPermittedException {
 		if (command.name == null || command.name.trim() == "") {
 			command.name = Product.DEFAULT_NAME
 		}
@@ -78,9 +78,6 @@ class ProductService {
 
 		Product product = new Product(command.properties)
 		product.owner = currentUser
-		if ((product.type == Product.Type.DATAUNION) && (product.dataUnionVersion == null)) {
-			product.dataUnionVersion = 1
-		}
 		product.save(failOnError: true)
 		permissionService.systemGrantAll(currentUser, product)
 		// A stream that is added when creating a new free product should inherit read access for anonymous user
@@ -103,8 +100,8 @@ class ProductService {
 		}
 
 		Product product = findById(id, currentUser, Permission.Operation.PRODUCT_EDIT)
-		Set<Stream> addedStreams = (command.streams as Set<Stream>).findAll{!product.streams.contains(it)}
-		Set<Stream> removedStreams = product.streams.findAll{!command.streams.contains(it)}
+		Set<Stream> addedStreams = (command.streams as Set<Stream>).findAll { !product.streams.contains(it) }
+		Set<Stream> removedStreams = product.streams.findAll { !command.streams.contains(it) }
 
 		command.updateProduct(product, currentUser, permissionService)
 		product.save(failOnError: true)
@@ -134,11 +131,11 @@ class ProductService {
 
 	boolean belongsToFreeProduct(Stream s) {
 		List<Product> products = store.findProductsByStream(s)
-		return products.any{Product p -> p.isFree()}
+		return products.any { Product p -> p.isFree() }
 	}
 
 	void addStreamToProduct(Product product, Stream stream, User currentUser)
-			throws ValidationException, NotPermittedException {
+		throws ValidationException, NotPermittedException {
 		permissionService.verify(currentUser, stream, Permission.Operation.STREAM_SHARE)
 		product.streams.add(stream)
 		product.save(failOnError: true)
@@ -258,7 +255,8 @@ class ProductService {
 
 	Product findByBeneficiaryAddress(String beneficiaryAddress) {
 		return (Product) Product.createCriteria().get {
-			ilike("beneficiaryAddress", beneficiaryAddress)	// ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
+			ilike("beneficiaryAddress", beneficiaryAddress)
+			// ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
 		}
 	}
 

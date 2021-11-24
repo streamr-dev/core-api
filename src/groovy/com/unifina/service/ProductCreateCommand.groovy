@@ -24,8 +24,6 @@ class ProductCreateCommand {
 	Contact contact = new Contact()
 	TermsOfUse termsOfUse = new TermsOfUse()
 
-	Integer dataUnionVersion
-
 	static constraints = {
 		importFrom(Product)
 	}
