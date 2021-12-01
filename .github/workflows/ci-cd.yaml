@@ -37,7 +37,7 @@ jobs:
         with:
           candidate: grails
           version: ${{ env.GRAILS_VERSION }}
-      - uses: actions/cache@v2.1.6
+      - uses: actions/cache@v2.1.7
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-v1-${{ hashFiles('grails-app/conf/BuildConfig.groovy') }}
@@ -79,7 +79,7 @@ jobs:
           driver-opts: |
             network=host
       - name: Cache Docker layers
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v2.1.7
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-v1-${{ github.sha }}
@@ -155,7 +155,7 @@ jobs:
           driver-opts: |
             network=host
       - name: Cache Docker layers
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v2.1.7
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-v1-${{ github.sha }}
