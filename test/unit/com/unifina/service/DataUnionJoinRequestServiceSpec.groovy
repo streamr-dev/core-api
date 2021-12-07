@@ -4,12 +4,10 @@ import com.streamr.client.StreamrClient
 import com.streamr.client.dataunion.DataUnion
 import com.streamr.client.dataunion.DataUnionClient
 import com.streamr.client.dataunion.EthereumTransactionReceipt
-import com.streamr.client.options.StreamrClientOptions
 import com.unifina.BeanMockingSpecification
 import com.unifina.domain.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import groovy.json.JsonBuilder
 
 @TestFor(DataUnionJoinRequestService)
 @Mock([User, DataUnionJoinRequest, DataUnionSecret])
@@ -20,27 +18,18 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 
 	User me
 	StreamrClient streamrClientMock
-	com.streamr.client.rest.Stream joinPartStream
-	ProductService productService
+	DataUnionClient dataUnionClientMock
+	DataUnion dataUnionMock
 
 	def setup() {
 		service.ethereumService = mockBean(EthereumService)
 		service.streamrClientService = mockBean(StreamrClientService)
 		service.permissionService = mockBean(PermissionService)
-		service.dataUnionService = mockBean(DataUnionService)
 
-		joinPartStream = new com.streamr.client.rest.Stream("join part stream", "")
-		joinPartStream.setId("joinPartStream")
-
+		dataUnionMock = Mock(DataUnion)
 		streamrClientMock = Mock(StreamrClient)
-		streamrClientMock.getStream(joinPartStream.id) >> joinPartStream
-		streamrClientMock.getOptions() >> Mock(StreamrClientOptions)
 		service.streamrClientService.getInstanceForThisEngineNode() >> streamrClientMock
-
-		Product mockProduct = new Product()
-		mockProduct.dataUnionVersion = 1
-		productService = mockBean(ProductService)
-		productService.findByBeneficiaryAddress(_) >> mockProduct
+		dataUnionClientMock = Mock(DataUnionClient)
 
 		me = new User(
 			name: "First Lastname",
@@ -79,22 +68,13 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 			secret: "secret",
 		)
 
-		DataUnionService.ProxyResponse notFoundStats = new DataUnionService.ProxyResponse()
-		notFoundStats.statusCode = 404
-		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
-		okStats.statusCode = 200
-		okStats.body = new JsonBuilder([
-			active: true,
-		]).toString()
-
 		when:
 		DataUnionJoinRequest c = service.create(contractAddress, cmd, me)
 
 		then:
-		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		2 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> notFoundStats
-		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> okStats
-		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
+		1 * streamrClientMock.dataUnionClient(_, _) >> dataUnionClientMock
+		1 * dataUnionClientMock.dataUnionFromMainnetAddress(_) >> dataUnionMock
+		1 * dataUnionMock.isMemberActive(_) >> true
 		c.state == DataUnionJoinRequest.State.ACCEPTED
 	}
 
@@ -166,27 +146,42 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
+		EthereumTransactionReceipt receipt = Mock(EthereumTransactionReceipt)
+		DataUnion dataUnion = new DataUnion(null, null, null, null, null, null) {
+			private int isMemberActiveCallCount = 0
 
-		DataUnionService.ProxyResponse notFoundStats = new DataUnionService.ProxyResponse()
-		notFoundStats.statusCode = 404
-		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
-		okStats.statusCode = 200
-		okStats.body = new JsonBuilder([
-			active: true,
-		]).toString()
+			@Override
+			boolean isMemberActive(String member) throws Exception {
+				return isMemberActiveCallCount++ > 1
+			}
+
+			@Override
+			EthereumTransactionReceipt addMembers(String... members) throws Exception {
+				return receipt
+			}
+		}
 
 		when:
 		DataUnionJoinRequest c = service.create(contractAddress, cmd, me)
 
 		then:
-		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		2 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> notFoundStats
-		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> okStats
-		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
+		4 * streamrClientMock.dataUnionClient(_, _) >> dataUnionClientMock
+		4 * dataUnionClientMock.dataUnionFromMainnetAddress(_) >> dataUnion
+		1 * service.permissionService.check(user, s1, Permission.Operation.STREAM_PUBLISH) >> false
+		1 * service.permissionService.check(user, s2, Permission.Operation.STREAM_PUBLISH) >> false
+		1 * service.permissionService.check(user, s3, Permission.Operation.STREAM_PUBLISH) >> false
+		1 * service.permissionService.check(user, s4, Permission.Operation.STREAM_PUBLISH) >> false
+		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.STREAM_PUBLISH)
+		1 * dataUnionClientMock.waitForSidechainTx(_, _, _) >> true
+		1 * receipt.getTransactionHash() >> "0x123456789000000000000000000000000000000001"
+		0 * service.permissionService._
 		c.state == DataUnionJoinRequest.State.ACCEPTED
 	}
 
@@ -199,6 +194,12 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		user.id = 1
 		user.save(failOnError: true, validate: false)
 
+		DataUnionSecret secret = new DataUnionSecret(
+			name: "some du secret",
+			secret: "secret",
+			contractAddress: contractAddress,
+		)
+		secret.save()
 		DataUnionJoinRequestCommand cmd = new DataUnionJoinRequestCommand(
 			memberAddress: memberAddress,
 			secret: "secret",
@@ -209,6 +210,8 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		Stream s4 = new Stream(name: "stream-4")
 		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i + 1}" } // assign ids
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: false)
+		new Permission(user: me, stream: s1, operation: Permission.Operation.STREAM_PUBLISH).save()
+		new Permission(user: me, stream: s2, operation: Permission.Operation.STREAM_PUBLISH).save()
 
 		Category category = new Category(name: "Category")
 		category.id = "category-id"
@@ -230,27 +233,38 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
+		EthereumTransactionReceipt receipt = Mock(EthereumTransactionReceipt)
+		DataUnion dataUnion = new DataUnion(null, null, null, null, null, null) {
+			private int isMemberActiveCallCount = 0
 
-		DataUnionService.ProxyResponse notFoundStats = new DataUnionService.ProxyResponse()
-		notFoundStats.statusCode = 404
-		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
-		okStats.statusCode = 200
-		okStats.body = new JsonBuilder([
-			active: true,
-		]).toString()
+			@Override
+			boolean isMemberActive(String member) throws Exception {
+				return isMemberActiveCallCount++ > 1
+			}
+
+			@Override
+			EthereumTransactionReceipt addMembers(String... members) throws Exception {
+				return receipt
+			}
+		}
 
 		when:
 		DataUnionJoinRequest c = service.create(contractAddress, cmd, me)
 
 		then:
-		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		2 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> notFoundStats
-		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> okStats
-		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
+		4 * streamrClientMock.dataUnionClient(_, _) >> dataUnionClientMock
+		4 * dataUnionClientMock.dataUnionFromMainnetAddress(_) >> dataUnion
 		1 * service.permissionService.check(user, s1, Permission.Operation.STREAM_PUBLISH) >> true
 		1 * service.permissionService.check(user, s2, Permission.Operation.STREAM_PUBLISH) >> true
+		1 * service.permissionService.check(user, s3, Permission.Operation.STREAM_PUBLISH) >> false
+		1 * service.permissionService.check(user, s4, Permission.Operation.STREAM_PUBLISH) >> false
+		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.STREAM_PUBLISH)
+		0 * service.permissionService._
+		1 * dataUnionClientMock.waitForSidechainTx(_, _, _) >> true
+		1 * receipt.getTransactionHash() >> "0x123456789000000000000000000000000000000001"
 		c.state == DataUnionJoinRequest.State.ACCEPTED
 	}
 
@@ -322,283 +336,6 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		members.size() == 2
 	}
 
-	void "update doesnt send join request if already joined"() {
-		setup:
-		User user = new User(
-			username: "user@domain.com",
-			name: "Firstname Lastname",
-		)
-		user.id = 1
-		user.save(failOnError: true, validate: false)
-
-		Stream s1 = new Stream(name: "stream-1")
-		Stream s2 = new Stream(name: "stream-2")
-		Stream s3 = new Stream(name: "stream-3")
-		Stream s4 = new Stream(name: "stream-4")
-		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i + 1}" } // assign ids
-		[s1, s2, s3, s4]*.save(failOnError: true, validate: false)
-
-		Category category = new Category(name: "Category")
-		category.id = "category-id"
-		category.save()
-
-		Product product = new Product(
-			name: "name",
-			description: "description",
-			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: contractAddress,
-			streams: [s1, s2, s3, s4],
-			pricePerSecond: 10,
-			category: category,
-			state: Product.State.NOT_DEPLOYED,
-			blockNumber: 40000,
-			blockIndex: 30,
-			owner: user,
-			type: Product.Type.DATAUNION,
-		)
-		product.id = "product-id"
-		product.save(failOnError: true, validate: true)
-
-		DataUnionJoinRequest r = new DataUnionJoinRequest(
-			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
-			contractAddress: contractAddress,
-			user: me,
-			state: DataUnionJoinRequest.State.PENDING,
-			dateCreated: new Date(),
-			lastUpdated: new Date(),
-		)
-		r.save(failOnError: true, validate: true)
-
-		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
-			state: "ACCEPTED",
-		)
-
-		DataUnionService.ProxyResponse stats = new DataUnionService.ProxyResponse()
-		stats.statusCode = 200
-		stats.body = new JsonBuilder([
-			active: true,
-		]).toString()
-
-		when:
-		service.update(contractAddress, r.id, cmd)
-		then:
-		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> stats
-		0 * service.ethereumService._
-		0 * streamrClientMock._
-		0 * service.permissionService._
-	}
-
-	void "update handles memberStats error"() {
-		setup:
-		User user = new User(
-			username: "user@domain.com",
-			name: "Firstname Lastname",
-		)
-		user.id = 1
-		user.save(failOnError: true, validate: false)
-
-		Stream s1 = new Stream(name: "stream-1")
-		Stream s2 = new Stream(name: "stream-2")
-		Stream s3 = new Stream(name: "stream-3")
-		Stream s4 = new Stream(name: "stream-4")
-		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i + 1}" } // assign ids
-		[s1, s2, s3, s4]*.save(failOnError: true, validate: false)
-
-		Category category = new Category(name: "Category")
-		category.id = "category-id"
-		category.save()
-
-		Product product = new Product(
-			name: "name",
-			description: "description",
-			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: contractAddress,
-			streams: [s1, s2, s3, s4],
-			pricePerSecond: 10,
-			category: category,
-			state: Product.State.NOT_DEPLOYED,
-			blockNumber: 40000,
-			blockIndex: 30,
-			owner: user,
-			type: Product.Type.DATAUNION,
-		)
-		product.id = "product-id"
-		product.save(failOnError: true, validate: true)
-
-		DataUnionJoinRequest r = new DataUnionJoinRequest(
-			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
-			contractAddress: contractAddress,
-			user: me,
-			state: DataUnionJoinRequest.State.PENDING,
-			dateCreated: new Date(),
-			lastUpdated: new Date(),
-		)
-		r.save(failOnError: true, validate: true)
-
-		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
-			state: "ACCEPTED",
-		)
-
-		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
-		okStats.statusCode = 200
-		okStats.body = new JsonBuilder([
-			active: true,
-		]).toString()
-
-		when:
-		service.update(contractAddress, r.id, cmd)
-		then:
-		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> {
-			throw new DataUnionProxyException("mocked exception")
-		}
-		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> okStats
-		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
-		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_PUBLISH)
-		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.STREAM_PUBLISH)
-		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.STREAM_PUBLISH)
-		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.STREAM_PUBLISH)
-	}
-
-	void "update fails if data union server doesnt register join"() {
-		setup:
-		User user = new User(
-			username: "user@domain.com",
-			name: "Firstname Lastname",
-		)
-		user.id = 1
-		user.save(failOnError: true, validate: false)
-
-		Stream s1 = new Stream(name: "stream-1")
-		Stream s2 = new Stream(name: "stream-2")
-		Stream s3 = new Stream(name: "stream-3")
-		Stream s4 = new Stream(name: "stream-4")
-		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i + 1}" } // assign ids
-		[s1, s2, s3, s4]*.save(failOnError: true, validate: false)
-
-		Category category = new Category(name: "Category")
-		category.id = "category-id"
-		category.save()
-
-		Product product = new Product(
-			name: "name",
-			description: "description",
-			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: contractAddress,
-			streams: [s1, s2, s3, s4],
-			pricePerSecond: 10,
-			category: category,
-			state: Product.State.NOT_DEPLOYED,
-			blockNumber: 40000,
-			blockIndex: 30,
-			owner: user,
-			type: Product.Type.DATAUNION,
-		)
-		product.id = "product-id"
-		product.save(failOnError: true, validate: true)
-
-		DataUnionJoinRequest r = new DataUnionJoinRequest(
-			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
-			contractAddress: contractAddress,
-			user: me,
-			state: DataUnionJoinRequest.State.PENDING,
-			dateCreated: new Date(),
-			lastUpdated: new Date(),
-		)
-		r.save(failOnError: true, validate: true)
-
-		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
-			state: "ACCEPTED",
-		)
-
-		DataUnionService.ProxyResponse notFoundStats = new DataUnionService.ProxyResponse()
-		notFoundStats.statusCode = 404
-
-		when:
-		service.update(contractAddress, r.id, cmd)
-		then:
-		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		11 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> notFoundStats
-		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
-		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_PUBLISH)
-		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.STREAM_PUBLISH)
-		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.STREAM_PUBLISH)
-		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.STREAM_PUBLISH)
-		thrown(DataUnionJoinRequestException)
-	}
-
-	void "accepting joinRequest grants permissions to streams in product"() {
-		setup:
-		User user = new User(
-			username: "user@domain.com",
-			name: "Firstname Lastname",
-		)
-		user.id = 1
-		user.save(failOnError: true, validate: false)
-
-		Stream s1 = new Stream(name: "stream-1")
-		Stream s2 = new Stream(name: "stream-2")
-		Stream s3 = new Stream(name: "stream-3")
-		Stream s4 = new Stream(name: "stream-4")
-		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i + 1}" } // assign ids
-		[s1, s2, s3, s4]*.save(failOnError: true, validate: false)
-
-		Category category = new Category(name: "Category")
-		category.id = "category-id"
-		category.save()
-
-		Product product = new Product(
-			name: "name",
-			description: "description",
-			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: contractAddress,
-			streams: [s1, s2, s3, s4],
-			pricePerSecond: 10,
-			category: category,
-			state: Product.State.NOT_DEPLOYED,
-			blockNumber: 40000,
-			blockIndex: 30,
-			owner: user,
-			type: Product.Type.DATAUNION,
-		)
-		product.id = "product-id"
-		product.save(failOnError: true, validate: true)
-
-		DataUnionJoinRequest r = new DataUnionJoinRequest(
-			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
-			contractAddress: contractAddress,
-			user: me,
-			state: DataUnionJoinRequest.State.PENDING,
-			dateCreated: new Date(),
-			lastUpdated: new Date(),
-		)
-		r.save(failOnError: true, validate: true)
-
-		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
-			state: "ACCEPTED",
-		)
-
-		DataUnionService.ProxyResponse notFoundStats = new DataUnionService.ProxyResponse()
-		notFoundStats.statusCode = 404
-		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
-		okStats.statusCode = 200
-		okStats.body = new JsonBuilder([
-			active: true,
-		]).toString()
-
-		when:
-		service.update(contractAddress, r.id, cmd)
-		then:
-		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		2 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> notFoundStats
-		1 * service.dataUnionService.memberStats(contractAddress, memberAddress) >> okStats
-		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
-		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_PUBLISH)
-		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.STREAM_PUBLISH)
-		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.STREAM_PUBLISH)
-		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.STREAM_PUBLISH)
-	}
-
 	void "accepting joinRequest grants permissions to streams in product (DU2)"() {
 		setup:
 		User user = new User(
@@ -632,7 +369,6 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 			blockIndex: 30,
 			owner: user,
 			type: Product.Type.DATAUNION,
-			dataUnionVersion: 2
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
@@ -651,36 +387,41 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 			state: "ACCEPTED",
 		)
 
-		DataUnionService.ProxyResponse notFoundStats = new DataUnionService.ProxyResponse()
-		notFoundStats.statusCode = 404
-		DataUnionService.ProxyResponse okStats = new DataUnionService.ProxyResponse()
-		okStats.statusCode = 200
-		okStats.body = new JsonBuilder([
-			active: true,
-		]).toString()
+		EthereumTransactionReceipt receipt = Mock(EthereumTransactionReceipt)
+		DataUnion dataUnion = new DataUnion(null, null, null, null, null, null) {
+			private int isMemberActiveCallCount = 0
 
-		boolean memberActive = false
-		DataUnionClient duClient = Mock(DataUnionClient)
-		DataUnion du = Mock(DataUnion)
-		duClient.dataUnionFromMainnetAddress(contractAddress) >> du
-		duClient.waitForSidechainTx(_, _, _) >> {
-			// Once the join transaction has gone through, member status turns to active
-			memberActive = true
+			@Override
+			boolean isMemberActive(String member) throws Exception {
+				return isMemberActiveCallCount++ > 1
+			}
+
+			@Override
+			EthereumTransactionReceipt addMembers(String... members) throws Exception {
+				return receipt
+			}
 		}
-		du.isMemberActive(memberAddress) >> {
-			memberActive
-		}
-		du.addMembers(memberAddress) >> Mock(EthereumTransactionReceipt)
 
 		when:
 		service.update(contractAddress, r.id, cmd)
 		then:
-		(1.._) * productService.findByBeneficiaryAddress(_) >> product
-		(1.._) * streamrClientMock.dataUnionClient(_, _) >> duClient
+		4 * streamrClientMock.dataUnionClient(_, _) >> dataUnionClientMock
+		4 * dataUnionClientMock.dataUnionFromMainnetAddress(_) >> dataUnion
+		1 * service.permissionService.check(user, s1, Permission.Operation.STREAM_PUBLISH) >> false
+		1 * service.permissionService.check(user, s2, Permission.Operation.STREAM_PUBLISH) >> false
+		1 * service.permissionService.check(user, s3, Permission.Operation.STREAM_PUBLISH) >> false
+		1 * service.permissionService.check(user, s4, Permission.Operation.STREAM_PUBLISH) >> false
+		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.STREAM_PUBLISH)
+		1 * dataUnionClientMock.waitForSidechainTx(_, _, _) >> true
+		1 * receipt.getTransactionHash() >> "0x123456789000000000000000000000000000000001"
+		0 * service.permissionService._
 	}
 
 	void "update rejects accepted state"() {

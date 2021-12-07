@@ -81,10 +81,6 @@ grails.project.dependency.resolution = {
 		runtime('commons-codec:commons-codec:1.15')
 
 		test('cglib:cglib:3.2.6')
-		test('org.gaul:httpbin:1.3.0') {
-			excludes('org.slf4j:slf4j-api:*')
-			excludes('ch.qos.logback:logback-classic:*')
-		}
 	}
 
 	plugins {
