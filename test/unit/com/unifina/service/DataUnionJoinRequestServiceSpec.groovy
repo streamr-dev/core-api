@@ -4,6 +4,7 @@ import com.streamr.client.StreamrClient
 import com.streamr.client.dataunion.DataUnion
 import com.streamr.client.dataunion.DataUnionClient
 import com.streamr.client.dataunion.EthereumTransactionReceipt
+import com.streamr.client.options.DataUnionClientOptions
 import com.unifina.BeanMockingSpecification
 import com.unifina.domain.*
 import grails.test.mixin.Mock
@@ -15,6 +16,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 
 	private static final String memberAddress = "0xCCCC000000000000000000000000AAAA0000FFFF"
 	private static final String contractAddress = "0x0000000000000000000000000000000000000000"
+	private static final String privateKey = "e80e35452d97febc624e65614b0a42e8a84603815b3e30f03a3d323062b8c3d2"
 
 	User me
 	StreamrClient streamrClientMock
@@ -147,7 +149,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
 		EthereumTransactionReceipt receipt = Mock(EthereumTransactionReceipt)
-		DataUnion dataUnion = new DataUnion(null, null, null, null, null, null) {
+		DataUnion dataUnion = new DataUnion(null, null, null, null, new DataUnionClientOptions("", privateKey, "", privateKey)) {
 			private int isMemberActiveCallCount = 0
 
 			@Override
@@ -234,7 +236,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
 		EthereumTransactionReceipt receipt = Mock(EthereumTransactionReceipt)
-		DataUnion dataUnion = new DataUnion(null, null, null, null, null, null) {
+		DataUnion dataUnion = new DataUnion(null, null, null, null, new DataUnionClientOptions("", privateKey, "", privateKey)) {
 			private int isMemberActiveCallCount = 0
 
 			@Override
@@ -388,7 +390,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		)
 
 		EthereumTransactionReceipt receipt = Mock(EthereumTransactionReceipt)
-		DataUnion dataUnion = new DataUnion(null, null, null, null, null, null) {
+		DataUnion dataUnion = new DataUnion(null, null, null, null, new DataUnionClientOptions("", privateKey, "", privateKey)) {
 			private int isMemberActiveCallCount = 0
 
 			@Override
