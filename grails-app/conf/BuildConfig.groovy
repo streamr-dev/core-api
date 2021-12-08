@@ -71,7 +71,7 @@ grails.project.dependency.resolution = {
 		compile('com.amazonaws:aws-java-sdk-s3:1.12.10')
 		compile('org.imgscalr:imgscalr-lib:4.2')
 		compile('commons-io:commons-io:2.4')
-		compile('com.streamr:client:2.2.1') {
+		compile('com.streamr:client:2.3.0') {
 			excludes "org.web3j:codegen:*"
 		}
 
