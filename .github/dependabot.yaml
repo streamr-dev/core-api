@@ -15,7 +15,7 @@ updates:
     reviewers:
       - kare
     assignees:
-      - kare
+      - DaisyDomergue
     labels:
       - github-actions
       - dependencies
