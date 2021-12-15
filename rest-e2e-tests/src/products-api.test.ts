@@ -354,6 +354,18 @@ describe('Products API', function () {
             assert.equal(json.operation, 'product_edit')
         })
 
+
+        it('command object is validated when updating Product fields', async () => {
+            const response = await Streamr.api.v1.products
+                .update(createdProductId, {
+                    ...newBody,
+                    beneficiaryAddress: 'not_a_valid_ethereum_address'
+                })
+                .withAuthenticatedUser(otherUser)
+                .call()
+            assertResponseIsError(response, 422, 'VALIDATION_ERROR')
+        })
+
         context('when called with valid params, body, headers, and permissions', () => {
             let response: Response
             let json: any
