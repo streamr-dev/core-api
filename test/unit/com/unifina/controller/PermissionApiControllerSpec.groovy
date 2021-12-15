@@ -34,7 +34,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		controller.permissionService.groovyPageRenderer = Mock(PageRenderer)
 		controller.permissionService = permissionService = Mock(PermissionService)
 
-		me = new User(id: 1, username: "me@me.net").save(validate: false)
+		me = new User(id: 1, username: "0x0000000000000000000000000000000000000001").save(validate: false)
 		other = new User(id: 2, username: "0x0000000000000000000000000000000000000000").save(validate: false)
 
 		def newStream = { String id ->
@@ -75,7 +75,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 		response.json.size() == 4
 		response.json[0].id == streamPermission.id
-		response.json[0].user == "me@me.net"
+		response.json[0].user == "0x0000000000000000000000000000000000000001"
 		response.json[0].operation == "stream_share"
 		1 * permissionService.findAllPermissions(resource, request.apiUser, true) >> [streamPermission, *ownerPermissions]
 		0 * permissionService._
@@ -96,7 +96,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 		response.json.size() == 4
 		response.json[0].id == streamPermission.id
-		response.json[0].user == "me@me.net"
+		response.json[0].user == "0x0000000000000000000000000000000000000001"
 		response.json[0].operation == "stream_share"
 		1 * permissionService.findAllPermissions(resource, request.apiUser, false) >> [streamPermission, *ownerPermissions]
 		0 * permissionService._
@@ -114,7 +114,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 200
 		response.json.id == 1
-		response.json.user == "me@me.net"
+		response.json.user == "0x0000000000000000000000000000000000000001"
 		response.json.operation == "stream_share"
 		1 * permissionService.findPermission(streamPermission.id, resource, request.apiUser) >> streamPermission
 		0 * permissionService._
@@ -145,7 +145,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		when:
 		request.JSON = [
 			anonymous: false,
-			user: "me@me.net",
+			user: "0x0000000000000000000000000000000000000001",
 			operation: "stream_get",
 		] as JSON
 		authenticatedAs(me) { controller.save() }
@@ -217,7 +217,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.getOwnPermissions() }
 		then:
 		response.status == 200
-		response.json == [[id: 1, operation: "stream_share", user: "me@me.net"]]
+		response.json == [[id: 1, operation: "stream_share", user: "0x0000000000000000000000000000000000000001"]]
 		1 * permissionService.getOwnPermissions(resource, me) >> [streamPermission]
 		0 * permissionService._
 	}
