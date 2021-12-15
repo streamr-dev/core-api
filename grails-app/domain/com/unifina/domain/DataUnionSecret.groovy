@@ -17,19 +17,21 @@ class DataUnionSecret {
 	// contractAddress is an Ethereum address of the data union smart contract.
 	String contractAddress
 
-    static constraints = {
-		contractAddress(validator: Product.isEthereumAddress)
-    }
+	static constraints = {
+		contractAddress(validator: EthereumAddressValidator.validate)
+	}
 	static mapping = {
 		id generator: IdGenerator.name
 	}
 
 	@GrailsCompileStatic
-	Map toMap() { [
-		id: id,
-		name: name,
-		contractAddress: contractAddress,
-		secret: secret,
-	] }
+	Map toMap() {
+		[
+			id: id,
+			name: name,
+			contractAddress: contractAddress,
+			secret: secret,
+		]
+	}
 
 }

@@ -1,5 +1,6 @@
 package com.unifina.controller
 
+import com.unifina.domain.EthereumAddressValidator
 import com.unifina.domain.Product
 import grails.validation.Validateable
 
@@ -10,7 +11,7 @@ class CreateSubscriptionCommand {
 	Long endsAt
 
 	static constraints = {
-		address(nullable: true, validator: Product.isEthereumAddressOrIsNull)
+		address(nullable: true, validator: EthereumAddressValidator.isNullOrValid)
 		endsAt(min: 0L)
 	}
 

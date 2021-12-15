@@ -4,10 +4,19 @@ import grails.compiler.GrailsCompileStatic
 
 @GrailsCompileStatic
 class EthereumAddressValidator {
-	static final Closure validate = { String address ->
+	private final static String REGEX = "^0x[a-fA-F0-9]{40}\$"
+
+	public static final Closure validate = { String address ->
 		if (address == null) {
 			return false
 		}
-		return address.matches("^0x[a-fA-F0-9]{40}\$")
+		return address.matches(REGEX)
+	}
+
+	public static final Closure isNullOrValid = { String address ->
+		if (address == null) {
+			return true
+		}
+		return address.matches(REGEX)
 	}
 }
