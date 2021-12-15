@@ -168,16 +168,6 @@ class Product {
 	boolean isFree() {
 		return pricePerSecond == 0L
 	}
-
-	static isEthereumAddressOrIsNull = { String value ->
-		boolean result = value == null || EthereumAddressValidator.validate(value)
-		return result
-	}
-
-	static isEthereumAddress = { String value ->
-		boolean result = EthereumAddressValidator.validate(value)
-		return result
-	}
 }
 
 @GrailsCompileStatic
