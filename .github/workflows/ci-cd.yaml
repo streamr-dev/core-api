@@ -102,9 +102,6 @@ jobs:
         uses: streamr-dev/streamr-docker-dev-action@v1.0.0-alpha.3
         with:
           services-to-start: "mysql redis cassandra parity-node0 parity-sidechain-node0 bridge broker-node-no-storage-1 broker-node-storage-1 nginx smtp"
-      - name: Set $NODE_VERSION variable
-        run: |
-          echo "NODE_VERSION=$(cat rest-e2e-tests/.nvmrc | sed -e '/^v/ s/^v//')" >> $GITHUB_ENV
       - name: Install Node
         uses: actions/setup-node@v2.5.0
         with:
