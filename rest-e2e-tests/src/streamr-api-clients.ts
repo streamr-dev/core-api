@@ -369,12 +369,6 @@ class DataUnions {
         this.options = options
     }
 
-    list() {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('dataunions')
-    }
-
     approveJoinRequest(id: string, contractAddress: string) {
         return new StreamrApiRequest(this.options)
             .method('PUT')

@@ -71,7 +71,7 @@ grails.project.dependency.resolution = {
 		compile('com.amazonaws:aws-java-sdk-s3:1.12.10')
 		compile('org.imgscalr:imgscalr-lib:4.2')
 		compile('commons-io:commons-io:2.4')
-		compile('com.streamr:client:2.2.1') {
+		compile('com.streamr:client:2.3.0') {
 			excludes "org.web3j:codegen:*"
 		}
 
@@ -81,10 +81,6 @@ grails.project.dependency.resolution = {
 		runtime('commons-codec:commons-codec:1.15')
 
 		test('cglib:cglib:3.2.6')
-		test('org.gaul:httpbin:1.3.0') {
-			excludes('org.slf4j:slf4j-api:*')
-			excludes('ch.qos.logback:logback-classic:*')
-		}
 	}
 
 	plugins {

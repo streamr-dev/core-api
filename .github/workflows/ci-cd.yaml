@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2.4.0
-      - uses: actions/setup-java@v2.3.1
+      - uses: actions/setup-java@v2.4.0
         with:
           java-version: '8.0.282'
           distribution: 'zulu'
@@ -37,7 +37,7 @@ jobs:
         with:
           candidate: grails
           version: ${{ env.GRAILS_VERSION }}
-      - uses: actions/cache@v2.1.6
+      - uses: actions/cache@v2.1.7
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-v1-${{ hashFiles('grails-app/conf/BuildConfig.groovy') }}
@@ -79,7 +79,7 @@ jobs:
           driver-opts: |
             network=host
       - name: Cache Docker layers
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v2.1.7
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-v1-${{ github.sha }}
@@ -101,14 +101,14 @@ jobs:
       - name: Start Streamr Docker Stack
         uses: streamr-dev/streamr-docker-dev-action@v1.0.0-alpha.3
         with:
-          services-to-start: "mysql redis cassandra parity-node0 parity-sidechain-node0 bridge data-union-server broker-node-no-storage-1 broker-node-storage-1 nginx smtp"
+          services-to-start: "mysql redis cassandra parity-node0 parity-sidechain-node0 bridge broker-node-no-storage-1 broker-node-storage-1 nginx smtp"
       - name: Set $NODE_VERSION variable
         run: |
           echo "NODE_VERSION=$(cat rest-e2e-tests/.nvmrc | sed -e '/^v/ s/^v//')" >> $GITHUB_ENV
       - name: Install Node
-        uses: actions/setup-node@v2.4.1
+        uses: actions/setup-node@v2.5.0
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version-file: 'rest-e2e-tests/.nvmrc'
       - name: Setup End to End tests
         run: |
           streamr-docker-dev start core-api
@@ -139,7 +139,7 @@ jobs:
       - uses: actions/checkout@v2.4.0
       - name: Docker meta
         id: docker_meta
-        uses: docker/metadata-action@v3.6.0
+        uses: docker/metadata-action@v3.6.2
         with:
           images: streamr/core-api
           tags: |
@@ -155,7 +155,7 @@ jobs:
           driver-opts: |
             network=host
       - name: Cache Docker layers
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v2.1.7
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-v1-${{ github.sha }}

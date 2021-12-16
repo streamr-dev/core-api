@@ -312,17 +312,6 @@
           ]
         }
       }
-    },
-    "dataUnionVersion": {
-      "description": "Data Union version",
-      "oneOf": [
-        {
-          "type": "null"
-        },
-        {
-          "type": "number"
-        }
-      ]
     }
   },
   "additionalProperties": false,

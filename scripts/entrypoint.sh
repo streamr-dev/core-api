@@ -16,7 +16,6 @@ CATALINA_OPTS="\
 	-Daws.secretKey=$AWS_SECRET_KEY \
 	-Dstreamr.fileUpload.s3.bucket=$FILEUPLOAD_S3_BUCKET \
 	-Dstreamr.fileUpload.s3.region=$FILEUPLOAD_S3_REGION \
-	-Dstreamr.cps.url=$CPS_URL \
 	-Dstreamr.dataunion.mainnet.factory.address=$DATAUNION_MAINNET_FACTORY_ADDRESS \
 	-Dstreamr.dataunion.sidechain.factory.address=$DATAUNION_SIDECHAIN_FACTORY_ADDRESS \
 	-Dstreamr.ethereum.defaultNetwork=$ETHEREUM_DEFAULT_NETWORK \
