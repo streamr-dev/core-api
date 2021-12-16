@@ -108,7 +108,7 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v2.5.0
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: 'rest-e2e-tests/.nvmrc'
       - name: Setup End to End tests
         run: |
           streamr-docker-dev start core-api
