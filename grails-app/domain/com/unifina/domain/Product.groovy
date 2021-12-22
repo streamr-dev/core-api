@@ -80,8 +80,8 @@ class Product {
 		previewStream(nullable: true, validator: { Stream s, p -> s == null || s in p.streams })
 		previewConfigJson(nullable: true)
 		pendingChanges(nullable: true)
-		ownerAddress(nullable: true, validator: isEthereumAddressOrIsNull)
-		beneficiaryAddress(nullable: true, validator: isEthereumAddressOrIsNull)
+		ownerAddress(nullable: true, validator: EthereumAddressValidator.isNullOrValid)
+		beneficiaryAddress(nullable: true, validator: EthereumAddressValidator.isNullOrValid)
 		pricePerSecond(min: 0L)
 		priceCurrency(enumType: "string")
 		minimumSubscriptionInSeconds(min: 0L)
@@ -167,14 +167,6 @@ class Product {
 
 	boolean isFree() {
 		return pricePerSecond == 0L
-	}
-
-	static isEthereumAddressOrIsNull = { String value ->
-		value == null || Product.isEthereumAddress(value)
-	}
-
-	static isEthereumAddress = { String value ->
-		value ==~ /^0x[a-fA-F0-9]{40}$/ ?: "validation.isEthereumAddress"
 	}
 }
 

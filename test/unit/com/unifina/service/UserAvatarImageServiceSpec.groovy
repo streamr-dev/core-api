@@ -21,7 +21,7 @@ class UserAvatarImageServiceSpec extends Specification {
 		}
 
 		user = new User(
-			username: "user@domain.com",
+			username: "0x0000000000000000000000000000000000000001",
 			name: "Firstname Lastname",
 		)
 		user.id = 1

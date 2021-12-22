@@ -49,8 +49,8 @@ class ProductUpdateCommand {
 	static constraints = {
 		importFrom(Product)
 		// List all onChainFields as nullable
-		ownerAddress(nullable: true, validator: Product.isEthereumAddressOrIsNull)
-		beneficiaryAddress(nullable: true, validator: Product.isEthereumAddressOrIsNull)
+		ownerAddress(nullable: true, validator: EthereumAddressValidator.isNullOrValid)
+		beneficiaryAddress(nullable: true, validator: EthereumAddressValidator.isNullOrValid)
 		pricePerSecond(nullable: true)
 		priceCurrency(nullable: true)
 		minimumSubscriptionInSeconds(nullable: true)

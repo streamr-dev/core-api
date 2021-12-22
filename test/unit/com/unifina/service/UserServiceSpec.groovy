@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.unifina.domain.Permission
 import com.unifina.domain.Role
 import com.unifina.domain.User
@@ -33,7 +32,7 @@ class UserServiceSpec extends Specification {
 	def "the user is created when called"() {
 		when:
 		createData()
-		User user = service.createUser([username: "test@test.com", name: "test", enabled: true, accountLocked: false])
+		User user = service.createUser([username: "0x0000000000000000000000000000000000000001", name: "test", enabled: true, accountLocked: false])
 
 		then:
 		User.count() == 1

@@ -9,7 +9,7 @@ class SubscriptionPaidIntegrationSpec extends IntegrationSpec {
 
 	void setup() {
 		def owner = new User(
-			username: "subscription-service-integration-spec-1@streamr.network",
+			username: "0x0000000000000000000000000000000000000001",
 			name: "Subscription Service Integration Spec 1",
 		).save(failOnError: true)
 

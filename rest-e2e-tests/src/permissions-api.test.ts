@@ -22,22 +22,6 @@ describe('Permissions API', () => {
             })
         })
 
-        it('can grant a permission to an existing user using email address', async () => {
-            const response = await Streamr.api.v1.streams
-                .grant(stream.id, 'tester1@streamr.com', 'stream_get')
-                .withAuthenticatedUser(me)
-                .call()
-            assert.equal(response.status, 200)
-        })
-
-        it('can grant a permission to a non-existing user using email address', async () => {
-            const response = await Streamr.api.v1.streams
-                .grant(stream.id, `${Date.now()}@foobar.invalid`, 'stream_get')
-                .withAuthenticatedUser(me)
-                .call()
-            assert.equal(response.status, 200)
-        })
-
         it('can grant a permission to an existing user using Ethereum address', async () => {
             const response = await Streamr.api.v1.streams
                 .grant(stream.id, existingUser.address, 'stream_get')

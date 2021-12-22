@@ -8,28 +8,6 @@ import spock.lang.Unroll
 @TestFor(Product)
 @Mock([User, Product, Stream])
 class ProductSpec extends Specification {
-	@Unroll
-	void "isEthereumAddress(#value) == #expected"(String value, Object expected) {
-		expect:
-		Product.isEthereumAddress(value) == expected
-		where:
-		value                                        | expected
-		null                                         | "validation.isEthereumAddress"
-		""                                           | "validation.isEthereumAddress"
-		"0x0"                                        | "validation.isEthereumAddress"
-		"0xfffFFffFfffFffffFFFFffffFFFFfffFFFFfffFf" | true
-		"0x0000000000000000000000000000000000000000" | true
-		"0x0123456789abcdefABCDEF000000000000000000" | true
-		"1x0000000000000000000000000000000000000000" | "validation.isEthereumAddress"
-		"0xG000000000000000000000000000000000000000" | "validation.isEthereumAddress"
-		"0x000000000000000000000000000000000000000"  | "validation.isEthereumAddress"
-	}
-
-	void "isEthereumAddressOrIsNull(null) == true"() {
-		expect:
-		Product.isEthereumAddressOrIsNull(null)
-	}
-
 	void "previewStream() validator passes if previewStream = null and streams empty"() {
 		def p = new Product(
 			name: "name",

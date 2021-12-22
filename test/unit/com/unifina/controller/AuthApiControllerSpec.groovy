@@ -9,6 +9,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.context.MessageSource
+import spock.lang.Ignore
 import spock.lang.Specification
 
 @TestFor(AuthApiController)
@@ -151,6 +152,7 @@ class AuthApiControllerSpec extends Specification {
 		response.json.error == 'User already exists'
 	}
 
+	@Ignore
 	void "submitting registration with valid invite should create user"() {
 		setup:
 		// The roles created
