@@ -202,10 +202,14 @@ class ProductService {
 		verifyDevops(currentUser)
 
 		product.setProperties(command.properties)
-		product.state = Product.State.DEPLOYED
+		saveAndGrantPermission(Product.State.DEPLOYED, product)
+		return true
+	}
+
+	private void saveAndGrantPermission(Product.State state, Product product) {
+		product.state = state
 		product.save(failOnError: true)
 		permissionService.systemGrantAnonymousAccess(product, Permission.Operation.PRODUCT_GET)
-		return true
 	}
 
 	boolean updatePricing(Product product, SetPricingCommand command, User currentUser) {
@@ -274,10 +278,7 @@ class ProductService {
 			throw new InvalidStateTransitionException(product.state, Product.State.DEPLOYED)
 		}
 
-		// TODO: these 3 statements also in ProductService#markAsDeployed
-		product.state = Product.State.DEPLOYED
-		product.save(failOnError: true)
-		permissionService.systemGrantAnonymousAccess(product, Permission.Operation.PRODUCT_GET)
+		saveAndGrantPermission(Product.State.DEPLOYED, product)
 
 		product.streams.each {
 			permissionService.systemGrantAnonymousAccess(it, Permission.Operation.STREAM_GET)
@@ -291,7 +292,6 @@ class ProductService {
 			throw new InvalidStateTransitionException(product.state, Product.State.NOT_DEPLOYED)
 		}
 
-		// TODO: these 3 statements also in ProductService#markAsDeployed
 		product.state = Product.State.NOT_DEPLOYED
 		product.save(failOnError: true)
 		permissionService.systemRevokeAnonymousAccess(product, Permission.Operation.PRODUCT_GET)
