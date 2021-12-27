@@ -190,7 +190,7 @@ class ProductApiControllerSpec extends Specification {
 
 		params.id = "product-id"
 		request.JSON = [
-				tx: "0x0000000000FFFFFFFFFF0000000000FFFFFFFFFF0000000000FFFFFFFFFFAAAA"
+			tx: "0x0000000000FFFFFFFFFF0000000000FFFFFFFFFF0000000000FFFFFFFFFFAAAA"
 		]
 		request.method = "POST"
 		when:
@@ -444,7 +444,6 @@ class ProductApiControllerSpec extends Specification {
 
 	void "deployFree() invokes productService#findById (with SHARE permission requirement)"() {
 		def productService = controller.productService = Mock(ProductService)
-		controller.productFreeService = Stub(ProductFreeService)
 		def user = new User()
 
 		params.id = "product-id"
@@ -459,10 +458,8 @@ class ProductApiControllerSpec extends Specification {
 	}
 
 	void "deployFree() invokes freeProductService#deployFreeProduct"() {
-		controller.productService = Stub(ProductService) {
-			findById(_, _, _) >> product
-		}
-		def freeProductService = controller.productFreeService = Mock(ProductFreeService)
+		product.pricePerSecond = 0
+		controller.productService = Mock(ProductService)
 
 		params.id = "product-id"
 		request.method = "POST"
@@ -472,14 +469,14 @@ class ProductApiControllerSpec extends Specification {
 			controller.deployFree()
 		}
 		then:
-		1 * freeProductService.deployFreeProduct(product)
+		1 * controller.productService.findById(_, _, _) >> product
+		1 * controller.productService.deployFreeProduct(product)
 	}
 
 	void "deployFree() returns 200 and renders a product"() {
 		controller.productService = Stub(ProductService) {
 			findById(_, _, _) >> product
 		}
-		controller.productFreeService = Stub(ProductFreeService)
 
 		params.id = "product-id"
 		request.method = "POST"
@@ -495,7 +492,6 @@ class ProductApiControllerSpec extends Specification {
 
 	void "undeployFree() invokes productService#findById (with SHARE permission requirement)"() {
 		def productService = controller.productService = Mock(ProductService)
-		controller.productFreeService = Stub(ProductFreeService)
 		def user = new User()
 
 		params.id = "product-id"
@@ -510,10 +506,8 @@ class ProductApiControllerSpec extends Specification {
 	}
 
 	void "undeployFree() invokes freeProductService#undeployFreeProduct"() {
-		controller.productService = Stub(ProductService) {
-			findById(_, _, _) >> product
-		}
-		def freeProductService = controller.productFreeService = Mock(ProductFreeService)
+		product.pricePerSecond = 0
+		controller.productService = Mock(ProductService)
 
 		params.id = "product-id"
 		request.method = "POST"
@@ -523,14 +517,14 @@ class ProductApiControllerSpec extends Specification {
 			controller.undeployFree()
 		}
 		then:
-		1 * freeProductService.undeployFreeProduct(product)
+		1 * controller.productService.findById(_, _, _) >> product
+		1 * controller.productService.undeployFreeProduct(product)
 	}
 
 	void "undeployFree() returns 200 and renders a product"() {
 		controller.productService = Stub(ProductService) {
 			findById(_, _, _) >> product
 		}
-		controller.productFreeService = Stub(ProductFreeService)
 
 		params.id = "product-id"
 		request.method = "POST"

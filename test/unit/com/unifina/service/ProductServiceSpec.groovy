@@ -12,6 +12,7 @@ class ProductServiceSpec extends Specification {
 	Stream s1, s2, s3, s4
 	Category category
 	Product product
+	Product freeProduct
 
 	void setup() {
 		mockForConstraintsTests(Product)
@@ -31,7 +32,7 @@ class ProductServiceSpec extends Specification {
 
 	private void setupProduct(Product.State state = Product.State.NOT_DEPLOYED) {
 		User user = new User(
-			username: "user@domain.com",
+			username: "0x0000000000000000000000000000000000000123",
 			name: "Firstname Lastname",
 		)
 		user.id = 1
@@ -55,12 +56,12 @@ class ProductServiceSpec extends Specification {
 
 	private void setupFreeProduct(Product.State state = Product.State.NOT_DEPLOYED) {
 		User user = new User(
-			username: "user@domain.com",
+			username: "0x0000000000000000000000000000000000001234",
 			name: "Firstname Lastname",
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
-		product = new Product(
+		freeProduct = new Product(
 			name: "name",
 			description: "description",
 			ownerAddress: "0x0000000000000000000000000000000000000000",
@@ -73,8 +74,8 @@ class ProductServiceSpec extends Specification {
 			blockIndex: 30,
 			owner: user
 		)
-		product.id = "product-id"
-		product.save(failOnError: true, validate: true)
+		freeProduct.id = "free-product-id"
+		freeProduct.save(failOnError: true, validate: true)
 	}
 
 	void "list() delegates to ApiService#list"() {
@@ -253,7 +254,7 @@ class ProductServiceSpec extends Specification {
 			pricePerSecond: 10,
 			minimumSubscriptionInSeconds: 1
 		)
-		def me = new User(username: "me@streamr.network")
+		def me = new User(username: "0x0000000000000000000000000000000000000000")
 
 		when:
 		service.create(validCommand, me)
@@ -378,7 +379,7 @@ class ProductServiceSpec extends Specification {
 
 		service.subscriptionService = Stub(SubscriptionService)
 		service.apiService = Stub(ApiService) {
-			authorizedGetById(Product, _, _, _) >> product
+			authorizedGetById(Product, _, _, _) >> freeProduct
 		}
 		def permissionService = service.permissionService = Mock(PermissionService)
 		service.store = Stub(ProductStore) {
@@ -425,7 +426,7 @@ class ProductServiceSpec extends Specification {
 
 		service.subscriptionService = Stub(SubscriptionService)
 		service.apiService = Stub(ApiService) {
-			authorizedGetById(Product, _, _, _) >> product
+			authorizedGetById(Product, _, _, _) >> freeProduct
 		}
 		def permissionService = service.permissionService = Mock(PermissionService)
 		service.store = Stub(ProductStore) {
@@ -468,13 +469,13 @@ class ProductServiceSpec extends Specification {
 
 		service.subscriptionService = Stub(SubscriptionService)
 		service.apiService = Stub(ApiService) {
-			authorizedGetById(Product, _, _, _) >> product
+			authorizedGetById(Product, _, _, _) >> freeProduct
 		}
 		def permissionService = service.permissionService = Mock(PermissionService)
 		service.store = Stub(ProductStore) {
 			findProductsByStream(_) >> { Stream s ->
 				if (s == s2) {
-					return [product]
+					return [freeProduct]
 				} else {
 					return [];
 				}
@@ -492,7 +493,7 @@ class ProductServiceSpec extends Specification {
 			priceCurrency: Product.Currency.DATA,
 			minimumSubscriptionInSeconds: 0
 		)
-		def user = new User(username: "me@streamr.network")
+		def user = new User(username: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCD")
 
 		when:
 		service.update("product-id", validCommand, user)
@@ -701,14 +702,14 @@ class ProductServiceSpec extends Specification {
 	void "addStreamToProduct() grants anonymous read permission for free products stream"() {
 		setupStreams()
 		setupFreeProduct()
-		assert !product.streams.contains(s4)
+		assert !freeProduct.streams.contains(s4)
 
 		service.subscriptionService = Stub(SubscriptionService)
 		service.permissionService = Mock(PermissionService)
 		def user = new User()
 
 		when:
-		service.addStreamToProduct(product, s4, user)
+		service.addStreamToProduct(freeProduct, s4, user)
 		then:
 		1 * service.permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
 		1 * service.permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_GET)
@@ -746,10 +747,10 @@ class ProductServiceSpec extends Specification {
 		setupFreeProduct()
 		service.subscriptionService = Stub(SubscriptionService)
 		service.permissionService = Mock(PermissionService)
-		assert product.streams.contains(s1)
+		assert freeProduct.streams.contains(s1)
 
 		when:
-		service.removeStreamFromProduct(product, s1)
+		service.removeStreamFromProduct(freeProduct, s1)
 		then:
 		1 * service.permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
@@ -1257,5 +1258,146 @@ class ProductServiceSpec extends Specification {
 		1 * service.dataUnionJoinRequestService.findMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
 		1 * service.permissionService.check(user, s1, Permission.Operation.STREAM_PUBLISH) >> true
 		1 * service.permissionService.systemRevoke(user, s1, Permission.Operation.STREAM_PUBLISH)
+	}
+
+	// Tests for Free products!
+
+	void "deployFreeProduct throws ProductNotFreeException when given paid Product"() {
+		when:
+		service.deployFreeProduct(new Product(pricePerSecond: 2))
+		then:
+		thrown(ProductNotFreeException)
+	}
+
+	void "deployFreeProduct throws InvalidStateTransitionException when given Product in state DEPLOYED"() {
+		when:
+		service.deployFreeProduct(new Product(pricePerSecond: 0, state: Product.State.DEPLOYED))
+		then:
+		thrown(InvalidStateTransitionException)
+	}
+
+	void "deployFreeProduct transitions Product state to DEPLOYED"() {
+		setup:
+		setupFreeProduct()
+		service.permissionService = Stub(PermissionService)
+
+		when:
+		service.deployFreeProduct(freeProduct)
+		then:
+		Product.findById("free-product-id").state == Product.State.DEPLOYED
+	}
+
+	void "deployFreeProduct grants anonymous access to Product"() {
+		setup:
+		setupStreams()
+		setupFreeProduct()
+		service.permissionService = Mock(PermissionService)
+
+		when:
+		service.deployFreeProduct(freeProduct)
+		then:
+		1 * service.permissionService.systemGrantAnonymousAccess(freeProduct, Permission.Operation.PRODUCT_GET)
+		1 * service.permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * service.permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * service.permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.STREAM_SUBSCRIBE)
+		0 * service.permissionService._
+	}
+
+	void "deployFreeProduct grants anonymous stream_get and stream_subscribe access to the streams of Product"() {
+		setup:
+		setupStreams()
+		setupFreeProduct()
+		service.permissionService = Mock(PermissionService)
+
+		when:
+		service.deployFreeProduct(freeProduct)
+		then:
+		1 * service.permissionService.systemGrantAnonymousAccess(freeProduct, Permission.Operation.PRODUCT_GET)
+		1 * service.permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * service.permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * service.permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.STREAM_SUBSCRIBE)
+		0 * service.permissionService._
+	}
+
+	void "undeployFreeProduct throws ProductNotFreeException when given paid Product"() {
+		setup:
+		setupFreeProduct()
+		when:
+		service.undeployFreeProduct(new Product(pricePerSecond: 2))
+		then:
+		thrown(ProductNotFreeException)
+	}
+
+	void "undeployFreeProduct throws InvalidStateTransitionException when given Product in state NOT_DEPLOYED"() {
+		setup:
+		setupFreeProduct()
+		when:
+		service.undeployFreeProduct(new Product(pricePerSecond: 0, state: Product.State.NOT_DEPLOYED))
+		then:
+		thrown(InvalidStateTransitionException)
+	}
+
+	void "undeployFreeProduct transitions Product state to NOT_DEPLOYED"() {
+		setup:
+		setupFreeProduct()
+		service.permissionService = Stub(PermissionService)
+
+		freeProduct.state = Product.State.DEPLOYED
+		freeProduct.save(failOnError: true)
+
+		when:
+		service.undeployFreeProduct(freeProduct)
+		then:
+		Product.findById("free-product-id").state == Product.State.NOT_DEPLOYED
+	}
+
+	void "undeployFreeProduct revokes anonymous access to Product"() {
+		setup:
+		setupStreams()
+		setupFreeProduct()
+		service.permissionService = Mock(PermissionService)
+
+		freeProduct.state = Product.State.DEPLOYED
+		freeProduct.save(failOnError: true)
+
+		when:
+		service.undeployFreeProduct(freeProduct)
+		then:
+		1 * service.permissionService.systemRevokeAnonymousAccess(freeProduct, Permission.Operation.PRODUCT_GET)
+		1 * service.permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * service.permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * service.permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_SUBSCRIBE)
+		0 * service.permissionService._
+	}
+
+	void "undeployFreeProduct revokes anonymous stream_get and stream_subscribe access to the streams of Product"() {
+		setup:
+		setupStreams()
+		setupFreeProduct()
+		service.permissionService = Mock(PermissionService)
+
+		freeProduct.state = Product.State.DEPLOYED
+		freeProduct.save(failOnError: true)
+
+		when:
+		service.undeployFreeProduct(freeProduct)
+		then:
+		1 * service.permissionService.systemRevokeAnonymousAccess(freeProduct, Permission.Operation.PRODUCT_GET)
+		1 * service.permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * service.permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * service.permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_SUBSCRIBE)
+		0 * service.permissionService._
 	}
 }

@@ -12,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile
 
 class ProductApiController {
 	ApiService apiService
-	ProductFreeService productFreeService
 	ProductService productService
 	ProductImageService productImageService
 	MailService mailService
@@ -88,7 +87,7 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def deployFree(String id) {
 		Product product = productService.findById(id, loggedInUser(), Permission.Operation.PRODUCT_SHARE)
-		productFreeService.deployFreeProduct(product)
+		productService.deployFreeProduct(product)
 		render(product.toMap() as JSON)
 	}
 
@@ -96,7 +95,7 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def undeployFree(String id) {
 		Product product = productService.findById(id, loggedInUser(), Permission.Operation.PRODUCT_SHARE)
-		productFreeService.undeployFreeProduct(product)
+		productService.undeployFreeProduct(product)
 		render(product.toMap() as JSON)
 	}
 
