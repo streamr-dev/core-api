@@ -14,4 +14,5 @@ databaseChangeLog = {
 	include file: 'core/2021-11-01-delete-integration-key.groovy'
 	include file: 'core/2021-11-02-unique-username-index.groovy'
 	include file: 'core/2021-11-19-rm-data-union-versions.groovy'
+	include file: 'core/2021-12-15-rm-registration-code.groovy'
 }
