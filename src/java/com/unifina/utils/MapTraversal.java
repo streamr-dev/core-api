@@ -7,7 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MapTraversal {
+public final class MapTraversal {
+	private MapTraversal() {
+	}
 
 	/**
 	 * Fetch given property in the nested map tree,
