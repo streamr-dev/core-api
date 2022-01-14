@@ -1,10 +1,9 @@
 package com.unifina.domain
 
 import grails.persistence.Entity
-import groovy.transform.CompileStatic
 
 @Entity
-class User implements Userish {
+class User {
 	Long id
 	String username
 	String email
@@ -53,11 +52,11 @@ class User implements Userish {
 
 	Map toMap() {
 		return [
-			name : name,
-			username : username,
-			email : email,
-			imageUrlSmall : imageUrlSmall,
-			imageUrlLarge : imageUrlLarge,
+			name: name,
+			username: username,
+			email: email,
+			imageUrlSmall: imageUrlSmall,
+			imageUrlLarge: imageUrlLarge,
 			lastLogin: lastLogin
 		]
 	}
@@ -80,21 +79,6 @@ class User implements Userish {
 	@Override
 	int hashCode() {
 		return this.id?.hashCode() ?: super.hashCode()
-	}
-
-	@Override
-	Userish resolveToUserish() {
-		return this
-	}
-
-	@CompileStatic
-	static User loadViaJava(Long userId) {
-		User.load(userId)
-	}
-
-	@CompileStatic
-	static User getViaJava(Long userId) {
-		User.get(userId)
 	}
 
 	String getPublisherId() {

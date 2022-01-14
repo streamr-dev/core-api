@@ -38,7 +38,7 @@ class RESTAPIFiltersSpec extends BeanMockingSpecification {
 		}
 
 		then:
-		1 * sessionService.getUserishFromToken(USER_SESSION_TOKEN) >> user
+		1 * sessionService.getUserFromToken(USER_SESSION_TOKEN) >> user
 		response.status == 403
 		response.json == [
 			code: "NOT_PERMITTED",
@@ -58,7 +58,7 @@ class RESTAPIFiltersSpec extends BeanMockingSpecification {
 		}
 
 		then:
-		1 * sessionService.getUserishFromToken(USER_SESSION_TOKEN) >> user
+		1 * sessionService.getUserFromToken(USER_SESSION_TOKEN) >> user
 		response.status == 200
 	}
 
@@ -72,7 +72,7 @@ class RESTAPIFiltersSpec extends BeanMockingSpecification {
 		}
 
 		then:
-		1 * sessionService.getUserishFromToken(USER_SESSION_TOKEN) >> user
+		1 * sessionService.getUserFromToken(USER_SESSION_TOKEN) >> user
 		response.status == 200
 	}
 }

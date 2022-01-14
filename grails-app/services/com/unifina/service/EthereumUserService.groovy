@@ -1,16 +1,100 @@
 package com.unifina.service
 
+
 import com.unifina.domain.SignupMethod
 import com.unifina.domain.User
 import groovy.transform.CompileStatic
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.validation.FieldError
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.ECKeyPair
 import org.web3j.crypto.Keys
 
 class EthereumUserService {
-	def grailsApplication
-	UserService userService
-	PermissionService permissionService
+	GrailsApplication grailsApplication
+
+	//
+	// Old UserService start
+	//
+
+	User createUser(String address, SignupMethod signupMethod) {
+		assertUnique(address)
+		User user = new User()
+		user.username = address
+		user.name = "Anonymous User"
+		user.enabled = true
+		user.accountLocked = false
+		user.signupMethod = signupMethod
+
+		if (!user.validate()) {
+			def errors = checkErrors(user.errors.getAllErrors())
+			def errorStrings = errors.collect { FieldError e ->
+				if (e.getCode() == "unique") {
+					return "Address already in use."
+				} else {
+					return e.toString()
+				}
+			}
+			throw new UserCreationFailedException("Registration failed:\n" + errorStrings.join(",\n"))
+		}
+
+		if (!user.save(flush: false)) {
+			log.warn("Failed to save user data: " + checkErrors(user.errors.getAllErrors()))
+			throw new UserCreationFailedException()
+		}
+		log.info("Created user for " + user.username)
+
+		return user
+	}
+
+	def delete(User user) {
+		if (user == null) {
+			throw new NotFoundException("user not found", "User", null)
+		}
+		user.enabled = false
+		user.save(validate: true)
+	}
+
+	/**
+	 * Checks if the errors list contains any fields whose values may not be logged
+	 * as plaintext (passwords etc.). The excluded fields are read from
+	 * grails.exceptionresolver.params.exclude config key.
+	 *
+	 * If any excluded fields are found, their field values are replaced with "***".
+	 * @param errorList
+	 * @return
+	 */
+	List<FieldError> checkErrors(List<FieldError> errorList) {
+		List<String> blackList = (List<String>) grailsApplication?.config?.grails?.exceptionresolver?.params?.exclude
+		if (blackList == null) {
+			blackList = Collections.emptyList()
+		}
+		List<FieldError> finalErrors = new ArrayList<>()
+		List<FieldError> toBeCensoredList = new ArrayList<>()
+		errorList.each {
+			if (blackList.contains(it.getField())) {
+				toBeCensoredList.add(it)
+			} else {
+				finalErrors.add(it)
+			}
+		}
+		toBeCensoredList.each {
+			List arguments = Arrays.asList(it.getArguments())
+			int index = arguments.indexOf(it.getRejectedValue())
+			if (index >= 0 && index < arguments.size()) {
+				arguments.set(index, "***")
+			}
+			FieldError fieldError = new FieldError(
+				it.getObjectName(), it.getField(), "***", it.isBindingFailure(),
+				it.getCodes(), arguments.toArray(), it.getDefaultMessage()
+			)
+			finalErrors.add(fieldError)
+		}
+		return finalErrors
+	}
+	//
+	// Old UserService ends
+	//
 
 	User getEthereumUser(String address) {
 		if (address == null) {
@@ -31,14 +115,7 @@ class EthereumUserService {
 	}
 
 	User createEthereumUser(String address, SignupMethod signupMethod) {
-		assertUnique(address)
-		User user = userService.createUser([
-			username: address,
-			name: "Anonymous User",
-			enabled: true,
-			accountLocked: false,
-			signupMethod: signupMethod
-		])
+		User user = createUser(address, signupMethod)
 		return user
 	}
 

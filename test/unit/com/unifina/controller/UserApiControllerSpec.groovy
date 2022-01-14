@@ -1,7 +1,10 @@
 package com.unifina.controller
 
 import com.unifina.domain.User
-import com.unifina.service.*
+import com.unifina.service.ApiException
+import com.unifina.service.EthereumUserService
+import com.unifina.service.SessionService
+import com.unifina.service.UserAvatarImageService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
@@ -58,7 +61,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 
 	void "delete user account"() {
 		setup:
-		controller.userService = Mock(UserService)
+		controller.userService = Mock(EthereumUserService)
 		request.addHeader("Authorization", "Bearer token")
 		request.apiUser = me
 		request.method = "DELETE"
@@ -71,14 +74,14 @@ class UserApiControllerSpec extends ControllerSpecification {
 		}
 
 		then:
-		1 * sessionService.getUserishFromToken("token") >> request.apiUser
+		1 * sessionService.getUserFromToken("token") >> request.apiUser
 		1 * controller.userService.delete(me)
 		response.status == 204
 	}
 
 	void "update ethereum users profile"() {
 		setup:
-		controller.userService = new UserService()
+		controller.userService = new EthereumUserService()
 		request.addHeader("Authorization", "Bearer token")
 		request.method = "PUT"
 		request.requestURI = "/api/v1/users/me"
@@ -94,7 +97,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		}
 
 		then: "values must be updated"
-		1 * sessionService.getUserishFromToken("token") >> request.apiUser
+		1 * sessionService.getUserFromToken("token") >> request.apiUser
 		response.json.name == "New Name"
 		response.json.email == "changed@emailaddress.com"
 		response.json.username == "0x0000000000000000000000000000000000000000"
@@ -102,7 +105,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 
 	void "private user fields cannot be changed via update profile"() {
 		setup:
-		controller.userService = new UserService()
+		controller.userService = new EthereumUserService()
 		request.addHeader("Authorization", "Bearer token")
 		request.method = "PUT"
 		request.requestURI = "/api/v1/users/me"
@@ -118,7 +121,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		}
 
 		then:
-		1 * sessionService.getUserishFromToken("token") >> request.apiUser
+		1 * sessionService.getUserFromToken("token") >> request.apiUser
 		User.get(1).username == "0x0000000000000000000000000000000000000001"
 		response.json.username == "0x0000000000000000000000000000000000000001"
 		User.get(1).enabled
@@ -140,7 +143,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		}
 
 		then:
-		1 * sessionService.getUserishFromToken("token") >> request.apiUser
+		1 * sessionService.getUserFromToken("token") >> request.apiUser
 		0 * controller.userAvatarImageService._
 		def e = thrown(ApiException)
 		e.statusCode == 400
@@ -164,7 +167,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		}
 
 		then:
-		1 * sessionService.getUserishFromToken("token") >> request.apiUser
+		1 * sessionService.getUserFromToken("token") >> request.apiUser
 		1 * controller.userAvatarImageService.replaceImage(request.apiUser as User, bytes, "my-user-avatar-image.jpg")
 	}
 
@@ -184,7 +187,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		}
 
 		then:
-		1 * sessionService.getUserishFromToken("token") >> new User(username: "foo@ƒoo.bar")
+		1 * sessionService.getUserFromToken("token") >> new User(username: "foo@ƒoo.bar")
 		response.status == 200
 		response.json.username == request.apiUser.username
 	}
@@ -204,7 +207,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.uploadAvatarImage()
 		}
 		then:
-		1 * sessionService.getUserishFromToken("token") >> new User(username: "foo@ƒoo.bar")
+		1 * sessionService.getUserFromToken("token") >> new User(username: "foo@ƒoo.bar")
 		response.status == 200
 	}
 
@@ -223,7 +226,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.uploadAvatarImage()
 		}
 		then:
-		1 * sessionService.getUserishFromToken("token") >> new User(username: "foo@ƒoo.bar")
+		1 * sessionService.getUserFromToken("token") >> new User(username: "foo@ƒoo.bar")
 		response.status == 415
 	}
 }

@@ -6,7 +6,6 @@ import com.unifina.domain.User
 import com.unifina.service.*
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
-import grails.plugin.mail.MailService
 import org.apache.log4j.Logger
 import org.springframework.web.multipart.MultipartFile
 
@@ -14,7 +13,6 @@ class ProductApiController {
 	ApiService apiService
 	ProductService productService
 	ProductImageService productImageService
-	MailService mailService
 	PermissionService permissionService
 
 	private static final Logger log = Logger.getLogger(ProductApiController)
@@ -70,7 +68,7 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def setPricing(String id, SetPricingCommand command) {
-		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
+		Product product = apiService.getByIdAndThrowIfNotFound(id)
 		productService.updatePricing(product, command, loggedInUser())
 		render(product.toMap() as JSON)
 	}
@@ -78,7 +76,7 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def setDeployed(String id, ProductDeployedCommand command) {
-		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
+		Product product = apiService.getByIdAndThrowIfNotFound(id)
 		productService.markAsDeployed(product, command, loggedInUser())
 		render(product.toMap() as JSON)
 	}
@@ -110,7 +108,7 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def setUndeployed(String id, ProductUndeployedCommand command) {
-		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
+		Product product = apiService.getByIdAndThrowIfNotFound(id)
 		productService.markAsUndeployed(product, command, loggedInUser())
 		render(product.toMap() as JSON)
 	}

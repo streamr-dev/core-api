@@ -1,47 +1,40 @@
 package com.unifina.controller
 
+import com.unifina.controller.RESTAPIFilters
 import com.unifina.domain.Permission
 import com.unifina.domain.Product
-import com.unifina.domain.Stream
 import com.unifina.domain.User
-import com.unifina.controller.RESTAPIFilters
-import com.unifina.service.ApiService
 import com.unifina.service.ProductService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(ProductStreamsApiController)
-@Mock([RESTAPIFilters])
+@Mock([RESTAPIFilters, Product])
 class ProductStreamsApiControllerSpec extends Specification {
 	void "index() invokes productService#findById (product_get)"() {
-		def productService = controller.productService = Mock(ProductService)
-
+		controller.productService = Mock(ProductService)
 		params.productId = "product-id"
-		def user = request.apiUser = new User(username: "me@streamr.network")
+		def user = request.apiUser = new User(username: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
 		when:
 		withFilters(action: "index") {
 			controller.index()
 		}
 		then:
-		1 * productService.findById("product-id", user, Permission.Operation.PRODUCT_GET) >> new Product()
+		1 * controller.productService.findById("product-id", user, Permission.Operation.PRODUCT_GET) >> new Product()
 	}
 
 	void "index() returns 200 and list of streams"() {
-		def s1 = new Stream(name: "Stream #1", partitions: 5)
-		def s2 = new Stream(name: "Stream #2", partitions: 1)
-		def s3 = new Stream(name: "Stream #3", partitions: 3)
-
-		s1.id = "stream-1"
-		s2.id = "stream-2"
-		s3.id = "stream-3"
+		def s1 = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/s1"
+		def s2 = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/s2"
+		def s3 = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/s3"
 
 		controller.productService = Stub(ProductService) {
 			findById(_, _, _) >> new Product(streams: [s1, s2, s3])
 		}
 
 		params.productId = "product-id"
-		def user = request.apiUser = new User(username: "me@streamr.network")
+		def user = request.apiUser = new User(username: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
 
 		when:
 		withFilters(action: "index") {
@@ -49,114 +42,73 @@ class ProductStreamsApiControllerSpec extends Specification {
 		}
 		then:
 		response.status == 200
-		response.json as Set == [s1, s2, s3]*.toMap() as Set
+		response.json as Set == [s1, s2, s3] as Set
 	}
 
 	void "update() invokes productService#findById (product_edit) and productService#addStreamToProduc"() {
-		def productService = controller.productService = Mock(ProductService)
-		controller.apiService = Stub(ApiService) {
-			getByIdAndThrowIfNotFound(_, _) >> {
-				def s = new Stream()
-				s.id = "id"
-				s
-			}
-		}
+		controller.productService = Mock(ProductService)
 		def product = new Product()
+		product.id = "product-id"
+		product.streams = []
 
 		params.productId = "product-id"
-		params.id = "stream-id"
-		def user = request.apiUser = new User(username: "me@streamr.network")
+		params.streamId = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/s1"
+		request.apiUser = new User(username: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
 
 		when:
 		withFilters(action: "update") {
 			controller.update()
 		}
 		then:
-		1 * productService.findById("product-id", user, Permission.Operation.PRODUCT_EDIT) >> product
-		1 * productService.addStreamToProduct(product, _ as Stream, user)
-	}
-
-	void "update() invokes apiService#getByIdAndThrowIfNotFound"() {
-		controller.productService = Stub(ProductService)
-		def apiService = controller.apiService = Mock(ApiService)
-
-		params.productId = "product-id"
-		params.id = "stream-id"
-		request.apiUser = new User(username: "me@streamr.network")
-
-		when:
-		withFilters(action: "update") {
-			controller.update()
-		}
-		then:
-		1 * apiService.getByIdAndThrowIfNotFound(Stream, "stream-id")
+		1 * controller.productService.findById("product-id", request.apiUser, Permission.Operation.PRODUCT_EDIT) >> product
+		1 * controller.productService.addStreamToProduct(product, _ as String, request.apiUser)
 	}
 
 	void "update() returns 204"() {
-		controller.productService = Stub(ProductService)
-		controller.apiService = Stub(ApiService) {
-			getByIdAndThrowIfNotFound(_, _) >> null
-		}
+		controller.productService = Mock(ProductService)
+		User me = new User(username: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
+		me.save(failOnError: true, validate: true)
+		def product = new Product()
+		product.id = "product-id"
+		product.streams = []
+		product.owner = me
+		product.save(validate: true, failOnError: true)
+
+		params.productId = "product-id"
+		params.streamId = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/s1"
+		request.apiUser = me
+
 
 		when:
 		withFilters(action: "update") {
 			controller.update()
 		}
 		then:
+		1 * controller.productService.findById(product.id, request.apiUser, Permission.Operation.PRODUCT_EDIT) >> product
 		response.status == 204
 	}
 
 	void "delete() invokes productService#findById (product_edit) and productService#addStreamToProduc"() {
-		def productService = controller.productService = Mock(ProductService)
-		controller.apiService = Stub(ApiService) {
-			getByIdAndThrowIfNotFound(_, _) >> {
-				def s = new Stream()
-				s.id = "id"
-				s
-			}
-		}
-		def product = new Product()
+		controller.productService = Mock(ProductService)
+		User me = new User(username: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
+		me.save(failOnError: true, validate: true)
+		Product product = new Product()
+		product.id = "product-id"
+		product.streams = ["0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/s1"]
+		product.owner = me
+		product.save(validate: true, failOnError: true)
 
-		params.productId = "product-id"
-		params.id = "stream-id"
-		def user = request.apiUser = new User(username: "me@streamr.network")
-
-		when:
-		withFilters(action: "delete") {
-			controller.delete()
-		}
-		then:
-		1 * productService.findById("product-id", user, Permission.Operation.PRODUCT_DELETE) >> product
-		1 * productService.removeStreamFromProduct(product, _ as Stream)
-	}
-
-	void "delete() invokes apiService#getByIdAndThrowIfNotFound"() {
-		controller.productService = Stub(ProductService)
-		def apiService = controller.apiService = Mock(ApiService)
-
-		params.productId = "product-id"
-		params.id = "stream-id"
-		request.apiUser = new User(username: "me@streamr.network")
+		params.productId = product.id
+		params.streamId = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/s1"
+		request.apiUser = me
 
 		when:
 		withFilters(action: "delete") {
 			controller.delete()
 		}
 		then:
-		1 * apiService.getByIdAndThrowIfNotFound(Stream, "stream-id")
-	}
-
-	void "delete() returns 204"() {
-		controller.productService = Stub(ProductService)
-		controller.apiService = Stub(ApiService) {
-			getByIdAndThrowIfNotFound(_, _) >> null
-		}
-
-		when:
-		withFilters(action: "delete") {
-			controller.delete()
-		}
-		then:
+		1 * controller.productService.findById(product.id, me, Permission.Operation.PRODUCT_DELETE) >> product
+		1 * controller.productService.removeStreamFromProduct(product, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/s1")
 		response.status == 204
 	}
 }

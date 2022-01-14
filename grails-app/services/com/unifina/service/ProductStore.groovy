@@ -1,13 +1,12 @@
 package com.unifina.service
 
 import com.unifina.domain.Product
-import com.unifina.domain.Stream
 
 class ProductStore {
-	List<Product> findProductsByStream(Stream s) {
+	List<Product> findProductsByStream(String s) {
 		return Product.createCriteria().list {
 			streams {
-				idEq(s.id)
+				idEq(s)
 			}
 		}
 	}

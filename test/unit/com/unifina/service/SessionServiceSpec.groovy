@@ -19,7 +19,7 @@ class SessionServiceSpec extends Specification {
 		// Must mock executeUpdate(String,List) because HQL is not supported in unit test GORM
 		// Used in SessionService#updateUsersLoginDate()
 		def secUserMock = mockFor(User)
-		secUserMock.demand.static.executeUpdate(1) {String s, List p->
+		secUserMock.demand.static.executeUpdate(1) { String s, List p ->
 			User.get(p[1]).lastLogin = p[0]
 		}
 	}
@@ -45,9 +45,9 @@ class SessionServiceSpec extends Specification {
 		User user = new User(id: 123L).save(failOnError: true, validate: false)
 		String token = "token"
 		when:
-		User retrieved = (User) service.getUserishFromToken(token)
+		User retrieved = service.getUserFromToken(token)
 		then:
-		1 * keyValueStoreService.get(token) >> "User"+user.id.toString()
+		1 * keyValueStoreService.get(token) >> "User" + user.id.toString()
 		retrieved.id == user.id
 	}
 }

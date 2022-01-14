@@ -17,7 +17,7 @@ class PermissionApiController {
 		if (params.subscriptions) {
 			subscriptions = Boolean.parseBoolean(params.subscriptions)
 		}
-		Resource resource = new Resource(params.resourceClass, params.resourceId)
+		Resource resource = new Resource(params.productId)
 		List<Permission> permissions = permissionService.findAllPermissions(resource, request.apiUser, subscriptions)
 		def perms = permissions*.toMap()
 		render(perms as JSON)
@@ -25,7 +25,7 @@ class PermissionApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def getOwnPermissions() {
-		Resource resource = new Resource(params.resourceClass, params.resourceId)
+		Resource resource = new Resource(params.productId)
 		List<Permission> permissions = permissionService.getOwnPermissions(resource, request.apiUser)
 		def perms = permissions*.toMap()
 		render(perms as JSON)
@@ -38,34 +38,20 @@ class PermissionApiController {
 		}
 		String username = cmd.user
 		Operation op = cmd.operationToEnum()
-		Resource res = new Resource(params.resourceClass, params.resourceId)
+		Resource res = new Resource(params.productId)
 		User apiUser = request.apiUser
 		Permission newPermission
 		if (cmd.anonymous) {
 			newPermission = permissionService.saveAnonymousPermission(apiUser, op, res)
 		} else {
-			String subjectTemplate = grailsApplication.config.unifina.email.shareInvite.subject
-			String sharer = apiUser?.username
-			// incoming "username" is either User.username or SignupInvite.username (possibly of a not yet created SignupInvite)
 			User user = User.findByUsername(username)
 			if (user) {
-				String recipient = user.email
-				// send share resource email and grant permission
-				EmailMessage msg = new EmailMessage(sharer, recipient, subjectTemplate, res)
-				newPermission = permissionService.savePermissionAndSendShareResourceEmail(
-					apiUser,
-					op,
-					user.username,
-					msg
-				)
+				newPermission = permissionService.savePermission(apiUser, op, user.username, res)
 			} else {
 				if (EthereumAddressValidator.validate(username)) {
-					// get or create a user based on an ethereum account, and grant permission
 					newPermission = permissionService.savePermissionForEthereumAccount(username, apiUser, op, res, SignupMethod.fromRequest(request))
 				} else {
-					// send share resource invite email and grant permission
-					EmailMessage msg = new EmailMessage(sharer, username, subjectTemplate, res)
-					newPermission = permissionService.savePermissionAndSendEmailShareResourceInvite(apiUser, username, op, msg)
+					newPermission = permissionService.savePermission(apiUser, op, username, res)
 				}
 			}
 		}
@@ -75,14 +61,14 @@ class PermissionApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(Long id) {
-		Resource resource = new Resource(params.resourceClass, params.resourceId)
+		Resource resource = new Resource(params.productId)
 		Permission p = permissionService.findPermission(id, resource, request.apiUser)
 		render(p.toMap() as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def delete(Long id) {
-		Resource resource = new Resource(params.resourceClass, params.resourceId)
+		Resource resource = new Resource(params.productId)
 		permissionService.deletePermission(id, resource, request.apiUser)
 		render(status: 204)
 	}

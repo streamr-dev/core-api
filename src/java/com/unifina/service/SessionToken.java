@@ -1,6 +1,6 @@
 package com.unifina.service;
 
-import com.unifina.domain.Userish;
+import com.unifina.domain.User;
 import com.unifina.utils.AlphanumericStringGenerator;
 
 import java.time.ZonedDateTime;
@@ -11,10 +11,10 @@ import java.util.Map;
 
 public class SessionToken {
 	private final String token;
-	private final Userish user;
+	private final User user;
 	private final ZonedDateTime expiration;
 
-	public SessionToken(int tokenLength, Userish user, int ttlHours) {
+	public SessionToken(int tokenLength, User user, int ttlHours) {
 		this.token = AlphanumericStringGenerator.getRandomAlphanumericString(tokenLength);
 		this.user = user;
 		this.expiration = ZonedDateTime.now().plusHours(ttlHours);
@@ -24,7 +24,7 @@ public class SessionToken {
 		return token;
 	}
 
-	public Userish getUserish() {
+	public User getUser() {
 		return user;
 	}
 

@@ -49,22 +49,13 @@ class SubscriptionService {
 	 * Should be invoked after a Product has been updated
 	 */
 	void afterProductUpdated(Product product) {
-		Set<Stream> after = product.streams
-
-		List<Subscription> subscriptions = Subscription.findAllByProduct(product)
-
-		subscriptions.each { Subscription subscription ->
-			Set<Stream> before = streamPermissionsFor(subscription)*.stream as Set
-			deletePermissions(subscription, before - after)
-			createPermissions(subscription, after - before)
-		}
 	}
 
 	private Subscription updateSubscriptionAndLinkedPermissions(Subscription subscription, Date endsAt) {
 		subscription.endsAt = endsAt
 		subscription.save(failOnError: true)
 		deletePermissions(subscription) // TODO: could be optimized to only remove/add what is necessary
-		createPermissions(subscription)
+		//createPermissions(subscription)
 		return subscription
 	}
 
@@ -74,26 +65,32 @@ class SubscriptionService {
 		}
 	}
 
-	private static void deletePermissions(Subscription subscription, Set<Stream> streams) {
-		List<Permission> permissions = Permission.findAllBySubscriptionAndStreamInList(subscription, streams as List)
+	private static void deletePermissions(Subscription subscription, Set<String> streams) {
+		// TODO
+		//List<Permission> permissions = Permission.findAllBySubscriptionAndStreamInList(subscription, streams as List)
+		//permissions*.delete()
+		List<Permission> permissions = Permission.findAllBySubscription(subscription)
 		permissions*.delete()
+
 	}
 
 	private void createPermissions(Subscription subscription) {
-		createPermissions(subscription, subscription.product.streams)
+		//createPermissions(subscription, subscription.product.streams)
 	}
 
-	private void createPermissions(Subscription subscription, Set<Stream> streams) {
+	private void createPermissions(Subscription subscription, Set<String> streams) {
 		User user = subscription.fetchUser()
 		if (user) {
-			streams.collect { Stream stream ->
-				permissionService.systemGrant(user, stream, Permission.Operation.STREAM_SUBSCRIBE, subscription, subscription.endsAt)
-				permissionService.systemGrant(user, stream, Permission.Operation.STREAM_GET, subscription, subscription.endsAt)
+			streams.collect { String stream ->
+				//permissionService.systemGrant(user, stream, Permission.Operation.STREAM_SUBSCRIBE, subscription, subscription.endsAt)
+				//permissionService.systemGrant(user, stream, Permission.Operation.STREAM_GET, subscription, subscription.endsAt)
 			}
 		}
 	}
 
 	private static Set<Permission> streamPermissionsFor(Subscription subscription) {
-		Permission.findAllBySubscriptionAndStreamIsNotNull(subscription) as Set
+		// TODO
+		//return Permission.findAllBySubscriptionAndStreamIsNotNull(subscription) as Set
+		return Permission.findAllBySubscription(subscription) as Set
 	}
 }

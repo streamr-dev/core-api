@@ -9,7 +9,6 @@ class LoginApiController {
 	ChallengeService challengeService
 	SessionService sessionService
 	EthereumUserService ethereumUserService
-	UserService userService
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def challenge(String address) {

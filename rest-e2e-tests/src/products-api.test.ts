@@ -20,9 +20,9 @@ function assertIsProduct(data: any) {
     assert(errors.length === 0, schemaValidator.toMessages(errors))
 }
 
-function assertIsStream(data: any) {
-    const errors = schemaValidator.validateStream(data)
-    assert(errors.length === 0, schemaValidator.toMessages(errors))
+function assertIsStreamID(id: string) {
+    // TODO: validate
+    assert(id.length === 42)
 }
 
 async function createProductAndReturnId(productBody: any, user: EthereumAccount) {
@@ -40,6 +40,11 @@ async function createStreamAndReturnId(streamBody: any, user: EthereumAccount) {
 
 describe('Products API', function () {
     let genericProductBody: any
+
+    // TODO
+    //const streamId1 = "0x0000000001000000000100000000010000000001/stream-1"
+    //const streamId2 = "0x0000000002000000000200000000020000000002/stream-2"
+    //const streamId3 = "0x0000000003000000000300000000030000000003/stream-3"
 
     let streamId1: string
     let streamId2: string
@@ -206,7 +211,7 @@ describe('Products API', function () {
                         streamId2
                     ],
                     state: 'NOT_DEPLOYED',
-                    previewStream: null,
+                    previewStreamId: null,
                     previewConfigJson: null,
                     ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
                     beneficiaryAddress: '0x0000000000000000000011111111111111111111',
@@ -404,7 +409,7 @@ describe('Products API', function () {
                     // above are changes
 
                     state: 'NOT_DEPLOYED',
-                    previewStream: null,
+                    previewStreamId: null,
                     previewConfigJson: null,
                     ownerAddress: '0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
                     beneficiaryAddress: '0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC',
@@ -928,7 +933,7 @@ describe('Products API', function () {
             })
 
             it('responds with list of Streams', () => {
-                json.forEach((stream: any) => assertIsStream(stream))
+                json.forEach((id: string) => assertIsStreamID(id))
             })
         })
     })

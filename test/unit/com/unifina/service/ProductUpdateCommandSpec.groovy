@@ -1,12 +1,14 @@
 package com.unifina.service
 
-import com.unifina.domain.*
+import com.unifina.domain.Category
+import com.unifina.domain.Permission
+import com.unifina.domain.Product
+import com.unifina.domain.User
 import spock.lang.Specification
 
 class ProductUpdateCommandSpec extends Specification {
-
 	Product product
-    ProductUpdateCommand command
+	ProductUpdateCommand command
 	PermissionService permissionService
 
 	void setup() {
@@ -15,9 +17,6 @@ class ProductUpdateCommandSpec extends Specification {
 		Category category = new Category(name: "category")
 		category.id = 'category-id'
 
-		Stream stream = new Stream(name: "stream")
-		stream.id = "stream-id"
-
 		product = new Product(
 			name: "name",
 			description: "description",
@@ -25,8 +24,8 @@ class ProductUpdateCommandSpec extends Specification {
 			thumbnailUrl: "thumb.jpg",
 			category: category,
 			state: Product.State.DEPLOYED,
-			previewStream: stream,
-			streams: [stream],
+			previewStreamId: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/abc",
+			streams: ["0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/abc"],
 			previewConfigJson: "{}",
 			score: 5,
 			owner: new User(name: "John Doe"),
@@ -43,15 +42,12 @@ class ProductUpdateCommandSpec extends Specification {
 		Category newCategory = new Category(name: "new-category")
 		newCategory.id = "new-category-id"
 
-		Stream newStream = new Stream(name: "new-stream")
-		newStream.id = "new-stream-id"
-
 		command = new ProductUpdateCommand(
 			name: "new name",
 			description: "new description",
-			streams: [newStream],
+			streams: ["0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/abc"],
 			category: newCategory,
-			previewStream: newStream,
+			previewStreamId: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/abc",
 			previewConfigJson: "{newConfig: true}",
 			ownerAddress: "0xA",
 			beneficiaryAddress: "0xF",
@@ -97,8 +93,8 @@ class ProductUpdateCommandSpec extends Specification {
 		map.imageUrl == "image.jpg"
 		map.thumbnailUrl == "thumb.jpg"
 		map.category == "new-category-id"
-		map.streams == ["new-stream-id"]
-		map.previewStream == "new-stream-id"
+		map.streams == ["0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/abc"]
+		map.previewStreamId == "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/abc"
 		map.previewConfigJson == "{newConfig: true}"
 		map.ownerAddress == "0x0"
 		map.beneficiaryAddress == "0x0"
@@ -128,8 +124,8 @@ class ProductUpdateCommandSpec extends Specification {
 		map.imageUrl == "image.jpg"
 		map.thumbnailUrl == "thumb.jpg"
 		map.category == "new-category-id"
-		map.streams == ["new-stream-id"]
-		map.previewStream == "new-stream-id"
+		map.streams == ["0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/abc"]
+		map.previewStreamId == "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/abc"
 		map.previewConfigJson == "{newConfig: true}"
 		map.ownerAddress == "0xA"
 		map.beneficiaryAddress == "0xF"
@@ -160,8 +156,8 @@ class ProductUpdateCommandSpec extends Specification {
 		map.imageUrl == "image.jpg"
 		map.thumbnailUrl == "thumb.jpg"
 		map.category == "new-category-id"
-		map.streams == ["new-stream-id"]
-		map.previewStream == "new-stream-id"
+		map.streams == ["0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/abc"]
+		map.previewStreamId == "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/abc"
 		map.previewConfigJson == "{newConfig: true}"
 		map.ownerAddress == "0xA"
 		map.beneficiaryAddress == "0xF"
@@ -188,7 +184,7 @@ class ProductUpdateCommandSpec extends Specification {
 		command = new ProductUpdateCommand(
 			name: "new name",
 			description: "new description",
-			pendingChanges: [name:"new name",description:"new description"]
+			pendingChanges: [name: "new name", description: "new description"]
 		)
 		product.pricePerSecond = 5
 
@@ -204,7 +200,7 @@ class ProductUpdateCommandSpec extends Specification {
 		command = new ProductUpdateCommand(
 			name: "new name",
 			description: "new description",
-			pendingChanges: [name:"new name",description:"new description"]
+			pendingChanges: [name: "new name", description: "new description"]
 		)
 		product.pricePerSecond = 5
 

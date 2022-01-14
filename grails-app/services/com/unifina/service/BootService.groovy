@@ -1,7 +1,6 @@
 package com.unifina.service
 
-import com.unifina.domain.*
-import com.unifina.utils.ApplicationConfig
+import com.unifina.domain.Role
 import org.apache.log4j.Logger
 
 /**
@@ -10,11 +9,6 @@ import org.apache.log4j.Logger
  * @author Henri
  */
 class BootService {
-
-	StreamService streamService
-	EthereumUserService ethereumUserService
-	PermissionService permissionService
-
 	private static final Logger log = Logger.getLogger(BootService.class)
 
 	def onInit() {
@@ -31,24 +25,5 @@ class BootService {
 		def userRole = Role.findByAuthority('ROLE_USER') ?: new Role(authority: 'ROLE_USER').save(failOnError: true)
 		def adminRole = Role.findByAuthority('ROLE_ADMIN') ?: new Role(authority: 'ROLE_ADMIN').save(failOnError: true)
 		def liveRole = Role.findByAuthority('ROLE_LIVE') ?: new Role(authority: 'ROLE_LIVE').save(failOnError: true)
-
-		try {
-			createStorageNodeAssignmentsStream()
-		} catch (Exception e) {
-			log.error("failed to create storage node assignment stream.", e)
-		}
-	}
-
-	def createStorageNodeAssignmentsStream() {
-		String streamId = StorageNodeService.createAssignmentStreamId()
-		Stream stream = streamService.getStream(streamId)
-		if (stream == null) {
-			log.info("creating stream for storage node assignments: " + streamId)
-			EthereumAddress nodeAddress = EthereumAddress.fromPrivateKey(ApplicationConfig.getString("streamr.ethereum.nodePrivateKey"))
-			User nodeUser = ethereumUserService.getOrCreateFromEthereumAddress(nodeAddress.toString(), SignupMethod.UNKNOWN)
-			stream = streamService.createStream(new CreateStreamCommand(id: streamId), nodeUser, null)
-			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_GET)
-			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
-		}
 	}
 }

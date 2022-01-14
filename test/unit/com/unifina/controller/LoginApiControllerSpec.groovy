@@ -45,10 +45,9 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		Challenge challenge = new Challenge("id", "challenge", challengeService.TTL_SECONDS)
 
 		User user = new User(
-			username: "username",
+			username: "0x1234567890123456789012345678900000000000",
 			name: "name",
 			email: "email@email.com",
-			timezone: "timezone"
 		).save(failOnError: true, validate: false)
 
 		SessionToken token = new SessionToken(64, user, 3)

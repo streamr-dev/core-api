@@ -153,6 +153,28 @@ class Products {
         this.permissions = new Permissions('products', options)
     }
 
+    grant(id: string, targetUser: string, operation: string) {
+        return new StreamrApiRequest(this.options)
+            .method('POST')
+            .endpoint('products', id, 'permissions')
+            .withBody({
+                user: targetUser,
+                operation,
+            })
+    }
+
+    deletePermission(streamId: string, permissionId: number) {
+        return new StreamrApiRequest(this.options)
+            .method('DELETE')
+            .endpoint('products', streamId, 'permissions', String(permissionId))
+    }
+
+    getOwnPermissions(id: string) {
+        return new StreamrApiRequest(this.options)
+            .method('GET')
+            .endpoint('products', id, 'permissions', 'me')
+    }
+
     list(queryParams: any) {
         return new StreamrApiRequest(this.options)
             .method('GET')
@@ -247,81 +269,6 @@ class Products {
     }
 }
 
-class Streams {
-
-    options: any
-    permissions: Permissions
-
-    constructor(options: any) {
-        this.options = options
-        this.permissions = new Permissions('streams', options)
-    }
-
-    setFields(id: string, body: any) {
-        return new StreamrApiRequest(this.options)
-            .method('POST')
-            .endpoint('streams', id, 'fields')
-            .withBody(body)
-    }
-
-    grantPublic(id: string, operation: string) {
-        return new StreamrApiRequest(this.options)
-            .method('POST')
-            .endpoint('streams', id, 'permissions')
-            .withBody({
-                anonymous: true,
-                operation,
-            })
-    }
-
-    grant(id: string, targetUser: string, operation: string) {
-        return new StreamrApiRequest(this.options)
-            .method('POST')
-            .endpoint('streams', id, 'permissions')
-            .withBody({
-                user: targetUser,
-                operation,
-            })
-    }
-
-    getOwnPermissions(id: string) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('streams', id, 'permissions', 'me')
-    }
-
-    deletePermission(streamId: string, permissionId: number) {
-        return new StreamrApiRequest(this.options)
-            .method('DELETE')
-            .endpoint('streams', streamId, 'permissions', String(permissionId))
-    }
-
-    delete(streamId: string) {
-        return new StreamrApiRequest(this.options)
-            .method('DELETE')
-            .endpoint('streams', streamId)
-    }
-
-    list(queryParams: any) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('streams')
-            .withQueryParams(queryParams)
-    }
-
-    publisher(streamId: string, address: string) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('streams', streamId, 'publisher', address)
-    }
-
-    subscriber(streamId: string, address: string) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('streams', streamId, 'subscriber', address)
-    }
-}
-
 class Subscriptions {
 
     options: any
@@ -377,40 +324,6 @@ class DataUnions {
     }
 }
 
-class StorageNodes {
-
-    options: any
-
-    constructor(options: any) {
-        this.options = options
-    }
-
-    findStreamsByStorageNode(address: string) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('storageNodes', address, 'streams')
-    }
-
-    findStorageNodesByStream(id: string) {
-        return new StreamrApiRequest(this.options)
-            .method('GET')
-            .endpoint('streams', id, 'storageNodes')
-    }
-
-    addStorageNodeToStream(storageNodeAddress: string, streamId: string) {
-        return new StreamrApiRequest(this.options)
-            .method('POST')
-            .endpoint('streams', streamId, 'storageNodes')
-            .withBody({address: storageNodeAddress})
-    }
-
-    removeStorageNodeFromStream(storageNodeAddress: string, streamId: string) {
-        return new StreamrApiRequest(this.options)
-            .method('DELETE')
-            .endpoint('streams', streamId, 'storageNodes', storageNodeAddress)
-    }
-}
-
 class NotFound {
 
     options: any
@@ -436,10 +349,8 @@ export default {
         v1: {
             categories: new Categories(options),
             products: new Products(options),
-            streams: new Streams(options),
             subscriptions: new Subscriptions(options),
             dataunions: new DataUnions(options),
-            storagenodes: new StorageNodes(options),
             not_found: new NotFound(options),
         },
     },

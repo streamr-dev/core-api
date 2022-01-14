@@ -1,7 +1,6 @@
 package com.unifina.service
 
-import com.unifina.controller.StreamListParams
-import com.unifina.domain.Stream
+import com.unifina.domain.Product
 import grails.orm.HibernateCriteriaBuilder
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
@@ -11,7 +10,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 @TestMixin(GrailsUnitTestMixin)
-@Mock(Stream)
+@Mock(Product)
 class ListParamsSpec extends Specification {
 
 	@Validateable
@@ -169,25 +168,25 @@ class ListParamsSpec extends Specification {
 
 	void "createListCriteria() supports fetching by offsets"() {
 		(1..100).each {
-			Stream s = new Stream(name: "Stream ${it}")
-			s.id = "${it}"
-			s.save(validate: false, failOnError: true)
+			Product p = new Product(name: "Product ${it}")
+			p.id = "${it}"
+			p.save(validate: false, failOnError: true)
 		}
 
-		def p1 = new StreamListParams(max: 30)
-		def p2 = new StreamListParams(max: 15, offset: 15)
-		def p3 = new StreamListParams(max: 30, offset: 30)
-		def p4 = new StreamListParams(max: 30, offset: 60)
-		def p5 = new StreamListParams(max: 30, offset: 90)
-		def p6 = new StreamListParams(max: 30, offset: 1100)
+		def p1 = new ProductListParams(max: 30)
+		def p2 = new ProductListParams(max: 15, offset: 15)
+		def p3 = new ProductListParams(max: 30, offset: 30)
+		def p4 = new ProductListParams(max: 30, offset: 60)
+		def p5 = new ProductListParams(max: 30, offset: 90)
+		def p6 = new ProductListParams(max: 30, offset: 1100)
 
 		expect:
-		Stream.withCriteria(p1.createListCriteria())*.id == (1..30)*.toString()
-		Stream.withCriteria(p2.createListCriteria())*.id == (16..30)*.toString()
-		Stream.withCriteria(p3.createListCriteria())*.id == (31..60)*.toString()
-		Stream.withCriteria(p4.createListCriteria())*.id == (61..90)*.toString()
-		Stream.withCriteria(p5.createListCriteria())*.id == (91..100)*.toString()
-		Stream.withCriteria(p6.createListCriteria()).empty
+		Product.withCriteria(p1.createListCriteria())*.id == (1..30)*.toString()
+		Product.withCriteria(p2.createListCriteria())*.id == (16..30)*.toString()
+		Product.withCriteria(p3.createListCriteria())*.id == (31..60)*.toString()
+		Product.withCriteria(p4.createListCriteria())*.id == (61..90)*.toString()
+		Product.withCriteria(p5.createListCriteria())*.id == (91..100)*.toString()
+		Product.withCriteria(p6.createListCriteria()).empty
 	}
 
 	void "CORE-1346 fix duplicate products in paging"() {

@@ -1,7 +1,6 @@
 package com.unifina.service
 
 import com.unifina.domain.User
-import com.unifina.domain.Userish
 import org.apache.log4j.Logger
 
 import java.time.Instant
@@ -21,16 +20,14 @@ class SessionService {
 		User.executeUpdate("update User u set u.lastLogin = ? where u.id = ?", [date, user.id])
 	}
 
-	SessionToken generateToken(Userish userish) {
-		SessionToken sk = new SessionToken(TOKEN_LENGTH, userish, TTL_HOURS)
-		keyValueStoreService.setWithExpiration(sk.getToken(), userishToString(userish), TTL_HOURS * 3600)
-		if (userish instanceof User) {
-			updateUsersLoginDate((User) userish, new Date())
-		}
+	SessionToken generateToken(User user) {
+		SessionToken sk = new SessionToken(TOKEN_LENGTH, user, TTL_HOURS)
+		keyValueStoreService.setWithExpiration(sk.getToken(), userToString(user), TTL_HOURS * 3600)
+		updateUsersLoginDate((User) user, new Date())
 		return sk
 	}
 
-	Userish getUserishFromToken(String token) throws InvalidSessionTokenException {
+	User getUserFromToken(String token) throws InvalidSessionTokenException {
 		Date date = Date.from(Instant.now().plus(TTL_HOURS, ChronoUnit.HOURS))
 		keyValueStoreService.resetExpiration(token, date)
 		String userishClassAndId = keyValueStoreService.get(token)
@@ -38,30 +35,26 @@ class SessionService {
 		if (userishClassAndId == null) {
 			throw new InvalidSessionTokenException("Invalid token: " + token)
 		}
-		return stringToUserish(userishClassAndId)
+		return stringToUser(userishClassAndId)
 	}
 
 	void invalidateSession(String sessionToken) {
 		keyValueStoreService.delete(sessionToken)
 	}
 
-	String userishToString(Userish u) {
-		if (u instanceof User) {
-			return "User" + u.id.toString()
+	String userToString(User u) {
+		if (u == null || u.id == null) {
+			throw new InvalidArgumentsException("Unrecognized user")
 		}
-		throw new InvalidArgumentsException("Unrecognized userish")
+		return "User" + u.id.toString()
 	}
 
-	Userish stringToUserish(String s) {
+	User stringToUser(String s) {
 		if (s.startsWith("User")) {
 			String id = s.substring(4)
-			return User.get(id)
-		} else if (s.startsWith("SecUser")) {
-			String id = s.substring(7)
 			return User.get(id)
 		} else {
 			throw new InvalidArgumentsException("Unrecognized string")
 		}
 	}
-
 }

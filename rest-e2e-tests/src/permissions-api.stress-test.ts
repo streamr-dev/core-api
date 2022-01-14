@@ -20,12 +20,12 @@ describe('POST /api/v1/streams/{id}/permissions', function () {
     describe('race conditions', () => {
         // The worst case is that there are parallel requests open for all the different operations
         const operations = [
-            'stream_get',
-            'stream_edit',
-            'stream_subscribe',
-            'stream_publish',
-            'stream_delete',
-            'stream_share',
+            'product_get',
+            'product_edit',
+            'product_subscribe',
+            'product_publish',
+            'product_delete',
+            'product_share',
         ]
 
         // Tests here are repeated 50 times, as they have some chance of an individual attempt

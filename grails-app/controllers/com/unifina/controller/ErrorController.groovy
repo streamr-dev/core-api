@@ -9,9 +9,7 @@ import javax.servlet.http.HttpServletResponse
 class ErrorController {
 
 	static final Map<String, Closure<ApiError>> errorMappings = [
-		InvalidStateException: { InvalidStateException e -> new ApiError(500, "STATE_NOT_ALLOWED", e.message) },
 		ValidationException: validationException(),
-		CannotRemoveEthereumKeyException: { CannotRemoveEthereumKeyException e -> new ApiError(409, "ETHEREUM_KEY_REMOVAL_ERROR", e.message) },
 		InvalidSessionTokenException: { InvalidSessionTokenException e -> new ApiError(401, "INVALID_SESSION_TOKEN_ERROR", e.message) },
 		ChallengeVerificationFailedException: { ChallengeVerificationFailedException e -> new ApiError(401, "CHALLENGE_VERIFICATION_FAILED_ERROR", e.message) },
 		DisabledUserException: { DisabledUserException e -> new ApiError(401, "DISABLED_USER_EXCEPTION", e.message) },

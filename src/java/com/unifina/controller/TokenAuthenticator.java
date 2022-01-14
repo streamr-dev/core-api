@@ -1,7 +1,6 @@
 package com.unifina.controller;
 
 import com.unifina.domain.User;
-import com.unifina.domain.Userish;
 import com.unifina.service.InvalidSessionTokenException;
 import com.unifina.service.SessionService;
 import grails.util.Holders;
@@ -78,9 +77,9 @@ public class TokenAuthenticator {
 			return new AuthenticationResult(false, true);
 		}
 		try {
-			Userish userish = sessionService.getUserishFromToken(token);
-			if (userish instanceof User) {
-				return new AuthenticationResult((User) userish);
+			User user = sessionService.getUserFromToken(token);
+			if (user instanceof User) {
+				return new AuthenticationResult(user);
 			} else {
 				throw new InvalidSessionTokenException("Invalid token: " + token);
 			}

@@ -2,7 +2,6 @@ import Ajv from 'ajv'
 import categorySchema from '../schemas/category.json'
 import permissionSchema from '../schemas/permission.json'
 import productSchema from '../schemas/product.json'
-import streamSchema from '../schemas/stream.json'
 import subscriptionSchema from '../schemas/subscription.json'
 
 export class SchemaValidator {
@@ -16,7 +15,6 @@ export class SchemaValidator {
                 'Category': categorySchema,
                 'Permission': permissionSchema,
                 'Product': productSchema,
-                'Stream': streamSchema,
                 'Subscription': subscriptionSchema
             }
         })
@@ -33,10 +31,6 @@ export class SchemaValidator {
 
     validateProduct(data: any) {
         return this.ajv.validate('Product', data) ? [] : [...this.ajv.errors]
-    }
-
-    validateStream(data: any) {
-        return this.ajv.validate('Stream', data) ? [] : [...this.ajv.errors]
     }
 
     validateSubscription(data: any) {

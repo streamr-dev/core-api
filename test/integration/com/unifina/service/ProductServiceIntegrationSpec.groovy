@@ -7,7 +7,7 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 	static transactional = true
 	ProductService service
 	Category category
-	Stream s1, s2, s3, s4
+	String s1, s2, s3, s4
 	Product product
 	User troll
 	User user
@@ -21,12 +21,10 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 		category.id = "category-id"
 		category.save()
 
-		s1 = new Stream(name: "stream-1")
-		s2 = new Stream(name: "stream-2")
-		s3 = new Stream(name: "stream-3")
-		s4 = new Stream(name: "stream-4")
-		[s1, s2, s3, s4].eachWithIndex { Stream s, int i -> s.id = "stream-id-${i + 1}" }
-		[s1, s2, s3, s4]*.save(failOnError: true, validate: true)
+		s1 = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/s1"
+		s2 = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/s2"
+		s3 = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/s3"
+		s4 = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/s4"
 
 		troll = new User(username: "0x0000000000000000000000000000000000000005", name: "sylvester stallone", email: "s@s.com")
 		troll.save(failOnError: true, validate: false)
@@ -67,9 +65,6 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 		fs2.save(failOnError: true, validate: true)
 	}
 
-	void cleanup() {
-	}
-
 	void "remove users products and related entities"() {
 		service = new ProductService()
 		service.subscriptionService = new SubscriptionService()
@@ -83,11 +78,6 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 		Product.get(p2.id) == null
 		SubscriptionFree.get(fs1.id) == null
 		SubscriptionFree.get(fs2.id) == null
-
-		Stream.get(s1.id) != null
-		Stream.get(s2.id) != null
-		Stream.get(s3.id) != null
-		Stream.get(s4.id) != null
 		Category.get(category.id) != null
 	}
 }

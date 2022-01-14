@@ -6,7 +6,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 @TestFor(Product)
-@Mock([User, Product, Stream])
+@Mock([User, Product])
 class ProductSpec extends Specification {
 	void "previewStream() validator passes if previewStream = null and streams empty"() {
 		def p = new Product(
@@ -25,8 +25,7 @@ class ProductSpec extends Specification {
 	}
 
 	void "previewStream() validator does not pass if previewStream != null and streams empty"() {
-		def s1 = new Stream(name: "stream-1")
-		s1.id = "1"
+		String s1 = "0x0000000000000000000000000000000000000001/abc"
 
 		def p = new Product(
 			name: "name",
@@ -35,23 +34,20 @@ class ProductSpec extends Specification {
 			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
 			pricePerSecond: 1,
 			category: new Category(),
-			previewStream: s1,
+			previewStreamId: s1,
 			owner: Mock(User)
 		)
 		when:
 		p.validate()
 		then:
 		p.errors.errorCount == 1
-		p.errors.fieldErrors.get(0).field == "previewStream"
+		p.errors.fieldErrors.get(0).field == "previewStreamId"
 	}
 
 	void "previewStream() validator does not pass if previewStream not included in streams"() {
-		def s1 = new Stream(name: "stream-1")
-		def s2 = new Stream(name: "stream-2")
-		def s3 = new Stream(name: "stream-3")
-		s1.id = "1"
-		s2.id = "2"
-		s3.id = "3"
+		def s1 = "0x0000000000000000000000000000000000000001/abc"
+		def s2 = "0x0000000000000000000000000000000000000000/def"
+		def s3 = "0x0000000000000000000000000000000000000000/ghj"
 
 		def p = new Product(
 			name: "name",
@@ -61,23 +57,20 @@ class ProductSpec extends Specification {
 			pricePerSecond: 1,
 			category: new Category(),
 			streams: [s1, s2],
-			previewStream: s3,
+			previewStreamId: s3,
 			owner: Mock(User)
 		)
 		when:
 		p.validate()
 		then:
 		p.errors.errorCount == 1
-		p.errors.fieldErrors.get(0).field == "previewStream"
+		p.errors.fieldErrors.get(0).field == "previewStreamId"
 	}
 
 	void "previewStream() validator passes if previewStream is included in streams"() {
-		def s1 = new Stream(name: "stream-1")
-		def s2 = new Stream(name: "stream-2")
-		def s3 = new Stream(name: "stream-3")
-		s1.id = "1"
-		s2.id = "2"
-		s3.id = "3"
+		def s1 = "0x0000000000000000000000000000000000000001/abc"
+		def s2 = "0x0000000000000000000000000000000000000000/def"
+		def s3 = "0x0000000000000000000000000000000000000000/ghj"
 
 		def p = new Product(
 			name: "name",
@@ -87,7 +80,7 @@ class ProductSpec extends Specification {
 			pricePerSecond: 1,
 			category: new Category(),
 			streams: [s1, s2, s3],
-			previewStream: s3,
+			previewStreamId: s3,
 			owner: Mock(User)
 		)
 		when:
@@ -101,9 +94,6 @@ class ProductSpec extends Specification {
 		Category category = new Category(name: "category")
 		category.id = 'category-id'
 
-		Stream stream = new Stream(name: "stream")
-		stream.id = "stream-id"
-
 		Product product = new Product(
 			name: "name",
 			description: "description",
@@ -111,8 +101,8 @@ class ProductSpec extends Specification {
 			thumbnailUrl: "thumb.jpg",
 			category: category,
 			state: Product.State.DEPLOYED,
-			previewStream: stream,
-			streams: [stream],
+			previewStreamId: "0x0000000000000000000000000000000000000001/abc",
+			streams: ["0x0000000000000000000000000000000000000001/abc"],
 			previewConfigJson: "{}",
 			score: 5,
 			owner: new User(name: "John Doe"),
@@ -140,8 +130,8 @@ class ProductSpec extends Specification {
 		map.imageUrl == "image.jpg"
 		map.thumbnailUrl == "thumb.jpg"
 		map.category == "category-id"
-		map.streams == ["stream-id"]
-		map.previewStream == "stream-id"
+		map.streams == ["0x0000000000000000000000000000000000000001/abc"]
+		map.previewStreamId == "0x0000000000000000000000000000000000000001/abc"
 		map.previewConfigJson == "{}"
 		map.ownerAddress == "0x0"
 		map.beneficiaryAddress == "0x0"

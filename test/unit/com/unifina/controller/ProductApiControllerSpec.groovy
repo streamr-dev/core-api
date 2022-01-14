@@ -216,12 +216,12 @@ class ProductApiControllerSpec extends Specification {
 			controller.setDeployed()
 		}
 		then:
-		1 * apiService.getByIdAndThrowIfNotFound(Product, "product-id") >> product
+		1 * apiService.getByIdAndThrowIfNotFound("product-id") >> product
 	}
 
 	void "setDeployed() invokes productService#markAsDeployed"() {
 		controller.apiService = Stub(ApiService) {
-			getByIdAndThrowIfNotFound(Product, "product-id") >> product
+			getByIdAndThrowIfNotFound("product-id") >> product
 		}
 		def productService = controller.productService = Mock(ProductService)
 
@@ -240,7 +240,7 @@ class ProductApiControllerSpec extends Specification {
 
 	void "setPricing() invokes productService#updatePricing"() {
 		controller.apiService = Stub(ApiService) {
-			getByIdAndThrowIfNotFound(Product, "product-id") >> product
+			getByIdAndThrowIfNotFound("product-id") >> product
 		}
 		def productService = controller.productService = Mock(ProductService)
 
@@ -259,7 +259,7 @@ class ProductApiControllerSpec extends Specification {
 
 	void "setDeployed() returns 200 and renders a product"() {
 		controller.apiService = Stub(ApiService) {
-			getByIdAndThrowIfNotFound(Product, "product-id") >> product
+			getByIdAndThrowIfNotFound("product-id") >> product
 		}
 		controller.productService = Stub(ProductService) {
 			markAsDeployed(_, _, _) >> product
@@ -325,12 +325,12 @@ class ProductApiControllerSpec extends Specification {
 			controller.setUndeployed()
 		}
 		then:
-		1 * apiService.getByIdAndThrowIfNotFound(Product, "product-id") >> product
+		1 * apiService.getByIdAndThrowIfNotFound("product-id") >> product
 	}
 
 	void "setUndeployed() invokes productService#markAsUndeployed"() {
 		controller.apiService = Stub(ApiService) {
-			getByIdAndThrowIfNotFound(Product, "product-id") >> product
+			getByIdAndThrowIfNotFound("product-id") >> product
 		}
 		def productService = controller.productService = Mock(ProductService)
 
@@ -349,7 +349,7 @@ class ProductApiControllerSpec extends Specification {
 
 	void "setUndeployed() returns 200 and renders a product"() {
 		controller.apiService = Stub(ApiService) {
-			getByIdAndThrowIfNotFound(Product, "product-id") >> product
+			getByIdAndThrowIfNotFound("product-id") >> product
 		}
 		controller.productService = Stub(ProductService)
 

@@ -3,13 +3,8 @@ package com.unifina.service
 import com.unifina.domain.*
 import com.unifina.domain.Permission.Operation
 import grails.compiler.GrailsCompileStatic
-import grails.gsp.PageRenderer
-import grails.plugin.mail.MailService
 import grails.transaction.Transactional
 import grails.util.Holders
-import groovy.transform.CompileStatic
-import groovy.transform.TypeCheckingMode
-import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.security.AccessControlException
 
@@ -18,25 +13,18 @@ import java.security.AccessControlException
  *
  * Complexities handled by PermissionService:
  * 		- anonymous Permissions: checked, and listed for resource, but permitted resources not listed for user
- * 		- Permission owners and grant/revoke targets can be SecUsers or SignupInvites
- * 			=> getUserPropertyName
+ * 		- Permission owners and grant/revoke targets can be Users => getUserPropertyName
  */
 @GrailsCompileStatic
 class PermissionService {
 	PermissionStore store = new PermissionStore()
-	GrailsApplication grailsApplication
-	MailService mailService
-	SignupCodeService signupCodeService
-	PageRenderer groovyPageRenderer
 
-	private Object findID(Object resource) {
+	private String findID(Object resource) {
 		if (resource == null) {
 			return null
 		}
 		if (resource instanceof Product) {
-			return resource.id
-		} else if (resource instanceof Stream) {
-			return resource.id
+			return ((Product) resource).getId()
 		}
 		return null
 	}
@@ -44,27 +32,32 @@ class PermissionService {
 	/**
 	 * Check whether user is allowed to perform specified operation on a resource
 	 */
-	boolean check(Userish userish, Object resource, Operation op) {
-		Object id = findID(resource)
-		return id != null && hasPermission(userish, resource, op)
+	boolean check(User user, Product resource, Operation op) {
+		String id = findID(resource)
+		return id != null && hasPermission(user, resource, op)
 	}
 
-	boolean checkAnonymousAccess(Object resource, Operation op) {
+	boolean checkAnonymousAccess(Product resource, Operation op) {
 		return check(null, resource, op)
 	}
 
 	/**
-	 * Throws an exception if user is not allowed to perform specified operation on a resource.
+	 * Throws an exception if user is not allowed to perform specified operation on a streamId.
 	 */
-	void verify(Userish userish, Object resource, Operation op) throws NotPermittedException {
-		if (!check(userish, resource, op)) {
-			String name
-			Userish u = userish?.resolveToUserish()
-			if (u instanceof User) {
-				User s = u as User
-				name = s.username
+	void verify(User user, String streamId, Operation op) throws NotPermittedException {
+		// TODO: Verify that user has STREAM_GET permission on streamId
+	}
+
+	/**
+	 * Throws an exception if user is not allowed to perform specified operation on a product.
+	 */
+	void verify(User user, Product product, Operation op) throws NotPermittedException {
+		if (!check(user, product, op)) {
+			String name = ""
+			if (user != null) {
+				name = user.username
 			}
-			throw new NotPermittedException(name, resource.class.simpleName, findID(resource)?.toString(), op.id)
+			throw new NotPermittedException(name, Product.simpleName, findID(product), op.id)
 		}
 	}
 
@@ -72,87 +65,67 @@ class PermissionService {
 	 * List all Permissions granted on a resource
 	 */
 	@Transactional(readOnly = true)
-	List<Permission> getPermissionsTo(Object resource) {
+	List<Permission> getPermissionsTo(Product resource) {
 		return getPermissionsTo(resource, true, null)
 	}
 
 	/**
 	 * List all Permissions granted on a resource.
 	 *
-	 * @param resource Stream, or other Streamr resource.
+	 * @param resource Product
 	 * @param subscriptions {@code true} for all permissions and {@code false} for permissions where subscription is {@code null}.
 	 * @param op Operation to limit the query result set.
 	 * @return List of Permission objects.
 	 */
 	@Transactional(readOnly = true)
-	List<Permission> getPermissionsTo(Object resource, boolean subscriptions, Operation op) {
-		String resourceProp = getResourcePropertyName(resource)
-		return store.getPermissionsTo(resourceProp, resource, subscriptions, op)
+	List<Permission> getPermissionsTo(Product resource, boolean subscriptions, Operation op) {
+		return store.getPermissionsTo(resource, subscriptions, op)
 	}
 
 	/**
 	 * List all Permissions with some Operation right granted on a resource
 	 */
 	@Transactional(readOnly = true)
-	List<Permission> getPermissionsTo(Object resource, Operation op) {
+	List<Permission> getPermissionsTo(Product resource, Operation op) {
 		return getPermissionsTo(resource, true, op)
 	}
 
 	/**
-	 * List all Permissions that have not expired yet with some Operation right granted on a resource
-	 */
-	List<Permission> getNonExpiredPermissionsTo(Object resource, Operation op) {
-		// TODO: find a way to do this in a single query instead of filtering results
-		List<Permission> results = []
-		Date now = new Date()
-		for (Permission p : getPermissionsTo(resource, op)) {
-			if (p.endsAt == null || p.endsAt.after(now)) {
-				results.add(p)
-			}
-		}
-		return results
-	}
-
-	/**
-	 * List all Permissions granted on a resource to a Userish
+	 * List all Permissions granted on a resource to a User
 	 */
 	@Transactional(readOnly = true)
-	List<Permission> getPermissionsTo(Object resource, Userish userish) {
-		userish = userish?.resolveToUserish()
-		String resourceProp = getResourcePropertyName(resource)
-
+	List<Permission> getPermissionsTo(Product resource, User user) {
 		// Direct permissions from database
-		List<Permission> directPermissions = store.findDirectPermissions(resourceProp, resource, null as Operation, userish)
+		List<Permission> directPermissions = store.findDirectPermissions(resource, null as Operation, user)
 		return directPermissions
 	}
 
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
 	@Transactional(readOnly = true)
-	public <T> List<T> get(Class<T> resourceClass, Userish userish, Operation op, Closure resourceFilter = {}) {
-		return get(resourceClass, userish, op, false, resourceFilter)
+	public List<Product> get(User user, Operation op, Closure resourceFilter = {}) {
+		return get(user, op, false, resourceFilter)
 	}
 
 	/** Convenience overload: get all including public, adding a flag for public resources may look cryptic */
 	@Transactional(readOnly = true)
-	public <T> List<T> getAll(Class<T> resourceClass, Userish userish, Operation op, Closure resourceFilter = {}) {
-		return get(resourceClass, userish, op, true, resourceFilter)
+	public List<Product> getAll(User user, Operation op, Closure resourceFilter = {}) {
+		return get(user, op, true, resourceFilter)
 	}
 
 	/**
 	 * Get all resources of given type that the user has specified permission for
 	 */
 	@Transactional(readOnly = true)
-	public <T> List<T> get(Class<T> resourceClass, Userish userish, Operation op, boolean includeAnonymous,
-		Closure resourceFilter = {}) {
-		return store.get(resourceClass, userish, op, includeAnonymous, resourceFilter)
+	public List<Product> get(User user, Operation op, boolean includeAnonymous, Closure resourceFilter = {}) {
+		return store.get(user, op, includeAnonymous, resourceFilter)
 	}
 
 	/**
-	 * As a User, attempt to grant Permission to another Userish on resource
+	 * As a User, attempt to grant Permission to an User on resource
 	 *
 	 * @param grantor user attempting to grant Permission (needs SHARE permission)
 	 * @param resource to be given permission on
-	 * @param target Userish to be given permission to
+	 * @param target User to be given permission to
 	 *
 	 * @return Permission if successfully granted
 	 *
@@ -160,57 +133,53 @@ class PermissionService {
 	 * @throws IllegalArgumentException if given invalid resource or target
 	 */
 	Permission grant(User grantor,
-		Object resource,
-		Userish target,
+		Product resource,
+		User target,
 		Operation operation,
 		boolean logIfDenied = true) throws AccessControlException, IllegalArgumentException {
-		Operation shareOp = Permission.Operation.shareOperation(resource)
-		if (!check(grantor, resource, shareOp)) {
+		if (!check(grantor, resource, Permission.Operation.PRODUCT_SHARE)) {
 			throwAccessControlException(grantor, resource, logIfDenied)
 		}
 		return systemGrant(target, resource, operation)
 	}
 
 	/**
-	 * Grants all permissions to a Userish on given resource (as sudo/system)
+	 * Grants all permissions to a User on given resource (as sudo/system)
 	 *
-	 * @param target Userish that will receive the access
+	 * @param target User that will receive the access
 	 * @param resource to be given permission on
 	 *
 	 * @return granted permissions (size == 3)
 	 */
-	List<Permission> systemGrantAll(Userish target, Object resource) {
-		Operation.operationsFor(resource).collect { Operation op ->
+	List<Permission> systemGrantAll(User target, Product resource) {
+		Operation.productOperations().collect { Operation op ->
 			systemGrant(target, resource, op)
 		}
 	}
 
 	/**
-	 * Grant Permission to a Userish (as sudo/system)
+	 * Grant Permission to a User (as sudo/system)
 	 *
-	 * @param target Userish that will receive the access
+	 * @param target User that will receive the access
 	 * @param resource to be given permission on
 	 *
 	 * @return granted permission
 	 */
-	Permission systemGrant(Userish target, Object resource, Operation operation) {
+	Permission systemGrant(User target, Product resource, Operation operation) {
 		return systemGrant(target, resource, operation, null, null)
 	}
 
-	Permission systemGrant(Userish target, Object resource, Operation operation, Subscription subscription, Date endsAt) {
+	Permission systemGrant(User target, Product resource, Operation operation, Subscription subscription, Date endsAt) {
 		if (target == null) {
 			throw new IllegalArgumentException("Permission grant target can't be null")
 		}
 		if (operation == null) {
 			throw new IllegalArgumentException("Operation can't be null")
 		}
-		target = target.resolveToUserish()
-		String userProp = getUserPropertyName(target)
-		String resourceProp = getResourcePropertyName(resource)
 
 		Permission parentPermission = new Permission(
-			(resourceProp): resource,
-			(userProp): target,
+			product: resource,
+			user: target,
 			operation: operation,
 			subscription: subscription,
 			endsAt: endsAt
@@ -232,11 +201,10 @@ class PermissionService {
 	 * @throws IllegalArgumentException if given invalid resource
 	 */
 	Permission grantAnonymousAccess(User grantor,
-		Object resource,
+		Product resource,
 		Operation operation,
 		boolean logIfDenied = true) throws AccessControlException, IllegalArgumentException {
-		Operation shareOp = Permission.Operation.shareOperation(resource)
-		if (!check(grantor, resource, shareOp)) {
+		if (!check(grantor, resource, Permission.Operation.PRODUCT_SHARE)) {
 			throwAccessControlException(grantor, resource, logIfDenied)
 		}
 		return systemGrantAnonymousAccess(resource, operation)
@@ -249,21 +217,20 @@ class PermissionService {
 	 *
 	 * @return granted permission
 	 */
-	Permission systemGrantAnonymousAccess(Object resource, Operation operation) {
-		String resourceProp = getResourcePropertyName(resource)
+	Permission systemGrantAnonymousAccess(Product resource, Operation operation) {
 		return new Permission(
-			(resourceProp): resource,
+			product: resource,
 			operation: operation,
 			anonymous: true
 		).save(flush: false, failOnError: true)
 	}
 
 	/**
-	 * As a User, revoke a Permission from a Userish
+	 * As a User, revoke a Permission from a User
 	 *
 	 * @param revoker user attempting to revoke permission (needs *_share permission)
 	 * @param resource to be revoked from target
-	 * @param target Userish user whose Permission is revoked
+	 * @param target User user whose Permission is revoked
 	 * @param operation or access level to be revoked
 	 *
 	 * @returns Permissions that were deleted
@@ -271,30 +238,29 @@ class PermissionService {
 	 * @throws AccessControlException if revoker doesn't have *_share permission on resource
 	 */
 	List<Permission> revoke(User revoker,
-		Object resource,
-		Userish target,
+		Product resource,
+		User target,
 		Operation operation,
 		boolean logIfDenied = true) throws AccessControlException {
 		if (operation == null) {
 			throw new IllegalArgumentException("Operation can't be null")
 		}
-		Operation shareOp = Permission.Operation.shareOperation(resource)
-		if (!check(revoker, resource, shareOp)) {
+		if (!check(revoker, resource, Permission.Operation.PRODUCT_SHARE)) {
 			throwAccessControlException(revoker, resource, logIfDenied)
 		}
 		return systemRevoke(target, resource, operation)
 	}
 
 	/**
-	 * Revoke a Permission from a Userish (as sudo/system)
+	 * Revoke a Permission from a User (as sudo/system)
 	 *
-	 * @param target Userish whose Permission is revoked
+	 * @param target User whose Permission is revoked
 	 * @param resource to be revoked from target
 	 * @param operation or access level to be revoked
 	 *
 	 * @return Permissions that were deleted
 	 */
-	List<Permission> systemRevoke(Userish target, Object resource, Operation operation) {
+	List<Permission> systemRevoke(User target, Product resource, Operation operation) {
 		if (operation == null) {
 			throw new IllegalArgumentException("Operation can't be null")
 		}
@@ -309,12 +275,12 @@ class PermissionService {
 	 *
 	 * @return Permissions that were deleted
 	 */
-	List<Permission> systemRevokeAnonymousAccess(Object resource, Operation operation) {
+	List<Permission> systemRevokeAnonymousAccess(Product resource, Operation operation) {
 		if (operation == null) {
 			throw new IllegalArgumentException("Operation can't be null")
 		}
 		boolean anonymous = true
-		Userish target = null
+		User target = null
 		return performRevoke(anonymous, target, resource, operation)
 	}
 
@@ -330,9 +296,8 @@ class PermissionService {
 	 */
 	List<Permission> revoke(User revoker, Permission permission, boolean logIfDenied = true)
 		throws AccessControlException {
-		Object resource = getResourceFromPermission(permission)
-		Permission.Operation shareOp = Operation.shareOperation(resource)
-		if (!check(revoker, resource, shareOp)) {
+		Product resource = permission.product
+		if (!check(revoker, resource, Operation.PRODUCT_SHARE)) {
 			throwAccessControlException(revoker, resource, logIfDenied)
 		}
 		return systemRevoke(permission)
@@ -344,28 +309,7 @@ class PermissionService {
 	 * @return Permissions that were deleted
 	 */
 	List<Permission> systemRevoke(Permission permission) {
-		return performRevoke(
-			permission.anonymous,
-			permission.user ?: permission.invite,
-			getResourceFromPermission(permission),
-			permission.operation)
-	}
-
-	/**
-	 * Transfer all Permissions created for a SignupInvite to the corresponding User (based on email)
-	 *
-	 * @param user to transfer to
-	 * @return List of Permissions transferred from SignupInvite to User
-	 */
-	List<Permission> transferInvitePermissionsTo(User user) {
-		// { invite { eq "username", user.username } } won't do: some invite are null => NullPointerException
-		return store.findPermissionsToTransfer().findAll { Permission it ->
-			it.invite.email == user.username
-		}.collect { Permission p ->
-			p.invite = null
-			p.user = user
-			p.save(flush: false, failOnError: true)
-		}
+		return performRevoke(permission.anonymous, permission.user, permission.product, permission.operation)
 	}
 
 	public void cleanUpExpiredPermissions() {
@@ -373,25 +317,19 @@ class PermissionService {
 		Permission.deleteAll(Permission.findAllByEndsAtLessThan(now))
 	}
 
-	private boolean hasPermission(Userish userish, Object resource, Operation op) {
-		userish = userish?.resolveToUserish()
-		String resourceProp = getResourcePropertyName(resource)
-
-		List<Permission> directPermissions = store.findDirectPermissions(resourceProp, resource, op, userish)
+	private boolean hasPermission(User user, Product resource, Operation op) {
+		List<Permission> directPermissions = store.findDirectPermissions(resource, op, user)
 		return !directPermissions.isEmpty()
 	}
 
 	/**
 	 * Find Permissions that will be revoked
 	 */
-	private List<Permission> performRevoke(boolean anonymous, Userish target, Object resource, Operation operation) {
-		target = target?.resolveToUserish()
-		String resourceProp = getResourcePropertyName(resource)
-
-		List<Permission> permissionList = store.findPermissionsToRevoke(resourceProp, resource, anonymous, target)
+	private List<Permission> performRevoke(boolean anonymous, User target, Product resource, Operation operation) {
+		List<Permission> permissionList = store.findPermissionsToRevoke(resource, anonymous, target)
 
 		// Prevent revocation of only/last share permission to prevent inaccessible resources
-		Operation shareOperation = Operation.shareOperation(resource)
+		Operation shareOperation = Operation.PRODUCT_SHARE
 		if (operation == shareOperation && hasOneOrLessSharePermissionsLeft(resource) && shareOperation in permissionList*.operation) {
 			throw new AccessControlException("Cannot revoke only SHARE permission of ${resource}")
 		}
@@ -426,9 +364,8 @@ class PermissionService {
 		return revoked
 	}
 
-	private boolean hasOneOrLessSharePermissionsLeft(Object resource) {
-		String resourceProp = getResourcePropertyName(resource)
-		int n = store.countSharePermissions(resourceProp, resource)
+	private boolean hasOneOrLessSharePermissionsLeft(Product resource) {
+		int n = store.countSharePermissions(resource)
 		return n <= 1
 	}
 
@@ -439,156 +376,66 @@ class PermissionService {
 		throw new AccessControlException("${violator?.username}(id ${violator?.id}) has no 'share' permission to $resource!")
 	}
 
-	private static Object getResourceFromPermission(Permission p) {
-		String field = Permission.resourceFields.find { p[it] }
-		if (field == null) {
-			throw new IllegalArgumentException("No known resource attached to " + p)
-		}
-		return p[field]
-	}
-
-	static String getResourcePropertyName(Object resource) {
-		// Cannot derive name straight from resource.getClass() because of proxy assist objects!
-		Class resourceClass = resource instanceof Class ? resource : resource.getClass()
-		if (Product.isAssignableFrom(resourceClass)) {
-			return "product"
-		} else if (Stream.isAssignableFrom(resourceClass)) {
-			return "stream"
-		} else {
-			throw new IllegalArgumentException("Unexpected resource class: " + resourceClass)
-		}
-	}
-
-	/**
-	 * Return property name for Userish
-	 */
-	static String getUserPropertyName(Userish userish) {
-		if (userish instanceof User) {
-			return "user"
-		} else if (userish instanceof SignupInvite) {
-			return "invite"
-		} else {
-			throw new IllegalArgumentException("Unexpected Userish instance: " + userish)
-		}
-	}
-
-	Permission savePermissionAndSendShareResourceEmail(User apiUser, Operation op, String targetUsername, EmailMessage msg) {
-		User userish = User.findByUsername(targetUsername)
-		Permission permission = savePermission(msg.resource, apiUser, userish, op)
-		sendEmailShareResource(op, msg)
+	Permission savePermission(User apiUser, Operation op, String targetUsername, Resource resource) {
+		User target = User.findByUsername(targetUsername)
+		Permission permission = savePermissionPrivate(apiUser, op, target, resource)
 		return permission
 	}
 
 	Permission saveAnonymousPermission(User apiUser, Operation op, Resource resource) {
-		Object res = resource.load(apiUser, true)
+		Product res = resource.load(apiUser, true)
 		Permission permission = grantAnonymousAccess(apiUser, res, op)
 		return permission
 	}
 
-	private Permission savePermission(Resource resource, User apiUser, Userish targetUserish, Operation op) {
-		Object res = resource.load(apiUser, true)
-		Permission permission = grant(apiUser, res, targetUserish, op)
+	private Permission savePermissionPrivate(User apiUser, Operation op, User targetUser, Resource resource) {
+		Product res = resource.load(apiUser, true)
+		Permission permission = grant(apiUser, res, targetUser, op)
 		return permission
-	}
-
-	@CompileStatic(value = TypeCheckingMode.SKIP)
-	private void sendEmailShareResource(Operation op, EmailMessage msg) {
-		if (!EmailValidator.validate.call(msg.to)) {
-			return
-		}
-		if (op == Operation.STREAM_GET) {
-			// Users who have provided an email address get an email
-			// send only one email for each read/get permission
-			String content = groovyPageRenderer.render([
-				template: "/emails/email_share_resource",
-				model: [
-					sharer: msg.sharer,
-					resource: msg.resourceType(),
-					name: msg.resourceName(),
-					link: msg.link(),
-				],
-			])
-			mailService.sendMail {
-				from grailsApplication.config.unifina.email.sender
-				to msg.to
-				subject msg.subject()
-				html content
-			}
-		}
-	}
-
-	@CompileStatic(value = TypeCheckingMode.SKIP)
-	Permission savePermissionAndSendEmailShareResourceInvite(User apiUser, String username, Operation op, EmailMessage msg) {
-		SignupInvite invite = SignupInvite.findByEmail(username)
-		if (!invite) {
-			invite = signupCodeService.create(username)
-			if (op == Operation.STREAM_GET) {
-				String content = groovyPageRenderer.render([
-					template: "/emails/email_share_resource_invite",
-					model: [
-						sharer: msg.sharer,
-						resource: msg.resourceType(),
-						name: msg.resourceName(),
-						invite: invite,
-					],
-				])
-				mailService.sendMail {
-					from grailsApplication.config.unifina.email.sender
-					to invite.email
-					subject msg.subject()
-					html content
-				}
-			}
-			invite.sent = true
-			invite.save(failOnError: true, validate: true)
-		}
-		Permission newPermission = savePermission(msg.resource, apiUser, invite, op)
-		return newPermission
 	}
 
 	Permission savePermissionForEthereumAccount(String username, User grantor, Operation operation, Resource res, SignupMethod signupMethod) {
 		EthereumUserService ethereumUserService = Holders.getApplicationContext().getBean(EthereumUserService)
 		User user = ethereumUserService.getOrCreateFromEthereumAddress(username, signupMethod)
-		User userish = User.findByUsername(user.username)
-		Permission newPermission = savePermission(res, grantor, userish, operation)
+		User target = User.findByUsername(user.username)
+		Permission newPermission = savePermissionPrivate(grantor, operation, target, res)
 		return newPermission
 	}
 
 	@Transactional(readOnly = true)
 	List<Permission> getOwnPermissions(Resource resource, User apiUser) {
-		Object res = resource.load(apiUser, false)
+		Product res = resource.load(apiUser, false)
 		List<Permission> results = getPermissionsTo(res, apiUser)
 		return results
 	}
 
 	@Transactional(readOnly = true)
 	List<Permission> findAllPermissions(Resource resource, User apiUser, boolean subscriptions) {
-		Object res = resource.load(apiUser, true)
+		Product res = resource.load(apiUser, true)
 		List<Permission> permissions = getPermissionsTo(res, subscriptions, null)
 		return permissions
 	}
 
 	@Transactional(readOnly = true)
 	Permission findPermission(Long permissionId, Resource resource, User apiUser) {
-		Object res = resource.load(apiUser, true)
+		Product res = resource.load(apiUser, true)
 		List<Permission> permissions = getPermissionsTo(res)
 		Permission p = permissions.find { it.id == permissionId }
 		if (!p) {
-			throw new NotFoundException("Permission not found", resource.type(), permissionId?.toString())
+			throw new NotFoundException("Permission not found", "Product", permissionId?.toString())
 		}
 		return p
 	}
 
 	void deletePermission(Long permissionId, Resource resource, User apiUser) {
-		Object res = resource.load(apiUser, false)
+		Product res = resource.load(apiUser, false)
 		List<Permission> permissions = getPermissionsTo(res)
 		Permission p = permissions.find { it.id == permissionId }
 		if (!p) {
-			throw new NotFoundException("Permission not found", resource.type(), permissionId?.toString())
+			throw new NotFoundException("Permission not found", "Product", permissionId?.toString())
 		}
-		Userish user = apiUser
-		boolean canShare = check(user, res, Permission.Operation.shareOperation(res))
-		if (canShare == false && p.user == user) {
+		boolean canShare = check(apiUser, res, Permission.Operation.PRODUCT_SHARE)
+		if (canShare == false && p.user == apiUser) {
 			// user without share permission to resource can delete their own permission to resource
 			systemRevoke(p)
 		} else if (canShare) {

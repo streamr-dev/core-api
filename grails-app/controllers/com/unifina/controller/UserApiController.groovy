@@ -4,15 +4,15 @@ import com.unifina.domain.EmailValidator
 import com.unifina.domain.User
 import com.unifina.service.ApiException
 import com.unifina.service.BalanceService
+import com.unifina.service.EthereumUserService
 import com.unifina.service.UserAvatarImageService
-import com.unifina.service.UserService
 import grails.converters.JSON
 import grails.validation.Validateable
 import groovy.transform.ToString
 import org.springframework.web.multipart.MultipartFile
 
 class UserApiController {
-	UserService userService
+	EthereumUserService userService
 	UserAvatarImageService userAvatarImageService
 	BalanceService balanceService
 
@@ -52,7 +52,7 @@ class UserApiController {
 	def getCurrentUserBalance() {
 		Map<String, BigInteger> balances = balanceService.getDatacoinBalances(loggedInUser())
 		BigInteger sum = BigInteger.ZERO;
-		for(BigInteger bal : balances.values()){
+		for (BigInteger bal : balances.values()) {
 			sum = sum.add(bal)
 		}
 		render([sum: sum] as JSON)

@@ -11,7 +11,7 @@
     "imageUrl",
     "category",
     "state",
-    "previewStream",
+    "previewStreamId",
     "previewConfigJson",
     "created",
     "updated",
@@ -83,7 +83,7 @@
         "UNDEPLOYING"
       ]
     },
-    "previewStream": {
+    "previewStreamId": {
       "description": "Identifier of stream chosen to be displayed in product preview",
       "oneOf": [
         {

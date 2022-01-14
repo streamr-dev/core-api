@@ -4,7 +4,10 @@ import com.streamr.client.StreamrClient
 import com.streamr.client.dataunion.DataUnion
 import com.streamr.client.dataunion.DataUnionClient
 import com.streamr.client.options.StreamrClientOptions
-import com.unifina.domain.*
+import com.unifina.domain.Category
+import com.unifina.domain.DataUnionJoinRequest
+import com.unifina.domain.Product
+import com.unifina.domain.User
 import spock.lang.Specification
 
 // This is an integration test because Grails doesn't support criteria queries in unit tests
@@ -42,7 +45,6 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		product.save(failOnError: true, validate: false)
 
 		service.ethereumService = Mock(EthereumService)
-		service.permissionService = Mock(PermissionService)
 	}
 
 	void "findAll"() {
@@ -203,19 +205,18 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 	void "delete test"() {
 		setup:
 		final String contractAddress = "0x0000000000000000000000000000000000000001"
-		Stream s1 = new Stream(name: "stream-1")
-		Stream s2 = new Stream(name: "stream-2")
-		Stream s3 = new Stream(name: "stream-3")
-		Stream s4 = new Stream(name: "stream-4")
-		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i + 1}" } // assign ids
-		[s1, s2, s3, s4]*.save(failOnError: true, validate: true)
 
 		Product product = new Product(
 			name: "name",
 			description: "description",
 			ownerAddress: "0x0000000000000000000000000000000000000000",
 			beneficiaryAddress: contractAddress,
-			streams: [s1, s2, s3, s4],
+			streams: [
+				"0x0000000000000000000000000000000000000001",
+				"0x0000000000000000000000000000000000000002",
+				"0x0000000000000000000000000000000000000003",
+				"0x0000000000000000000000000000000000000004",
+			],
 			pricePerSecond: 10,
 			category: category,
 			state: Product.State.NOT_DEPLOYED,
@@ -238,15 +239,6 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		when:
 		service.delete(contractAddress, r.id)
 		then:
-		1 * service.permissionService.systemRevoke(me, s1, Permission.Operation.STREAM_PUBLISH)
-		1 * service.permissionService.systemRevoke(me, s1, Permission.Operation.STREAM_GET)
-		1 * service.permissionService.systemRevoke(me, s2, Permission.Operation.STREAM_PUBLISH)
-		1 * service.permissionService.systemRevoke(me, s2, Permission.Operation.STREAM_GET)
-		1 * service.permissionService.systemRevoke(me, s3, Permission.Operation.STREAM_PUBLISH)
-		1 * service.permissionService.systemRevoke(me, s3, Permission.Operation.STREAM_GET)
-		1 * service.permissionService.systemRevoke(me, s4, Permission.Operation.STREAM_PUBLISH)
-		1 * service.permissionService.systemRevoke(me, s4, Permission.Operation.STREAM_GET)
-		0 * service.permissionService._
 		DataUnionJoinRequest.findById(r.id) == null
 	}
 

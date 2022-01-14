@@ -2,7 +2,6 @@ package com.unifina.service
 
 import com.unifina.domain.Permission
 import com.unifina.domain.Product
-import com.unifina.domain.Stream
 import com.unifina.domain.User
 import grails.compiler.GrailsCompileStatic
 
@@ -13,7 +12,6 @@ class ProductService {
 	ApiService apiService
 	PermissionService permissionService
 	SubscriptionService subscriptionService
-	DataUnionJoinRequestService dataUnionJoinRequestService
 	ProductStore store = new ProductStore()
 	Random random = ThreadLocalRandom.current()
 
@@ -42,8 +40,8 @@ class ProductService {
 		def user = User.findByUsername(username)
 		def all = Product.findAllByOwner(user)
 		all.toArray().each { Product product ->
-			product.streams.toArray().each { Stream stream ->
-				product.streams.remove(stream)
+			product.streams.toArray().each { String streamId ->
+				product.streams.remove(streamId)
 			}
 			subscriptionService.deleteProduct(product)
 			product.delete(flush: true)
@@ -55,12 +53,12 @@ class ProductService {
 			listParams.sortBy = "score"
 			listParams.order = "desc"
 		}
-		apiService.list(Product, listParams, currentUser)
+		apiService.list(listParams, currentUser)
 	}
 
 	Product findById(String id, User currentUser, Permission.Operation op)
 		throws NotFoundException, NotPermittedException {
-		apiService.authorizedGetById(Product, id, currentUser, op)
+		apiService.authorizedGetById(id, currentUser, op)
 	}
 
 	Product create(ProductCreateCommand command, User currentUser)
@@ -72,21 +70,14 @@ class ProductService {
 			throw new ValidationException(command.errors)
 		}
 
-		command.streams.each {
-			permissionService.verify(currentUser, it, Permission.Operation.STREAM_SHARE)
+		command.streams.each { String streamId ->
+			// TODO: permissionService.verify(currentUser, streamId, Permission.Operation.STREAM_SHARE)
 		}
 
 		Product product = new Product(command.properties)
 		product.owner = currentUser
 		product.save(failOnError: true)
 		permissionService.systemGrantAll(currentUser, product)
-		// A stream that is added when creating a new free product should inherit read access for anonymous user
-		if (product.isFree()) {
-			product.streams.each { stream ->
-				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_GET)
-				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
-			}
-		}
 		return product
 	}
 
@@ -95,88 +86,36 @@ class ProductService {
 			throw new ValidationException(command.errors)
 		}
 
-		command.streams.each {
-			permissionService.verify(currentUser, it, Permission.Operation.STREAM_SHARE)
+		command.streams.each { String streamId ->
+			// TODO: permissionService.verify(currentUser, streamId, Permission.Operation.STREAM_SHARE)
 		}
 
 		Product product = findById(id, currentUser, Permission.Operation.PRODUCT_EDIT)
-		Set<Stream> addedStreams = (command.streams as Set<Stream>).findAll { !product.streams.contains(it) }
-		Set<Stream> removedStreams = product.streams.findAll { !command.streams.contains(it) }
+		Set<String> addedStreams = (command.streams as Set<String>).findAll { !product.streams.contains(it) }
+		Set<String> removedStreams = product.streams.findAll { !command.streams.contains(it) }
 
 		command.updateProduct(product, currentUser, permissionService)
 		product.save(failOnError: true)
-
-		// A stream that is added when editing an existing free product should inherit read access for anonymous user
-		// TODO if a stream is removed from a free product, but still belongs to another free product, we should not
-		// remove the permission (this will be fixed in BACK-6)
-		if (product.isFree()) {
-			Iterable<Permission.Operation> permissions = [Permission.Operation.STREAM_GET, Permission.Operation.STREAM_SUBSCRIBE]
-			permissions.each { Permission.Operation permission ->
-				addedStreams.each { Stream s ->
-					if (!permissionService.checkAnonymousAccess(s, permission)) {
-						permissionService.systemGrantAnonymousAccess(s, permission)
-					}
-				}
-				removedStreams.each { Stream s ->
-					if (!belongsToFreeProduct(s)) {
-						permissionService.systemRevokeAnonymousAccess(s, permission)
-					}
-				}
-			}
-		}
 
 		subscriptionService.afterProductUpdated(product)
 		return product
 	}
 
-	boolean belongsToFreeProduct(Stream s) {
+	boolean belongsToFreeProduct(String s) {
 		List<Product> products = store.findProductsByStream(s)
 		return products.any { Product p -> p.isFree() }
 	}
 
-	void addStreamToProduct(Product product, Stream stream, User currentUser)
+	void addStreamToProduct(Product product, String streamId, User currentUser)
 		throws ValidationException, NotPermittedException {
-		permissionService.verify(currentUser, stream, Permission.Operation.STREAM_SHARE)
-		product.streams.add(stream)
+		product.streams.add(streamId)
 		product.save(failOnError: true)
-		// A stream that is added when editing an existing free product should inherit read access for anonymous user
-		if (product.isFree()) {
-			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_GET)
-			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
-		}
-		if (product.type == Product.Type.DATAUNION) {
-			Set<User> users = dataUnionJoinRequestService.findMembers(product.beneficiaryAddress)
-			for (User u : users) {
-				if (!permissionService.check(u, stream, Permission.Operation.STREAM_GET)) {
-					permissionService.systemGrant(u, stream, Permission.Operation.STREAM_GET)
-				}
-				if (!permissionService.check(u, stream, Permission.Operation.STREAM_PUBLISH)) {
-					permissionService.systemGrant(u, stream, Permission.Operation.STREAM_PUBLISH)
-				}
-			}
-		}
 		subscriptionService.afterProductUpdated(product)
 	}
 
-	void removeStreamFromProduct(Product product, Stream stream) {
-		product.streams.remove(stream)
+	void removeStreamFromProduct(Product product, String streamId) {
+		product.streams.remove(streamId)
 		product.save(failOnError: true)
-		// A stream that is removed when editing an existing free product should revoke read access for anonymous user
-		if (product.isFree()) {
-			permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.STREAM_GET)
-			permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
-		}
-		if (product.type == Product.Type.DATAUNION) {
-			Set<User> users = dataUnionJoinRequestService.findMembers(product.beneficiaryAddress)
-			for (User u : users) {
-				if (permissionService.check(u, stream, Permission.Operation.STREAM_GET)) {
-					permissionService.systemRevoke(u, stream, Permission.Operation.STREAM_GET)
-				}
-				if (permissionService.check(u, stream, Permission.Operation.STREAM_PUBLISH)) {
-					permissionService.systemRevoke(u, stream, Permission.Operation.STREAM_PUBLISH)
-				}
-			}
-		}
 		subscriptionService.afterProductUpdated(product)
 	}
 
@@ -279,11 +218,6 @@ class ProductService {
 		}
 
 		saveAndGrantPermission(Product.State.DEPLOYED, product)
-
-		product.streams.each {
-			permissionService.systemGrantAnonymousAccess(it, Permission.Operation.STREAM_GET)
-			permissionService.systemGrantAnonymousAccess(it, Permission.Operation.STREAM_SUBSCRIBE)
-		}
 	}
 
 	void undeployFreeProduct(Product product) {
@@ -295,11 +229,6 @@ class ProductService {
 		product.state = Product.State.NOT_DEPLOYED
 		product.save(failOnError: true)
 		permissionService.systemRevokeAnonymousAccess(product, Permission.Operation.PRODUCT_GET)
-
-		product.streams.each {
-			permissionService.systemRevokeAnonymousAccess(it, Permission.Operation.STREAM_GET)
-			permissionService.systemRevokeAnonymousAccess(it, Permission.Operation.STREAM_SUBSCRIBE)
-		}
 	}
 
 	static void verifyThatProductIsFree(Product product) {

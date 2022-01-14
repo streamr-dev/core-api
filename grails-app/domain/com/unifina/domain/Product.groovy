@@ -19,7 +19,7 @@ class Product {
 	Type type = Type.NORMAL
 	Category category
 	State state = State.NOT_DEPLOYED
-	Stream previewStream
+	String previewStreamId
 	String previewConfigJson
 	String pendingChanges
 
@@ -52,7 +52,7 @@ class Product {
 
 	static hasMany = [
 		permissions: Permission,
-		streams: Stream,
+		streams: String,
 	]
 
 	enum Type {
@@ -89,7 +89,7 @@ class Product {
 		category(nullable: true)
 		state(enumType: "string")
 		type(nullable: false, enumType: "ordinal")
-		previewStream(nullable: true, validator: { Stream s, p -> s == null || s in p.streams })
+		previewStreamId(nullable: true, validator: { String sid, p -> sid == null || sid in p.streams })
 		previewConfigJson(nullable: true)
 		pendingChanges(nullable: true)
 		ownerAddress(nullable: true, validator: EthereumAddressValidator.isNullOrValid)
@@ -117,6 +117,12 @@ class Product {
 		ownerAddress index: "owner_address_idx"
 		beneficiaryAddress index: "beneficiary_address_idx"
 		owner(fetch: 'join')
+		streams(joinTable: [
+			name: "product_streams",
+			key: "product_id",
+			column: "stream_id",
+			type: "varchar(255)",
+		])
 	}
 
 	@GrailsCompileStatic
@@ -129,9 +135,9 @@ class Product {
 			imageUrl: imageUrl,
 			thumbnailUrl: thumbnailUrl,
 			category: category?.id,
-			streams: streams*.id,
+			streams: streams*.toString(),
 			state: state.toString(),
-			previewStream: previewStream?.id,
+			previewStreamId: previewStreamId,
 			previewConfigJson: previewConfigJson,
 			created: dateCreated,
 			updated: lastUpdated,
@@ -164,7 +170,7 @@ class Product {
 			thumbnailUrl: thumbnailUrl,
 			category: category?.id,
 			state: state.toString(),
-			previewStream: previewStream?.id,
+			previewStreamId: previewStreamId,
 			previewConfigJson: previewConfigJson,
 			created: dateCreated,
 			updated: lastUpdated,

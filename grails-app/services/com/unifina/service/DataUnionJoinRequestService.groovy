@@ -3,7 +3,9 @@ package com.unifina.service
 import com.streamr.client.dataunion.DataUnion
 import com.streamr.client.dataunion.DataUnionClient
 import com.streamr.client.dataunion.EthereumTransactionReceipt
-import com.unifina.domain.*
+import com.unifina.domain.DataUnionJoinRequest
+import com.unifina.domain.DataUnionSecret
+import com.unifina.domain.User
 import com.unifina.utils.ApplicationConfig
 import com.unifina.utils.ThreadUtil
 import org.apache.log4j.Logger
@@ -15,7 +17,6 @@ class DataUnionJoinRequestService {
 	private static final Logger log = Logger.getLogger(DataUnionJoinRequestService)
 
 	EthereumService ethereumService
-	PermissionService permissionService
 	StreamrClientService streamrClientService
 
 	private isMemberActive(String contractAddress, String memberAddress) {
@@ -28,17 +29,6 @@ class DataUnionJoinRequestService {
 		if (isMemberActive(c.contractAddress, c.memberAddress)) {
 			log.debug("onApproveJoinRequest: Member ${c.memberAddress} is already active. Skipping.")
 			return
-		}
-
-		// Grant the member publish permission to streams in the Data Union
-		for (Stream s : findStreams(c)) {
-			if (permissionService.check(c.user, s, Permission.Operation.STREAM_PUBLISH)) {
-				log.debug(String.format("user %s already has write permission to %s (%s), skipping grant", c.user.username, s.name, s.id))
-			} else {
-				log.debug(String.format("granting write permission to %s (%s) for %s", s.name, s.id, c.user.username))
-				permissionService.systemGrant(c.user, s, Permission.Operation.STREAM_GET)
-				permissionService.systemGrant(c.user, s, Permission.Operation.STREAM_PUBLISH)
-			}
 		}
 
 		// Join the member
@@ -67,33 +57,6 @@ class DataUnionJoinRequestService {
 		}
 
 		log.debug("exiting onApproveJoinRequest")
-	}
-
-	protected Set<Stream> findStreams(DataUnionJoinRequest c) {
-		log.debug(String.format("entering findStreams(%s)", c))
-		List<Product> products = Product.createCriteria().list {
-			eq("type", Product.Type.DATAUNION)
-			// ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems
-			// are in use (checksum-case, lower-case at least)
-			ilike("beneficiaryAddress", c.contractAddress)
-		}
-		Set<Stream> streams = new HashSet<>()
-		for (Product p : products) {
-			streams.addAll(p.streams)
-		}
-		log.debug(String.format("exiting findStreams(): %s", streams))
-		return streams
-	}
-
-	Set<User> findMembers(String contractAddress) {
-		List<DataUnionJoinRequest> requests = DataUnionJoinRequest.createCriteria().list {
-			ilike("contractAddress", contractAddress)
-		}
-		Set<User> users = new HashSet<>()
-		for (DataUnionJoinRequest c : requests) {
-			users.add(c.user)
-		}
-		return users
 	}
 
 	List<DataUnionJoinRequest> findAll(String contractAddress, DataUnionJoinRequest.State state) {
@@ -188,10 +151,6 @@ class DataUnionJoinRequestService {
 			throw new NotFoundException(message)
 		}
 
-		for (Stream s : findStreams(c)) {
-			permissionService.systemRevoke(c.user, s, Permission.Operation.STREAM_GET)
-			permissionService.systemRevoke(c.user, s, Permission.Operation.STREAM_PUBLISH)
-		}
 		c.delete()
 	}
 

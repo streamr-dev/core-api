@@ -1,28 +1,26 @@
 package com.unifina.service
 
+import com.unifina.domain.Role
 import com.unifina.domain.SignupMethod
 import com.unifina.domain.User
+import com.unifina.domain.UserRole
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.test.mixin.TestMixin
-import grails.test.mixin.web.ControllerUnitTestMixin
+import org.springframework.validation.FieldError
 import org.web3j.crypto.ECKeyPair
 import spock.lang.Specification
 
-@TestMixin(ControllerUnitTestMixin)
 @TestFor(EthereumUserService)
-@Mock([User])
+@Mock([User, UserRole, Role])
 class EthereumUserServiceSpec extends Specification {
 	String address = "0x8eEEF384734a8cEfeC53eA49eb651D0257cbA6B6"
 	User me
 
 	ChallengeService challengeService
 	SubscriptionService subscriptionService
-	PermissionService permissionService
 
 	void setup() {
 		me = new User(username: address).save(failOnError: true, validate: false)
-		permissionService = service.permissionService = Mock(PermissionService)
 	}
 
 	void "get address from private key"() {
@@ -53,5 +51,67 @@ class EthereumUserServiceSpec extends Specification {
 		then:
 		user.username == me.username
 		User.count == 1
+	}
+
+	// Old UserService specs =>
+
+	def "the user is created when called"() {
+		setup:
+		["ROLE_USER", "ROLE_LIVE", "ROLE_ADMIN"].each { String authority ->
+			Role role = new Role()
+			role.authority = authority
+			role.save()
+		}
+		String userAddress = "0x000000000000000000ffff0000ddd0000abc1231"
+
+		when:
+		User user = service.createUser(userAddress, SignupMethod.CORE)
+
+		then:
+		User.findByUsername(userAddress) != null
+		user.getAuthorities().size() == 0 // By default, user's have no roles
+	}
+
+	void "censoring errors with checkErrors() works properly"() {
+		List checkedErrors
+
+		when: "given list of fieldErrors"
+		List<FieldError> errorList = new ArrayList<>()
+		errorList.add(new FieldError(
+			this.getClass().name, 'password', 'rejectedPassword', false, null, ['null', 'null', 'rejectedPassword'].toArray(), null
+		))
+		errorList.add(new FieldError(
+			this.getClass().name, 'username', 'rejectedUsername', false, null, ['null', 'null', 'rejectedUsername'].toArray(), null
+		))
+		checkedErrors = service.checkErrors(errorList)
+
+		then: "the rejected password is hidden but the rejected username is not"
+		checkedErrors.get(0).getField() == "username"
+		checkedErrors.get(0).getRejectedValue() == "rejectedUsername"
+		checkedErrors.get(0).getArguments() == ['null', 'null', 'rejectedUsername']
+
+		checkedErrors.get(1).getField() == "password"
+		checkedErrors.get(1).getRejectedValue() == "***"
+		checkedErrors.get(1).getArguments() == ['null', 'null', '***']
+	}
+
+	def "delete user"() {
+		setup:
+		User user = new User()
+		user.id = 1
+
+		when:
+		service.delete(user)
+
+		then:
+		user.enabled == false
+	}
+
+	def "delete user validates parameters"() {
+		when:
+		service.delete(null)
+
+		then:
+		thrown NotFoundException
 	}
 }

@@ -1,6 +1,9 @@
 package com.unifina.service
 
-import com.unifina.domain.*
+import com.unifina.domain.Category
+import com.unifina.domain.Contact
+import com.unifina.domain.Product
+import com.unifina.domain.TermsOfUse
 import grails.validation.Validateable
 
 @Validateable
@@ -11,10 +14,10 @@ class ProductCreateCommand {
 	String description
 
 	Category category
-	Stream previewStream
+	String previewStreamId
 	String previewConfigJson
 
-	Set<Stream> streams = []
+	Set<String> streams = []
 
 	String ownerAddress
 	String beneficiaryAddress

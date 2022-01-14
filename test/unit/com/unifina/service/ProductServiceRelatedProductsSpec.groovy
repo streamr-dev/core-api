@@ -103,8 +103,8 @@ class ProductServiceRelatedProductsSpec extends Specification {
 		def products = service.relatedProducts(p1, max, apiUser)
 		then:
 		service.random.nextInt(_) >> 1
-		1 * service.apiService.list(Product, _, apiUser) >> [p2, p3, p4, p5, p6]
-		1 * service.apiService.list(Product, _, apiUser) >> [p7, p8, p9, p10, p11]
+		1 * service.apiService.list(_, apiUser) >> [p2, p3, p4, p5, p6]
+		1 * service.apiService.list(_, apiUser) >> [p7, p8, p9, p10, p11]
 		products.size() == max
 	}
 
@@ -114,8 +114,8 @@ class ProductServiceRelatedProductsSpec extends Specification {
 		def products = service.relatedProducts(p1, max, apiUser)
 		then:
 		service.random.nextInt(_) >> 1
-		1 * service.apiService.list(Product, _, apiUser) >> [p2]
-		1 * service.apiService.list(Product, _, apiUser) >> [p3, p5]
+		1 * service.apiService.list(_, apiUser) >> [p2]
+		1 * service.apiService.list(_, apiUser) >> [p3, p5]
 		products.size() == max
 		products.contains(p1) == false
 		products.contains(p2) == true

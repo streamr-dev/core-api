@@ -3446,10 +3446,10 @@
             "stream-3-id"
           ]
         },
-        "previewStream": {
+        "previewStreamId": {
           "type": "string",
           "description": "Identifier of Stream selected for preview",
-          "example": "stream-2-id"
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/abc"
         },
         "previewConfigJson": {
           "type": "string",

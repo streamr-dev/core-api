@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.unifina.domain.DataUnionSecret
 import com.unifina.utils.IdGenerator
 import spock.lang.Specification

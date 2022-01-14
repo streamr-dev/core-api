@@ -5,38 +5,11 @@ import spock.lang.Specification
 
 @Mock(Permission)
 class PermissionSpec extends Specification {
-	void "validation fails if no domain class attached"() {
-		def permission = new Permission(operation: Permission.Operation.STREAM_GET)
-		permission.save()
-		expect:
-		!permission.validate()
-	}
-
-	void "validation fails if more than 1 domain class attached"() {
-		def product = new Product()
-		def stream = new Stream(name: "stream")
-		def permission = new Permission(operation: Permission.Operation.STREAM_GET, product: product, stream: stream)
-		expect:
-		!permission.validate()
-	}
-
 	void "validation succeeds if exactly 1 domain class attached"() {
-		def stream = new Stream()
-		def permission = new Permission(operation: Permission.Operation.STREAM_GET, stream: stream)
+		Product product = new Product()
+		def permission = new Permission(operation: Permission.Operation.PRODUCT_GET, product: product)
 		expect:
 		permission.validate()
-	}
-
-	void "all items in resourceFields are defined as fields"() {
-		Permission p = new Permission(operation: Permission.Operation.STREAM_GET)
-
-		when:
-		Permission.resourceFields.each {
-			p[it] // throws if field doesn't exist
-		}
-
-		then:
-		noExceptionThrown()
 	}
 
 	void "permission fromString() accepts lowercase or uppercase string"(String input, Permission.Operation result) {

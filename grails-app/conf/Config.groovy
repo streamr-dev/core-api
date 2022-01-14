@@ -1,5 +1,4 @@
 import com.unifina.utils.PropertiesUtil
-import org.web3j.ens.Contracts
 
 /**
  * Base URL
@@ -204,18 +203,6 @@ streamr.dataunion.sidechainName = System.getProperty("streamr.dataunion.sidechai
 streamr.dataunion.mainnet.factory.address = System.getProperty("streamr.dataunion.mainnet.factory.address") ? System.getProperty("streamr.dataunion.mainnet.factory.address") : "0x4bbcBeFBEC587f6C4AF9AF9B48847caEa1Fe81dA"
 streamr.dataunion.sidechain.factory.address = System.getProperty("streamr.dataunion.sidechain.factory.address") ? System.getProperty("streamr.dataunion.sidechain.factory.address") : "0x4A4c4759eb3b7ABee079f832850cD3D0dC48D927"
 
-environments {
-	development {
-		streamr.ethereum.ensRegistryContractAddress = "0x92E8435EB56fD01BF4C79B66d47AC1A94338BB03"
-	}
-	test {
-		streamr.ethereum.ensRegistryContractAddress = "0x92E8435EB56fD01BF4C79B66d47AC1A94338BB03"
-	}
-	production {
-		streamr.ethereum.ensRegistryContractAddress = System.getProperty("streamr.ethereum.ensRegistryContractAddress") ?: Contracts.MAINNET
-	}
-}
-
 /**
  * Redis config
  */
@@ -257,11 +244,6 @@ grails {
 		}
 	}
 }
-
-unifina.email.sender = "contact@streamr.network"
-unifina.email.registerLink.subject = "Streamr signup link"
-unifina.email.welcome.subject = "Welcome to Streamr"
-unifina.email.shareInvite.subject = "%USER% wants to share a %RESOURCE% with you via Streamr Core"
 
 /**
  * S3 File upload

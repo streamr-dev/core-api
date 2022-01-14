@@ -6,21 +6,19 @@ import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.*;
-import org.web3j.ens.NameHash;
-import org.web3j.ens.contracts.generated.ENS;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.*;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.*;
 import org.web3j.protocol.http.HttpService;
-import org.web3j.tx.ClientTransactionManager;
 import org.web3j.tx.Contract;
-import org.web3j.tx.TransactionManager;
-import org.web3j.tx.gas.DefaultGasProvider;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class Web3jHelper {
@@ -257,19 +255,4 @@ public class Web3jHelper {
 			throw new BlockchainException(e);
 		}
 	}
-
-	public static String getENSDomainOwner(String domain) throws BlockchainException {
-		Web3j web3j = Web3jHelper.getWeb3jConnectionFromConfig();
-		TransactionManager transactionManager = new ClientTransactionManager(web3j, null);
-		String ensContractAddress = ApplicationConfig.getString("streamr.ethereum.ensRegistryContractAddress");
-		ENS ensRegistry = ENS.load(ensContractAddress, web3j, transactionManager, new DefaultGasProvider());
-		byte[] nameHash = NameHash.nameHashAsBytes(domain);
-		String contractAddress = send(ensRegistry.owner(nameHash));
-		if (!Objects.equals(contractAddress, ADDRESS_NONE)) {
-			return contractAddress;
-		} else {
-			return null;
-		}
-	}
-
 }
