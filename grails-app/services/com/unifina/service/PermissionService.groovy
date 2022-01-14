@@ -1,10 +1,14 @@
 package com.unifina.service
-
+import com.streamr.network.contract.StreamRegistry
 import com.unifina.domain.*
 import com.unifina.domain.Permission.Operation
+import com.unifina.utils.ApplicationConfig
 import grails.compiler.GrailsCompileStatic
 import grails.transaction.Transactional
 import grails.util.Holders
+import org.web3j.crypto.Credentials
+import org.web3j.protocol.Web3j
+import org.web3j.protocol.core.RemoteFunctionCall
 
 import java.security.AccessControlException
 
@@ -44,8 +48,24 @@ class PermissionService {
 	/**
 	 * Throws an exception if user is not allowed to perform specified operation on a streamId.
 	 */
-	void verify(User user, String streamId, Operation op) throws NotPermittedException {
-		// TODO: Verify that user has STREAM_GET permission on streamId
+	void verify(Web3j web3j, String userAddress, String streamId, StreamPermission permission) throws NotPermittedException {
+		log.debug(String.format("Checking users %s Stream %s permission to Stream %s", userAddress, permission, streamId))
+		String streamRegistryAddress = ApplicationConfig.getString("streamr.ethereum.streamRegistryAddress")
+		Credentials credentials = Credentials.create(ApplicationConfig.getString("streamr.ethereum.nodePrivateKey"))
+		StreamrGasProvider gasProvider = StreamrGasProvider.createStreamrGasProvider()
+		StreamRegistry streamRegistry = StreamRegistry.load(streamRegistryAddress, web3j, credentials, gasProvider)
+		RemoteFunctionCall<Boolean> hasPermissionCall = streamRegistry.hasPermission(streamId, userAddress, permission.toBigInteger())
+		Boolean hasPermission
+		try {
+			hasPermission = hasPermissionCall.send()
+		} catch (Exception e) {
+			String msg = String.format("Function call to Ethereum failed with error: %s", e)
+			throw new BlockchainException(msg)
+		}
+		log.debug(String.format("Users %s permission %s to stream %s is %s", userAddress, permission, streamId, hasPermission))
+		if (!hasPermission) {
+			throw new NotPermittedException(userAddress, "Stream", streamId, "Grant")
+		}
 	}
 
 	/**
@@ -99,6 +119,8 @@ class PermissionService {
 		List<Permission> directPermissions = store.findDirectPermissions(resource, null as Operation, user)
 		return directPermissions
 	}
+
+	// TODO: What about anonymous permissions?
 
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
 	@Transactional(readOnly = true)

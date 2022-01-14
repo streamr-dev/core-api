@@ -74,10 +74,10 @@ class StreamrApiRequest {
 
     async call() {
         if (!this.methodId) {
-            throw 'Method not set.'
+            throw Error('Method not set.')
         }
         if (!this.relativePath) {
-            throw 'Relative path not set.'
+            throw Error('Relative path not set.')
         }
 
         const apiUrl = url.resolve(this.baseUrl, this.relativePath) + this.queryParams

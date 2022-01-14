@@ -1,6 +1,5 @@
 package com.unifina.controller
 
-import com.unifina.controller.RESTAPIFilters
 import com.unifina.domain.Permission
 import com.unifina.domain.Product
 import com.unifina.domain.User
@@ -52,7 +51,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 		product.streams = []
 
 		params.productId = "product-id"
-		params.streamId = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/s1"
+		params.id = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/s1"
 		request.apiUser = new User(username: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
 
 		when:
@@ -99,7 +98,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 		product.save(validate: true, failOnError: true)
 
 		params.productId = product.id
-		params.streamId = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/s1"
+		params.id = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/s1"
 		request.apiUser = me
 
 		when:

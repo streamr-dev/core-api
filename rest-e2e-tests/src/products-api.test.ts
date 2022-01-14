@@ -22,7 +22,7 @@ function assertIsProduct(data: any) {
 
 function assertIsStreamID(id: string) {
     // TODO: validate
-    assert(id.length === 42)
+    assert(id !== undefined, "Stream ID is undefined")
 }
 
 async function createProductAndReturnId(productBody: any, user: EthereumAccount) {
@@ -40,32 +40,26 @@ async function createStreamAndReturnId(streamBody: any, user: EthereumAccount) {
 
 describe('Products API', function () {
     let genericProductBody: any
-
-    // TODO
-    //const streamId1 = "0x0000000001000000000100000000010000000001/stream-1"
-    //const streamId2 = "0x0000000002000000000200000000020000000002/stream-2"
-    //const streamId3 = "0x0000000003000000000300000000030000000003/stream-3"
-
     let streamId1: string
     let streamId2: string
     let streamId3: string
-    const productOwner = StreamrClient.generateEthereumAccount()
-    const otherUser = StreamrClient.generateEthereumAccount()
+    const productOwner = testUsers.tokenHolder
+    const otherUser = testUsers.ensDomainOwner
     const devOpsUser = testUsers.devOpsUser
 
     this.timeout(1000 * 25)
 
     before(async () => {
         streamId1 = await createStreamAndReturnId({
-            id: `/test-stream/${Date.now()}`,
+            id: `${productOwner.address}/test-stream/${Date.now()}`,
             name: 'stream-1'
         }, productOwner)
         streamId2 = await createStreamAndReturnId({
-            id: `/test-stream/${Date.now()}`,
+            id: `${productOwner.address}/test-stream/${Date.now()}`,
             name: 'stream-2'
         }, productOwner)
         streamId3 = await createStreamAndReturnId({
-            id: `/test-stream/${Date.now()}`,
+            id: `${productOwner.address}/test-stream/${Date.now()}`,
             name: 'stream-3'
         }, productOwner)
 
@@ -152,10 +146,10 @@ describe('Products API', function () {
                 .create(body)
                 .withAuthenticatedUser(productOwner)
                 .call()
-            await assertResponseIsError(response, 422, 'VALIDATION_ERROR', 'Invalid streams: [non-existing-stream-id-1, non-existing-stream-id-2] (typeMismatch)')
+            await assertResponseIsError(response, 403, 'FORBIDDEN', ' does not have permission to Grant Stream (id non-existing-stream-id-1)')
         })
 
-        it('requires stream_share permission on streams (in body)', async () => {
+        it('requires stream grant permission on products streams', async () => {
             const streamId = await createStreamAndReturnId({
                 id: `/test-stream/${Date.now()}`,
                 name: 'other user\'s stream'
@@ -909,7 +903,7 @@ describe('Products API', function () {
 
         context('when called with valid params, body, headers, and permissions', () => {
             let response: Response
-            let json: any
+            let productsStreamIds: any
 
             before(async () => {
                 response = await Streamr.api.v1.products
@@ -917,7 +911,7 @@ describe('Products API', function () {
                     .withAuthenticatedUser(productOwner)
                     .call()
 
-                json = await response.json()
+                productsStreamIds = await response.json()
             })
 
             it('responds with 200', () => {
@@ -925,15 +919,11 @@ describe('Products API', function () {
             })
 
             it('Streams have expected ids', () => {
-                assert.sameMembers(json.map((stream: any) => stream.id), [streamId1, streamId2])
-            })
-
-            it('Streams have expected names', () => {
-                assert.sameMembers(json.map((stream: any) => stream.name), ['stream-1', 'stream-2'])
+                assert.sameMembers(productsStreamIds.map((streamId: string) => streamId), [streamId1, streamId2])
             })
 
             it('responds with list of Streams', () => {
-                json.forEach((id: string) => assertIsStreamID(id))
+                productsStreamIds.forEach((streamId: string) => assertIsStreamID(streamId))
             })
         })
     })
@@ -1102,10 +1092,10 @@ describe('Products API', function () {
                 .addStream(createdProductId, 'non-existing-id')
                 .withAuthenticatedUser(productOwner)
                 .call()
-            await assertResponseIsError(response, 404, 'NOT_FOUND', 'Stream')
+            await assertResponseIsError(response, 403, 'FORBIDDEN', ' does not have permission to Grant Stream (id non-existing-id)')
         })
 
-        it('requires stream_share permission on Stream', async () => {
+        it('requires Grant permission on Stream', async () => {
             const streamId4 = await createStreamAndReturnId({
                 id: `/test-stream/${Date.now()}`,
                 name: 'stream-3'
@@ -1119,7 +1109,7 @@ describe('Products API', function () {
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
-            assert.equal(json.operation, 'stream_share')
+            assert.equal(json.operation, 'Grant')
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
@@ -1141,8 +1131,8 @@ describe('Products API', function () {
                     .listStreams(createdProductId)
                     .withAuthenticatedUser(productOwner)
                     .call()
-                const json = await response.json()
-                assert.include(json.map((stream: any) => stream.id), streamId3)
+                const productsStreamIds = await response.json()
+                assert.include(productsStreamIds.map((streamId: any) => streamId), streamId3)
             })
         })
     })
@@ -1179,7 +1169,7 @@ describe('Products API', function () {
                 .removeStream(createdProductId, 'non-existing-id')
                 .withAuthenticatedUser(productOwner)
                 .call()
-            await assertResponseIsError(response, 404, 'NOT_FOUND', 'Stream')
+            assert.equal(response.status, 204)
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
@@ -1196,13 +1186,13 @@ describe('Products API', function () {
                 assert.equal(response.status, 204)
             })
 
-            it('removes stream to Product', async () => {
+            it('removes stream from Product', async () => {
                 const response = await Streamr.api.v1.products
                     .listStreams(createdProductId)
                     .withAuthenticatedUser(productOwner)
                     .call()
-                const json = await response.json()
-                assert.deepEqual(json.map((stream: any) => stream.id), [streamId2])
+                const productsStreamIds = await response.json()
+                assert.deepEqual(productsStreamIds, [streamId2])
             })
         })
 

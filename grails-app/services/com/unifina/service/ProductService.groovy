@@ -2,8 +2,12 @@ package com.unifina.service
 
 import com.unifina.domain.Permission
 import com.unifina.domain.Product
+import com.unifina.domain.StreamPermission
 import com.unifina.domain.User
+import com.unifina.utils.ApplicationConfig
+import com.unifina.utils.EthereumConfig
 import grails.compiler.GrailsCompileStatic
+import org.web3j.protocol.Web3j
 
 import java.util.concurrent.ThreadLocalRandom
 
@@ -70,8 +74,19 @@ class ProductService {
 			throw new ValidationException(command.errors)
 		}
 
-		command.streams.each { String streamId ->
-			// TODO: permissionService.verify(currentUser, streamId, Permission.Operation.STREAM_SHARE)
+		Web3j web3j
+		try {
+			if (!command.streams.isEmpty()) {
+				EthereumConfig ethConf = new EthereumConfig(ApplicationConfig.getString("streamr.dataunion.sidechainName"))
+				web3j = ethConf.getWeb3j(EthereumConfig.RpcConnectionMethod.HTTP)
+				command.streams.each { String streamId ->
+					permissionService.verify(web3j, currentUser.username, streamId, StreamPermission.GRANT)
+				}
+			}
+		} finally {
+			if (web3j != null) {
+				web3j.shutdown()
+			}
 		}
 
 		Product product = new Product(command.properties)
@@ -86,8 +101,19 @@ class ProductService {
 			throw new ValidationException(command.errors)
 		}
 
-		command.streams.each { String streamId ->
-			// TODO: permissionService.verify(currentUser, streamId, Permission.Operation.STREAM_SHARE)
+		Web3j web3j
+		try {
+			if (!command.streams.isEmpty()) {
+				EthereumConfig ethConf = new EthereumConfig(ApplicationConfig.getString("streamr.dataunion.sidechainName"))
+				web3j = ethConf.getWeb3j(EthereumConfig.RpcConnectionMethod.HTTP)
+				command.streams.each { String streamId ->
+					permissionService.verify(web3j, currentUser.username, streamId, StreamPermission.GRANT)
+				}
+			}
+		} finally {
+			if (web3j != null) {
+				web3j.shutdown()
+			}
 		}
 
 		Product product = findById(id, currentUser, Permission.Operation.PRODUCT_EDIT)
@@ -108,6 +134,16 @@ class ProductService {
 
 	void addStreamToProduct(Product product, String streamId, User currentUser)
 		throws ValidationException, NotPermittedException {
+		Web3j web3j
+		try {
+			EthereumConfig ethConf = new EthereumConfig(ApplicationConfig.getString("streamr.dataunion.sidechainName"))
+			web3j = ethConf.getWeb3j(EthereumConfig.RpcConnectionMethod.HTTP)
+			permissionService.verify(web3j, currentUser.username, streamId, StreamPermission.GRANT)
+		} finally {
+			if (web3j != null) {
+				web3j.shutdown()
+			}
+		}
 		product.streams.add(streamId)
 		product.save(failOnError: true)
 		subscriptionService.afterProductUpdated(product)

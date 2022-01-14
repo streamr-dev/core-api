@@ -7,7 +7,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 @TestFor(ProductService)
-@Mock([Category, Product, SubscriptionFree, SubscriptionPaid])
+@Mock([Category, Product, User])
 class ProductServiceSpec extends Specification {
 	String s1, s2, s3, s4
 	Category category
@@ -77,28 +77,30 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "list() delegates to ApiService#list"() {
-		def apiService = service.apiService = Mock(ApiService)
+		setup:
+		service.apiService = Mock(ApiService)
 		def me = new User(username: "0x0000000000000000000000000000000000002341")
 
 		when:
 		service.list(new ProductListParams(max: 5), me)
 
 		then:
-		1 * apiService.list({
+		1 * service.apiService.list({
 			assert it.toMap() == new ProductListParams(max: 5, sortBy: "score", order: "desc").toMap()
 			true
 		}, me)
 	}
 
 	void "findById() delegates to ApiService#authorizedGetById"() {
-		def apiService = service.apiService = Mock(ApiService)
+		setup:
+		service.apiService = Mock(ApiService)
 		def me = new User(username: "0x0000000000000000000000000000000098762341")
 
 		when:
 		service.findById("product-id", me, Permission.Operation.PRODUCT_GET)
 
 		then:
-		1 * apiService.authorizedGetById("product-id", me, Permission.Operation.PRODUCT_GET)
+		1 * service.apiService.authorizedGetById("product-id", me, Permission.Operation.PRODUCT_GET)
 	}
 
 	void "create() throws ValidationException if command object does not pass validation"() {
@@ -109,8 +111,9 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "create() creates and returns Product with correct info and NOT_DEPLOYED state"() {
+		setup:
 		setupStreams()
-		service.permissionService = Stub(PermissionService)
+		service.permissionService = Mock(PermissionService)
 
 		Contact contact = new Contact()
 		contact.url = "https://www.fi"
@@ -166,8 +169,9 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "create() invokes permissionService#systemGrant"() {
+		setup:
 		setupStreams()
-		def permissionService = service.permissionService = Mock(PermissionService)
+		service.permissionService = Mock(PermissionService)
 
 		def validCommand = new ProductCreateCommand(
 			name: "Product",
@@ -179,15 +183,20 @@ class ProductServiceSpec extends Specification {
 			pricePerSecond: 10,
 			minimumSubscriptionInSeconds: 1
 		)
-		def me = new User(username: "me@streamr.network")
+		def me = new User(username: "0x711241f99Aef8D2AFf3e4c5196C8F1e8F4168C93")
 
 		when:
 		service.create(validCommand, me)
 		then:
-		1 * permissionService.systemGrantAll(me, _ as Product)
+		1 * service.permissionService.systemGrantAll(me, _ as Product)
+		1 * service.permissionService.verify(_, me.username, s1, StreamPermission.GRANT)
+		1 * service.permissionService.verify(_, me.username, s2, StreamPermission.GRANT)
+		1 * service.permissionService.verify(_, me.username, s3, StreamPermission.GRANT)
+		0 * service.permissionService._
 	}
 
 	void "create() with an empty command object creates a product with default values"() {
+		setup:
 		setupStreams()
 		service.permissionService = Stub(PermissionService)
 
@@ -242,6 +251,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "create() can create data unions"() {
+		setup:
 		setupStreams()
 		service.permissionService = Stub(PermissionService)
 
@@ -267,10 +277,11 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "update() invokes ApiService#authorizedGetById"() {
+		setup:
 		setupProduct()
 
 		service.subscriptionService = Stub(SubscriptionService)
-		def apiService = service.apiService = Mock(ApiService)
+		service.apiService = Mock(ApiService)
 
 		def validCommand = new ProductUpdateCommand(
 			name: "updated name",
@@ -289,14 +300,15 @@ class ProductServiceSpec extends Specification {
 		service.update("product-id", validCommand, user)
 
 		then:
-		1 * apiService.authorizedGetById('product-id', user, Permission.Operation.PRODUCT_EDIT) >> product
+		1 * service.apiService.authorizedGetById('product-id', user, Permission.Operation.PRODUCT_EDIT) >> product
 	}
 
 	void "update() invokes subscriptionService#afterProductUpdated after Product updated"() {
+		setup:
 		setupStreams()
 		setupProduct()
 
-		def subscriptionService = service.subscriptionService = Mock(SubscriptionService)
+		service.subscriptionService = Mock(SubscriptionService)
 		service.apiService = Stub(ApiService) {
 			authorizedGetById(_, _, _) >> product
 		}
@@ -318,10 +330,11 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.update("product-id", validCommand, user)
 		then:
-		1 * subscriptionService.afterProductUpdated(product)
+		1 * service.subscriptionService.afterProductUpdated(product)
 	}
 
 	void "update() updates and returns Product with correct info"() {
+		setup:
 		setupStreams()
 		setupProduct()
 
@@ -416,6 +429,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "addStreamToProduct() adds Stream to Product"() {
+		setup:
 		setupStreams()
 		setupProduct()
 		assert !product.streams.contains(s4)
@@ -431,19 +445,21 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "addStreamToProduct() invokes subscriptionService#afterProductUpdated"() {
+		setup:
 		setupStreams()
 		setupProduct()
-		def subscriptionService = service.subscriptionService = Mock(SubscriptionService)
+		service.subscriptionService = Mock(SubscriptionService)
 		service.permissionService = Stub(PermissionService)
 		def user = new User()
 
 		when:
 		service.addStreamToProduct(product, s4, user)
 		then:
-		1 * subscriptionService.afterProductUpdated(product)
+		1 * service.subscriptionService.afterProductUpdated(product)
 	}
 
 	void "removeStreamFromProduct() removes Stream from Product"() {
+		setup:
 		setupStreams()
 		setupProduct()
 		service.subscriptionService = Stub(SubscriptionService)
@@ -456,18 +472,20 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "removeStreamFromProduct() invokes subscriptionService#afterProductUpdated"() {
+		setup:
 		setupStreams()
 		setupProduct()
-		def subscriptionService = service.subscriptionService = Mock(SubscriptionService)
+		service.subscriptionService = Mock(SubscriptionService)
 
 		when:
 		service.removeStreamFromProduct(product, s1)
 		then:
-		1 * subscriptionService.afterProductUpdated(product)
+		1 * service.subscriptionService.afterProductUpdated(product)
 	}
 
 	@Unroll
 	void "transitionToDeploying() throws InvalidStateTransitionException if Product.state == #state"(Product.State state) {
+		setup:
 		setupProduct(state)
 		when:
 		service.transitionToDeploying(product)
@@ -478,6 +496,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "transitionToDeploying() transitions Product from NOT_DEPLOYED to DEPLOYING"() {
+		setup:
 		setupProduct(Product.State.NOT_DEPLOYED)
 		when:
 		service.transitionToDeploying(product)
@@ -487,6 +506,7 @@ class ProductServiceSpec extends Specification {
 
 	@Unroll
 	void "transitionToUndeploying() throws InvalidStateTransitionException if Product.state == #state"(Product.State state) {
+		setup:
 		setupProduct(state)
 		when:
 		service.transitionToUndeploying(product)
@@ -497,6 +517,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "transitionToUndeploying() transitions Product from DEPLOYED to UNDEPLOYING"() {
+		setup:
 		setupProduct(Product.State.DEPLOYED)
 		when:
 		service.transitionToUndeploying(product)
@@ -506,6 +527,7 @@ class ProductServiceSpec extends Specification {
 
 	@Unroll
 	void "markAsUndeployed() throws InvalidStateTransitionException if Product.state == #state"(Product.State state) {
+		setup:
 		setupProduct(state)
 		def command = new ProductUndeployedCommand(blockNumber: 50000, blockIndex: 15)
 		when:
@@ -517,6 +539,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "markAsUndeployed() throws NotPermittedException if user is not devops"() {
+		setup:
 		setupProduct(Product.State.UNDEPLOYING)
 		def command = new ProductUndeployedCommand(blockNumber: 50000, blockIndex: 15)
 
@@ -529,6 +552,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "markAsUndeployed() returns false if command is stale"() {
+		setup:
 		setupProduct(Product.State.UNDEPLOYING)
 		service.permissionService = new PermissionService()
 
@@ -544,8 +568,9 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "markAsUndeployed() does not invoke permissionService#systemRevokeAnonymousAccess if command is stale"() {
+		setup:
 		setupProduct(Product.State.DEPLOYED)
-		def permissionService = service.permissionService = Mock(PermissionService)
+		service.permissionService = Mock(PermissionService)
 
 		def command = new ProductUndeployedCommand(blockNumber: 30000, blockIndex: 15)
 
@@ -555,12 +580,12 @@ class ProductServiceSpec extends Specification {
 		})
 
 		then:
-		0 * permissionService.systemRevokeAnonymousAccess(_)
+		0 * service.permissionService.systemRevokeAnonymousAccess(_)
 	}
 
 	void "markAsUndeployed() does not transition Product to NOT_DEPLOYED if command is stale"() {
+		setup:
 		setupProduct(Product.State.DEPLOYED)
-		def permissionService = service.permissionService = Mock(PermissionService)
 
 		def command = new ProductUndeployedCommand(blockNumber: 30000, blockIndex: 15)
 
@@ -574,6 +599,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "markAsUndeployed() returns true if command not stale"() {
+		setup:
 		setupProduct(Product.State.UNDEPLOYING)
 		service.permissionService = new PermissionService()
 
@@ -590,6 +616,7 @@ class ProductServiceSpec extends Specification {
 
 	@Unroll
 	void "markAsUndeployed() transitions Product from #state to NOT_DEPLOYED"(Product.State state) {
+		setup:
 		setupProduct(state)
 		service.permissionService = new PermissionService()
 
@@ -608,8 +635,9 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "markAsUndeployed() invokes permissionService#systemRevokeAnonymousAccess"() {
+		setup:
 		setupProduct(Product.State.UNDEPLOYING)
-		def permissionService = service.permissionService = Mock(PermissionService)
+		service.permissionService = Mock(PermissionService)
 
 		def command = new ProductUndeployedCommand(blockNumber: 50000, blockIndex: 15)
 
@@ -619,7 +647,8 @@ class ProductServiceSpec extends Specification {
 		})
 
 		then:
-		1 * permissionService.systemRevokeAnonymousAccess(product, Permission.Operation.PRODUCT_GET)
+		1 * service.permissionService.systemRevokeAnonymousAccess(product, Permission.Operation.PRODUCT_GET)
+		0 * service.permissionService._
 	}
 
 	void "markAsDeployed() throws ValidationException if command object does not pass validation"() {
@@ -631,6 +660,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "markAsDeployed() throws InvalidStateTransitionException if Product.state == UNDEPLOYING"() {
+		setup:
 		setupProduct(Product.State.UNDEPLOYING)
 
 		def command = new ProductDeployedCommand(
@@ -650,6 +680,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "markAsDeployed() throws NotPermittedException if user is not devops"() {
+		setup:
 		setupProduct()
 
 		def command = new ProductDeployedCommand(
@@ -671,6 +702,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "markAsDeployed() returns false if command object is stale"() {
+		setup:
 		setupProduct()
 		service.permissionService = Stub(PermissionService)
 
@@ -694,8 +726,9 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "markAsDeployed() does not invoke permissionService#systemGrantAnonymousAccess if command object is stale"() {
+		setup:
 		setupProduct()
-		def permissionService = service.permissionService = Mock(PermissionService)
+		service.permissionService = Mock(PermissionService)
 
 		def command = new ProductDeployedCommand(
 			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
@@ -713,10 +746,11 @@ class ProductServiceSpec extends Specification {
 		})
 
 		then:
-		0 * permissionService.systemGrantAnonymousAccess(_)
+		0 * service.permissionService.systemGrantAnonymousAccess(_)
 	}
 
 	void "markAsDeployed() does not update Product if command object is stale"() {
+		setup:
 		setupProduct()
 		service.permissionService = Stub(PermissionService)
 
@@ -741,6 +775,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "markAsDeployed() returns true if command not stale"() {
+		setup:
 		setupProduct()
 		service.permissionService = Stub(PermissionService)
 
@@ -764,6 +799,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "markAsDeployed() transitions Product to DEPLOYED and updates Blockchain-related information"() {
+		setup:
 		setupProduct()
 		service.permissionService = Stub(PermissionService)
 
@@ -812,8 +848,9 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "markAsDeployed() grants public access to Product via permissionService#systemGrantAnonymousAccess"() {
+		setup:
 		setupProduct()
-		def permissionService = service.permissionService = Mock(PermissionService)
+		service.permissionService = Mock(PermissionService)
 
 		def command = new ProductDeployedCommand(
 			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
@@ -831,10 +868,12 @@ class ProductServiceSpec extends Specification {
 		})
 
 		then:
-		1 * permissionService.systemGrantAnonymousAccess(product, Permission.Operation.PRODUCT_GET)
+		1 * service.permissionService.systemGrantAnonymousAccess(product, Permission.Operation.PRODUCT_GET)
+		0 * service.permissionService._
 	}
 
 	void "updatePricing() updates product price etc"() {
+		setup:
 		setupProduct(Product.State.DEPLOYED)
 		service.permissionService = new PermissionService()
 
@@ -864,6 +903,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "updatePricing() throws NotPermittedException if user is not devops"() {
+		setup:
 		setupProduct()
 
 		def command = new SetPricingCommand(

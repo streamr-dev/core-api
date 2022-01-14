@@ -1,5 +1,4 @@
 package com.unifina.controller
-
 import com.unifina.domain.Permission
 import com.unifina.domain.Product
 import com.unifina.domain.User
@@ -19,7 +18,8 @@ class ProductStreamsApiController {
 
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def update(String productId, String streamId) {
+	def update(String productId, String id) {
+		final String streamId = id
 		Product product = productService.findById(productId, loggedInUser(), Permission.Operation.PRODUCT_EDIT)
 		if (!product.streams.contains(streamId)) {
 			productService.addStreamToProduct(product, streamId, loggedInUser())
@@ -29,7 +29,8 @@ class ProductStreamsApiController {
 
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def delete(String productId, String streamId) {
+	def delete(String productId, String id) {
+		final String streamId = id
 		Product product = productService.findById(productId, loggedInUser(), Permission.Operation.PRODUCT_DELETE)
 		if (product.streams.contains(streamId)) {
 			productService.removeStreamFromProduct(product, streamId)

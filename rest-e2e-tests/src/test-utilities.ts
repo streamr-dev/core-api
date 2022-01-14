@@ -1,9 +1,9 @@
 import {assert} from 'chai'
 import _ from 'lodash';
-import {StreamrClient, StreamrClientOptions} from 'streamr-client'
 import {Wallet} from '@ethersproject/wallet'
 import {EthereumAccount} from './EthereumAccount';
 import Streamr from "./streamr-api-clients";
+import {ConfigTest, StreamrClient, StreamrClientOptions} from 'streamr-client'
 
 export const assertResponseIsError = async (response: any, statusCode: number, programmaticCode: string, includeInMessage?: string) => {
     const json = await response.json()
@@ -33,24 +33,8 @@ export const assertEqualEthereumAddresses = (actual: string | undefined, expecte
 
 export const getStreamrClient = (user?: EthereumAccount) => {
     const options: StreamrClientOptions = {
-        url: 'ws://localhost/api/v1/ws',
+        ...ConfigTest,
         restUrl: 'http://localhost/api/v1',
-        tokenAddress: '0xbAA81A0179015bE47Ad439566374F2Bae098686F',
-        tokenSidechainAddress: '0x73Be21733CC5D08e1a14Ea9a399fb27DB3BEf8fF',
-        dataUnion: {
-            factoryMainnetAddress: '0x4bbcBeFBEC587f6C4AF9AF9B48847caEa1Fe81dA',
-            factorySidechainAddress: '0x4A4c4759eb3b7ABee079f832850cD3D0dC48D927',
-            templateMainnetAddress: '0x7bFBAe10AE5b5eF45e2aC396E0E605F6658eF3Bc',
-            templateSidechainAddress: '0x36afc8c9283CC866b8EB6a61C6e6862a83cd6ee8',
-        },
-        sidechain: {
-            url: 'http://localhost:8546'
-        },
-        mainnet: {
-            url: 'http://localhost:8545'
-        },
-        autoConnect: false,
-        autoDisconnect: false
     }
     if (user !== undefined) {
         options.auth = {

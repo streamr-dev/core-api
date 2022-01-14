@@ -177,6 +177,8 @@ streamr.api.http.url = System.getProperty("streamr.api.http.url") ?: "${baseUrl}
 
 streamr.ethereum.datacoinAddress = System.getProperty("streamr.ethereum.datacoinAddress", "0x0cf0ee63788a0849fe5297f3407f701e122cc023")
 
+streamr.ethereum.streamRegistryAddress = "0xa86863053cECFD9f6f861e0Fd39a042238411b75"
+
 /**
  * Ethereum networks configuration (RPC urls)
  *
