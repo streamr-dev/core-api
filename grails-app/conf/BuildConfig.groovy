@@ -65,7 +65,7 @@ grails.project.dependency.resolution = {
 		compile('org.springframework.security:spring-security-web:4.2.9.RELEASE') { // Needed for CORS plugin
 			excludes('org.springframework:spring-web:*')
 		}
-		compile('org.web3j:core:4.8.4') {
+		compile('org.web3j:core:4.8.9') {
 			excludes "org.java-websocket:Java-WebSocket:*" // Version conflict with com.streamr:client
 		}
 		compile('com.amazonaws:aws-java-sdk-s3:1.12.10')
