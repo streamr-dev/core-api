@@ -5,34 +5,18 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.websocket.WebSocketService;
 
-import java.io.Serializable;
+public final class EthereumConfig {
+	private static final Logger log = Logger.getLogger(EthereumConfig.class);
 
-public class EthereumSettings implements Serializable {
-	private static final Logger log = Logger.getLogger(EthereumSettings.class);
-
-	private String network = ApplicationConfig.getString("streamr.ethereum.defaultNetwork");
-	private double gasPriceWei = 20e9; // 20 Gwei
-	private int gasLimit = 6000000;
+	private final String network;
 
 	public enum RpcConnectionMethod {
 		WS,
 		HTTP
 	}
 
-	public String getNetwork() {
-		return network;
-	}
-
-	public void setNetwork(String network) {
+	public EthereumConfig(final String network) {
 		this.network = network;
-	}
-
-	public double getGasPriceWei() {
-		return gasPriceWei;
-	}
-
-	public long getGasLimit() {
-		return gasLimit;
 	}
 
 	public String getRpcUrl() {
@@ -46,24 +30,19 @@ public class EthereumSettings implements Serializable {
 	public String getWebsocketRpcUri() {
 		String url = ApplicationConfig.getString("streamr.ethereum.wss." + network);
 		if (url == null) {
-			log.warn("No websockets URI found for Ethereum network " + network);
+			throw new RuntimeException("No websockets URI found for Ethereum network " + network);
 		}
 		return url;
 	}
 
-	public Web3j getWeb3j() {
-		return getWeb3j(RpcConnectionMethod.HTTP);
-	}
-
 	public Web3j getWeb3j(RpcConnectionMethod preferredMethod) {
-		Web3j web3j;
 		int start = preferredMethod.ordinal();
 		int len = RpcConnectionMethod.values().length;
 
 		// cycle through all connection methods starting with preferredMethod
 		for (int i = 0; i < len; i++) {
 			RpcConnectionMethod method = RpcConnectionMethod.values()[start + i % len];
-			web3j = getWeb3jUsingMethod(method);
+			Web3j web3j = getWeb3jUsingMethod(method);
 			if (web3j != null) {
 				log.info("Created RPC using connection method: " + method);
 				return web3j;
@@ -80,16 +59,10 @@ public class EthereumSettings implements Serializable {
 		String url;
 		switch (method) {
 			case HTTP:
-				if ((url = getRpcUrl()) == null) {
-					log.warn("No http RPC URL specified");
-					return null;
-				}
+				url = getRpcUrl();
 				return Web3j.build(new HttpService(url));
 			case WS:
-				if ((url = getWebsocketRpcUri()) == null) {
-					log.warn("No ws RPC URL specified");
-					return null;
-				}
+				url = getWebsocketRpcUri();
 				return Web3j.build(new WebSocketService(url, true));
 			default:
 				return null;

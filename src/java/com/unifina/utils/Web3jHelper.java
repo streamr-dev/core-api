@@ -132,8 +132,8 @@ public class Web3jHelper {
 	}
 
 	public static Web3j getWeb3jConnectionFromConfig() {
-		EthereumSettings ethereumOptions = new EthereumSettings();
-		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
+		EthereumConfig ethereumConf = new EthereumConfig(ApplicationConfig.getString("streamr.ethereum.defaultNetwork"));
+		return Web3j.build(new HttpService(ethereumConf.getRpcUrl()));
 	}
 
 	/**
