@@ -6,7 +6,6 @@ import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 import grails.test.runtime.FreshRuntime
-import org.web3j.exceptions.MessageDecodingException
 import spock.lang.Specification
 
 import java.util.concurrent.ExecutionException
@@ -59,12 +58,12 @@ class BalanceServiceSpec extends Specification {
 		thrown(ApiException)
 	}
 
-	void "check balance when underlying Web3j API throws MessageDecodingException"() {
+	void "check balance when underlying Web3j API throws RuntimeException"() {
 		when:
 		service.getDatacoinBalances(me)
 
 		then:
-		1 * service.web3jHelperService.getERC20Balance(_, _, address) >> { throw new MessageDecodingException("mock: message decoding", new Exception("root cause")) }
+		1 * service.web3jHelperService.getERC20Balance(_, _, address) >> { throw new RuntimeException("mock: message decoding", new Exception("root cause")) }
 		thrown(ApiException)
 	}
 }
