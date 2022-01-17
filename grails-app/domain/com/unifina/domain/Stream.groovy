@@ -35,6 +35,13 @@ class Stream implements Comparable {
 	// exampleType marks this Stream as an example for new users.
 	ExampleType exampleType = ExampleType.NOT_SET
 
+	// Is this Stream migrated to Brubeck network?
+	Boolean migrateToBrubeck = false
+	// Brubeck migration sync turned on at date
+	Date migrateSyncTurnedOnAt
+	// Brubeck migration sync last run at date
+	Date migrateSyncLastRunAt
+
 	static hasMany = [
 		permissions: Permission,
 		products: Product,
@@ -60,6 +67,9 @@ class Stream implements Comparable {
 		storageDays(nullable: false, min: 0, max: Integer.MAX_VALUE)
 		inactivityThresholdHours(nullable: false, min: 0, max: Integer.MAX_VALUE)
 		exampleType(nullable: false)
+		migrateToBrubeck(nullable: false)
+		migrateSyncTurnedOnAt(nullable: true)
+		migrateSyncLastRunAt(nullable: true)
 	}
 
 	static mapping = {
@@ -79,10 +89,9 @@ class Stream implements Comparable {
 		return name
 	}
 
-	// TODO: in PR phase, coordinate with frontend to remove dependency on stream.feed.* (maybe used in Editor)
 	@CompileStatic
-	Map toMap() {
-		[
+	Map<String, Object> toMap() {
+		Map<String, Object> map = [
 			id: id,
 			partitions: partitions,
 			name: name,
@@ -95,7 +104,11 @@ class Stream implements Comparable {
 			autoConfigure: autoConfigure,
 			storageDays: storageDays,
 			inactivityThresholdHours: inactivityThresholdHours,
+			migrateToBrubeck: migrateToBrubeck,
+			migrateSyncTurnedOnAt: migrateSyncTurnedOnAt,
+			migrateSyncLastRunAt: migrateSyncLastRunAt,
 		]
+		return map
 	}
 
 	@CompileStatic
