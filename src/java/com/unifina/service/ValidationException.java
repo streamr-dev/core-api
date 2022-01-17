@@ -1,33 +1,33 @@
 package com.unifina.service;
-import java.util.List;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.stream.Stream;
-import java.util.stream.Collectors;
+
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 
-public class ValidationException extends RuntimeException {
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
-	public ValidationException() {}
+public class ValidationException extends ApiException {
+	private static final int STATUS_CODE = 422;
+	private static final String CODE = "VALIDATION_ERROR";
 
 	public ValidationException(Errors errors) {
-		super(turnToMessage(errors.getFieldErrors()));
+		super(STATUS_CODE, CODE, turnToMessage(errors.getFieldErrors()));
 	}
 
 	public ValidationException(FieldError error) {
-		super(turnToMessage(Collections.singletonList(error)));
+		super(STATUS_CODE, CODE, turnToMessage(Collections.singletonList(error)));
 	}
 
 	public ValidationException(String message) {
-		super(message);
+		super(STATUS_CODE, CODE, message);
 	}
 
 	private static String turnToMessage(List<FieldError> errors) {
 		return "Invalid " + errors
-			.stream()
-			.map(ValidationException::createFieldErrorDescription)
-			.collect(Collectors.joining(", "));
+				.stream()
+				.map(ValidationException::createFieldErrorDescription)
+				.collect(Collectors.joining(", "));
 	}
 
 	private static String createFieldErrorDescription(FieldError error) {

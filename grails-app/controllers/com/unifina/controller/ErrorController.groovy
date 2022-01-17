@@ -1,33 +1,16 @@
 package com.unifina.controller
 
-import com.unifina.service.*
+import com.unifina.service.ApiError
+import com.unifina.service.ApiException
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 
 import javax.servlet.http.HttpServletResponse
 
 class ErrorController {
-
-	static final Map<String, Closure<ApiError>> errorMappings = [
-		ValidationException: validationException(),
-		InvalidSessionTokenException: { InvalidSessionTokenException e -> new ApiError(401, "INVALID_SESSION_TOKEN_ERROR", e.message) },
-		ChallengeVerificationFailedException: { ChallengeVerificationFailedException e -> new ApiError(401, "CHALLENGE_VERIFICATION_FAILED_ERROR", e.message) },
-		DisabledUserException: { DisabledUserException e -> new ApiError(401, "DISABLED_USER_EXCEPTION", e.message) },
-		BadRequestException: { BadRequestException e -> new ApiError(400, "PARAMETER_MISSING", e.message) },
-		FieldCannotBeUpdatedException: { FieldCannotBeUpdatedException e -> new ApiError(422, "FIELD_CANNOT_BE_UPDATED", e.message) }
+	static final Map<String, Closure<ApiError>> ERROR_MAPPINGS = [
+		(grails.validation.ValidationException): { grails.validation.ValidationException e -> new ApiError(422, "VALIDATION_ERROR", v.message) }
 	]
-
-	private static Closure<ApiError> validationException() {
-		return { Exception e ->
-			if (e instanceof grails.validation.ValidationException) {
-				grails.validation.ValidationException ve = (grails.validation.ValidationException) e
-				ValidationException v = new ValidationException(ve.errors)
-				return new ApiError(422, "VALIDATION_ERROR", v.message)
-			}
-			ValidationException ve = (ValidationException) e
-			return new ApiError(422, "VALIDATION_ERROR", ve.message)
-		}
-	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE, expectedContentTypes = ["application/json", "multipart/form-data"])
 	def index() {
@@ -50,7 +33,7 @@ class ErrorController {
 
 	@CompileStatic
 	def renderAsJson(Exception exception) {
-		def mapper = errorMappings[exception.class.simpleName]
+		def mapper = ERROR_MAPPINGS[exception.class.name]
 
 		ApiError apiError
 		if (mapper) {
