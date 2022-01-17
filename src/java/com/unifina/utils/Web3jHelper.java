@@ -7,10 +7,12 @@ import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.*;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.*;
+import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.Request;
+import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.*;
-import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.Contract;
 
 import java.io.IOException;
@@ -22,15 +24,12 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class Web3jHelper {
-	private final static String ADDRESS_NONE = "0x0000000000000000000000000000000000000000";
+	private static final String ADDRESS_NONE = "0x0000000000000000000000000000000000000000";
+	private static final Logger log = Logger.getLogger(Web3jHelper.class);
 
 	public static class BlockchainException extends Exception {
 		public BlockchainException(String msg) {
 			super(msg);
-		}
-
-		public BlockchainException(Throwable cause) {
-			super(cause);
 		}
 	}
 
@@ -45,8 +44,6 @@ public class Web3jHelper {
 			super(msg);
 		}
 	}
-
-	private static final Logger log = Logger.getLogger(Web3jHelper.class);
 
 	public static TransactionReceipt getTransactionReceipt(Web3j web3, String txhash) throws IOException {
 		EthGetTransactionReceipt gtr = web3.ethGetTransactionReceipt(txhash).send();
@@ -80,12 +77,7 @@ public class Web3jHelper {
 
 	/**
 	 * get item (i,j,k...) from a multi-dimensional Web3j array
-	 *
-	 * @param array
-	 * @param indices
-	 * @return
 	 */
-
 	public static Type web3jArrayGet(Array array, int... indices) {
 		Array ar = array;
 		Object val = null;
@@ -98,26 +90,10 @@ public class Web3jHelper {
 		return (Type) val;
 	}
 
-	public static TransactionReceipt waitForTransactionReceipt(Web3j web3j, String txHash, long waitMsBetweenTries, int tries) throws IOException {
-		try {
-			return waitForTransactionReceipt(web3j, txHash, waitMsBetweenTries, tries, false);
-		} catch (InterruptedException e) {
-			log.error("waitForTransactionReceipt threw InterruptedException despite throwInterruptedException = false. This shouldnt happen.");
-			throw new RuntimeException(e);
-		}
-	}
-
 	/**
-	 * @param web3j
-	 * @param txHash
-	 * @param waitMsBetweenTries
-	 * @param tries
-	 * @param throwInterruptedException
 	 * @return the TransactionReceipt, or null if none was found in allotted time
-	 * @throws InterruptedException
-	 * @throws IOException
 	 */
-	public static TransactionReceipt waitForTransactionReceipt(Web3j web3j, String txHash, long waitMsBetweenTries, int tries, boolean throwInterruptedException) throws InterruptedException, IOException {
+	public static TransactionReceipt waitForTransactionReceipt(Web3j web3j, String txHash, long waitMsBetweenTries, int tries) throws IOException {
 		TransactionReceipt receipt = null;
 		int retry = 0;
 		while (receipt == null && retry < tries) {
@@ -131,29 +107,28 @@ public class Web3jHelper {
 		return receipt;
 	}
 
-	public static Web3j getWeb3jConnectionFromConfig() {
-		EthereumConfig ethereumConf = new EthereumConfig(ApplicationConfig.getString("streamr.ethereum.defaultNetwork"));
-		return Web3j.build(new HttpService(ethereumConf.getRpcUrl()));
-	}
-
 	/**
 	 * Get a public field in Ethereum contract. Returns T of a Type&lt;T&gt; specified in fieldType.
 	 *
-	 * @return Web3j.Type return value from eth_call (Solidity type + value), or null if bad address or fieldName
 	 * <p>
 	 * For example:
-	 * <p>
+	 * <pre>
 	 * if contract contains:
 	 * address public owner;
-	 * <p>
+	 *
 	 * then
-	 * String s = getPublicField(web3j, contractAddress, "owner", Address.class); returns a String type with the owner address
-	 * <p>
+	 * String s = getPublicField(web3j, contractAddress, "owner", Address.class);
+	 * returns a String type with the owner address
+	 *
 	 * if contract contains:
 	 * uint public somenum;
-	 * <p>
+	 *
 	 * then
-	 * BigInteger i = getPublicField(web3j, contractAddress, "somenum", Uint.class); returns a BigInteger with the value of somenum
+	 * BigInteger i = getPublicField(web3j, contractAddress, "somenum", Uint.class);
+	 * returns a BigInteger with the value of somenum
+	 * </pre>
+	 *
+	 * @return Web3j.Type return value from eth_call (Solidity type + value), or null if bad address or fieldName
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T, X extends Type<T>> T getPublicField(Web3j web3j, String contractAddress, String fieldName, Class<X> fieldType) throws IOException {
@@ -181,13 +156,8 @@ public class Web3jHelper {
 	}
 
 	/**
-	 * @param web3j
-	 * @param tr
 	 * @return the timestamp (seconds) of the block in which trasnaction occured
-	 * @throws IOException
-	 * @throws BlockchainException
 	 */
-
 	public static long getBlockTime(Web3j web3j, TransactionReceipt tr) throws IOException, BlockchainException {
 		DefaultBlockParameter dbp = DefaultBlockParameter.valueOf(tr.getBlockNumber());
 		EthBlock eb = web3j.ethGetBlockByNumber(dbp, false).send();
@@ -218,12 +188,8 @@ public class Web3jHelper {
 	}
 
 	/**
-	 * @param web3j
-	 * @param erc20address  address of ERC20 or 0x0 for ETH balance
-	 * @param holderAddress
+	 * @param erc20address address of ERC20 or 0x0 for ETH balance
 	 * @return token balance in wei
-	 * @throws ExecutionException
-	 * @throws InterruptedException
 	 */
 	public static BigInteger getERC20Balance(Web3j web3j, String erc20address, String holderAddress) throws ExecutionException, InterruptedException {
 		Address tokenAddress = new Address(erc20address);
@@ -246,13 +212,5 @@ public class Web3jHelper {
 		}
 		List<Type> rslt = FunctionReturnDecoder.decode(response.getValue(), balanceOf.getOutputParameters());
 		return ((Uint) rslt.iterator().next()).getValue();
-	}
-
-	private static <T> T send(RemoteCall<T> call) throws BlockchainException {
-		try {
-			return call.send();
-		} catch (Exception e) {
-			throw new BlockchainException(e);
-		}
 	}
 }
