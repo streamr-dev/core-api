@@ -1,6 +1,8 @@
 package com.unifina.service
 
 import com.unifina.domain.User
+import com.unifina.utils.ApplicationConfig
+import com.unifina.utils.EthereumConfig
 import com.unifina.utils.Web3jHelper
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
@@ -15,12 +17,17 @@ class EthereumService {
 	 * @return admin's address, or null if contractAddress is faulty
 	 */
 	String fetchDataUnionAdminsEthereumAddress(String contractAddress) {
-		Web3j web3j = Web3jHelper.getWeb3jConnectionFromConfig()
+		EthereumConfig ethereumConf = new EthereumConfig(ApplicationConfig.getString("streamr.ethereum.defaultNetwork"));
+		Web3j web3j = ethereumConf.getWeb3j(EthereumConfig.RpcConnectionMethod.HTTP)
 		try {
 			return Web3jHelper.getPublicField(web3j, contractAddress, "owner", Address.class)
 		} catch (IOException e) {
 			log.error("fetch data union admins ethereum address error", e)
 			throw new RuntimeException(e)
+		} finally {
+			if (web3j != null) {
+				web3j.shutdown()
+			}
 		}
 	}
 
