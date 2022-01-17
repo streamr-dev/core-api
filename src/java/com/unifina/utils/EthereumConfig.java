@@ -2,6 +2,7 @@ package com.unifina.utils;
 
 import org.apache.log4j.Logger;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.Web3jService;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.websocket.WebSocketService;
 
@@ -35,37 +36,26 @@ public final class EthereumConfig {
 		return url;
 	}
 
-	public Web3j getWeb3j(RpcConnectionMethod preferredMethod) {
-		int start = preferredMethod.ordinal();
-		int len = RpcConnectionMethod.values().length;
-
-		// cycle through all connection methods starting with preferredMethod
-		for (int i = 0; i < len; i++) {
-			RpcConnectionMethod method = RpcConnectionMethod.values()[start + i % len];
-			Web3j web3j = getWeb3jUsingMethod(method);
-			if (web3j != null) {
-				log.info("Created RPC using connection method: " + method);
-				return web3j;
-			}
-		}
-		return null;
-	}
-
 	/**
 	 * @param method the connection method
 	 * @return a Web3j connector, or null if it can't create
 	 */
-	private Web3j getWeb3jUsingMethod(RpcConnectionMethod method) {
+	public Web3j getWeb3j(RpcConnectionMethod method) {
 		String url;
+		Web3jService service;
 		switch (method) {
 			case HTTP:
 				url = getRpcUrl();
-				return Web3j.build(new HttpService(url));
+				service = new HttpService(url);
+				break;
 			case WS:
 				url = getWebsocketRpcUri();
-				return Web3j.build(new WebSocketService(url, true));
+				service = new WebSocketService(url, true);
+				break;
 			default:
 				return null;
 		}
+		log.info("Creating RPC connection using method: " + method);
+		return Web3j.build(service);
 	}
 }
