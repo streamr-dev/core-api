@@ -1,5 +1,6 @@
 package com.unifina.utils;
 
+import com.unifina.service.BlockchainException;
 import org.apache.log4j.Logger;
 import org.web3j.abi.EventValues;
 import org.web3j.abi.FunctionEncoder;
@@ -23,26 +24,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class Web3jHelper {
-	private static final String ADDRESS_NONE = "0x0000000000000000000000000000000000000000";
+public final class Web3jHelper {
 	private static final Logger log = Logger.getLogger(Web3jHelper.class);
 
-	public static class BlockchainException extends Exception {
-		public BlockchainException(String msg) {
-			super(msg);
-		}
-	}
-
-	public static class BlockTimestampIsNullException extends BlockchainException {
-		public BlockTimestampIsNullException(String msg) {
-			super(msg);
-		}
-	}
-
-	public static class BlockWasNullException extends BlockchainException {
-		public BlockWasNullException(String msg) {
-			super(msg);
-		}
+	private Web3jHelper() {
 	}
 
 	public static TransactionReceipt getTransactionReceipt(Web3j web3, String txhash) throws IOException {
@@ -141,8 +126,9 @@ public class Web3jHelper {
 		EthCall response = request.send();
 		Response.Error err = response.getError();
 		if (err != null) {
-			log.error(String.format("getPublicField() error: message: '%s', code: '%d', data: '%s', contract address: '%s'", err.getMessage(), err.getCode(), err.getData(), contractAddress));
-			throw new Web3jException(err);
+			String msg = String.format("getPublicField() error: message: '%s', code: '%d', data: '%s', contract address: '%s'", err.getMessage(), err.getCode(), err.getData(), contractAddress);
+			log.error(msg);
+			throw new BlockchainException(msg);
 		}
 		List<Type> result = FunctionReturnDecoder.decode(response.getValue(), func.getOutputParameters());
 		Iterator<Type> i = result.iterator();
@@ -173,13 +159,13 @@ public class Web3jHelper {
 		if (block == null) {
 			String err = "getBlock() returned null block for txHash " + tr.getTransactionHash();
 			log.error(err);
-			throw new BlockWasNullException(err);
+			throw new BlockchainException(err);
 		}
 		BigInteger timestamp = block.getTimestamp();
 		if (timestamp == null) {
 			String err = "getBlock() returned null timestamp for block: " + block + ", re txHash: " + tr.getTransactionHash();
 			log.error(err);
-			throw new BlockTimestampIsNullException(err);
+			throw new BlockchainException(err);
 		}
 
 		long ts = timestamp.longValue();
