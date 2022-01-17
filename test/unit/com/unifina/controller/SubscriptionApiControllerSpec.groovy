@@ -11,13 +11,13 @@ import groovy.json.JsonSlurper
 import spock.lang.Specification
 
 @TestFor(SubscriptionApiController)
-@Mock([RESTAPIFilters, User, UserRole])
+@Mock([RESTAPIFilters, User, UserRole, Role, Product])
 class SubscriptionApiControllerSpec extends Specification {
 
 	User devOpsUser
 
 	void setup() {
-		devOpsUser = new User(name: "me@streamr.network").save(failOnError: true, validate: false)
+		devOpsUser = new User(name: "0x809408D25AC4bF286A665Ba06EaBe0dE57396b37").save(failOnError: true, validate: false)
 		def devopsRole = new Role(authority: "ROLE_DEV_OPS").save(failOnError: true)
 		new UserRole(user: devOpsUser, role: devopsRole).save(failOnError: true)
 	}
@@ -39,7 +39,7 @@ class SubscriptionApiControllerSpec extends Specification {
 
 	void "index() returns 200 and renders subscriptions"() {
 		User user = new User(
-			username: "user@domain.com",
+			username: "0x6E35686A5871d7c18853f99f7442b5b1d0E898A5",
 			name: "Firstname Lastname",
 		)
 		user.id = 1
@@ -138,7 +138,7 @@ class SubscriptionApiControllerSpec extends Specification {
 
 		request.apiUser = devOpsUser
 		request.JSON = [
-		    address: "0x0000000000000000000000000000000000000000",
+			address: "0x0000000000000000000000000000000000000000",
 			product: "1",
 			endsAt: 1520334404
 		]

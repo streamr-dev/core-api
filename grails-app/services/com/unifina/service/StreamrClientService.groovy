@@ -27,6 +27,10 @@ class StreamrClientService {
 
 	private Constructor<StreamrClient> clientConstructor
 
+	static doWithConfig(c) {
+		c.streamr.ethereum.nodePrivateKey = "0x0000000000000000000000000000000000054321"
+	}
+
 	StreamrClientService() {
 		clientConstructor = StreamrClient.class.getConstructor(StreamrClientOptions)
 	}

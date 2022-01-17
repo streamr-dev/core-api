@@ -6,7 +6,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 @TestFor(Product)
-@Mock([User, Product])
+@Mock([User, Product, Category])
 class ProductSpec extends Specification {
 	void "previewStream() validator passes if previewStream = null and streams empty"() {
 		def p = new Product(

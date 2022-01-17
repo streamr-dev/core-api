@@ -6,7 +6,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(SubscriptionService)
-@Mock([SubscriptionFree, SubscriptionPaid, Product, Subscription])
+@Mock([User, SubscriptionFree, SubscriptionPaid, Product, Subscription])
 class SubscriptionServiceSpec extends BeanMockingSpecification {
 	User user, user2
 	String s1, s2, s3

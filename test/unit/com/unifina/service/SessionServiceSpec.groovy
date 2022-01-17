@@ -18,8 +18,8 @@ class SessionServiceSpec extends Specification {
 
 		// Must mock executeUpdate(String,List) because HQL is not supported in unit test GORM
 		// Used in SessionService#updateUsersLoginDate()
-		def secUserMock = mockFor(User)
-		secUserMock.demand.static.executeUpdate(1) { String s, List p ->
+		def userMock = mockFor(User)
+		userMock.demand.static.executeUpdate(1) { String s, List p ->
 			User.get(p[1]).lastLogin = p[0]
 		}
 	}

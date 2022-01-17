@@ -6,7 +6,7 @@ import com.unifina.domain.UserRole
 import grails.test.mixin.Mock
 import spock.lang.Specification
 
-@Mock(UserRole)
+@Mock([User, Role, UserRole])
 class AllowRoleSpec extends Specification {
 
 	void "hasUserRole(null) is true when this == NO_ROLE_REQUIRED"() {
@@ -57,7 +57,7 @@ class AllowRoleSpec extends Specification {
 		User user = new User()
 		user.save(failOnError: true, validate: false)
 
-        Role secRole = new Role(authority: "ROLE_ADMIN")
+		Role secRole = new Role(authority: "ROLE_ADMIN")
 		secRole.save(failOnError: true)
 
 		new UserRole(user: user, role: secRole).save(failOnError: true)

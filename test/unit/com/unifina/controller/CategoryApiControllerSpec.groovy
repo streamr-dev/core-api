@@ -6,7 +6,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(CategoryApiController)
-@Mock([Category])
+@Mock([User, Category])
 class CategoryApiControllerSpec extends ControllerSpecification {
 
 	User me

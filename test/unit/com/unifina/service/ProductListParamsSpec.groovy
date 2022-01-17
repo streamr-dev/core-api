@@ -17,8 +17,9 @@ class ProductListParamsSpec extends Specification {
 	User user, other
 
 	void setup() {
+		String address = "0x808a9b387Cf830CEb16108C84b50202a69188fdd"
 		user = new User(
-			username: "user@domain.com",
+			username: address,
 			name: "Firstname Lastname",
 		)
 		user.id = 1
@@ -39,8 +40,8 @@ class ProductListParamsSpec extends Specification {
 		Product p1 = new Product(
 			name: "Generic Product",
 			description: "Hello, world! I am a product.",
-			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			ownerAddress: address,
+			beneficiaryAddress: address,
 			category: c1,
 			pricePerSecond: 5,
 			state: Product.State.NOT_DEPLOYED,
@@ -49,8 +50,8 @@ class ProductListParamsSpec extends Specification {
 		Product p2 = new Product(
 			name: "Hello Product",
 			description: "description",
-			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			ownerAddress: address,
+			beneficiaryAddress: address,
 			category: c2,
 			pricePerSecond: 10,
 			state: Product.State.DEPLOYING,
@@ -59,8 +60,8 @@ class ProductListParamsSpec extends Specification {
 		Product p3 = new Product(
 			name: "Cryptocurrency Product",
 			description: "Live exchange rate between USD and ETH",
-			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			ownerAddress: address,
+			beneficiaryAddress: address,
 			category: c3,
 			pricePerSecond: 1,
 			state: Product.State.DEPLOYED,
@@ -69,8 +70,8 @@ class ProductListParamsSpec extends Specification {
 		Product p4 = new Product(
 			name: "Automobile Product",
 			description: "Real-time automobile sensor and GPS data",
-			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			ownerAddress: address,
+			beneficiaryAddress: address,
 			category: c1,
 			pricePerSecond: 3,
 			state: Product.State.DEPLOYED,
@@ -79,8 +80,8 @@ class ProductListParamsSpec extends Specification {
 		Product p5 = new Product(
 			name: "Water Product",
 			description: "Water quality",
-			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			ownerAddress: address,
+			beneficiaryAddress: address,
 			category: c4,
 			pricePerSecond: 11,
 			state: Product.State.DEPLOYED,

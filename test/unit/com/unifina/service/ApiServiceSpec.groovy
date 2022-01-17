@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.unifina.domain.Permission
 import com.unifina.domain.Product
 import com.unifina.domain.User
@@ -12,7 +11,7 @@ import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin)
 @TestFor(ApiService)
-@Mock(Product)
+@Mock([Permission, Product])
 class ApiServiceSpec extends Specification {
 
 	void "list() returns streams with share permission"() {

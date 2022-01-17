@@ -2,7 +2,9 @@ package com.unifina.domain
 
 import com.unifina.BeanMockingSpecification
 import com.unifina.service.EthereumUserService
+import grails.test.mixin.Mock
 
+@Mock([User, Subscription, SubscriptionPaid])
 class SubscriptionSpec extends BeanMockingSpecification {
 
 	Subscription subscription

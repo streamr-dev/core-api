@@ -11,7 +11,7 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(ProductImageService)
-@Mock(Product)
+@Mock([Category, Product, User])
 class ProductImageServiceSpec extends Specification {
 
 	Product product

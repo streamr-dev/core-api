@@ -1,5 +1,6 @@
 package com.unifina.utils;
 
+import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.id.IdentifierGenerator;
 import org.web3j.utils.Numeric;
@@ -15,7 +16,7 @@ public class HexIdGenerator implements IdentifierGenerator {
 	 * @return String
 	 */
 	@Override
-	public Serializable generate(SessionImplementor session, Object object) {
+	public Serializable generate(SessionImplementor session, Object object) throws HibernateException {
 		UUID uuid = UUID.randomUUID();
 		UUID uuid2 = UUID.randomUUID();
 
