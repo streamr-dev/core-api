@@ -21,17 +21,23 @@ public final class EthereumConfig {
 	}
 
 	public String getRpcUrl() {
-		String url = ApplicationConfig.getString("streamr.ethereum.networks." + network);
+		String key = "streamr.ethereum.networks." + network;
+		String url = ApplicationConfig.getString(key);
+		log.debug(String.format("Ethereum RPC HTTP URL key='%s' value='%s'", key, url));
 		if (url == null) {
-			throw new RuntimeException("No rpcUrl found for Ethereum network " + network);
+			String s = String.format("No RPC HTTP URL found for Ethereum network: '%s'", network);
+			throw new RuntimeException(s);
 		}
 		return url;
 	}
 
 	public String getWebsocketRpcUri() {
-		String url = ApplicationConfig.getString("streamr.ethereum.wss." + network);
+		String key = "streamr.ethereum.wss." + network;
+		String url = ApplicationConfig.getString(key);
+		log.debug(String.format("Ethereum RPC WS URL key='%s' value='%s'", key, url));
 		if (url == null) {
-			throw new RuntimeException("No websockets URI found for Ethereum network " + network);
+			String s = String.format("No RPC WS URL found for Ethereum network: '%s'", network);
+			throw new RuntimeException(s);
 		}
 		return url;
 	}
@@ -55,7 +61,7 @@ public final class EthereumConfig {
 			default:
 				return null;
 		}
-		log.info("Creating RPC connection using method: " + method);
+		log.debug(String.format("Creating Ethereum RPC connection using method: %s", method));
 		return Web3j.build(service);
 	}
 }
