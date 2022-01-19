@@ -1,6 +1,6 @@
-package com.unifina.utils;
+package com.unifina.service;
 
-import com.unifina.service.BlockchainException;
+import com.unifina.utils.ThreadUtil;
 import org.apache.log4j.Logger;
 import org.web3j.abi.EventValues;
 import org.web3j.abi.FunctionEncoder;

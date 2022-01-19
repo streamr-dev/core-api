@@ -1,6 +1,5 @@
 package com.unifina.service
 
-import com.unifina.utils.Web3jHelper
 import org.web3j.protocol.Web3j
 
 import java.util.concurrent.ExecutionException

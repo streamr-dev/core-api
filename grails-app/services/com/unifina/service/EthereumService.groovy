@@ -3,7 +3,6 @@ package com.unifina.service
 import com.unifina.domain.User
 import com.unifina.utils.ApplicationConfig
 import com.unifina.utils.EthereumConfig
-import com.unifina.utils.Web3jHelper
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
 import org.web3j.abi.datatypes.Address
