@@ -1,6 +1,5 @@
-package com.unifina.utils
+package com.unifina.service
 
-import com.unifina.service.ApiException
 import org.apache.commons.io.IOUtils
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -17,7 +16,8 @@ class ImageResizerSpec extends Specification {
 	}
 
 	private byte[] bytesFromFile(String fileName) {
-		return IOUtils.toByteArray(getClass().getResource("test-images/" + fileName).toURI())
+		InputStream input = getClass().getResourceAsStream("/resources/test-images/" + fileName)
+		return IOUtils.toByteArray(input)
 	}
 
 	private BufferedImage imageFromBytes(byte[] bytes) {

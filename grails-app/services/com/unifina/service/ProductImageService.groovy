@@ -3,8 +3,6 @@ package com.unifina.service
 import com.streamr.s3.S3Client
 import com.unifina.domain.Product
 import com.unifina.utils.IdGenerator
-import com.unifina.utils.ImageResizer
-import com.unifina.utils.ImageVerifier
 
 class ProductImageService {
 	S3Client s3Client

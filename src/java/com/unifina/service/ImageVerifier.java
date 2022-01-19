@@ -1,6 +1,4 @@
-package com.unifina.utils;
-
-import com.unifina.service.ApiException;
+package com.unifina.service;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;

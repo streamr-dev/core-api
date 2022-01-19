@@ -4,8 +4,6 @@ import com.streamr.s3.S3Client
 import com.unifina.domain.Category
 import com.unifina.domain.Product
 import com.unifina.domain.User
-import com.unifina.utils.ImageResizer
-import com.unifina.utils.ImageVerifier
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification

@@ -1,4 +1,4 @@
-package com.unifina.utils
+package com.unifina.service
 
 import spock.lang.Specification
 

@@ -3,8 +3,6 @@ package com.unifina.service
 import com.streamr.s3.S3Client
 import com.unifina.domain.User
 import com.unifina.utils.IdGenerator
-import com.unifina.utils.ImageResizer
-import com.unifina.utils.ImageVerifier
 import grails.transaction.NotTransactional
 import grails.transaction.Transactional
 
