@@ -193,8 +193,8 @@ streamr.ethereum.networks = PropertiesUtil.matchingPropertiesToMap("streamr.ethe
 	sidechain: "http://localhost:8546",
 ]
 streamr.ethereum.wss = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.wss.", System.getProperties()) ?: [
-	local: "ws://localhost:8545",
-	sidechain: "ws://localhost:8546",
+	local: "ws://10.200.10.1:8450",
+	sidechain: "ws://10.200.10.1:8451",
 ]
 // Ethereum identity of this instance. Don't use this silly development private key for anything.
 streamr.ethereum.nodePrivateKey = "".equals(System.getProperty("streamr.ethereum.nodePrivateKey", "")) ? "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF" : System.getProperty("streamr.ethereum.nodePrivateKey")
