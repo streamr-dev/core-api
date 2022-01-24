@@ -2,6 +2,7 @@ package com.unifina.service
 
 import com.unifina.domain.User
 import com.unifina.utils.ApplicationConfig
+import com.unifina.utils.ApplicationConfigException
 import com.unifina.utils.EthereumConfig
 import org.web3j.exceptions.MessageDecodingException
 import org.web3j.protocol.Web3j
@@ -19,7 +20,7 @@ class BalanceService {
 			web3j = ethereumConf.getWeb3j(EthereumConfig.RpcConnectionMethod.HTTP)
 			String dataCoinAddress = ApplicationConfig.getString("streamr.ethereum.datacoinAddress");
 			if (dataCoinAddress == null) {
-				throw new RuntimeException("No datacoin address found in config");
+				throw new ApplicationConfigException("No datacoin address found in config");
 			}
 			try {
 				String address = user.getUsername()
