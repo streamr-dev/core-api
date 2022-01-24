@@ -46,10 +46,6 @@
       "description": "Products sold on a marketplace containing Streams"
     },
     {
-      "name": "streams",
-      "description": "Manage Streams, and insert or read data from them"
-    },
-    {
       "name": "subscriptions",
       "description": "Subscriptions for Products purchased on the marketplace"
     },
@@ -1923,531 +1919,10 @@
         }
       }
     },
-    "/products/remove/{username}": {
-      "delete": {
-        "summary": "Remove troll users products",
-        "description": "Removes users all products. Undo is not supported. Admin role is required.",
-        "tags": [
-          "products"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "username",
-            "description": "Username of the product owner",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Product's removed'",
-            "schema": {
-              "$ref": "#/definitions/Product"
-            }
-          },
-          "400": {
-            "description": "Username is missing from the request.",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Not authenticated",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/streams": {
-      "get": {
-        "summary": "List streams",
-        "description": "Lists the streams available to the user.\n",
-        "parameters": [
-          {
-            "name": "name",
-            "in": "query",
-            "description": "Only return streams that exactly match the given name.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "uiChannel",
-            "in": "query",
-            "description": "Filter by whether this stream is an UI channel or not. UI channels are streams used to push updates to visualisation widgets. For the typical list of streams, set this to false.",
-            "required": false,
-            "type": "boolean",
-            "default": false
-          },
-          {
-            "name": "noConfig",
-            "in": "query",
-            "description": "Remove config object from JSON response.",
-            "required": false,
-            "type": "boolean",
-            "default": false
-          },
-          {
-            "name": "search",
-            "type": "string",
-            "in": "query",
-            "description": "Filter by search term in name or description",
-            "required": false
-          },
-          {
-            "name": "sortBy",
-            "type": "string",
-            "in": "query",
-            "description": "Sort the returned results by the given field.",
-            "required": false,
-            "default": "id"
-          },
-          {
-            "name": "order",
-            "type": "string",
-            "enum": [
-              "asc",
-              "desc"
-            ],
-            "in": "query",
-            "description": "Control whether the results are sorted in ascending or descending order. Used with parameter `sortBy`.",
-            "required": false,
-            "default": "asc"
-          },
-          {
-            "name": "max",
-            "type": "integer",
-            "in": "query",
-            "description": "Maximum number of returned results (capped at 100)",
-            "required": false,
-            "default": 100
-          },
-          {
-            "name": "offset",
-            "type": "integer",
-            "in": "query",
-            "description": "Skip the first (offset) results. Used together with max for paging.",
-            "required": false,
-            "default": 0
-          },
-          {
-            "name": "grantedAccess",
-            "type": "boolean",
-            "in": "query",
-            "description": "If false, excludes resources that user has been granted specific permission to from results.",
-            "required": false,
-            "default": true
-          },
-          {
-            "name": "publicAccess",
-            "type": "boolean",
-            "in": "query",
-            "description": "If true, includes publicly available resources in the results.",
-            "required": false,
-            "default": false
-          },
-          {
-            "name": "operation",
-            "type": "string",
-            "enum": [
-              "stream_get",
-              "stream_edit",
-              "stream_delete",
-              "stream_publish",
-              "stream_subscribe",
-              "stream_share"
-            ],
-            "in": "query",
-            "description": "Filter results by Permission (access level)",
-            "required": false,
-            "default": "stream_get"
-          }
-        ],
-        "tags": [
-          "streams"
-        ],
-        "responses": {
-          "200": {
-            "description": "An array of streams",
-            "headers": {
-              "Link": {
-                "type": "string",
-                "description": "a RFC5988 Link containing a URL for fetching more results"
-              }
-            },
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Stream"
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Create a new stream",
-        "description": "Creates a new stream.\n",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "description": "Stream object",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/StreamCreateRequest"
-            }
-          }
-        ],
-        "tags": [
-          "streams"
-        ],
-        "responses": {
-          "200": {
-            "description": "The stream that was created",
-            "schema": {
-              "$ref": "#/definitions/Stream"
-            }
-          },
-          "400": {
-            "description": "Duplicate stream id"
-          },
-          "422": {
-            "description": "Validation error"
-          }
-        }
-      }
-    },
-    "/streams/{id}": {
-      "get": {
-        "summary": "Get stream by id",
-        "description": "Returns a stream by id",
-        "tags": [
-          "streams"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "ID of the stream to be fetched (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "schema": {
-              "$ref": "#/definitions/Stream"
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      },
-      "put": {
-        "summary": "Update a stream",
-        "description": "Updates a stream.",
-        "tags": [
-          "streams"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "ID of the stream to be updated",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "description": "StreamUpdateRequest object",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/StreamUpdateRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "schema": {
-              "$ref": "#/definitions/Stream"
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete a stream",
-        "description": "Deletes a stream by id. This will also delete all data for this stream. Use with caution!",
-        "tags": [
-          "streams"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "ID of the stream to be deleted",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Success (no content)"
-          },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/streams/{id}/data/partitions/{partition}/last": {
-      "get": {
-        "summary": "Get most recent events from a stream",
-        "description": "Get the N most recent events from a stream.",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "path",
-            "name": "partition",
-            "description": "Partition number",
-            "required": true,
-            "type": "integer",
-            "default": 0
-          },
-          {
-            "in": "query",
-            "name": "count",
-            "description": "Number of messages to fetch",
-            "required": false,
-            "type": "integer",
-            "default": 1
-          }
-        ],
-        "tags": [
-          "streams"
-        ],
-        "responses": {
-          "200": {
-            "description": "A list of events"
-          },
-          "400": {
-            "description": "Malformed request"
-          },
-          "401": {
-            "description": "Permission denied"
-          },
-          "403": {
-            "description": "Authentication failed"
-          },
-          "404": {
-            "description": "Stream not found"
-          },
-          "500": {
-            "description": "Unexpected error"
-          }
-        }
-      }
-    },
-    "/streams/{id}/data/partitions/{partition}/range": {
-      "get": {
-        "summary": "Get events between a range from the stream",
-        "description": "Get events between a range from the stream. The range can be defined between two timestamps or between two message references (timestamp and sequence number).",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "path",
-            "name": "partition",
-            "description": "Partition number",
-            "required": true,
-            "type": "integer",
-            "default": 0
-          },
-          {
-            "in": "query",
-            "name": "fromTimestamp",
-            "description": "Timestamp lower bound in milliseconds since Jan 1st 1970 UTC",
-            "required": true,
-            "type": "integer"
-          },
-          {
-            "in": "query",
-            "name": "fromSequenceNumber",
-            "description": "Sequence number lower bound of fromTimestamp",
-            "required": false,
-            "type": "integer"
-          },
-          {
-            "in": "query",
-            "name": "toTimestamp",
-            "description": "Timestamp upper bound in milliseconds since Jan 1st 1970 UTC",
-            "required": true,
-            "type": "integer"
-          },
-          {
-            "in": "query",
-            "name": "toSequenceNumber",
-            "description": "Sequence number upper bound of toTimestamp",
-            "required": false,
-            "type": "integer"
-          },
-          {
-            "in": "query",
-            "name": "publisherId",
-            "description": "Id of the publisher of the two message references",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "query",
-            "name": "msgChainId",
-            "description": "Id of the message chain of the publisher, required if publisherId is specified",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "streams"
-        ],
-        "responses": {
-          "200": {
-            "description": "A list of events"
-          },
-          "400": {
-            "description": "Malformed request"
-          },
-          "401": {
-            "description": "Permission denied"
-          },
-          "403": {
-            "description": "Authentication failed"
-          },
-          "404": {
-            "description": "Stream not found"
-          },
-          "500": {
-            "description": "Unexpected error"
-          }
-        }
-      }
-    },
-    "/streams/{id}/data/partitions/{partition}/from": {
-      "get": {
-        "summary": "Get events from a timestamp or reference from the stream",
-        "description": "Get events from a timestamp or reference from the stream. The starting point can be defined by a timestamp or by a message reference (timestamp and sequence number).",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "path",
-            "name": "partition",
-            "description": "Partition number",
-            "required": true,
-            "type": "integer",
-            "default": 0
-          },
-          {
-            "in": "query",
-            "name": "fromTimestamp",
-            "description": "Timestamp lower bound in milliseconds since Jan 1st 1970 UTC",
-            "required": true,
-            "type": "integer"
-          },
-          {
-            "in": "query",
-            "name": "fromSequenceNumber",
-            "description": "Sequence number lower bound of fromTimestamp",
-            "required": false,
-            "type": "integer"
-          },
-          {
-            "in": "query",
-            "name": "publisherId",
-            "description": "Id of the publisher",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "streams"
-        ],
-        "responses": {
-          "200": {
-            "description": "A list of events"
-          },
-          "400": {
-            "description": "Malformed request"
-          },
-          "401": {
-            "description": "Permission denied"
-          },
-          "403": {
-            "description": "Authentication failed"
-          },
-          "404": {
-            "description": "Stream not found"
-          },
-          "500": {
-            "description": "Unexpected error"
-          }
-        }
-      }
-    },
-    "/streams/{id}/permissions": {
+    "/products/{id}/permissions": {
       "get": {
         "summary": "List permissions",
-        "description": "Lists the permissions to given stream.\n Requires 'share' permission or ownership.",
+        "description": "Lists the permissions to given Product.\n Requires 'grant' permission or ownership.",
         "parameters": [
           {
             "in": "path",
@@ -2487,7 +1962,7 @@
       },
       "post": {
         "summary": "Grant permission",
-        "description": "Grant a new permission to given stream.\n Requires 'share' permission or ownership.",
+        "description": "Grant a new permission to given Product.\n Requires 'grant' permission or ownership.",
         "parameters": [
           {
             "in": "path",
@@ -2532,10 +2007,10 @@
         }
       }
     },
-    "/streams/{id}/permissions/{pid}": {
+    "/products/{id}/permissions/{pid}": {
       "get": {
         "summary": "Get single permission object",
-        "description": "Returns one stream-user-operation relationship object by its unique id. \n Requires 'share' permission or ownership.",
+        "description": "Returns one product-user-operation relationship object by its unique id. \n Requires 'grant' permission or ownership.",
         "tags": [
           "streams",
           "permissions"
@@ -2578,8 +2053,8 @@
         }
       },
       "delete": {
-        "summary": "Delete a stream permission",
-        "description": "Deletes a stream permission by id.\n Requires 'share' permission or ownership.",
+        "summary": "Delete a product permission",
+        "description": "Deletes a Product permission by id.\n Requires 'grant' permission or ownership.",
         "tags": [
           "streams",
           "permissions"
@@ -2619,149 +2094,40 @@
         }
       }
     },
-    "/storageNodes/{storageNodeAddress}/streams": {
-      "get": {
-        "summary": "Get streams by storage node",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "storageNodeAddress",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "streams"
-        ],
-        "responses": {
-          "200": {
-            "description": "An array of streams",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/StreamSummary"
-              }
-            }
-          },
-          "500": {
-            "description": "Unexpected error"
-          },
-          "422": {
-            "description": "Validation error"
-          }
-        }
-      }
-    },
-    "/streams/{streamId}/storageNodes": {
-      "get": {
-        "summary": "Get storage nodes by stream",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "streamId",
-            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "streams"
-        ],
-        "responses": {
-          "200": {
-            "description": "An array of stream storage nodes",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/StreamStorageNode"
-              }
-            }
-          },
-          "404": {
-            "description": "Stream not found"
-          },
-          "500": {
-            "description": "Unexpected error"
-          }
-        }
-      },
-      "post": {
-        "summary": "Create stream storage node",
-        "tags": [
-          "streams"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "streamId",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "description": "StorageNodeAddRequest object",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/StorageNodeAddRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Storage node already exists"
-          },
-          "401": {
-            "description": "No authentication"
-          },
-          "403": {
-            "description": "Authentication failed"
-          },
-          "422": {
-            "description": "Validation error"
-          }
-        }
-      }
-    },
-    "/streams/{streamId}/storageNodes/{storageNodeAddress}": {
+    "/products/remove/{username}": {
       "delete": {
-        "summary": "Delete stream storage node",
+        "summary": "Remove troll users products",
+        "description": "Removes users all products. Undo is not supported. Admin role is required.",
         "tags": [
-          "streams"
+          "products"
         ],
         "parameters": [
           {
             "in": "path",
-            "name": "streamId",
-            "description": "ID of the stream (NOTE: can contain slashes, must be url-encoded e.g. using encodeURIComponent())",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "path",
-            "name": "storageNodeAddress",
+            "name": "username",
+            "description": "Username of the product owner",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "204": {
-            "description": "Success"
+            "description": "Product's removed'",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
           },
-          "404": {
-            "description": "Not found"
+          "400": {
+            "description": "Username is missing from the request.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           },
           "401": {
-            "description": "No authentication"
-          },
-          "403": {
-            "description": "Authentication failed"
-          },
-          "422": {
-            "description": "Validation error"
+            "description": "Not authenticated",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           }
         }
       }
@@ -3100,273 +2466,6 @@
         }
       }
     },
-    "Stream": {
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for this stream.",
-          "example": "ln2g8OKHSdr7BcL-rcnh2r"
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of this stream.",
-          "example": "My stream"
-        },
-        "description": {
-          "type": "string",
-          "description": "Description of this stream.",
-          "example": "My stream description"
-        },
-        "config": {
-          "$ref": "#/definitions/StreamConfig"
-        },
-        "uiChannel": {
-          "type": "boolean",
-          "description": "Indicates whether this stream is an UI channel: a stream used internally to push updates to UI widgets.",
-          "example": false
-        },
-        "partitions": {
-          "type": "integer",
-          "description": "Number of partitions in this stream. Defaults to 1 (unpartitioned).",
-          "example": 1
-        },
-        "requireSignedData": {
-          "type": "boolean",
-          "description": "If true, all messages in this stream must be cryptographically signed. Client's should not accept unsigned messages.",
-          "example": false
-        },
-        "requireEncryptedData": {
-          "type": "boolean",
-          "description": "If true, all data in this stream must be encrypted.",
-          "example": false
-        },
-        "dateCreated": {
-          "type": "string",
-          "description": "ISO-8601 timestamp of when stream was created.",
-          "example": "2018-02-21T12:26:18Z"
-        },
-        "lastUpdated": {
-          "type": "string",
-          "description": "ISO-8601 timestamp of when stream details were updated.",
-          "example": "2018-02-21T12:26:18Z"
-        },
-        "autoConfigure": {
-          "type": "boolean",
-          "description": "If true, always try to automatically configure field names and types.",
-          "example": true
-        },
-        "storageDays": {
-          "type": "integer",
-          "description": "Historical data storage period (days)",
-          "example": 365
-        },
-        "inactivityThresholdHours": {
-          "type": "integer",
-          "description": "Inactivity period for a stream in hours.",
-          "example": 48
-        }
-      }
-    },
-    "StreamSummary": {
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for this stream.",
-          "example": "ln2g8OKHSdr7BcL-rcnh2r"
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of this stream.",
-          "example": "My stream"
-        },
-        "description": {
-          "type": "string",
-          "description": "Description of this stream.",
-          "example": "My stream description"
-        },
-        "uiChannel": {
-          "type": "boolean",
-          "description": "Indicates whether this stream is an UI channel: a stream used internally to push updates to UI widgets.",
-          "example": false
-        },
-        "partitions": {
-          "type": "integer",
-          "description": "Number of partitions in this stream. Defaults to 1 (unpartitioned).",
-          "example": 1
-        },
-        "requireSignedData": {
-          "type": "boolean",
-          "description": "If true, all messages in this stream must be cryptographically signed. Client's should not accept unsigned messages.",
-          "example": false
-        },
-        "requireEncryptedData": {
-          "type": "boolean",
-          "description": "If true, all data in this stream must be encrypted.",
-          "example": false
-        },
-        "dateCreated": {
-          "type": "string",
-          "description": "ISO-8601 timestamp of when stream was created.",
-          "example": "2018-02-21T12:26:18Z"
-        },
-        "lastUpdated": {
-          "type": "string",
-          "description": "ISO-8601 timestamp of when stream details were updated.",
-          "example": "2018-02-21T12:26:18Z"
-        },
-        "storageDays": {
-          "type": "integer",
-          "description": "Historical data storage period (days)",
-          "example": 365
-        }
-      }
-    },
-    "StreamCreateRequest": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "ID of this stream.",
-          "example": "foobar.eth/foo/bar"
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of this stream.",
-          "example": "My stream"
-        },
-        "description": {
-          "type": "string",
-          "description": "Description of this stream.",
-          "example": "My stream description"
-        },
-        "config": {
-          "$ref": "#/definitions/StreamConfig"
-        },
-        "partitions": {
-          "type": "integer",
-          "description": "Number of partitions in this stream. Defaults to 1 (unpartitioned).",
-          "example": 1
-        },
-        "requireSignedData": {
-          "type": "boolean",
-          "description": "If true, all messages in this stream must be cryptographically signed. Client's should not accept unsigned messages.",
-          "example": false
-        },
-        "requireEncryptedData": {
-          "type": "boolean",
-          "description": "If true, all data in this stream must be encrypted.",
-          "example": false
-        },
-        "autoConfigure": {
-          "type": "boolean",
-          "description": "If true, always try to automatically configure field names and types.",
-          "example": true
-        },
-        "storageDays": {
-          "type": "integer",
-          "description": "Historical data storage period (days)",
-          "example": 365
-        },
-        "inactivityThresholdHours": {
-          "type": "integer",
-          "description": "Inactivity period for a stream in hours.",
-          "example": 48
-        }
-      }
-    },
-    "StreamUpdateRequest": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "Name of this stream.",
-          "example": "My stream"
-        },
-        "description": {
-          "type": "string",
-          "description": "Description of this stream.",
-          "example": "My stream description"
-        },
-        "config": {
-          "$ref": "#/definitions/StreamConfig"
-        },
-        "partitions": {
-          "type": "integer",
-          "description": "Number of partitions in this stream. Defaults to 1 (unpartitioned).",
-          "example": 1
-        },
-        "requireSignedData": {
-          "type": "boolean",
-          "description": "If true, all messages in this stream must be cryptographically signed. Client's should not accept unsigned messages.",
-          "example": false
-        },
-        "requireEncryptedData": {
-          "type": "boolean",
-          "description": "If true, all data in this stream must be encrypted.",
-          "example": false
-        },
-        "autoConfigure": {
-          "type": "boolean",
-          "description": "If true, always try to automatically configure field names and types.",
-          "example": true
-        },
-        "storageDays": {
-          "type": "integer",
-          "description": "Historical data storage period (days)",
-          "example": 365
-        },
-        "inactivityThresholdHours": {
-          "type": "integer",
-          "description": "Inactivity period for a stream in hours.",
-          "example": 48
-        }
-      }
-    },
-    "StreamConfig": {
-      "type": "object",
-      "properties": {
-        "fields": {
-          "type": "array",
-          "default": [],
-          "description": "An array containing field definitions for this stream.",
-          "items": {
-            "$ref": "#/definitions/FieldDefinition"
-          }
-        }
-      }
-    },
-    "FieldDefinition": {
-      "type": "object",
-      "required": [
-        "name",
-        "type"
-      ],
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "name of the field"
-        },
-        "type": {
-          "type": "string",
-          "description": "type of the field",
-          "enum": [
-            "number",
-            "string",
-            "boolean",
-            "list",
-            "map"
-          ]
-        }
-      }
-    },
     "Category": {
       "type": "object",
       "required": [
@@ -3405,8 +2504,8 @@
         },
         "operation": {
           "type": "string",
-          "description": "User rights that this permission enables, e.g. 'stream_get', 'product_edit', 'dashboard_share'",
-          "example": "stream_edit"
+          "description": "User rights that this permission enables, e.g. 'product_get', 'product_edit', 'product_grant'",
+          "example": "product_edit"
         }
       }
     },
@@ -4037,43 +3136,6 @@
         },
         "product": {
           "$ref": "#/definitions/Product"
-        }
-      }
-    },
-    "StreamStorageNode": {
-      "type": "object",
-      "required": [
-        "streamId",
-        "storageNodeAddress",
-        "dateCreated"
-      ],
-      "properties": {
-        "streamId": {
-          "type": "string",
-          "description": "Stream id"
-        },
-        "storageNodeAddress": {
-          "type": "string",
-          "description": "Ethereum address of the storage node",
-          "example": "0x1234567890123456789012345678901234567890"
-        },
-        "dateCreated": {
-          "type": "string",
-          "description": "ISO-8601 datetime",
-          "example": "2000-12-31T23:59:59Z"
-        }
-      }
-    },
-    "StorageNodeAddRequest": {
-      "type": "object",
-      "required": [
-        "address"
-      ],
-      "properties": {
-        "address": {
-          "type": "string",
-          "description": "Ethereum address of the storage node",
-          "example": "0x1234567890123456789012345678901234567890"
         }
       }
     },
