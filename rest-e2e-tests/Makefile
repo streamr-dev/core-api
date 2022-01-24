@@ -73,7 +73,7 @@ test/stress: vendor ## Run stress tests
 
 .PHONY: clean
 clean: ## Remove generated files
-	rm -rf \
+	$(RM) -r \
 		rest-e2e-tests/test-data/bigfile.txt \
 		node_modules
 

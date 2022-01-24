@@ -13,7 +13,7 @@ SHELL = /bin/bash
 .SHELLFLAGS = -eu -o pipefail -c # run '/bin/bash ... -c /bin/cmd'
 .ONESHELL:
 .DELETE_ON_ERROR:
-.DEFAULT_GOAL = idea
+.DEFAULT_GOAL = test
 
 grails = grails -plain-output
 
@@ -50,8 +50,6 @@ test-stress:
 
 .PHONY: idea
 idea: ## Generate IntelliJ IDEA project files
-	cp .idea/core-api.iml.copy .idea/core-api.iml
-	cp .idea/core-api-grailsPlugins.iml.copy .idea/core-api-grailsPlugins.iml
 	$(grails) --refresh-dependencies idea-print-project-settings
 
 .PHONY: compile
@@ -178,7 +176,7 @@ docker-run-dev: ## Run Docker dev container locally
 
 .PHONY: clean
 clean: ## Remove all files created by this Makefile
-	rm -rf \
+	$(RM) -r \
 		dependencies.txt \
 		tomcat.8081/work \
 		target \
