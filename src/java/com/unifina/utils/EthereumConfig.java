@@ -6,6 +6,8 @@ import org.web3j.protocol.Web3jService;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.websocket.WebSocketService;
 
+import java.util.Objects;
+
 public final class EthereumConfig {
 	private static final Logger log = Logger.getLogger(EthereumConfig.class);
 
@@ -17,6 +19,7 @@ public final class EthereumConfig {
 	}
 
 	public EthereumConfig(final String network) {
+		Objects.requireNonNull(network, "Ethereum network name should not be null");
 		this.network = network;
 	}
 
@@ -25,8 +28,8 @@ public final class EthereumConfig {
 		String url = ApplicationConfig.getString(key);
 		log.debug(String.format("Ethereum RPC HTTP URL key='%s' value='%s'", key, url));
 		if (url == null) {
-			String s = String.format("No RPC HTTP URL found for Ethereum network: '%s'", network);
-			throw new RuntimeException(s);
+			String s = String.format("No RPC HTTP URL found for Ethereum network: '%s'", key);
+			throw new ApplicationConfigException(s);
 		}
 		return url;
 	}
@@ -36,8 +39,8 @@ public final class EthereumConfig {
 		String url = ApplicationConfig.getString(key);
 		log.debug(String.format("Ethereum RPC WS URL key='%s' value='%s'", key, url));
 		if (url == null) {
-			String s = String.format("No RPC WS URL found for Ethereum network: '%s'", network);
-			throw new RuntimeException(s);
+			String s = String.format("No RPC WS URL found for Ethereum network: '%s'", key);
+			throw new ApplicationConfigException(s);
 		}
 		return url;
 	}
