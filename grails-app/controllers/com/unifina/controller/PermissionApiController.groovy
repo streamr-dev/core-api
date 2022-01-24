@@ -49,7 +49,9 @@ class PermissionApiController {
 				newPermission = permissionService.savePermission(apiUser, op, user.username, res)
 			} else {
 				if (EthereumAddressValidator.validate(username)) {
-					newPermission = permissionService.savePermissionForEthereumAccount(username, apiUser, op, res, SignupMethod.fromRequest(request))
+					String origin = request.getHeader("Origin")
+					SignupMethod signupMethod = SignupMethod.fromOriginURL(origin)
+					newPermission = permissionService.savePermissionForEthereumAccount(username, apiUser, op, res, signupMethod)
 				} else {
 					newPermission = permissionService.savePermission(apiUser, op, username, res)
 				}
