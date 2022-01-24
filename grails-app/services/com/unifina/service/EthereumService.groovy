@@ -22,7 +22,7 @@ class EthereumService {
 			return Web3jHelper.getPublicField(web3j, contractAddress, "owner", Address.class)
 		} catch (IOException e) {
 			log.error("fetch data union admins ethereum address error", e)
-			throw new RuntimeException(e)
+			throw new BlockchainException(e)
 		} finally {
 			if (web3j != null) {
 				web3j.shutdown()
