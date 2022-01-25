@@ -1,7 +1,7 @@
-import { assert } from 'chai'
-import { StreamrClient } from 'streamr-client'
+import {assert} from 'chai'
+import {StreamrClient} from 'streamr-client'
 import Streamr from './streamr-api-clients'
-import { Response } from 'node-fetch'
+import {Response} from 'node-fetch'
 
 describe('REST API', function() {
 

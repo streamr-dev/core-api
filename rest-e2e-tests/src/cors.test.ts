@@ -1,4 +1,4 @@
-import { assert } from 'chai'
+import {assert} from 'chai'
 import fetch from 'node-fetch'
 
 const URL = 'http://localhost/api/v1'

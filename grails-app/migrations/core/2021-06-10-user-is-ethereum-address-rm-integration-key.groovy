@@ -1,6 +1,6 @@
 package core
 
-import com.unifina.service.UserAvatarImageService
+import com.streamr.core.service.UserAvatarImageService
 import groovy.sql.GroovyResultSet
 
 class Key {

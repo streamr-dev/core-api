@@ -1,4 +1,4 @@
-import com.unifina.utils.PropertiesUtil
+import com.streamr.core.utils.PropertiesUtil
 
 /**
  * Base URL
@@ -139,7 +139,7 @@ log4j.main = {
 	warn 'org.mortbay.log',
 		'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner'
 
-	debug 'com.unifina.service.DataUnionJoinRequestService'
+	debug 'com.streamr.core.service.DataUnionJoinRequestService'
 }
 
 /**
@@ -162,12 +162,6 @@ cors.url.pattern = [
 	'/api/*', // Streamr REST API
 ]
 cors.headers = ['Access-Control-Allow-Headers': 'origin, authorization, accept, content-type, x-requested-with, Streamr-Client'] // allow custom Streamr-Client header in CORS requests
-
-/**
- * Application properties
- */
-// Where to send email reports
-unifina.reports.recipient = "henri.pihkala@streamr.network"
 
 /**
  * Streamr API URLs

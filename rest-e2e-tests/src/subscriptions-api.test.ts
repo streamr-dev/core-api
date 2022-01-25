@@ -1,10 +1,10 @@
-import { assert } from 'chai'
+import {assert} from 'chai'
 import Streamr from './streamr-api-clients'
-import { SchemaValidator } from './schema-validator'
-import { assertResponseIsError, testUsers} from './test-utilities'
-import { EthereumAccount } from './EthereumAccount'
-import { StreamrClient } from 'streamr-client'
-import { Response } from 'node-fetch'
+import {SchemaValidator} from './schema-validator'
+import {assertResponseIsError, testUsers} from './test-utilities'
+import {EthereumAccount} from './EthereumAccount'
+import {StreamrClient} from 'streamr-client'
+import {Response} from 'node-fetch'
 
 const schemaValidator = new SchemaValidator()
 

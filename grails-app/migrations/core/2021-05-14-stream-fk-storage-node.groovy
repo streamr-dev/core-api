@@ -1,6 +1,6 @@
 package core
 
-import com.unifina.utils.IdGenerator
+import com.streamr.core.utils.IdGenerator
 
 databaseChangeLog = {
 	changeSet(author: "kkn", id: "stream-fk-storage-node-1") {

@@ -1,10 +1,10 @@
 package com.streamr.client.authentication;
 
-import com.unifina.domain.SignupMethod;
-import com.unifina.domain.User;
-import com.unifina.service.EthereumUserService;
-import com.unifina.service.SessionService;
-import com.unifina.service.SessionToken;
+import com.streamr.core.domain.SignupMethod;
+import com.streamr.core.domain.User;
+import com.streamr.core.service.EthereumUserService;
+import com.streamr.core.service.SessionService;
+import com.streamr.core.service.SessionToken;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;

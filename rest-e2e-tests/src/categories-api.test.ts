@@ -1,7 +1,7 @@
-import { assert } from 'chai'
+import {assert} from 'chai'
 import Streamr from './streamr-api-clients'
-import { SchemaValidator } from './schema-validator'
-import { Response } from 'node-fetch'
+import {SchemaValidator} from './schema-validator'
+import {Response} from 'node-fetch'
 
 const schemaValidator = new SchemaValidator()
 

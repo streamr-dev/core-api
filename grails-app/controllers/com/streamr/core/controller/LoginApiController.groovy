@@ -1,0 +1,39 @@
+package com.streamr.core.controller
+
+import com.streamr.core.domain.SignupMethod
+import com.streamr.core.domain.User
+import com.streamr.core.service.*
+import grails.converters.JSON
+
+class LoginApiController {
+	ChallengeService challengeService
+    SessionService sessionService
+    EthereumUserService ethereumUserService
+
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
+	def challenge(String address) {
+		Challenge ch = challengeService.createChallenge(address.toLowerCase())
+		render(ch.toMap() as JSON)
+	}
+
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
+	def response(ChallengeResponseCommand cmd) {
+		if (cmd.hasErrors()) {
+			throw new InvalidArgumentsException(cmd.errors.getFieldErrors().collect { it.field + " expected." }.join(" "))
+		}
+		challengeService.checkValidChallengeResponse(cmd.challenge?.id,
+			cmd.challenge?.challenge, cmd.signature.toLowerCase(), cmd.address.toLowerCase())
+		String origin = request.getHeader("Origin")
+		SignupMethod signupMethod = SignupMethod.fromOriginURL(origin)
+		User user = ethereumUserService.getOrCreateFromEthereumAddress(cmd.address.toLowerCase(), signupMethod)
+		assertEnabled(user)
+		SessionToken token = sessionService.generateToken(user)
+		render(token.toMap() as JSON)
+	}
+
+	private void assertEnabled(User user) {
+		if (!user.enabled) {
+			throw new DisabledUserException("Cannot login with disabled user")
+		}
+	}
+}

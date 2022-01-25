@@ -10,7 +10,7 @@ import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.unifina.service.ApiException;
+import com.streamr.core.service.ApiException;
 import org.apache.log4j.Logger;
 
 import java.io.ByteArrayInputStream;
