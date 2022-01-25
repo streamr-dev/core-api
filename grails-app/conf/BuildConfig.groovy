@@ -75,7 +75,7 @@ grails.project.dependency.resolution = {
 			excludes "org.web3j:codegen:*"
 		}
 
-		compile('com.google.code.gson:gson:2.8.5')
+		compile('com.google.code.gson:gson:2.8.9')
 		runtime('mysql:mysql-connector-java:5.1.20')
 		runtime('com.mchange:c3p0:0.9.5.5')
 		runtime('commons-codec:commons-codec:1.15')
