@@ -61,7 +61,7 @@ grails.project.dependency.resolution = {
 		compile('log4j:log4j:1.2.17')
 		compile('biz.paluch.redis:lettuce:3.5.0.Final')
 		compile('com.google.code.findbugs:jsr305:3.0.2')
-		compile('org.jetbrains:annotations:17.0.0')
+		compile('org.jetbrains:annotations:23.0.0')
 		compile('org.springframework.security:spring-security-web:4.2.9.RELEASE') { // Needed for CORS plugin
 			excludes('org.springframework:spring-web:*')
 		}
