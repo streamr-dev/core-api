@@ -7,7 +7,7 @@ describe('REST API', function() {
 
     const testUser = StreamrClient.generateEthereumAccount()
 
-    describe('GET /api/v1/page-not-found', function() {
+    describe('GET /api/v2/page-not-found', function() {
         const assertContentLengthIsZero = async function (response: Response) {
             const body = await response.text()
             const bodyLenBytes = body.length

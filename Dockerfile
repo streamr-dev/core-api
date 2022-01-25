@@ -30,8 +30,8 @@ ENV DB_NAME core_test
 ENV SMTP_HOST smtp
 ENV SMTP_PORT 25
 ENV REDIS_HOSTS redis
-ENV WS_SERVER ws://10.200.10.1/api/v1/ws
-ENV HTTPS_API_SERVER http://10.200.10.1/api/v1
+ENV WS_SERVER ws://10.200.10.1/api/v2/ws
+ENV HTTPS_API_SERVER http://10.200.10.1/api/v2
 ENV STREAMR_URL http://localhost
 ENV AWS_ACCESS_KEY_ID TODO
 ENV AWS_SECRET_KEY TODO
@@ -58,7 +58,7 @@ ENV JAVA_OPTS \
 	-Dcom.sun.management.jmxremote.port=9090 \
 	-Dcom.sun.management.jmxremote.ssl=false
 
-HEALTHCHECK --interval=5m --timeout=3s --start-period=100s --retries=3 CMD /usr/bin/curl -s http://localhost:8081/streamr-core/api/v1/products || exit 1
+HEALTHCHECK --interval=5m --timeout=3s --start-period=100s --retries=3 CMD /usr/bin/curl -s http://localhost:8081/streamr-core/api/v2/products || exit 1
 EXPOSE 8081
 CMD ["/usr/local/tomcat/bin/entrypoint.sh"]
 

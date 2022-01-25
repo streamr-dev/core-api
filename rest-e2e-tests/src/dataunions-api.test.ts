@@ -22,7 +22,7 @@ const createJoinRequest = async (joiner: EthereumAccount, dataUnionAddress: stri
 
 describe('DataUnions API', () => {
 
-    describe('PUT /api/v1/dataunions/:id/joinRequests/:id', function () {
+    describe('PUT /api/v2/dataunions/:id/joinRequests/:id', function () {
 
         this.timeout(60 * 1000)
 

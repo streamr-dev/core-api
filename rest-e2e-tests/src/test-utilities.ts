@@ -34,7 +34,7 @@ export const assertEqualEthereumAddresses = (actual: string | undefined, expecte
 export const getStreamrClient = (user?: EthereumAccount) => {
     const options: StreamrClientOptions = {
         ...ConfigTest,
-        restUrl: 'http://localhost/api/v1',
+        restUrl: 'http://localhost/api/v2',
     }
     if (user !== undefined) {
         options.auth = {

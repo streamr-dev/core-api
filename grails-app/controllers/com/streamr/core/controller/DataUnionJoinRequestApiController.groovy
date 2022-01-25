@@ -27,7 +27,7 @@ class DataUnionJoinRequestApiController {
 	 * Publicly available endpoint: POST /dataunions/{contractAddress}/joinRequests
 	 *
 	 * Example:
-	 * curl -v -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"memberAddress": "0x9334f0aa74d2744b97b0b1be6896788ee46f4aaa", metadata: {"foo":"bar"}}' http://localhost:8081/streamr-core/api/v1/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests
+	 * curl -v -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"memberAddress": "0x9334f0aa74d2744b97b0b1be6896788ee46f4aaa", metadata: {"foo":"bar"}}' http://localhost:8081/streamr-core/api/v2/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests
 	 **/
 	@StreamrApi
 	def save(String contractAddress, DataUnionJoinRequestCommand cmd) {
@@ -56,7 +56,7 @@ class DataUnionJoinRequestApiController {
 		}
 	}
 
-	// curl -v -X GET -H "Authorization: token tester1-api-key" "http://localhost:8081/streamr-core/api/v1/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests?state=pending"
+	// curl -v -X GET -H "Authorization: token tester1-api-key" "http://localhost:8081/streamr-core/api/v2/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests?state=pending"
 	@StreamrApi
 	def index(String contractAddress, String state) {
 		checkAdminAccessControl(loggedInUser(), contractAddress)
@@ -65,7 +65,7 @@ class DataUnionJoinRequestApiController {
 		render(results*.toMap() as JSON)
 	}
 
-	// curl -v -X GET -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v1/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
+	// curl -v -X GET -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v2/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
 	@StreamrApi
 	def show(String contractAddress, String id) {
 		checkAdminAccessControl(loggedInUser(), contractAddress)
@@ -79,7 +79,7 @@ class DataUnionJoinRequestApiController {
 		render(result.toMap() as JSON)
 	}
 
-	// curl -v -X PUT -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"state": "ACCEPTED"}' http://localhost:8081/streamr-core/api/v1/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
+	// curl -v -X PUT -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"state": "ACCEPTED"}' http://localhost:8081/streamr-core/api/v2/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
 	@StreamrApi
 	def update(String contractAddress, String id, DataUnionUpdateJoinRequestCommand cmd) {
 		checkAdminAccessControl(loggedInUser(), contractAddress)
@@ -93,7 +93,7 @@ class DataUnionJoinRequestApiController {
 		render(result?.toMap() as JSON)
 	}
 
-	// curl -v -X DELETE -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v1/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
+	// curl -v -X DELETE -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v2/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
 	@StreamrApi
 	def delete(String contractAddress, String id) {
 		checkAdminAccessControl(loggedInUser(), contractAddress)

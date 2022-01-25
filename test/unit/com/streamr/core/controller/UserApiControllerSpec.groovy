@@ -65,7 +65,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		request.addHeader("Authorization", "Bearer token")
 		request.apiUser = me
 		request.method = "DELETE"
-		request.requestURI = "/api/v1/users/me"
+		request.requestURI = "/api/v2/users/me"
 		params.id = me.id
 
 		when:
@@ -84,7 +84,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		controller.userService = new EthereumUserService()
 		request.addHeader("Authorization", "Bearer token")
 		request.method = "PUT"
-		request.requestURI = "/api/v1/users/me"
+		request.requestURI = "/api/v2/users/me"
 		request.json = [
 			name: "New Name",
 			email: "changed@emailaddress.com",
@@ -108,7 +108,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		controller.userService = new EthereumUserService()
 		request.addHeader("Authorization", "Bearer token")
 		request.method = "PUT"
-		request.requestURI = "/api/v1/users/me"
+		request.requestURI = "/api/v2/users/me"
 		request.json = [
 			username: "0x0000000000000000000000000001110987654321",
 			enabled: false,
@@ -132,7 +132,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		controller.userAvatarImageService = Mock(UserAvatarImageService)
 		request.apiUser = new User(username: "foo@ƒoo.bar")
 		request.method = "POST"
-		request.requestURI = "/api/v1/users/me/image"
+		request.requestURI = "/api/v2/users/me/image"
 		request.addHeader("Authorization", "Bearer token")
 		request.addHeader("Content-Length", 200)
 		request.setContentType("multipart/form-data")
@@ -156,7 +156,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		request.apiUser = new User(username: "foo@ƒoo.bar")
 		request.addHeader("Authorization", "Bearer token")
 		request.method = "POST"
-		request.requestURI = "/api/v1/users/me/image"
+		request.requestURI = "/api/v2/users/me/image"
 		def bytes = new byte[16]
 		request.addFile(new MockMultipartFile("file", "my-user-avatar-image.jpg", "image/jpeg", bytes))
 		request.addHeader("Content-Length", bytes.length)
@@ -175,7 +175,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		setup:
 		controller.userAvatarImageService = Mock(UserAvatarImageService)
 		request.method = "POST"
-		request.requestURI = "/api/v1/users/me/image"
+		request.requestURI = "/api/v2/users/me/image"
 		def bytes = new byte[16]
 		request.addFile(new MockMultipartFile("file", "my-user-avatar-image.jpg", "image/jpeg", bytes))
 		request.addHeader("Content-Length", bytes.length)
@@ -197,7 +197,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		controller.userAvatarImageService = Mock(UserAvatarImageService)
 		request.addHeader("Authorization", "Bearer token")
 		request.method = "POST"
-		request.requestURI = "/api/v1/users/me/image"
+		request.requestURI = "/api/v2/users/me/image"
 		def bytes = new byte[16]
 		request.addFile(new MockMultipartFile("file", "my-user-avatar-image.jpg", "image/jpeg", bytes))
 		request.addHeader("Content-Length", bytes.length)
@@ -216,7 +216,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		controller.userAvatarImageService = Mock(UserAvatarImageService)
 		request.addHeader("Authorization", "Bearer token")
 		request.method = "POST"
-		request.requestURI = "/api/v1/users/me/image"
+		request.requestURI = "/api/v2/users/me/image"
 		def bytes = new byte[16]
 		request.addFile(new MockMultipartFile("file", "my-user-avatar-image.jpg", "image/jpeg", bytes))
 		request.addHeader("Content-Length", bytes.length)

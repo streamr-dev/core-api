@@ -166,8 +166,8 @@ cors.headers = ['Access-Control-Allow-Headers': 'origin, authorization, accept, 
 /**
  * Streamr API URLs
  */
-streamr.api.websocket.url = System.getProperty("streamr.api.websocket.url") ?: "${baseUrl.replaceFirst("http", "ws")}/api/v1/ws"
-streamr.api.http.url = System.getProperty("streamr.api.http.url") ?: "${baseUrl}/api/v1"
+streamr.api.websocket.url = System.getProperty("streamr.api.websocket.url") ?: "${baseUrl.replaceFirst("http", "ws")}/api/v2/ws"
+streamr.api.http.url = System.getProperty("streamr.api.http.url") ?: "${baseUrl}/api/v2"
 
 streamr.ethereum.datacoinAddress = System.getProperty("streamr.ethereum.datacoinAddress", "0x0cf0ee63788a0849fe5297f3407f701e122cc023")
 

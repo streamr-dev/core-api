@@ -40,7 +40,7 @@ class RESTAPIFilters {
 	}
 
 	def filters = {
-		authenticationFilter(uri: '/api/**', uriExclude: '/api/v1/login/**') {
+		authenticationFilter(uri: '/api/**', uriExclude: '/api/v2/login/**') {
 			before = {
 				StreamrApi annotation = getApiAnnotation(controllerName, actionName)
 

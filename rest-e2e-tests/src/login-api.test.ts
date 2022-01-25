@@ -3,7 +3,7 @@ import fetch from 'node-fetch'
 import {getSessionToken} from './test-utilities'
 import {StreamrClient} from "streamr-client";
 
-const URL = 'http://localhost/api/v1'
+const URL = 'http://localhost/api/v2'
 const TIMEOUT = 10000
 
 describe('Login API', () => {
@@ -35,7 +35,7 @@ describe('Login API', () => {
         return new Promise(resolve => setTimeout(() => resolve(undefined), ms))
     }
 
-    describe('POST /api/v1/login/response', () => {
+    describe('POST /api/v2/login/response', () => {
         it('responds with status 401 when wrong token even if endpoint does not require authentication', async () => {
             const response = await getStreamPermissions('some-stream-id', 'wrong-token')
             assert.equal(response.status, 401)

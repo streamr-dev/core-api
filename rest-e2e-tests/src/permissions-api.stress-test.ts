@@ -3,7 +3,7 @@ import Streamr from './streamr-api-clients'
 import {Stream, StreamrClient} from 'streamr-client'
 import {getStreamrClient} from './test-utilities'
 
-describe('POST /api/v1/streams/{id}/permissions', function () {
+describe('POST /api/v2/streams/{id}/permissions', function () {
 
     this.timeout(200 * 1000)
 

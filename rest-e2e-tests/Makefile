@@ -38,7 +38,7 @@ npm_install: ## Run 'npm install'
 
 vendor: node_modules ## Install source code packages
 
-core_api_status_check_url := http://localhost:8081/streamr-core/api/v1/users/me
+core_api_status_check_url := http://localhost:8081/streamr-core/api/v2/users/me
 .PHONY: test/server/wait
 test/server/wait: ## Wait for server to come online
 	export i=1

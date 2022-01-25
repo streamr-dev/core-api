@@ -34,7 +34,7 @@ describe('Subscriptions API', () => {
 	const subscriber = StreamrClient.generateEthereumAccount()
 	const devOpsUser = testUsers.devOpsUser
 
-    describe('POST /api/v1/subscriptions', () => {
+    describe('POST /api/v2/subscriptions', () => {
 
         let paidProductId: string
         let freeProductId: string
@@ -152,7 +152,7 @@ describe('Subscriptions API', () => {
         })
     })
 
-    describe('GET /api/v1/subscriptions', () => {
+    describe('GET /api/v2/subscriptions', () => {
         let productId: string
 
         before(async () => {

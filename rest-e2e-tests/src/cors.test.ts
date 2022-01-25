@@ -1,7 +1,7 @@
 import {assert} from 'chai'
 import fetch from 'node-fetch'
 
-const URL = 'http://localhost/api/v1'
+const URL = 'http://localhost/api/v2'
 const TIMEOUT = 5000
 
 describe('CORS Requests', () => {

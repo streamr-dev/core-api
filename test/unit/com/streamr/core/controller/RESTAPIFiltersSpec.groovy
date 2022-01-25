@@ -32,7 +32,7 @@ class RESTAPIFiltersSpec extends BeanMockingSpecification {
 	void "authenticationFilter responds with 403 and 'NOT_PERMITTED' if user don't have proper role"() {
 		when:
 		request.addHeader("Authorization", "Bearer " + USER_SESSION_TOKEN)
-		request.requestURI = "/api/v1/nodes"
+		request.requestURI = "/api/v2/nodes"
 		withFilters(action: "config") {
 			controller.config()
 		}
@@ -52,7 +52,7 @@ class RESTAPIFiltersSpec extends BeanMockingSpecification {
 
 		when:
 		request.addHeader("Authorization", "Bearer " + USER_SESSION_TOKEN)
-		request.requestURI = "/api/v1/nodes"
+		request.requestURI = "/api/v2/nodes"
 		withFilters(action: "config") {
 			controller.config()
 		}
@@ -66,7 +66,7 @@ class RESTAPIFiltersSpec extends BeanMockingSpecification {
 		when:
 		new UserRole(user: user, role: adminRole).save(failOnError: true)
 		request.addHeader("Authorization", "Bearer " + USER_SESSION_TOKEN)
-		request.requestURI = "/api/v1/nodes"
+		request.requestURI = "/api/v2/nodes"
 		withFilters(action: "config") {
 			controller.config()
 		}

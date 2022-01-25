@@ -13,7 +13,7 @@ describe('Permissions API', () => {
         await getSessionToken(existingUser)
     })
 
-    describe('POST /api/v1/products/{productId}/permissions', () => {
+    describe('POST /api/v2/products/{productId}/permissions', () => {
         let product: any
 
         before(async () => {
@@ -37,7 +37,7 @@ describe('Permissions API', () => {
         })
     })
 
-    describe('DELETE /api/v1/products/{productId}/permissions/{permissionId}', function () {
+    describe('DELETE /api/v2/products/{productId}/permissions/{permissionId}', function () {
         let product: any
 
         before(async function () {

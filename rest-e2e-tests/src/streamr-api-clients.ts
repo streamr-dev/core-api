@@ -341,7 +341,7 @@ class NotFound {
 
 const LOGGING_ENABLED = process.env.LOGGING_ENABLED || false
 const options = {
-    baseUrl: 'http://localhost/api/v1/',
+    baseUrl: 'http://localhost/api/v2/',
     logging: LOGGING_ENABLED,
 }
 export default {

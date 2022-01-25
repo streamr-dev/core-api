@@ -6,7 +6,7 @@ import {Response} from 'node-fetch'
 const schemaValidator = new SchemaValidator()
 
 describe('Categories API', () => {
-    describe('GET /api/v1/categories', () => {
+    describe('GET /api/v2/categories', () => {
         let response: Response
         let json: any
 

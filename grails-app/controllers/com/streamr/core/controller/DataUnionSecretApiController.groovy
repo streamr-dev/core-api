@@ -37,7 +37,7 @@ class DataUnionSecretApiController {
 		}
 	}
 
-	// curl -v -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v1/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets
+	// curl -v -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v2/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets
 	@StreamrApi
 	def index(String contractAddress) {
 		checkAdminAccessControl(loggedInUser(), contractAddress)
@@ -45,7 +45,7 @@ class DataUnionSecretApiController {
 		render(secrets*.toMap() as JSON)
 	}
 
-	// curl -v -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"name":"name"}' http://localhost:8081/streamr-core/api/v1/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets
+	// curl -v -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"name":"name"}' http://localhost:8081/streamr-core/api/v2/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets
 	@StreamrApi
 	def save(String contractAddress, DataUnionSecretCommand cmd) {
 		checkAdminAccessControl(loggedInUser(), contractAddress)
@@ -56,7 +56,7 @@ class DataUnionSecretApiController {
 		render(secret.toMap() as JSON)
 	}
 
-	// curl -v -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v1/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
+	// curl -v -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v2/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
 	@StreamrApi
 	def show(String contractAddress, String id) {
 		checkAdminAccessControl(loggedInUser(), contractAddress)
@@ -70,7 +70,7 @@ class DataUnionSecretApiController {
 		render(secret.toMap() as JSON)
 	}
 
-	// curl -v -X PUT -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"name":"new name"}' http://localhost:8081/streamr-core/api/v1/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
+	// curl -v -X PUT -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"name":"new name"}' http://localhost:8081/streamr-core/api/v2/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
 	@StreamrApi
 	def update(String contractAddress, String id, DataUnionSecretCommand cmd) {
 		checkAdminAccessControl(loggedInUser(), contractAddress)
@@ -84,7 +84,7 @@ class DataUnionSecretApiController {
 		render(secret.toMap() as JSON)
 	}
 
-	// curl -v -X DELETE -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v1/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
+	// curl -v -X DELETE -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v2/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
 	@StreamrApi
 	def delete(String contractAddress, String id) {
 		checkAdminAccessControl(loggedInUser(), contractAddress)

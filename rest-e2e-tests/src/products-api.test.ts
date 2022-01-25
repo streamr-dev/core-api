@@ -96,7 +96,7 @@ describe('Products API', function () {
         }
     })
 
-    describe('POST /api/v1/products', () => {
+    describe('POST /api/v2/products', () => {
 
         let createdProductId
 
@@ -234,7 +234,7 @@ describe('Products API', function () {
         })
     })
 
-    describe('GET /api/v1/products/:id', () => {
+    describe('GET /api/v2/products/:id', () => {
 
         let createdProductId: string
 
@@ -282,7 +282,7 @@ describe('Products API', function () {
         })
     })
 
-    describe('PUT /api/v1/products/:id', () => {
+    describe('PUT /api/v2/products/:id', () => {
         const newBody = {
             name: 'Product (updated)',
             description: 'Description of the product.',
@@ -432,7 +432,7 @@ describe('Products API', function () {
         })
     })
 
-    describe('POST /api/v1/products/:id/setDeploying', () => {
+    describe('POST /api/v2/products/:id/setDeploying', () => {
 
         let createdProductId: string
 
@@ -493,7 +493,7 @@ describe('Products API', function () {
         })
     })
 
-    describe('POST /api/v1/products/:id/setDeployed', () => {
+    describe('POST /api/v2/products/:id/setDeployed', () => {
         const deployedBody = {
             ownerAddress: '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF',
             beneficiaryAddress: '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF',
@@ -638,7 +638,7 @@ describe('Products API', function () {
         })
     })
 
-    describe('POST /api/v1/products/:id/setUndeploying', () => {
+    describe('POST /api/v2/products/:id/setUndeploying', () => {
 
         let createdProductId: string
 
@@ -721,7 +721,7 @@ describe('Products API', function () {
         })
     })
 
-    describe('POST /api/v1/products/:id/setUndeployed', () => {
+    describe('POST /api/v2/products/:id/setUndeployed', () => {
         const undeployedBody = {
             blockNumber: 35001,
             blockIndex: 80
@@ -858,7 +858,7 @@ describe('Products API', function () {
         })
     })
 
-    describe('GET /api/v1/products', () => {
+    describe('GET /api/v2/products', () => {
         it('anonymous user can fetch public Products with publicAccess=true', async () => {
             const response = await Streamr.api.v1.products
                 .list({
@@ -873,7 +873,7 @@ describe('Products API', function () {
         })
     })
 
-    describe('GET /api/v1/products/:id/streams', () => {
+    describe('GET /api/v2/products/:id/streams', () => {
         let createdProductId: string
 
         before(async () => {
@@ -927,7 +927,7 @@ describe('Products API', function () {
         })
     })
 
-    describe('POST /api/v1/products/:id/images', () => {
+    describe('POST /api/v2/products/:id/images', () => {
         let createdProductId: string
 
         before(async () => {
@@ -1059,7 +1059,7 @@ describe('Products API', function () {
         })
     })
 
-    describe('PUT /api/v1/products/:id/streams/:streamId', () => {
+    describe('PUT /api/v2/products/:id/streams/:streamId', () => {
         let createdProductId: string
 
         before(async () => {
@@ -1136,7 +1136,7 @@ describe('Products API', function () {
         })
     })
 
-    describe('DELETE /api/v1/products/:id/streams/:streamId', () => {
+    describe('DELETE /api/v2/products/:id/streams/:streamId', () => {
         let createdProductId: string
 
         before(async () => {
@@ -1204,7 +1204,7 @@ describe('Products API', function () {
         })
     })
 
-    describe('GET /api/v1/products/:id/permissions/me', () => {
+    describe('GET /api/v2/products/:id/permissions/me', () => {
         let createdProductId: string
 
         before(async () => {
@@ -1236,7 +1236,7 @@ describe('Products API', function () {
         })
     })
 
-    describe('GET /api/v1/products/:id/deployFree', () => {
+    describe('GET /api/v2/products/:id/deployFree', () => {
         let freeProductId: string
 
         before(async () => {
@@ -1327,7 +1327,7 @@ describe('Products API', function () {
         })
     })
 
-    describe('GET /api/v1/products/:id/undeployFree', () => {
+    describe('GET /api/v2/products/:id/undeployFree', () => {
         let freeProductId: string
 
         before(async () => {
