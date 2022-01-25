@@ -80,7 +80,7 @@ grails.project.dependency.resolution = {
 		runtime('com.mchange:c3p0:0.9.5.5')
 		runtime('commons-codec:commons-codec:1.15')
 
-		test('cglib:cglib:3.2.6')
+		test('cglib:cglib:3.2.12')
 	}
 
 	plugins {
