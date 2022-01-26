@@ -38,6 +38,9 @@ class Product {
 		'termsOfUse',
 	]
 
+	// Chain where product belogs to
+	Chain chain = Chain.ETHEREUM
+
 	// The below fields exist in the domain object for speed & query support, but the ground truth is in the smart contract.
 	String ownerAddress
 	String beneficiaryAddress
@@ -69,6 +72,15 @@ class Product {
 		USD
 	}
 
+	// Product belongs to a chain
+	enum Chain {
+		ETHEREUM,
+		XDAI,
+		POLYGON,
+		BSC,
+		AVALANCHE
+	}
+
 	static constraints = {
 		name(blank: false)
 		description(nullable: true)
@@ -90,6 +102,7 @@ class Product {
 		owner(nullable: false)
 		contact(nullable: true)
 		termsOfUse(nullable: true)
+		chain(enumType: "string", nullable: false, inList: Chain.values() as List)
 	}
 
 	static mapping = {
@@ -131,6 +144,7 @@ class Product {
 			owner: owner.name,
 			contact: contact?.toMap(),
 			termsOfUse: termsOfUse?.toMap(),
+			chain: chain.toString(),
 		]
 		if (isOwner && pendingChanges != null) {
 			JsonSlurper slurper = new JsonSlurper()
@@ -160,7 +174,8 @@ class Product {
 			isFree: this.isFree(),
 			priceCurrency: priceCurrency.toString(),
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
-			owner: owner.name
+			owner: owner.name,
+			chain: chain.toString(),
 		]
 		return map;
 	}

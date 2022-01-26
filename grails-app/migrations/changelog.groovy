@@ -16,4 +16,5 @@ databaseChangeLog = {
 	include file: 'core/2021-11-19-rm-data-union-versions.groovy'
 	include file: 'core/2021-12-15-rm-registration-code.groovy'
 	include file: 'core/2022-01-13-add-stream-migration-fields.groovy'
+	include file: 'core/2021-11-22-add-product-chain-field.groovy'
 }

@@ -69,6 +69,7 @@ describe('Products API', function () {
             type: 'NORMAL',
             description: 'Description of the product.',
             category: 'satellite-id',
+            chain: 'ETHEREUM',
             streams: [
                 streamId1,
                 streamId2
@@ -195,6 +196,7 @@ describe('Products API', function () {
                 assert.deepEqual(json, {
                     name: 'Product',
                     type: 'NORMAL',
+                    chain: 'ETHEREUM',
                     description: 'Description of the product.',
                     imageUrl: null,
                     thumbnailUrl: null,
@@ -396,6 +398,7 @@ describe('Products API', function () {
                     imageUrl: null,
                     thumbnailUrl: null,
                     category: 'automobile-id',
+                    chain: 'ETHEREUM',
                     streams: [],
 
                     // above are changes

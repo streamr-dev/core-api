@@ -168,6 +168,18 @@
       ],
       "maxLength": 65535
     },
+    "chain": {
+      "description": "Contains the name of the chain where product is published.",
+      "type": "string",
+      "enum": [
+        "ETHEREUM",
+        "XDAI",
+        "POLYGON",
+        "BSC",
+        "AVALANCHE"
+      ],
+      "maxLength": 50
+    },
     "contact": {
       "description": "Product's contact details",
       "type": [
