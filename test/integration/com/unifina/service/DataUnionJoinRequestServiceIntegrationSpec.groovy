@@ -20,7 +20,7 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 	void setup() {
 		me = new User(
 			name: "First Lastname",
-			username: "first@last.com",
+			username: "0x0000000000000000000000000000000000000001",
 		)
 		me.save(validate: true, failOnError: true)
 

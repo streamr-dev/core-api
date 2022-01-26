@@ -12,7 +12,7 @@ class SubscriptionPaid extends Subscription {
 	String address
 
 	static constraints = {
-		address(unique: 'product', validator: Product.isEthereumAddress)
+		address(unique: 'product', validator: EthereumAddressValidator.validate)
 	}
 
 	static mapping = {

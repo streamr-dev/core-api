@@ -19,13 +19,13 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 
 	void setup() {
 		service = Holders.getApplicationContext().getBean(PermissionService)
-		user = new User(name: "name", username: "me@me.com")
+		user = new User(name: "name", username: "0x0000000000000000000000000000000000000001")
 		user.save(validate: true, failOnError: true)
 
 		resource = new Stream(name: "stream 1")
 		resource.id = "stream-id-1"
 		resource.save(validate: true, failOnError: true)
-		another = new User(name: "another", username: "another@example.com")
+		another = new User(name: "another", username: "0x0000000000000000000000000000000000000002")
 		another.save(validate: true, failOnError: true)
 
 		anotherResource = new Stream(name: "stream 2")

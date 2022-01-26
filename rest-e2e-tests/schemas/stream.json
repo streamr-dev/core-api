@@ -15,7 +15,10 @@
     "requireEncryptedData",
     "autoConfigure",
     "storageDays",
-    "inactivityThresholdHours"
+    "inactivityThresholdHours",
+    "migrateToBrubeck",
+    "migrateSyncTurnedOnAt",
+    "migrateSyncLastRunAt"
   ],
   "properties": {
     "id": {
@@ -75,6 +78,26 @@
       "description": "inactivity period for a stream in hours",
       "type": "integer",
       "minimum": 0
+    },
+    "migrateToBrubeck": {
+      "description": "Migration to Brubeck network",
+      "type": "boolean"
+    },
+    "migrateSyncTurnedOnAt": {
+      "description": "Brubeck migration sync turned on at date",
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "migrateSyncLastRunAt": {
+      "description": "Brubeck migration sync last run at date",
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
     }
   },
   "additionalProperties": false,

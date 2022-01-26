@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.domain.Product
+import com.unifina.domain.EthereumAddressValidator
 import grails.validation.Validateable
 import groovy.transform.ToString
 
@@ -11,6 +11,6 @@ class DataUnionJoinRequestCommand {
 	String secret
 	Map<String, Object> metadata
 	static constraints = {
-		memberAddress(nullable: false, validator: Product.isEthereumAddress)
+		memberAddress(nullable: false, validator: EthereumAddressValidator.validate)
 	}
 }

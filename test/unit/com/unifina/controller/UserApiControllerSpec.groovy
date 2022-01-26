@@ -20,7 +20,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 	def setup() {
 		me = new User(
 			name: "me",
-			username: "me@too.com",
+			username: "0x0000000000000000000000000000000000000001",
 			email: "me@too.com",
 			enabled: true,
 		)
@@ -107,7 +107,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		request.method = "PUT"
 		request.requestURI = "/api/v1/users/me"
 		request.json = [
-			username: "attacker@email.com",
+			username: "0x0000000000000000000000000001110987654321",
 			enabled: false,
 		]
 		request.apiUser = me
@@ -119,8 +119,8 @@ class UserApiControllerSpec extends ControllerSpecification {
 
 		then:
 		1 * sessionService.getUserishFromToken("token") >> request.apiUser
-		User.get(1).username == "me@too.com"
-		response.json.username == "me@too.com"
+		User.get(1).username == "0x0000000000000000000000000000000000000001"
+		response.json.username == "0x0000000000000000000000000000000000000001"
 		User.get(1).enabled
 	}
 

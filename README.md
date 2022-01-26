@@ -85,7 +85,7 @@ running JVM process.
 
 - [Grails 2.5.6 Framework Reference Documentation (single page)](https://grails.github.io/grails2-doc/2.5.6/guide/single.html)
 - [Spock Framework Reference Documentation (single page)](http://spockframework.org/spock/docs/1.1/all_in_one.html)
-- [Grails Database Migration Plugin Documentation (single page)](http://grails-plugins.github.io/grails-database-migration/1.4.0/guide/single.html)
+- [Grails Database Migration Plugin Documentation](https://web.archive.org/web/20210119030814/https://grails-plugins.github.io/grails-database-migration/1.4.0/)
 - [Spock Concurrency Tools](http://spockframework.org/spock/javadoc/1.1/spock/util/concurrent/package-summary.html)
 
 ## License
