@@ -202,6 +202,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 			inactivityThresholdHours: 99,
 			partitions: 5,
 			requireEncryptedData: true,
+			migrateToBrubeck: true,
 		]
 
 		when:
@@ -214,6 +215,9 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		response.json.storageDays == 24
 		response.json.inactivityThresholdHours == 99
 		response.json.partitions == 5
+		response.json.migrateToBrubeck == true
+		response.json.migrateSyncTurnedOnAt != null
+		response.json.migrateSyncLastRunAt == null
 
 		then:
 		def stream = streamOne
@@ -226,6 +230,9 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		stream.storageDays == 24
 		stream.inactivityThresholdHours == 99
 		stream.partitions == 5
+		stream.migrateToBrubeck == true
+		stream.migrateSyncTurnedOnAt != null
+		stream.migrateSyncLastRunAt == null
 	}
 
 	void "update a Stream of logged in user but do not update undefined fields"() {
