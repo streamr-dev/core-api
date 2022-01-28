@@ -4,12 +4,13 @@ streamr-docker-dev
 .slcache
 out
 .git
-terraform*
 Dockerfile
 **/node_modules
 **/.DS_Store
 README.md
 LICENSE
-target/stacktrace.log
-target/test-classes
-target/test-reports
+target/*/*
+*.patch
+*.diff
+*.sql
+*.gz

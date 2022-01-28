@@ -82,6 +82,10 @@ class StreamApiController {
 			if (newStream.inactivityThresholdHours != null) {
 				stream.inactivityThresholdHours = newStream.inactivityThresholdHours
 			}
+			if (newStream.migrateToBrubeck == true) {
+				stream.migrateToBrubeck = true
+				stream.migrateSyncTurnedOnAt = new Date()
+			}
 			if (stream.validate()) {
 				stream.save(failOnError: true)
 				render(stream.toMap() as JSON)
