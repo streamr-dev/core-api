@@ -1,5 +1,5 @@
+---
 name: CI & CD
-
 on:
   push:
     branches:
@@ -37,11 +37,6 @@ jobs:
         with:
           candidate: grails
           version: ${{ env.GRAILS_VERSION }}
-      - uses: actions/cache@v2.1.7
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-v1-${{ hashFiles('grails-app/conf/BuildConfig.groovy') }}
-          restore-keys: ${{ runner.os }}-maven-v1-
       - name: Install Grails
         run: |
           unzip ${{ steps.sdkman-grails.outputs.file }} -d "$HOME"
