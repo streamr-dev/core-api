@@ -1,5 +1,5 @@
+---
 name: CI & CD
-
 on:
   push:
     branches:
@@ -37,11 +37,6 @@ jobs:
         with:
           candidate: grails
           version: ${{ env.GRAILS_VERSION }}
-      - uses: actions/cache@v2.1.7
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-v1-${{ hashFiles('grails-app/conf/BuildConfig.groovy') }}
-          restore-keys: ${{ runner.os }}-maven-v1-
       - name: Install Grails
         run: |
           unzip ${{ steps.sdkman-grails.outputs.file }} -d "$HOME"
@@ -141,7 +136,7 @@ jobs:
           images: streamr/core-api
           tags: |
             type=sha
-            type=ref,event=branch
+            type=ref,event=pr
             type=semver,pattern=v{{version}}
             type=raw,value=dev
           flavor: |
@@ -159,7 +154,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-v1-
       - name: Login to DockerHub
-        if: ${{ github.event_name != 'pull_request' }}
         uses: docker/login-action@v1.12.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -170,8 +164,8 @@ jobs:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64
-          push: ${{ github.event_name != 'pull_request' }}
-          load: ${{ github.event_name == 'pull_request' }}
+          push: true
+          load: false
           build-args: |
             GRAILS_WAR_ENV=${{ env.GRAILS_WAR_ENV }}
           cache-from: type=local,src=/tmp/.buildx-cache
