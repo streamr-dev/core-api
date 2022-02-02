@@ -77,7 +77,7 @@ class ProductService {
 		Web3j web3j
 		try {
 			if (!command.streams.isEmpty()) {
-				EthereumConfig ethConf = new EthereumConfig(ApplicationConfig.getString("streamr.dataunion.sidechainName"))
+				EthereumConfig ethConf = new EthereumConfig(ApplicationConfig.getString("streamr.ethereum.streamRegistryChain"))
 				web3j = ethConf.getWeb3j(EthereumConfig.RpcConnectionMethod.HTTP)
 				command.streams.each { String streamId ->
 					permissionService.verify(web3j, currentUser.username, streamId, StreamPermission.GRANT)
@@ -104,7 +104,7 @@ class ProductService {
 		Web3j web3j
 		try {
 			if (!command.streams.isEmpty()) {
-				EthereumConfig ethConf = new EthereumConfig(ApplicationConfig.getString("streamr.dataunion.sidechainName"))
+				EthereumConfig ethConf = new EthereumConfig(ApplicationConfig.getString("streamr.ethereum.streamRegistryChain"))
 				web3j = ethConf.getWeb3j(EthereumConfig.RpcConnectionMethod.HTTP)
 				command.streams.each { String streamId ->
 					permissionService.verify(web3j, currentUser.username, streamId, StreamPermission.GRANT)
@@ -136,7 +136,7 @@ class ProductService {
 		throws ValidationException, NotPermittedException {
 		Web3j web3j
 		try {
-			EthereumConfig ethConf = new EthereumConfig(ApplicationConfig.getString("streamr.dataunion.sidechainName"))
+			EthereumConfig ethConf = new EthereumConfig(ApplicationConfig.getString("streamr.ethereum.streamRegistryChain"))
 			web3j = ethConf.getWeb3j(EthereumConfig.RpcConnectionMethod.HTTP)
 			permissionService.verify(web3j, currentUser.username, streamId, StreamPermission.GRANT)
 		} finally {
