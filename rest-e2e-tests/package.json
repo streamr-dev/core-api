@@ -32,6 +32,6 @@
     "@types/lodash": "4.14.178",
     "@types/mocha": "9.0.0",
     "@types/node": "16.11.10",
-    "@types/node-fetch": "2.5.10"
+    "@types/node-fetch": "3.0.3"
   }
 }
