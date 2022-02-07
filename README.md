@@ -51,12 +51,12 @@ make run
 ## CI
 
 The project uses [GitHub Actions](https://github.com/streamr-dev/core-api/actions) to automatically run tests for each
-commit to `master` and pull requests.
+commit to `main` and pull requests.
 
 ## Docker
 
 A [Docker image](https://hub.docker.com/r/streamr/core-api/) is automatically built and pushed to DockerHub
-when commits are pushed to branch `master`.
+when commits are pushed to branch `main`.
 
 ## IDE
 

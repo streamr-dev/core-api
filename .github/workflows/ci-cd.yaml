@@ -3,7 +3,7 @@ name: CI & CD
 on:
   push:
     branches:
-      - master
+      - main
     paths-ignore:
       - '**.md'
       - 'docs/swagger.json'
