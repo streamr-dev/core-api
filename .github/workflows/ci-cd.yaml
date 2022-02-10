@@ -48,7 +48,7 @@ jobs:
         run: |
           make -f Makefile.ci test-unit
       - name: Start Streamr Docker Stack
-        uses: streamr-dev/streamr-docker-dev-action@v1.0.0-alpha.3
+        uses: streamr-dev/streamr-docker-dev-action@v1.0.0
         with:
           services-to-start: "mysql redis"
       - name: Integration test
@@ -94,7 +94,7 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
       - name: Start Streamr Docker Stack
-        uses: streamr-dev/streamr-docker-dev-action@v1.0.0-alpha.3
+        uses: streamr-dev/streamr-docker-dev-action@v1.0.0
         with:
           services-to-start: "mysql redis cassandra parity-node0 parity-sidechain-node0 bridge broker-node-no-storage-1 broker-node-storage-1 nginx smtp"
       - name: Install Node
