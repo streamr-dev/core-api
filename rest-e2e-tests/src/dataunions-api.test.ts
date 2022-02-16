@@ -16,7 +16,8 @@ const createDataUnion = async (admin: EthereumAccount) => {
 
 const createJoinRequest = async (joiner: EthereumAccount, dataUnionAddress: string) => {
     const joinerClient = getStreamrClient(joiner)
-    const joinResponse = await joinerClient.getDataUnion(dataUnionAddress).join()
+    const dataUnion = await joinerClient.getDataUnion(dataUnionAddress)
+    const joinResponse = await dataUnion.join()
     return joinResponse.id
 }
 
@@ -37,7 +38,8 @@ describe('DataUnions API', () => {
                 .withAuthenticatedUser(admin)
                 .call()
             assert.equal(response.status, 200)
-            await getStreamrClient().getDataUnion(dataUnionAddress).isMember(joiner.address)
+            const dataUnion = await getStreamrClient().getDataUnion(dataUnionAddress)
+            assert.isTrue(await dataUnion.isMember(joiner.address))
         })
     })
 })
