@@ -111,10 +111,6 @@ jobs:
         run: |
           cd rest-e2e-tests
           npm run test:e2e
-      - name: Run End to End stress tests
-        run: |
-          cd rest-e2e-tests
-          npm run test:stress
       - name: Stop Streamr Docker Stack
         if: always()
         run: |

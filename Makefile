@@ -20,7 +20,7 @@ grails = grails -plain-output
 # Testing recipes
 
 .PHONY: all
-all: clean test-unit test-integration start-wait test-e2e test-stress ethereum-watcher network-explorer
+all: clean test-unit test-integration start-wait test-e2e ethereum-watcher network-explorer
 
 .PHONY: test
 test: test-unit test-integration test-e2e ## Run unit, integration and end to end tests
@@ -41,10 +41,6 @@ test-rest:
 .PHONY: test-e2e
 test-e2e:
 	$(MAKE) -C rest-e2e-tests test/e2e
-
-.PHONY: test-stress
-test-stress:
-	$(MAKE) -C rest-e2e-tests test/stress
 
 # Development recipes
 

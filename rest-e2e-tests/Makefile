@@ -61,15 +61,11 @@ test/server/wait: ## Wait for server to come online
 	done
 
 .PHONY: test
-test: vendor test/e2e test/stress ## Run tests
+test: vendor test/e2e ## Run tests
 
 .PHONY: test/e2e
 test/e2e: vendor ## Run end to end tests
 	$(call npm, run test:e2e)
-
-.PHONY: test/stress
-test/stress: vendor ## Run stress tests
-	$(call npm, run test:stress)
 
 .PHONY: clean
 clean: ## Remove generated files
