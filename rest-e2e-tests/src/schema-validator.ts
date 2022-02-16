@@ -20,24 +20,37 @@ export class SchemaValidator {
         })
     }
 
-    validateCategory(data: any) {
-        // @ts-expect-error
-        return this.ajv.validate('Category', data) ? [] : [...this.ajv.errors]
+    validateCategory(data: any): Array<Ajv.ErrorObject> {
+        const schemaKeyRef = 'Category';
+        return this.validate(schemaKeyRef, data);
     }
 
-    validatePermission(data: any) {
-        return this.ajv.validate('Permission', data) ? [] : [...this.ajv.errors]
+    validatePermission(data: any): Array<Ajv.ErrorObject> {
+        const schemaKeyRef = 'Permission';
+        return this.validate(schemaKeyRef, data);
     }
 
-    validateProduct(data: any) {
-        return this.ajv.validate('Product', data) ? [] : [...this.ajv.errors]
+    validateProduct(data: any): Array<Ajv.ErrorObject> {
+        const schemaKeyRef = 'Product';
+        return this.validate(schemaKeyRef, data);
     }
 
-    validateSubscription(data: any) {
-        return this.ajv.validate('Subscription', data) ? [] : [...this.ajv.errors]
+    validateSubscription(data: any): Array<Ajv.ErrorObject> {
+        const schemaKeyRef = 'Subscription';
+        return this.validate(schemaKeyRef, data);
     }
 
-    toMessages(errors: any) {
+    private validate(schemaKeyRef: string, data: any): Array<Ajv.ErrorObject> {
+        if (this.ajv.validate(schemaKeyRef, data)) {
+            return []
+        }
+        if (this.ajv.errors) {
+            return this.ajv.errors
+        }
+        return []
+    }
+
+    toMessages(errors: any): string {
         return this.ajv.errorsText(errors)
     }
 }
