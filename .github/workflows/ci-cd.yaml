@@ -98,7 +98,7 @@ jobs:
         with:
           services-to-start: "mysql redis cassandra parity-node0 parity-sidechain-node0 bridge broker-node-no-storage-1 broker-node-storage-1 nginx smtp"
       - name: Install Node
-        uses: actions/setup-node@v2.5.1
+        uses: actions/setup-node@v3.0.0
         with:
           node-version-file: 'rest-e2e-tests/.nvmrc'
       - name: Setup End to End tests
