@@ -16,7 +16,7 @@ jobs:
     name: Swagger validation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
       - name: Validate Swagger
         run: |
           make -f Makefile.ci validate-swagger
@@ -29,7 +29,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Commit Swagger
