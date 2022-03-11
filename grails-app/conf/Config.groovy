@@ -139,7 +139,8 @@ log4j.main = {
 	warn 'org.mortbay.log',
 		'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner'
 
-	debug 'com.streamr.core.service.DataUnionJoinRequestService'
+	debug 'com.streamr.core.service.DataUnionJoinRequestService',
+		'com.streamr.core.service.PermissionService'
 }
 
 /**
