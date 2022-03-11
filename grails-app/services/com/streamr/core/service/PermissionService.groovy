@@ -61,6 +61,7 @@ class PermissionService {
 			hasPermission = hasPermissionCall.send()
 		} catch (Exception e) {
 			String msg = String.format("Function call to Ethereum failed with error: %s", e)
+			log.error(msg, e)
 			throw new BlockchainException(msg)
 		}
 		log.debug(String.format("Users %s permission %s to stream %s is %s", userAddress, permission, streamId, hasPermission))
