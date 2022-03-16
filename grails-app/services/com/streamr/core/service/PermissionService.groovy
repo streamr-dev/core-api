@@ -3,7 +3,7 @@ package com.streamr.core.service
 import com.streamr.core.domain.*
 import com.streamr.core.domain.Permission.Operation
 import com.streamr.core.utils.ApplicationConfig
-import com.streamr.network.contract.StreamRegistry
+import com.streamr.network.contract.StreamRegistryV3
 import grails.compiler.GrailsCompileStatic
 import grails.transaction.Transactional
 import grails.util.Holders
@@ -54,7 +54,7 @@ class PermissionService {
 		String streamRegistryAddress = ApplicationConfig.getString("streamr.ethereum.streamRegistryAddress")
 		Credentials credentials = Credentials.create(ApplicationConfig.getString("streamr.ethereum.nodePrivateKey"))
 		StreamrGasProvider gasProvider = StreamrGasProvider.createStreamrGasProvider()
-		StreamRegistry streamRegistry = StreamRegistry.load(streamRegistryAddress, web3j, credentials, gasProvider)
+		StreamRegistryV3 streamRegistry = StreamRegistryV3.load(streamRegistryAddress, web3j, credentials, gasProvider)
 		RemoteFunctionCall<Boolean> hasPermissionCall = streamRegistry.hasPermission(streamId, userAddress, permission.toBigInteger())
 		Boolean hasPermission
 		try {
