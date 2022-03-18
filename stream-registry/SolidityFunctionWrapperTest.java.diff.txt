@@ -1,0 +1,23 @@
+diff --git a/codegen/src/test/java/org/web3j/codegen/SolidityFunctionWrapperTest.java b/codegen/src/test/java/org/web3j/codegen/SolidityFunctionWrapperTest.java
+index ab033a31..6c0c1b71 100644
+--- a/codegen/src/test/java/org/web3j/codegen/SolidityFunctionWrapperTest.java
++++ b/codegen/src/test/java/org/web3j/codegen/SolidityFunctionWrapperTest.java
+@@ -124,6 +124,18 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
+                 (ParameterizedTypeName.get(
+                         ClassName.get(DynamicArray.class),
+                         ParameterizedTypeName.get(DynamicArray.class, Uint256.class))));
++
++        ParameterizedTypeName parameterizedTypeName = ParameterizedTypeName.get(DynamicArray.class, Address.class);
++        ClassName rawType = ClassName.get(DynamicArray.class);
++        TypeName expected = buildTypeName("address[][]");
++        ParameterizedTypeName actual = ParameterizedTypeName.get(rawType, parameterizedTypeName);
++        assertEquals(expected, actual);
++
++        parameterizedTypeName = ParameterizedTypeName.get(DynamicArray.class, Address.class);
++        rawType = ClassName.get(DynamicArray.class);
++        actual = ParameterizedTypeName.get(rawType, parameterizedTypeName);
++        expected = buildTypeName("address[]");
++        assertEquals(expected, actual);
+     }
+ 
+     @Test

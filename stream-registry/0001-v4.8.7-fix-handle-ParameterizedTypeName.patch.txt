@@ -1,0 +1,80 @@
+From 02962e3f435f960a95afa0c3980f6550b9cf2af3 Mon Sep 17 00:00:00 2001
+From: Kare Nuorteva <kare.nuorteva@me.com>
+Date: Fri, 18 Mar 2022 13:14:18 +0200
+Subject: [PATCH] fix: handle ParameterizedTypeName
+
+---
+ .../codegen/SolidityFunctionWrapper.java      | 37 +++++++++----------
+ gradle.properties                             |  2 +-
+ 2 files changed, 19 insertions(+), 20 deletions(-)
+
+diff --git a/codegen/src/main/java/org/web3j/codegen/SolidityFunctionWrapper.java b/codegen/src/main/java/org/web3j/codegen/SolidityFunctionWrapper.java
+index 8e6e16df..cd0588ff 100644
+--- a/codegen/src/main/java/org/web3j/codegen/SolidityFunctionWrapper.java
++++ b/codegen/src/main/java/org/web3j/codegen/SolidityFunctionWrapper.java
+@@ -984,29 +984,16 @@ public class SolidityFunctionWrapper extends Generator {
+             if (typeNames.size() != 1) {
+                 throw new UnsupportedOperationException(
+                         "Only a single parameterized type is supported");
+-            } else if (structClassNameMap.values().stream()
++            }
++            ParameterizedTypeName type = (ParameterizedTypeName) parameterSpec.type;
++            TypeName typeArgName = type.typeArguments.get(0);
++            if (structClassNameMap.values().stream()
+                     .map(ClassName::simpleName)
+-                    .anyMatch(
+-                            name ->
+-                                    name.equals(
+-                                            ((ClassName)
+-                                                            ((ParameterizedTypeName)
+-                                                                            parameterSpec.type)
+-                                                                    .typeArguments.get(0))
+-                                                    .simpleName()))) {
++                    .anyMatch(name -> namesAreEqual(typeArgName, name))) {
+                 String structName =
+                         structClassNameMap.values().stream()
+                                 .map(ClassName::simpleName)
+-                                .filter(
+-                                        name ->
+-                                                name.equals(
+-                                                        ((ClassName)
+-                                                                        ((ParameterizedTypeName)
+-                                                                                        parameterSpec
+-                                                                                                .type)
+-                                                                                .typeArguments.get(
+-                                                                                        0))
+-                                                                .simpleName()))
++                                .filter(name -> namesAreEqual(typeArgName, name))
+                                 .collect(Collectors.toList())
+                                 .get(0);
+                 return "new "
+@@ -1063,6 +1050,18 @@ public class SolidityFunctionWrapper extends Generator {
+         }
+     }
+ 
++    private boolean namesAreEqual(TypeName typeName, String name) {
++        if (typeName instanceof ClassName) {
++            ClassName className = (ClassName) typeName;
++            return name.equals(className.simpleName());
++        } else if (typeName instanceof ParameterizedTypeName) {
++            ParameterizedTypeName className = (ParameterizedTypeName) typeName;
++            return name.equals(className.rawType.simpleName());
++        }
++        String message = "Only ClassName and ParameterizedTypeName type are supported";
++        throw new UnsupportedOperationException(message);
++    }
++
+     private TypeName getWrapperType(TypeName typeName) {
+         if (useNativeJavaTypes) {
+             return getNativeType(typeName);
+diff --git a/gradle.properties b/gradle.properties
+index 31b4727f..1c525004 100644
+--- a/gradle.properties
++++ b/gradle.properties
+@@ -1,2 +1,2 @@
+ group=org.web3j
+-version=4.8.7-SNAPSHOT
++version=4.8.7
+-- 
+2.32.0 (Apple Git-132)
+
