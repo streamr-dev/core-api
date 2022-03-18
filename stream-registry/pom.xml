@@ -1,0 +1,53 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.streamr.network</groupId>
+	<artifactId>contract</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.maven.shared</groupId>
+			<artifactId>file-management</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.web3j</groupId>
+					<artifactId>web3j-maven-plugin</artifactId>
+					<version>4.8.8-SNAPSHOT</version>
+					<configuration>
+						<packageName>com.streamr.network.contract</packageName>
+						<sourceDestination>src/generated/java</sourceDestination>
+						<nativeJavaType>true</nativeJavaType>
+						<soliditySourceFiles>
+							<directory>network-contracts/packages/smartcontracts/contracts</directory>
+							<includes>
+								<include>**/*.sol</include>
+							</includes>
+						</soliditySourceFiles>
+						<contract>
+							<includes>
+								<include>StreamRegistryV3</include>
+							</includes>
+						</contract>
+						<pathPrefixes>
+							<pathPrefix>@openzeppelin=../../../node_modules/@openzeppelin</pathPrefix>
+							<pathPrefix>@chainlink=../../../node_modules/@chainlink</pathPrefix>
+						</pathPrefixes>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>
