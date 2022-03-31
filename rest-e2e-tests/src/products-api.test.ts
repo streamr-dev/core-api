@@ -938,6 +938,12 @@ describe('Products API', function () {
 
         before(async () => {
             createdProductId = await createProductAndReturnId(genericProductBody, productOwner)
+            // Warm um JVM
+            const response: Response = await Streamr.api.v1.products
+                .uploadImage(createdProductId, fs.createReadStream('./test-data/500-by-400-image.png'))
+                .withAuthenticatedUser(productOwner)
+                .call()
+            await response.json()
         })
 
         it('requires authentication', async () => {
