@@ -117,6 +117,9 @@ class ProductService {
 		}
 
 		Product product = findById(id, currentUser, Permission.Operation.PRODUCT_EDIT)
+		if (command.chain != null && !product.writtenToChain) {
+			product.chain = command.chain
+		}
 		Set<String> addedStreams = (command.streams as Set<String>).findAll { !product.streams.contains(it) }
 		Set<String> removedStreams = product.streams.findAll { !command.streams.contains(it) }
 
@@ -177,6 +180,7 @@ class ProductService {
 		verifyDevops(currentUser)
 
 		product.setProperties(command.properties)
+		product.writtenToChain = true
 		saveAndGrantPermission(Product.State.DEPLOYED, product)
 		return true
 	}

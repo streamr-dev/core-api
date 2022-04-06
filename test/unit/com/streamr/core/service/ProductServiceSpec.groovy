@@ -269,6 +269,66 @@ class ProductServiceSpec extends Specification {
 		product.toMap().type == "DATAUNION"
 	}
 
+	void "update() allows product chain to be changed before publish"() {
+		setup:
+		setupProduct()
+
+		service.subscriptionService = Stub(SubscriptionService)
+		service.apiService = Mock(ApiService)
+
+		def validCommand = new ProductUpdateCommand(
+			name: "updated name",
+			description: "updated description",
+			category: category,
+			streams: [],
+			pricePerSecond: 20L,
+			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			priceCurrency: Product.Currency.DATA,
+			minimumSubscriptionInSeconds: 1000,
+			chain: Product.Chain.AVALANCHE,
+		)
+		def user = new User(username: "0x0000000000000000000000000000000000000001")
+
+		when:
+		service.update("product-id", validCommand, user)
+
+		then:
+		1 * service.apiService.authorizedGetById('product-id', user, Permission.Operation.PRODUCT_EDIT) >> product
+		product.chain == Product.Chain.AVALANCHE
+	}
+
+	void "update() throws bad request if product is published and chain is changed"() {
+		setup:
+		setupProduct()
+		product.writtenToChain = true
+		product.save()
+
+		service.subscriptionService = Stub(SubscriptionService)
+		service.apiService = Mock(ApiService)
+
+		def validCommand = new ProductUpdateCommand(
+			name: "updated name",
+			description: "updated description",
+			category: category,
+			streams: [],
+			pricePerSecond: 20L,
+			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			priceCurrency: Product.Currency.DATA,
+			minimumSubscriptionInSeconds: 1000,
+			chain: Product.Chain.AVALANCHE,
+		)
+		def user = new User(username: "0x0000000000000000000000000000000000000001")
+
+		when:
+		service.update("product-id", validCommand, user)
+
+		then:
+		1 * service.apiService.authorizedGetById('product-id', user, Permission.Operation.PRODUCT_EDIT) >> product
+		product.chain == Product.Chain.ETHEREUM
+	}
+
 	void "update() throws ValidationException if command object does not pass validation"() {
 		when:
 		service.update("product-id", new ProductUpdateCommand(), new User())
@@ -292,7 +352,8 @@ class ProductServiceSpec extends Specification {
 			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 			priceCurrency: Product.Currency.DATA,
-			minimumSubscriptionInSeconds: 1000
+			minimumSubscriptionInSeconds: 1000,
+			chain: Product.Chain.ETHEREUM,
 		)
 		def user = new User(username: "0x0000000000000000000000000000000000000001")
 
@@ -323,7 +384,8 @@ class ProductServiceSpec extends Specification {
 			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 			priceCurrency: Product.Currency.DATA,
-			minimumSubscriptionInSeconds: 1000
+			minimumSubscriptionInSeconds: 1000,
+			chain: Product.Chain.ETHEREUM,
 		)
 		def user = new User(username: "me@streamr.network")
 
@@ -376,7 +438,9 @@ class ProductServiceSpec extends Specification {
 			minimumSubscriptionInSeconds: 1000,
 			contact: contact,
 			termsOfUse: terms,
+			chain: Product.Chain.ETHEREUM,
 		)
+		product.writtenToChain = true
 
 		when:
 		def updatedProduct = service.update("product-id", validCommand, new User())
@@ -822,6 +886,7 @@ class ProductServiceSpec extends Specification {
 		Product.findById("product-id").toMap() == product.toMap()
 
 		and:
+		product.writtenToChain == true
 		def map = product.toMap()
 		map.id == "product-id"
 		map.type == "NORMAL"

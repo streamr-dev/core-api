@@ -1,4 +1,5 @@
 package com.streamr.core.service
+
 import com.streamr.core.domain.*
 import grails.compiler.GrailsCompileStatic
 import grails.validation.Validateable
@@ -17,6 +18,7 @@ class ProductUpdateCommand {
 	Map<String, Object> pendingChanges
 	Contact contact = new Contact()
 	TermsOfUse termsOfUse = new TermsOfUse()
+	Product.Chain chain
 
 	// Below are used only when updating NOT_DEPLOYED product
 	String ownerAddress
@@ -34,7 +36,7 @@ class ProductUpdateCommand {
 		"previewConfigJson",
 		"pendingChanges",
 		"contact",
-		"termsOfUse",
+		"termsOfUse"
 	]
 
 	public static final List<String> onChainFields = [
