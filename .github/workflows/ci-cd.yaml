@@ -127,7 +127,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Docker meta
         id: docker_meta
-        uses: docker/metadata-action@v3.6.2
+        uses: docker/metadata-action@v3.7.0
         with:
           images: streamr/core-api
           tags: |
