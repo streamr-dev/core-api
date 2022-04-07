@@ -36,7 +36,8 @@ class ProductUpdateCommand {
 		"previewConfigJson",
 		"pendingChanges",
 		"contact",
-		"termsOfUse"
+		"termsOfUse",
+		"chain",
 	]
 
 	public static final List<String> onChainFields = [
@@ -49,6 +50,7 @@ class ProductUpdateCommand {
 
 	static constraints = {
 		importFrom(Product)
+		chain(nullable: true)
 		// List all onChainFields as nullable
 		ownerAddress(nullable: true, validator: EthereumAddressValidator.isNullOrValid)
 		beneficiaryAddress(nullable: true, validator: EthereumAddressValidator.isNullOrValid)
@@ -61,7 +63,11 @@ class ProductUpdateCommand {
 	void updateProduct(Product product, User user, PermissionService permissionService) {
 		// Always update off-chain fields if given
 		offChainFields.forEach { String fieldName ->
-			product[fieldName] = this[fieldName]
+			if (fieldName != "chain") {
+				product[fieldName] = this[fieldName]
+			} else if (!product.writtenToChain && this[fieldName] != null) {
+				product[fieldName] = this[fieldName]
+			}
 		}
 
 		// Prevent deployed products from changing from free to paid

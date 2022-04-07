@@ -298,7 +298,7 @@ class ProductServiceSpec extends Specification {
 		product.chain == Product.Chain.AVALANCHE
 	}
 
-	void "update() throws bad request if product is published and chain is changed"() {
+	void "update() doesnt update chain field if product is published and chain is changed"() {
 		setup:
 		setupProduct()
 		product.writtenToChain = true
