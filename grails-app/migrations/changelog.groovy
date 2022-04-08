@@ -19,4 +19,5 @@ databaseChangeLog = {
 	include file: 'core/2021-11-22-add-product-chain-field.groovy'
 	include file: 'core/2021-12-27-rm-stream.groovy'
 	include file: 'core/2022-01-24-rename-domain-package.groovy'
+	include file: 'core/2022-04-05-add-product-written-to-chain.groovy'
 }

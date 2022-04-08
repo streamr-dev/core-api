@@ -49,6 +49,9 @@ class Product {
 	Long minimumSubscriptionInSeconds = 0
 	Long blockNumber = 0
 	Long blockIndex = 0
+	// writtenToChain value defaults to false and is updated to true once the product is deployed.
+	// Once product is deployed writtenToChain's value can not be updated.
+	Boolean writtenToChain = false
 
 	static hasMany = [
 		permissions: Permission,
@@ -103,6 +106,7 @@ class Product {
 		contact(nullable: true)
 		termsOfUse(nullable: true)
 		chain(enumType: "string", nullable: false, inList: Chain.values() as List)
+		writtenToChain(nullable: false)
 	}
 
 	static mapping = {
