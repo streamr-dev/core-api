@@ -15,7 +15,7 @@ The application uses the Grails web framework and runs on Java VM.
 
 - Java 8
 - Grails 2.5.6
-- node.js ^14.0.0 (for e2e tests)
+- node.js ^16.0.0 (for e2e tests)
 - npm
 
 A convenient way of installing and managing multiple versions of Grails is [SDKMAN!](https://sdkman.io/install).
