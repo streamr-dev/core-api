@@ -1,6 +1,7 @@
 .DS_Store
 hs_err_pid*
 replay_pid*
+/.vscode
 
 /out/
 
