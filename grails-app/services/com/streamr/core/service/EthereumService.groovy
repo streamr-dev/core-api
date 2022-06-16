@@ -1,5 +1,6 @@
 package com.streamr.core.service
 
+import com.streamr.core.domain.Product
 import com.streamr.core.domain.User
 import com.streamr.core.utils.ApplicationConfig
 import com.streamr.core.utils.EthereumConfig
@@ -16,7 +17,12 @@ class EthereumService {
 	 * @return admin's address, or null if contractAddress is faulty
 	 */
 	String fetchDataUnionAdminsEthereumAddress(String contractAddress) {
-		EthereumConfig ethereumConf = new EthereumConfig(ApplicationConfig.getString("streamr.ethereum.defaultNetwork"));
+		Product product = Product.findByBeneficiaryAddress(contractAddress)
+		String networkKey = "streamr.ethereum.defaultNetwork"
+		if (product != null) {
+			networkKey = "streamr.ethereum.networks." + product.chain.toLowerCase()
+		}
+		EthereumConfig ethereumConf = new EthereumConfig(ApplicationConfig.getString(networkKey))
 		Web3j web3j = ethereumConf.getWeb3j(EthereumConfig.RpcConnectionMethod.HTTP)
 		try {
 			return Web3jHelper.getPublicField(web3j, contractAddress, "owner", Address.class)
