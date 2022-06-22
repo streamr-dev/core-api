@@ -20,7 +20,7 @@ class EthereumService {
 		Product product = Product.findByBeneficiaryAddress(contractAddress)
 		String networkKey = "streamr.ethereum.defaultNetwork"
 		if (product != null) {
-			networkKey = "streamr.ethereum.networks." + product.chain.toLowerCase()
+			networkKey = "streamr.ethereum.networks." + product.chain.toString().toLowerCase()
 		}
 		EthereumConfig ethereumConf = new EthereumConfig(ApplicationConfig.getString(networkKey))
 		Web3j web3j = ethereumConf.getWeb3j(EthereumConfig.RpcConnectionMethod.HTTP)
