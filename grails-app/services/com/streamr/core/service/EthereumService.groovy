@@ -2,7 +2,6 @@ package com.streamr.core.service
 
 import com.streamr.core.domain.Product
 import com.streamr.core.domain.User
-import com.streamr.core.utils.ApplicationConfig
 import com.streamr.core.utils.EthereumConfig
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
@@ -18,11 +17,11 @@ class EthereumService {
 	 */
 	String fetchDataUnionAdminsEthereumAddress(String contractAddress) {
 		Product product = Product.findByBeneficiaryAddress(contractAddress)
-		String networkKey = "streamr.ethereum.defaultNetwork"
+		String networkKey = "ethereum"
 		if (product != null) {
-			networkKey = "streamr.ethereum.networks." + product.chain.toString().toLowerCase()
+			networkKey = product.chain.toString().toLowerCase()
 		}
-		EthereumConfig ethereumConf = new EthereumConfig(ApplicationConfig.getString(networkKey))
+		EthereumConfig ethereumConf = new EthereumConfig(networkKey)
 		Web3j web3j = ethereumConf.getWeb3j(EthereumConfig.RpcConnectionMethod.HTTP)
 		try {
 			return Web3jHelper.getPublicField(web3j, contractAddress, "owner", Address.class)
