@@ -53,6 +53,8 @@ ENV JAVA_OPTS \
 	-Xms256M \
 	-Xmx1024M \
 	-XX:+UseG1GC \
+	-Dstreamr.ethereum.networks.ethereum=http://10.200.10.1:8545 \
+	-Dstreamr.ethereum.networks.xdai=http://10.200.10.1:8546 \
 	-Dcom.sun.management.jmxremote=true \
 	-Dcom.sun.management.jmxremote.authenticate=false \
 	-Dcom.sun.management.jmxremote.port=9090 \
