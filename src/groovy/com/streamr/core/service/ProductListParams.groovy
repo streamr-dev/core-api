@@ -14,6 +14,7 @@ class ProductListParams extends ListParams {
 	Long maxPrice
 	User productOwner
 	String type
+	String beneficiaryAddress
 
 	ProductListParams() {
 		super()
@@ -27,6 +28,7 @@ class ProductListParams extends ListParams {
 		maxPrice(nullable: true)
 		productOwner(nullable: true)
 		type(nullable: true)
+		beneficiaryAddress(nullable: true)
 	}
 
 	@Override
@@ -59,6 +61,9 @@ class ProductListParams extends ListParams {
 				} catch (final IllegalArgumentException ignored) {
 				}
 			}
+			if (beneficiaryAddress != null) {
+				eq("beneficiaryAddress", beneficiaryAddress)
+			}
 		}
 	}
 
@@ -71,6 +76,7 @@ class ProductListParams extends ListParams {
 			maxPrice  : maxPrice,
 			owner     : productOwner,
 			type      : type,
+			beneficiaryAddress: beneficiaryAddress,
 		] as Map<String, Object>
 	}
 }
