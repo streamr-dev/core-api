@@ -2,10 +2,12 @@
 
 ![CI & CD](https://github.com/streamr-dev/core-api/workflows/CI%20&%20CD/badge.svg)
 
-RESTful API containing the backend for Streamr Core, facilitating things like:
+RESTful API containing the backend for Streamr Core. With the Streamr Network now fully decentralized, the only remaining features in this centralized API are related to the Marketplace:
 
-- Creating streams
-- Creating products for the Streamr Marketplace
+- Creating and listing products on the Streamr Marketplace
+- Managing the mapping between products and streams (what streams are in what products)
+
+The Marketplace will become fully decentralized, so this API is being **phased out** in the near future.
 
 The application uses the Grails web framework and runs on Java VM.
 
