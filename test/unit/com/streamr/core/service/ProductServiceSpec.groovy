@@ -41,7 +41,7 @@ class ProductServiceSpec extends Specification {
 			ownerAddress: "0x0000000000000000000000000000000000000000",
 			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
 			streams: s1 != null ? [s1, s2, s3] : [],
-			pricePerSecond: 10,
+			pricePerSecond: "10",
 			category: category,
 			state: state,
 			blockNumber: 40000,
@@ -65,7 +65,7 @@ class ProductServiceSpec extends Specification {
 			ownerAddress: "0x0000000000000000000000000000000000000000",
 			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
 			streams: s1 != null ? [s1, s2, s3] : [],
-			pricePerSecond: 0,
+			pricePerSecond: "0",
 			category: category,
 			state: state,
 			blockNumber: 40000,
@@ -105,7 +105,7 @@ class ProductServiceSpec extends Specification {
 
 	void "create() throws ValidationException if command object does not pass validation"() {
 		when:
-		service.create(new ProductCreateCommand(pricePerSecond: -1), new User())
+		service.create(new ProductCreateCommand(pricePerSecond: "-1"), new User())
 		then:
 		thrown(ValidationException)
 	}
@@ -126,7 +126,7 @@ class ProductServiceSpec extends Specification {
 			streams: [s1, s2, s3],
 			ownerAddress: "0x0000000000000000000000000000000000000000",
 			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-			pricePerSecond: 10,
+			pricePerSecond: "10",
 			minimumSubscriptionInSeconds: 1,
 			contact: contact,
 			termsOfUse: termsOfUse,
@@ -180,7 +180,7 @@ class ProductServiceSpec extends Specification {
 			streams: [s1, s2, s3],
 			ownerAddress: "0x0000000000000000000000000000000000000000",
 			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-			pricePerSecond: 10,
+			pricePerSecond: "10",
 			minimumSubscriptionInSeconds: 1
 		)
 		def me = new User(username: "0x711241f99Aef8D2AFf3e4c5196C8F1e8F4168C93")
@@ -281,7 +281,7 @@ class ProductServiceSpec extends Specification {
 			description: "updated description",
 			category: category,
 			streams: [],
-			pricePerSecond: 20L,
+			pricePerSecond: "20",
 			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 			priceCurrency: Product.Currency.DATA,
@@ -312,7 +312,7 @@ class ProductServiceSpec extends Specification {
 			description: "updated description",
 			category: category,
 			streams: [],
-			pricePerSecond: 20L,
+			pricePerSecond: "20",
 			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 			priceCurrency: Product.Currency.DATA,
@@ -348,7 +348,7 @@ class ProductServiceSpec extends Specification {
 			description: "updated description",
 			category: category,
 			streams: [],
-			pricePerSecond: 20L,
+			pricePerSecond: "20",
 			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 			priceCurrency: Product.Currency.DATA,
@@ -380,7 +380,7 @@ class ProductServiceSpec extends Specification {
 			description: "updated description",
 			category: category,
 			streams: [s2, s4],
-			pricePerSecond: 20L,
+			pricePerSecond: "20",
 			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 			priceCurrency: Product.Currency.DATA,
@@ -431,7 +431,7 @@ class ProductServiceSpec extends Specification {
 			description: "updated description",
 			category: category2,
 			streams: [s2, s4],
-			pricePerSecond: 20L,
+			pricePerSecond: "20",
 			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 			priceCurrency: Product.Currency.DATA,
@@ -730,7 +730,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductDeployedCommand(
 			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
 			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-			pricePerSecond: 2,
+			pricePerSecond: "2",
 			priceCurrency: Product.Currency.USD,
 			minimumSubscriptionInSeconds: 600,
 			blockNumber: 50000,
@@ -750,7 +750,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductDeployedCommand(
 			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
 			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-			pricePerSecond: 2,
+			pricePerSecond: "2",
 			priceCurrency: Product.Currency.USD,
 			minimumSubscriptionInSeconds: 600,
 			blockNumber: 50000,
@@ -773,7 +773,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductDeployedCommand(
 			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
 			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-			pricePerSecond: 2,
+			pricePerSecond: "2",
 			priceCurrency: Product.Currency.USD,
 			minimumSubscriptionInSeconds: 600,
 			blockNumber: 30000,
@@ -797,7 +797,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductDeployedCommand(
 			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
 			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-			pricePerSecond: 2,
+			pricePerSecond: "2",
 			priceCurrency: Product.Currency.USD,
 			minimumSubscriptionInSeconds: 600,
 			blockNumber: 30000,
@@ -821,7 +821,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductDeployedCommand(
 			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
 			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-			pricePerSecond: 2,
+			pricePerSecond: "2",
 			priceCurrency: Product.Currency.USD,
 			minimumSubscriptionInSeconds: 600,
 			blockNumber: 30000,
@@ -846,7 +846,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductDeployedCommand(
 			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
 			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-			pricePerSecond: 2,
+			pricePerSecond: "2",
 			priceCurrency: Product.Currency.USD,
 			minimumSubscriptionInSeconds: 600,
 			blockNumber: 50000,
@@ -870,7 +870,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductDeployedCommand(
 			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
 			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-			pricePerSecond: 2,
+			pricePerSecond: "2",
 			priceCurrency: Product.Currency.USD,
 			minimumSubscriptionInSeconds: 600,
 			blockNumber: 50000,
@@ -920,7 +920,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductDeployedCommand(
 			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
 			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-			pricePerSecond: 2,
+			pricePerSecond: "2",
 			priceCurrency: Product.Currency.USD,
 			minimumSubscriptionInSeconds: 600,
 			blockNumber: 50000,
@@ -945,7 +945,7 @@ class ProductServiceSpec extends Specification {
 		def command = new SetPricingCommand(
 			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
 			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-			pricePerSecond: 2,
+			pricePerSecond: "2",
 			priceCurrency: Product.Currency.USD,
 			minimumSubscriptionInSeconds: 600,
 			blockNumber: 50000,
@@ -960,7 +960,7 @@ class ProductServiceSpec extends Specification {
 		then:
 		product.ownerAddress == "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
 		product.beneficiaryAddress == "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-		product.pricePerSecond == 2
+		product.pricePerSecond == "2"
 		product.priceCurrency == Product.Currency.USD
 		product.minimumSubscriptionInSeconds == 600
 		product.blockNumber == 50000
@@ -993,14 +993,14 @@ class ProductServiceSpec extends Specification {
 
 	void "deployFreeProduct throws ProductNotFreeException when given paid Product"() {
 		when:
-		service.deployFreeProduct(new Product(pricePerSecond: 2))
+		service.deployFreeProduct(new Product(pricePerSecond: "2"))
 		then:
 		thrown(ProductNotFreeException)
 	}
 
 	void "deployFreeProduct throws InvalidStateTransitionException when given Product in state DEPLOYED"() {
 		when:
-		service.deployFreeProduct(new Product(pricePerSecond: 0, state: Product.State.DEPLOYED))
+		service.deployFreeProduct(new Product(pricePerSecond: "0", state: Product.State.DEPLOYED))
 		then:
 		thrown(InvalidStateTransitionException)
 	}
@@ -1046,7 +1046,7 @@ class ProductServiceSpec extends Specification {
 		setup:
 		setupFreeProduct()
 		when:
-		service.undeployFreeProduct(new Product(pricePerSecond: 2))
+		service.undeployFreeProduct(new Product(pricePerSecond: "2"))
 		then:
 		thrown(ProductNotFreeException)
 	}
@@ -1055,7 +1055,7 @@ class ProductServiceSpec extends Specification {
 		setup:
 		setupFreeProduct()
 		when:
-		service.undeployFreeProduct(new Product(pricePerSecond: 0, state: Product.State.NOT_DEPLOYED))
+		service.undeployFreeProduct(new Product(pricePerSecond: "0", state: Product.State.NOT_DEPLOYED))
 		then:
 		thrown(InvalidStateTransitionException)
 	}

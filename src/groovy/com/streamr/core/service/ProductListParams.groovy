@@ -10,8 +10,7 @@ import grails.validation.Validateable
 class ProductListParams extends ListParams {
 	Set<Category> categories
 	Set<Product.State> states
-	Long minPrice
-	Long maxPrice
+	Boolean free
 	User productOwner
 	String type
 	String beneficiaryAddress
@@ -24,8 +23,7 @@ class ProductListParams extends ListParams {
 	static constraints = {
 		categories(nullable: true, minSize: 1)
 		states(nullable: true, minSize: 1)
-		minPrice(nullable: true, min: 0L)
-		maxPrice(nullable: true)
+		free(nullable: true)
 		productOwner(nullable: true)
 		type(nullable: true)
 		beneficiaryAddress(nullable: true)
@@ -45,11 +43,11 @@ class ProductListParams extends ListParams {
 			if (states) {
 				'in'("state", states)
 			}
-			if (minPrice != null) {
-				ge("pricePerSecond", minPrice)
+			if (free != null && free) {
+				eq("pricePerSecond", "0")
 			}
-			if (maxPrice != null) {
-				le("pricePerSecond", maxPrice)
+			if (free != null && !free) {
+				ne("pricePerSecond", "0")
 			}
 			if (productOwner != null) {
 				eq("owner", productOwner)
@@ -72,8 +70,7 @@ class ProductListParams extends ListParams {
 		return super.toMap() + [
 			categories: categories*.id,
 			states    : states*.id,
-			minPrice  : minPrice,
-			maxPrice  : maxPrice,
+			free      : free,
 			owner     : productOwner,
 			type      : type,
 			beneficiaryAddress: beneficiaryAddress,

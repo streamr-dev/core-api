@@ -21,7 +21,7 @@ class ProductCreateCommand {
 
 	String ownerAddress
 	String beneficiaryAddress
-	Long pricePerSecond = 0
+	String pricePerSecond = "0"
 	Product.Currency priceCurrency = Product.Currency.DATA
 	Long minimumSubscriptionInSeconds = 0
 	Contact contact = new Contact()

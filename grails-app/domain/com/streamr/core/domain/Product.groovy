@@ -44,7 +44,7 @@ class Product {
 	// The below fields exist in the domain object for speed & query support, but the ground truth is in the smart contract.
 	String ownerAddress
 	String beneficiaryAddress
-	Long pricePerSecond = 0
+	String pricePerSecond = "0"
 	Currency priceCurrency = Currency.DATA
 	Long minimumSubscriptionInSeconds = 0
 	Long blockNumber = 0
@@ -97,7 +97,7 @@ class Product {
 		pendingChanges(nullable: true)
 		ownerAddress(nullable: true, validator: EthereumAddressValidator.isNullOrValid)
 		beneficiaryAddress(nullable: true, validator: EthereumAddressValidator.isNullOrValid)
-		pricePerSecond(min: 0L)
+		pricePerSecond(nullable: false, validator: BigIntegerStringValidator.validateNonNegative)
 		priceCurrency(enumType: "string")
 		minimumSubscriptionInSeconds(min: 0L)
 		blockNumber(min: 0L)
@@ -147,7 +147,7 @@ class Product {
 			updated: lastUpdated,
 			ownerAddress: ownerAddress,
 			beneficiaryAddress: beneficiaryAddress,
-			pricePerSecond: pricePerSecond.toString(),
+			pricePerSecond: pricePerSecond,
 			isFree: this.isFree(),
 			priceCurrency: priceCurrency.toString(),
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
@@ -180,7 +180,7 @@ class Product {
 			updated: lastUpdated,
 			ownerAddress: ownerAddress,
 			beneficiaryAddress: beneficiaryAddress,
-			pricePerSecond: pricePerSecond.toString(),
+			pricePerSecond: pricePerSecond,
 			isFree: this.isFree(),
 			priceCurrency: priceCurrency.toString(),
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
@@ -191,7 +191,7 @@ class Product {
 	}
 
 	boolean isFree() {
-		return pricePerSecond == 0L
+		return pricePerSecond == "0"
 	}
 }
 

@@ -31,7 +31,7 @@ class ProductApiControllerSpec extends Specification {
 			category: category,
 			ownerAddress: "0x0",
 			beneficiaryAddress: "0x1",
-			pricePerSecond: 5,
+			pricePerSecond: "5",
 			owner: user,
 		)
 		product.id = "product-id"
@@ -458,7 +458,7 @@ class ProductApiControllerSpec extends Specification {
 	}
 
 	void "deployFree() invokes freeProductService#deployFreeProduct"() {
-		product.pricePerSecond = 0
+		product.pricePerSecond = "0"
 		controller.productService = Mock(ProductService)
 
 		params.id = "product-id"
@@ -506,7 +506,7 @@ class ProductApiControllerSpec extends Specification {
 	}
 
 	void "undeployFree() invokes freeProductService#undeployFreeProduct"() {
-		product.pricePerSecond = 0
+		product.pricePerSecond = "0"
 		controller.productService = Mock(ProductService)
 
 		params.id = "product-id"

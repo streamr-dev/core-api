@@ -737,17 +737,10 @@
             ]
           },
           {
-            "name": "minPrice",
-            "type": "number",
+            "name": "free",
+            "type": "boolean",
             "in": "query",
-            "description": "Minimum price (per second) of product",
-            "required": false
-          },
-          {
-            "name": "maxPrice",
-            "type": "number",
-            "in": "query",
-            "description": "Maximum price (per second) of product",
+            "description": "If true, returns only free products. If false, returns only paid products. If omitted, returns all products.",
             "required": false
           }
         ],
@@ -920,17 +913,10 @@
             ]
           },
           {
-            "name": "minPrice",
-            "type": "number",
+            "name": "free",
+            "type": "boolean",
             "in": "query",
-            "description": "Minimum price (per second) of product",
-            "required": false
-          },
-          {
-            "name": "maxPrice",
-            "type": "number",
-            "in": "query",
-            "description": "Maximum price (per second) of product",
+            "description": "If true, returns only free products. If false, returns only paid products. If omitted, returns all products.",
             "required": false
           }
         ],
@@ -2565,9 +2551,9 @@
           "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
         },
         "pricePerSecond": {
-          "type": "integer",
+          "type": "string",
           "description": "Unit cost per second",
-          "example": 5
+          "example": "5"
         },
         "priceCurrency": {
           "type": "string",

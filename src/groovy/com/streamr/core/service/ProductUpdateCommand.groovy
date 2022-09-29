@@ -23,7 +23,7 @@ class ProductUpdateCommand {
 	// Below are used only when updating NOT_DEPLOYED product
 	String ownerAddress
 	String beneficiaryAddress
-	Long pricePerSecond
+	String pricePerSecond
 	Product.Currency priceCurrency
 	Long minimumSubscriptionInSeconds
 
@@ -54,7 +54,7 @@ class ProductUpdateCommand {
 		// List all onChainFields as nullable
 		ownerAddress(nullable: true, validator: EthereumAddressValidator.isNullOrValid)
 		beneficiaryAddress(nullable: true, validator: EthereumAddressValidator.isNullOrValid)
-		pricePerSecond(nullable: true)
+		pricePerSecond(nullable: true, validator: BigIntegerStringValidator.isNullOrNonNegative)
 		priceCurrency(nullable: true)
 		minimumSubscriptionInSeconds(nullable: true)
 	}

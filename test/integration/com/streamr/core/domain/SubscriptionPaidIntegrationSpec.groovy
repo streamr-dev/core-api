@@ -24,7 +24,7 @@ class SubscriptionPaidIntegrationSpec extends IntegrationSpec {
 			owner: owner,
 			ownerAddress: "0x0000000000000000000000000000000000000000",
 			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
-			pricePerSecond: 1,
+			pricePerSecond: "1",
 		).save(failOnError: true)
 	}
 

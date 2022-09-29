@@ -7,7 +7,7 @@ import grails.validation.Validateable
 class SetPricingCommand implements StalenessCheck {
 	String ownerAddress
 	String beneficiaryAddress
-	Long pricePerSecond
+	String pricePerSecond
 	Product.Currency priceCurrency
 	Long minimumSubscriptionInSeconds
 

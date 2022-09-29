@@ -51,7 +51,7 @@ class SubscriptionApiControllerSpec extends Specification {
 			category: new Category(id: "category-1"),
 			streams: [],
 			owner: user,
-			pricePerSecond: 0
+			pricePerSecond: "0"
 		)
 
 		def p2 = new Product(
@@ -61,7 +61,7 @@ class SubscriptionApiControllerSpec extends Specification {
 			category: new Category(id: "category-2"),
 			streams: [],
 			owner: user,
-			pricePerSecond: 0
+			pricePerSecond: "0"
 		)
 
 		def s1 = new SubscriptionPaid(

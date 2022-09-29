@@ -74,7 +74,7 @@ describe('Products API', function () {
             ],
             ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
             beneficiaryAddress: '0x0000000000000000000011111111111111111111',
-            pricePerSecond: 5,
+            pricePerSecond: '5',
             priceCurrency: 'USD',
             minimumSubscriptionInSeconds: 60,
             contact: {
@@ -291,7 +291,7 @@ describe('Products API', function () {
             streams: [],
             ownerAddress: '0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
             beneficiaryAddress: '0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC',
-            pricePerSecond: 4556,
+            pricePerSecond: '4556',
             priceCurrency: 'DATA',
             minimumSubscriptionInSeconds: 30000,
             contact: {
@@ -497,7 +497,7 @@ describe('Products API', function () {
         const deployedBody = {
             ownerAddress: '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF',
             beneficiaryAddress: '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF',
-            pricePerSecond: 10,
+            pricePerSecond: '10',
             priceCurrency: 'DATA',
             minimumSubscriptionInSeconds: 15,
             blockNumber: 35000,
@@ -598,7 +598,7 @@ describe('Products API', function () {
             })
 
             it('pricePerSecond of Product is updated', () => {
-                assert.equal(json.pricePerSecond, 10)
+                assert.equal(json.pricePerSecond, '10')
             })
 
             it('priceCurrency of Product is updated', () => {
@@ -690,7 +690,7 @@ describe('Products API', function () {
                     .setDeployed(createdProductId, {
                         ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
                         beneficiaryAddress: '0x0000000000000000000011111111111111111111',
-                        pricePerSecond: 5,
+                        pricePerSecond: '5',
                         priceCurrency: 'USD',
                         minimumSubscriptionInSeconds: 60,
                         blockNumber: 35000,
@@ -754,7 +754,7 @@ describe('Products API', function () {
                 .setDeployed(productId, {
                     ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
                     beneficiaryAddress: '0x0000000000000000000011111111111111111111',
-                    pricePerSecond: 5,
+                    pricePerSecond: '5',
                     priceCurrency: 'USD',
                     minimumSubscriptionInSeconds: 60,
                     blockNumber: 35000,
@@ -787,7 +787,7 @@ describe('Products API', function () {
                     .setDeployed(createdProductId, {
                         ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
                         beneficiaryAddress: '0x0000000000000000000011111111111111111111',
-                        pricePerSecond: 5,
+                        pricePerSecond: '5',
                         priceCurrency: 'USD',
                         minimumSubscriptionInSeconds: 60,
                         blockNumber: 35000,
@@ -821,7 +821,7 @@ describe('Products API', function () {
                     .setDeployed(createdProductId, {
                         ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
                         beneficiaryAddress: '0x0000000000000000000011111111111111111111',
-                        pricePerSecond: 5,
+                        pricePerSecond: '5',
                         priceCurrency: 'USD',
                         minimumSubscriptionInSeconds: 60,
                         blockNumber: 35000,
