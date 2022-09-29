@@ -31,7 +31,7 @@ class ProductUpdateCommandSpec extends Specification {
 			owner: new User(name: "John Doe"),
 			ownerAddress: "0x0",
 			beneficiaryAddress: "0x0",
-			pricePerSecond: 5,
+			pricePerSecond: "5",
 			priceCurrency: Product.Currency.DATA,
 			minimumSubscriptionInSeconds: 0
 		)
@@ -51,7 +51,7 @@ class ProductUpdateCommandSpec extends Specification {
 			previewConfigJson: "{newConfig: true}",
 			ownerAddress: "0xA",
 			beneficiaryAddress: "0xF",
-			pricePerSecond: 10,
+			pricePerSecond: "10",
 			priceCurrency: Product.Currency.USD,
 			minimumSubscriptionInSeconds: 10
 		)
@@ -59,7 +59,7 @@ class ProductUpdateCommandSpec extends Specification {
 
 	void "updateProduct() throws when trying to update on-chain fields on a deployed paid product"() {
 		product.state = Product.State.DEPLOYED
-		product.pricePerSecond = 5
+		product.pricePerSecond = "5"
 
 		when:
 		command.updateProduct(product, new User(), permissionService)
@@ -70,7 +70,7 @@ class ProductUpdateCommandSpec extends Specification {
 
 	void "updateProduct() updates all off-chain fields on a deployed paid product"() {
 		product.state = Product.State.DEPLOYED
-		product.pricePerSecond = 5
+		product.pricePerSecond = "5"
 
 		// Don't provide any of the on-chain fields
 		ProductUpdateCommand.onChainFields.each {
@@ -106,7 +106,7 @@ class ProductUpdateCommandSpec extends Specification {
 
 	void "updateProduct() updates both on-chain and off-chain fields on non-deployed paid Products"() {
 		product.state = Product.State.NOT_DEPLOYED
-		product.pricePerSecond = 5
+		product.pricePerSecond = "5"
 
 		when:
 		command.updateProduct(product, new User(), permissionService)
@@ -137,8 +137,8 @@ class ProductUpdateCommandSpec extends Specification {
 
 	void "updateProduct() updates both on-chain and off-chain fields on deployed free Products"() {
 		product.state = Product.State.DEPLOYED
-		product.pricePerSecond = 0
-		command.pricePerSecond = 0
+		product.pricePerSecond = "0"
+		command.pricePerSecond = "0"
 
 		when:
 		command.updateProduct(product, new User(), permissionService)
@@ -169,8 +169,8 @@ class ProductUpdateCommandSpec extends Specification {
 
 	void "updateProduct() throws when trying to change a free product to paid product when in deployed state"() {
 		product.state = Product.State.DEPLOYED
-		product.pricePerSecond = 0
-		command.pricePerSecond = 5
+		product.pricePerSecond = "0"
+		command.pricePerSecond = "5"
 
 		when:
 		command.updateProduct(product, new User(), permissionService)
@@ -186,7 +186,7 @@ class ProductUpdateCommandSpec extends Specification {
 			description: "new description",
 			pendingChanges: [name: "new name", description: "new description"]
 		)
-		product.pricePerSecond = 5
+		product.pricePerSecond = "5"
 
 		when:
 		command.updateProduct(product, new User(), permissionService)
@@ -202,7 +202,7 @@ class ProductUpdateCommandSpec extends Specification {
 			description: "new description",
 			pendingChanges: [name: "new name", description: "new description"]
 		)
-		product.pricePerSecond = 5
+		product.pricePerSecond = "5"
 
 		when:
 		command.updateProduct(product, new User(), permissionService)
@@ -217,7 +217,7 @@ class ProductUpdateCommandSpec extends Specification {
 			name: "new name",
 			description: "new description",
 		)
-		product.pricePerSecond = 5
+		product.pricePerSecond = "5"
 
 		when:
 		command.updateProduct(product, new User(), permissionService)

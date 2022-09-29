@@ -15,7 +15,7 @@ class ProductSpec extends Specification {
 			description: "description",
 			ownerAddress: "0x0000000000000000000000000000000000000000",
 			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
-			pricePerSecond: 1,
+			pricePerSecond: "1",
 			category: new Category(),
 			owner: Mock(User)
 		)
@@ -33,7 +33,7 @@ class ProductSpec extends Specification {
 			description: "description",
 			ownerAddress: "0x0000000000000000000000000000000000000000",
 			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
-			pricePerSecond: 1,
+			pricePerSecond: "1",
 			category: new Category(),
 			previewStreamId: s1,
 			owner: Mock(User)
@@ -55,7 +55,7 @@ class ProductSpec extends Specification {
 			description: "description",
 			ownerAddress: "0x0000000000000000000000000000000000000000",
 			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
-			pricePerSecond: 1,
+			pricePerSecond: "1",
 			category: new Category(),
 			streams: [s1, s2],
 			previewStreamId: s3,
@@ -78,7 +78,7 @@ class ProductSpec extends Specification {
 			description: "description",
 			ownerAddress: "0x0000000000000000000000000000000000000000",
 			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
-			pricePerSecond: 1,
+			pricePerSecond: "1",
 			category: new Category(),
 			streams: [s1, s2, s3],
 			previewStreamId: s3,
@@ -109,7 +109,7 @@ class ProductSpec extends Specification {
 			owner: new User(name: "John Doe"),
 			ownerAddress: "0x0",
 			beneficiaryAddress: "0x0",
-			pricePerSecond: 5,
+			pricePerSecond: "5",
 			priceCurrency: Product.Currency.DATA,
 			minimumSubscriptionInSeconds: 0
 		)
@@ -144,15 +144,15 @@ class ProductSpec extends Specification {
 	}
 
 	@Unroll
-	void "isFree(#price) == #expected"(Long price, Object expected) {
+	void "isFree(#price) == #expected"(String price, Object expected) {
 		expect:
 		Product p = new Product(pricePerSecond: price)
 		p.isFree() == expected
 
 		where:
 		price | expected
-		-1L   | false
-		0L    | true
-		1L    | false
+		"-1"   | false
+		"0"    | true
+		"1"    | false
 	}
 }

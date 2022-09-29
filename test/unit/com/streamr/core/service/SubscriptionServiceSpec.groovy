@@ -74,7 +74,7 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 	}
 
 	void "subscribeToFreeProduct() throws ProductNotFreeException if given non-free Product"() {
-		product.pricePerSecond = 1
+		product.pricePerSecond = "1"
 		product.priceCurrency = Product.Currency.DATA
 
 		when:
@@ -84,7 +84,7 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 	}
 
 	void "subscribeToFreeProduct() creates new FreeSubscription if product-user pair does not exist"() {
-		product.pricePerSecond = 0
+		product.pricePerSecond = "0"
 
 		assert SubscriptionFree.count() == 0
 
@@ -97,7 +97,7 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 	}
 
 	void "subscribeToFreeProduct() updates existing Subscription if product-user exists"() {
-		product.pricePerSecond = 0
+		product.pricePerSecond = "0"
 
 		Subscription sub1 = new SubscriptionFree(product: product, user: user, endsAt: new Date()).save(failOnError: true, validate: false)
 

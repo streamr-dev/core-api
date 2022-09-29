@@ -217,7 +217,7 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 				"0x0000000000000000000000000000000000000003",
 				"0x0000000000000000000000000000000000000004",
 			],
-			pricePerSecond: 10,
+			pricePerSecond: "10",
 			category: category,
 			state: Product.State.NOT_DEPLOYED,
 			blockNumber: 40000,

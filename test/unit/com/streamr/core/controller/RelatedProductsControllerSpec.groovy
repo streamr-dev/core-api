@@ -24,7 +24,7 @@ class RelatedProductsControllerSpec extends ControllerSpecification {
 			owner: user,
 			ownerAddress: null,
 			beneficiaryAddress: null,
-			pricePerSecond: 0,
+			pricePerSecond: "0",
 			minimumSubscriptionInSeconds: 0,
 			blockNumber: 0,
 			blockIndex: 0

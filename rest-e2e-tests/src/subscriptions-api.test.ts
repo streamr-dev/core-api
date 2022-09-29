@@ -48,7 +48,7 @@ describe('Subscriptions API', () => {
                 streams: [],
                 ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
                 beneficiaryAddress: '0x0000000000000000000011111111111111111111',
-                pricePerSecond: 5,
+                pricePerSecond: '5',
                 priceCurrency: 'USD',
                 minimumSubscriptionInSeconds: 60,
             }, productOwner)
@@ -59,7 +59,7 @@ describe('Subscriptions API', () => {
                 imageUrl: 'https://streamr.network/uploads/product2.png',
                 category: 'satellite-id',
                 streams: [],
-                pricePerSecond: 0,
+                pricePerSecond: '0',
                 priceCurrency: 'DATA',
                 minimumSubscriptionInSeconds: 30,
             }, productOwner)
@@ -163,7 +163,7 @@ describe('Subscriptions API', () => {
                 streams: [],
                 ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
                 beneficiaryAddress: '0x0000000000000000000011111111111111111111',
-                pricePerSecond: 5,
+                pricePerSecond: '5',
                 priceCurrency: 'USD',
                 minimumSubscriptionInSeconds: 60,
             }, productOwner)

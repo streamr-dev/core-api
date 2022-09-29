@@ -43,7 +43,7 @@ class ProductListParamsSpec extends Specification {
 			ownerAddress: address,
 			beneficiaryAddress: address,
 			category: c1,
-			pricePerSecond: 5,
+			pricePerSecond: "0",
 			state: Product.State.NOT_DEPLOYED,
 			owner: user
 		)
@@ -53,7 +53,7 @@ class ProductListParamsSpec extends Specification {
 			ownerAddress: address,
 			beneficiaryAddress: address,
 			category: c2,
-			pricePerSecond: 10,
+			pricePerSecond: "10",
 			state: Product.State.DEPLOYING,
 			owner: user
 		)
@@ -63,7 +63,7 @@ class ProductListParamsSpec extends Specification {
 			ownerAddress: address,
 			beneficiaryAddress: address,
 			category: c3,
-			pricePerSecond: 1,
+			pricePerSecond: "1",
 			state: Product.State.DEPLOYED,
 			owner: user
 		)
@@ -73,7 +73,7 @@ class ProductListParamsSpec extends Specification {
 			ownerAddress: address,
 			beneficiaryAddress: address,
 			category: c1,
-			pricePerSecond: 3,
+			pricePerSecond: "3",
 			state: Product.State.DEPLOYED,
 			owner: other
 		)
@@ -83,7 +83,7 @@ class ProductListParamsSpec extends Specification {
 			ownerAddress: address,
 			beneficiaryAddress: address,
 			category: c4,
-			pricePerSecond: 11,
+			pricePerSecond: "11",
 			state: Product.State.DEPLOYED,
 			type: Product.Type.DATAUNION,
 			owner: user,
@@ -113,7 +113,6 @@ class ProductListParamsSpec extends Specification {
 
 		where:
 		map              | numOfErrors | fieldsWithError
-		[minPrice: -1]   | 1           | ["minPrice"]
 		[categories: []] | 1           | ["categories"]
 		[states: []]     | 1           | ["states"]
 	}
@@ -132,25 +131,18 @@ class ProductListParamsSpec extends Specification {
 		fetchProductIdsFor(paramsList) == ["product-1", "product-2"] as Set
 	}
 
-	void "createListCriteria() with minPrice returns criteria that filters products by price"() {
+	void "createListCriteria() with free=true returns criteria that returns only free products"() {
 		when:
-		def paramsList = new ProductListParams(minPrice: 3)
+		def paramsList = new ProductListParams(free: true)
 		then:
-		fetchProductIdsFor(paramsList) == ["product-1", "product-2", "product-4", "product-5"] as Set
+		fetchProductIdsFor(paramsList) == ["product-1"] as Set
 	}
 
-	void "createListCriteria() with maxPrice returns criteria that filters products by price"() {
+	void "createListCriteria() with free=false returns criteria that returns only non-free products"() {
 		when:
-		def paramsList = new ProductListParams(maxPrice: 3)
+		def paramsList = new ProductListParams(free: false)
 		then:
-		fetchProductIdsFor(paramsList) == ["product-3", "product-4"] as Set
-	}
-
-	void "createListCriteria() with minPrice and maxPrice returns criteria that filters products by price"() {
-		when:
-		def paramsList = new ProductListParams(minPrice: 3, maxPrice: 5)
-		then:
-		fetchProductIdsFor(paramsList) == ["product-1", "product-4"] as Set
+		fetchProductIdsFor(paramsList) == ["product-2", "product-3", "product-4", "product-5"] as Set
 	}
 
 	void "createListCriteria() with categories returns criteria that filters products by category"() {
