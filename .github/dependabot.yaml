@@ -7,14 +7,10 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: daily
-      time: "08:00"
-      timezone: Europe/Helsinki
+      interval: weekly
     commit-message:
       prefix: ci
       include: scope
-    reviewers:
-      - kare
     assignees:
       - DaisyDomergue
     labels:
@@ -22,30 +18,18 @@ updates:
   - package-ecosystem: docker
     directory: /
     schedule:
-      interval: daily
-      time: "08:00"
-      timezone: Europe/Helsinki
+      interval: weekly
     commit-message:
       prefix: build
       include: scope
-    reviewers:
-      - kare
-    assignees:
-      - kare
     labels:
       - build
   - package-ecosystem: npm
     directory: /rest-e2e-tests
     schedule:
-      interval: daily
-      time: "08:00"
-      timezone: Europe/Helsinki
+      interval: weekly
     commit-message:
       prefix: test
       include: scope
-    reviewers:
-      - kare
-    assignees:
-      - kare
     labels:
       - test
